@@ -92,7 +92,20 @@ fi
 packages+=(release-out/SHA256SUMS.txt)
 
 export GLAB_ENABLE_CI_AUTOLOGIN=true
+release_name="Star Fox Enhanced ${version}"
+if [[ "$build_set" != all ]]; then
+    release_name+=" (partial)"
+    partial_notes="release-out/RELEASE-PARTIAL.md"
+    {
+        printf '**Partial GitLab release.** Verified packages in this upload: %s.\n\n' "${expected[*]}"
+        printf 'macOS/iOS builds are unavailable without a Mac runner; Android/Quest upgrade-compatible APKs require the original signing key.\n\n'
+        printf 'These binaries were built from CI commit `%s`; the existing `%s` tag remains at its original source commit.\n\n' "${CI_COMMIT_SHA:?CI_COMMIT_SHA is required}" "$tag"
+        cat "$notes"
+    } > "$partial_notes"
+    notes="$partial_notes"
+fi
 glab release create "$tag" "${packages[@]}" \
+    --name "$release_name" \
     --notes-file "$notes" \
     --use-package-registry --package-name release-assets
 echo "Published ${#packages[@]} verified assets to $tag"

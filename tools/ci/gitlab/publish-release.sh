@@ -32,8 +32,17 @@ desktop)
 mobile)
     expected=(ios-arm64-unsigned android-arm64)
     ;;
+android)
+    expected=(android-arm64)
+    ;;
+apple)
+    expected=(macos-universal ios-arm64-unsigned)
+    ;;
 quest)
     expected=(quest-arm64)
+    ;;
+homebrew)
+    expected=(switch-homebrew vita)
     ;;
 *)
     echo "Nothing publishable was selected (CI_BUILD_SET=$build_set)" >&2

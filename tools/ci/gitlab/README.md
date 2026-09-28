@@ -8,7 +8,8 @@ it is manual until such a runner is registered with tag
 `starfox-windows-uwp`. No ROMs or private asset bundles are packaged.
 
 For 0.0.8, run a pipeline on the CI branch and select the `desktop` build-set
-input first. After it passes, use `mobile`, `quest`, or `all` as needed. Leave
+input first. After it passes, use `android`, `homebrew`, `quest`, or `all` as
+needed. `apple` and `mobile` also include the macOS-hosted iOS runner. Leave
 the release-tag input at `v0.0.8`; setting publish-release to `true` publishes the selected
 verified packages and a SHA256 manifest to that existing tag's GitLab release.
 The release script refuses missing packages for the selected build set, and

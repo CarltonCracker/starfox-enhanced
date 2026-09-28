@@ -11,7 +11,7 @@ case "${target}" in
 linux)
     apt-get update
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        ca-certificates build-essential cmake ninja-build pkg-config curl file unzip \
+        ca-certificates git build-essential cmake ninja-build pkg-config curl file unzip \
         libasound2-dev libpulse-dev libx11-dev libxext-dev \
         libxrandr-dev libxcursor-dev libxfixes-dev libxi-dev \
         libxss-dev libxtst-dev libxkbcommon-dev libgl1-mesa-dev \

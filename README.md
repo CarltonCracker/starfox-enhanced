@@ -10,11 +10,11 @@ presentation, widescreen support, and optional visual enhancements using Codex A
 Codex and AI tools used for programming, testing, documentation and some visual
 assets.
 
-**[Download 0.0.8](https://github.com/kandowontu/starfox-enhanced/releases/tag/v0.0.8)** ·
-[Changelog](https://github.com/kandowontu/starfox-enhanced/blob/main/docs/RELEASE-0.0.8.md) ·
-[Settings and controls](https://github.com/kandowontu/starfox-enhanced/blob/main/docs/SETTINGS-AND-CONTROLS.md) ·
-[Build guide](https://github.com/kandowontu/starfox-enhanced/blob/main/docs/BUILDING.md) ·
-[Report a bug](https://github.com/kandowontu/starfox-enhanced/issues)
+**[Download 0.0.8](https://github.com/kandowontu2/starfox-enhanced/releases/tag/v0.0.8)** ·
+[Changelog](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/RELEASE-0.0.8.md) ·
+[Settings and controls](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/SETTINGS-AND-CONTROLS.md) ·
+[Build guide](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/BUILDING.md) ·
+[Report a bug](https://github.com/kandowontu2/starfox-enhanced/issues)
 
 > This is an alpha release, not a cycle-accurate SNES emulator. A supported,
 > unmodified retail ROM supplied by you is required. No retail ROM is included.
@@ -35,7 +35,7 @@ assets.
    **Start Game** from the main menu.
 
 For devices needing prepared assets, the release includes a standalone Windows
-[asset builder](https://github.com/kandowontu/starfox-enhanced/blob/main/platform/mobile/ASSET_BUILDER.md). It accepts the same ROMs;
+[asset builder](https://github.com/kandowontu2/starfox-enhanced/blob/main/platform/mobile/ASSET_BUILDER.md). It accepts the same ROMs;
 mobile users can also select a ROM directly.
 
 ### Supported ROMs
@@ -56,20 +56,20 @@ competition cartridges, Star Fox 2 and unknown revisions are not supported.
 | Windows x64 / x86 | Extract and run `starfox_pc.exe`. |
 | Linux x64 | Native SDL3 runtime. |
 | macOS universal | Unsigned application for Intel and Apple Silicon. |
-| iOS arm64 | Unsigned device bundle; [signing/sideloading instructions](https://github.com/kandowontu/starfox-enhanced/blob/main/platform/apple/IOS_INSTALL.md). |
-| Android arm64 | Installable development APK; see the upgrade notice below. |
-| Nintendo Switch | Homebrew NRO; [setup and optional forwarder](https://github.com/kandowontu/starfox-enhanced/blob/main/platform/switch/README.md). |
-| PS Vita | Homebrew VPK; [setup](https://github.com/kandowontu/starfox-enhanced/blob/main/platform/vita/README.md). |
-| Xbox UWP x64 | Developer Mode required; [setup](https://github.com/kandowontu/starfox-enhanced/blob/main/platform/uwp/README.md). |
-| Windows PCVR / Quest 3 | Experimental OpenXR packages; [VR setup](https://github.com/kandowontu/starfox-enhanced/blob/main/docs/VR-BUILD.md). |
+| iOS arm64 | Unsigned device bundle; [signing/sideloading instructions](https://github.com/kandowontu2/starfox-enhanced/blob/main/platform/apple/IOS_INSTALL.md). |
+| Android arm64 | Development APK is a CI artifact while release signing is unavailable; see the upgrade notice below. |
+| Nintendo Switch | Homebrew NRO; [setup and optional forwarder](https://github.com/kandowontu2/starfox-enhanced/blob/main/platform/switch/README.md). |
+| PS Vita | Homebrew VPK; [setup](https://github.com/kandowontu2/starfox-enhanced/blob/main/platform/vita/README.md). |
+| Xbox UWP x64 | Developer Mode required; [setup](https://github.com/kandowontu2/starfox-enhanced/blob/main/platform/uwp/README.md). |
+| Windows PCVR / Quest 3 | Experimental OpenXR packages; [VR setup](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/VR-BUILD.md). |
 
 Build success does not guarantee identical behavior on every device.
-See the [release notes](https://github.com/kandowontu/starfox-enhanced/blob/main/docs/RELEASE-0.0.8.md) for verification limits.
+See the [release notes](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/RELEASE-0.0.8.md) for verification limits.
 
-**Android upgrades:** 0.0.6 uses a permanent signing key. Older APKs used
-temporary keys, so upgrading from those builds requires a one-time reinstall.
-**Back up saves and settings before uninstalling.** Later public builds will
-retain the permanent signing certificate.
+**Android/Quest upgrades:** the original release-signing keystore is unavailable.
+Validation APKs therefore use temporary signing keys, are not included in
+release downloads, and cannot update an existing installation. Back up saves
+and settings before uninstalling an older build.
 
 ## Features and settings
 
@@ -102,7 +102,7 @@ Optional Original MSU-1 music requires `Starfox-MSU1.PAK` beside the desktop
 executable (or in the platform's writable storage). It is not included in the
 standard packages. Without it, native SPC music remains available.
 
-See [Settings and controls](https://github.com/kandowontu/starfox-enhanced/blob/main/docs/SETTINGS-AND-CONTROLS.md) for detailed options,
+See [Settings and controls](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/SETTINGS-AND-CONTROLS.md) for detailed options,
 EX peripherals, multiplayer and presentation debugging.
 
 ## Default controls
@@ -158,8 +158,8 @@ builds use writable platform storage instead of their read-only package folders.
 ## Development and credits
 
 To build, regenerate source assets or run tests, use the
-[build guide](https://github.com/kandowontu/starfox-enhanced/blob/main/docs/BUILDING.md). The
-[architecture notes](https://github.com/kandowontu/starfox-enhanced/blob/main/docs/ARCHITECTURE.md) explain the hybrid native/65C816
+[build guide](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/BUILDING.md). The
+[architecture notes](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/ARCHITECTURE.md) explain the hybrid native/65C816
 boundary: gameplay remains fixed-point while extra presentation frames are
 interpolated. Visual parity remains an ongoing effort.
 

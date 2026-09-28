@@ -433,17 +433,6 @@ jobs:
           name: StarFoxEnhanced-0.0.8-android-arm64
           path: StarFoxEnhanced-0.0.8-android-arm64.apk
           if-no-files-found: error
-      - name: Add to GitHub release
-        if: github.event_name == 'push' || inputs.release_tag != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REQUESTED_TAG: ${{ inputs.release_tag }}
-        shell: bash
-        run: |
-          tag="${REQUESTED_TAG:-${GITHUB_REF_NAME}}"
-          gh release upload "${tag}" \
-            StarFoxEnhanced-0.0.8-android-arm64.apk --clobber
-
   quest-arm64:
     name: Quest 3 arm64 signed VR development APK
     runs-on: ubuntu-latest
@@ -524,14 +513,6 @@ jobs:
           name: StarFoxEnhanced-0.0.8-quest-arm64
           path: StarFoxEnhanced-0.0.8-quest-arm64.zip
           if-no-files-found: error
-      - name: Add to GitHub release
-        if: github.event_name == 'push' || inputs.release_tag != ''
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ inputs.release_tag || github.ref_name }}
-          files: StarFoxEnhanced-0.0.8-quest-arm64.zip
-          draft: true
-
   windows-pcvr:
     if: ${{ !inputs.quest_only }}
     name: Windows x64 OpenXR PCVR development build
@@ -662,7 +643,7 @@ jobs:
   release-checksums:
     name: Release package checksums
     needs: [windows-x64, windows-x86, xbox-uwp-x64, linux-x64, macos-universal, ios-device, android-arm64, quest-arm64, windows-pcvr, switch-homebrew, vita-homebrew]
-    if: ${{ !inputs.quest_only && (github.event_name == 'push' || inputs.release_tag != '') }}
+    if: ${{ always() && !inputs.quest_only && (github.event_name == 'push' || inputs.release_tag != '') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -677,7 +658,20 @@ jobs:
         shell: bash
         run: |
           cd packages
-          sha256sum *.zip *.apk > SHA256SUMS.txt
+          shopt -s nullglob
+          assets=( *.zip *.apk )
+          release_assets=()
+          for asset in "${assets[@]}"; do
+            case "${asset}" in
+              *android-arm64.apk|*quest-arm64.zip) continue ;;
+            esac
+            release_assets+=("${asset}")
+          done
+          if ((${#release_assets[@]} == 0)); then
+            echo 'No verified release packages were produced.' >&2
+            exit 1
+          fi
+          sha256sum "${release_assets[@]}" > SHA256SUMS.txt
           tag="${REQUESTED_TAG:-${GITHUB_REF_NAME}}"
           gh release upload "${tag}" SHA256SUMS.txt --clobber
           gh release edit "${tag}" --draft=false

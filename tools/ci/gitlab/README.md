@@ -7,9 +7,9 @@ The Xbox UWP job requires a Windows runner with the UWP workload and VCLibs;
 it is manual until such a runner is registered with tag
 `starfox-windows-uwp`. No ROMs or private asset bundles are packaged.
 
-For 0.0.8, run a pipeline on the CI branch with `CI_BUILD_SET=desktop` first.
-After it passes, use `mobile`, `quest`, or `all` as needed. Set
-`CI_RELEASE_TAG=v0.0.8`; `CI_PUBLISH_RELEASE=true` publishes the selected
+For 0.0.8, run a pipeline on the CI branch and select the `desktop` build-set
+input first. After it passes, use `mobile`, `quest`, or `all` as needed. Leave
+the release-tag input at `v0.0.8`; setting publish-release to `true` publishes the selected
 verified packages and a SHA256 manifest to that existing tag's GitLab release.
 The release script refuses missing packages for the selected build set, and
 the default `smoke` pipeline only validates Linux without publishing.

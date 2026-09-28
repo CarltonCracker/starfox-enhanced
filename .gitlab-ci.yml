@@ -1,24 +1,31 @@
 # GitLab replacement for .github/workflows/portable-builds.yml.
 # A branch pipeline builds Linux as a smoke test. From Build > Pipelines, run a
-# manual pipeline with CI_BUILD_SET=all (or desktop/mobile/quest) and optionally
-# CI_PUBLISH_RELEASE=true, CI_RELEASE_TAG=v0.0.8.
+# manual pipeline with build_set=all (or desktop/mobile/quest) and optionally
+# publish_release=true, release_tag=v0.0.8.
+spec:
+  inputs:
+    build_set:
+      default: smoke
+      options: [smoke, desktop, mobile, quest, all]
+      description: Platform group to build in manual pipelines.
+    release_tag:
+      default: v0.0.8
+      regex: '^v[0-9]+\.[0-9]+\.[0-9]+$'
+      description: Existing tag to attach manual release packages to.
+    publish_release:
+      default: 'false'
+      options: ['false', 'true']
+      description: Publish verified packages as a GitLab release.
+---
 stages:
   - build
   - release
 
 variables:
   GIT_DEPTH: "0"
-  CI_BUILD_SET:
-    value: "smoke"
-    options: ["smoke", "desktop", "mobile", "quest", "all"]
-    description: "Platform group to build in manual pipelines."
-  CI_RELEASE_TAG:
-    value: "v0.0.8"
-    description: "Existing tag to attach manual release packages to."
-  CI_PUBLISH_RELEASE:
-    value: "false"
-    options: ["false", "true"]
-    description: "Publish verified packages as a GitLab release."
+  CI_BUILD_SET: $[[ inputs.build_set ]]
+  CI_RELEASE_TAG: $[[ inputs.release_tag ]]
+  CI_PUBLISH_RELEASE: $[[ inputs.publish_release ]]
 
 workflow:
   rules:

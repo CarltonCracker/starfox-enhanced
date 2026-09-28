@@ -1,12 +1,12 @@
 # GitLab replacement for .github/workflows/portable-builds.yml.
 # A branch pipeline builds Linux as a smoke test. From Build > Pipelines, run a
-# manual pipeline with build_set=all (or desktop/android/homebrew/quest) and optionally
+# manual pipeline with build_set=all (or a verified platform/group) and optionally
 # publish_release=true, release_tag=v0.0.8.
 spec:
   inputs:
     build_set:
       default: smoke
-      options: [smoke, desktop, android, apple, mobile, quest, homebrew, all]
+      options: [smoke, linux, windows-x64, windows-x86, pcvr, android, quest, switch, vita, desktop, homebrew, apple, mobile, all]
       description: Platform group to build in manual pipelines.
     release_tag:
       default: v0.0.8
@@ -47,7 +47,7 @@ windows-x64:
   extends: .package
   tags: [saas-windows-medium-amd64]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "desktop"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "desktop" || $CI_BUILD_SET == "windows-x64"'
   script:
     - '& .\tools\ci\gitlab\build-windows.ps1 -Target x64'
 
@@ -55,7 +55,7 @@ windows-x86:
   extends: .package
   tags: [saas-windows-medium-amd64]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "desktop"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "desktop" || $CI_BUILD_SET == "windows-x86"'
   script:
     - '& .\tools\ci\gitlab\build-windows.ps1 -Target x86'
 
@@ -63,7 +63,7 @@ windows-pcvr:
   extends: .package
   tags: [saas-windows-medium-amd64]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "desktop"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "desktop" || $CI_BUILD_SET == "pcvr"'
   script:
     - '& .\tools\ci\gitlab\build-windows.ps1 -Target pcvr'
 
@@ -73,7 +73,7 @@ xbox-uwp-x64:
   extends: .package
   tags: [starfox-windows-uwp]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all"'
+    - if: '$CI_BUILD_SET == "all"'
       when: manual
       allow_failure: true
   script:
@@ -84,7 +84,7 @@ linux-x64:
   image: ubuntu:24.04
   tags: [saas-linux-medium-amd64]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "desktop" || $CI_BUILD_SET == "smoke"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "desktop" || $CI_BUILD_SET == "smoke" || $CI_BUILD_SET == "linux"'
   script:
     - bash tools/ci/gitlab/build-unix.sh linux
 
@@ -93,7 +93,7 @@ macos-universal:
   image: macos-15-xcode-16
   tags: [saas-macos-large-m2pro]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "apple"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "apple"'
   script:
     - bash tools/ci/gitlab/build-apple.sh macos
 
@@ -102,7 +102,7 @@ ios-device:
   image: macos-15-xcode-16
   tags: [saas-macos-large-m2pro]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "mobile" || $CI_BUILD_SET == "apple"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "mobile" || $CI_BUILD_SET == "apple"'
   script:
     - bash tools/ci/gitlab/build-apple.sh ios
 
@@ -111,7 +111,7 @@ android-arm64:
   image: eclipse-temurin:17-jdk-jammy
   tags: [saas-linux-medium-amd64]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "mobile" || $CI_BUILD_SET == "android"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "mobile" || $CI_BUILD_SET == "android"'
   script:
     - bash tools/ci/gitlab/build-android.sh android
 
@@ -120,7 +120,7 @@ quest-arm64:
   image: eclipse-temurin:17-jdk-jammy
   tags: [saas-linux-medium-amd64]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "quest"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "quest"'
   script:
     - bash tools/ci/gitlab/build-android.sh quest
 
@@ -131,7 +131,7 @@ switch-homebrew:
     entrypoint: [""]
   tags: [saas-linux-medium-amd64]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "homebrew"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "homebrew" || $CI_BUILD_SET == "switch"'
   script:
     - bash tools/ci/gitlab/build-unix.sh switch
 
@@ -144,7 +144,7 @@ vita-homebrew:
       user: root
   tags: [saas-linux-medium-amd64]
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_BUILD_SET == "all" || $CI_BUILD_SET == "homebrew"'
+    - if: '$CI_BUILD_SET == "all" || $CI_BUILD_SET == "homebrew" || $CI_BUILD_SET == "vita"'
   script:
     - bash tools/ci/gitlab/build-unix.sh vita
 
@@ -154,7 +154,7 @@ publish-release:
   tags: [saas-linux-small-amd64]
   resource_group: starfox-008-release
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^v[0-9]/ || $CI_PUBLISH_RELEASE == "true"'
+    - if: '$CI_PUBLISH_RELEASE == "true"'
   needs:
     - {job: windows-x64, artifacts: true, optional: true}
     - {job: windows-x86, artifacts: true, optional: true}

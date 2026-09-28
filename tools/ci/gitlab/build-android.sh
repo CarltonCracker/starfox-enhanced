@@ -8,7 +8,7 @@ version="${version#v}"
 
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    ca-certificates curl unzip zip python3 cmake ninja-build openssl
+    ca-certificates curl git unzip zip python3 cmake ninja-build openssl
 
 export ANDROID_HOME="$CI_PROJECT_DIR/.android-sdk"
 export ANDROID_SDK_ROOT="$ANDROID_HOME"

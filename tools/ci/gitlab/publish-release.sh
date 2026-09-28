@@ -19,7 +19,6 @@ if [[ ! -f "$notes" ]]; then
 fi
 
 build_set="${CI_BUILD_SET:-all}"
-if [[ -n "${CI_COMMIT_TAG:-}" ]]; then build_set=all; fi
 case "$build_set" in
 all)
     expected=(windows-x64 windows-x86 windows-pcvr linux-x64
@@ -28,6 +27,18 @@ all)
     ;;
 desktop)
     expected=(windows-x64 windows-x86 windows-pcvr linux-x64)
+    ;;
+linux)
+    expected=(linux-x64)
+    ;;
+windows-x64)
+    expected=(windows-x64)
+    ;;
+windows-x86)
+    expected=(windows-x86)
+    ;;
+pcvr)
+    expected=(windows-pcvr)
     ;;
 mobile)
     expected=(ios-arm64-unsigned android-arm64)
@@ -43,6 +54,12 @@ quest)
     ;;
 homebrew)
     expected=(switch-homebrew vita)
+    ;;
+switch)
+    expected=(switch-homebrew)
+    ;;
+vita)
+    expected=(vita)
     ;;
 *)
     echo "Nothing publishable was selected (CI_BUILD_SET=$build_set)" >&2

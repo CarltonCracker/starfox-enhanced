@@ -2,6 +2,8 @@
 
 This is a fork of Kandowontu's Star Fox Enhanced PC port to experiment with enhancements such a high resolution textures/sprites, replacing models with sprites, an any other potential timing work to match the original Super FX chip timing if needed.
 
+My main focus will be Windows and PCVR (specifically Steam Frame)
+
 A native C++/SDL3 port of [UltraStarFox](https://github.com/Sunlitspace542/ultrastarfox),
 with **Original Star Fox** and **Star Fox EX** experiences, high-frame-rate
 presentation, widescreen support, and optional visual enhancements using Codex AI (5.6 Sol, 6 Astra, 6 Sol).

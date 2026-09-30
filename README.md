@@ -4,6 +4,9 @@ This is a fork of Kandowontu's Star Fox Enhanced PC port to experiment with enha
 
 My main focus will be Windows and PCVR (specifically Steam Frame)
 
+
+The following is the original readme:
+
 A native C++/SDL3 port of [UltraStarFox](https://github.com/Sunlitspace542/ultrastarfox),
 with **Original Star Fox** and **Star Fox EX** experiences, high-frame-rate
 presentation, widescreen support, and optional visual enhancements using Codex AI (5.6 Sol, 6 Astra, 6 Sol).

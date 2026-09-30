@@ -7175,6 +7175,17 @@ int main(int argc, char** argv) {
             require(boot_game.model_smoothing()==level%4U,"3D SMOOTHING did not cycle all levels");
         }
         drive_boot({0, starfox::input::down, 0});
+        select_menu_action(boot_game, starfox::simulation::PregamePage::three_d, 42U, &boot_audio);
+        require(boot_game.pregame_selection() == 42U
+                && boot_game.asteroid_models() == starfox::render::AsteroidModels::sprite,
+                "3D ASTEROIDS missing or not default SPRITE");
+        drive_boot({0, starfox::input::a, 0});
+        require(boot_game.asteroid_models() == starfox::render::AsteroidModels::super_fx,
+                "3D ASTEROIDS did not select SUPER FX STYLE");
+        drive_boot({0, starfox::input::a, 0});
+        require(boot_game.asteroid_models() == starfox::render::AsteroidModels::sprite,
+                "3D ASTEROIDS did not wrap to SPRITE");
+        drive_boot({0, starfox::input::down, 0});
         select_menu_action(boot_game, starfox::simulation::PregamePage::three_d, 10U, &boot_audio);
         require(boot_game.pregame_selection() == 10U,
                 "pre-game cursor did not reach RTX LIGHTING");

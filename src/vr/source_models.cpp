@@ -584,7 +584,7 @@ SourceModelPackets SourceModels::assemble_poses(const GameSceneSnapshot& scene,s
             // Optional 3D asteroids replace whole-object sprites before any
             // geometry is built, so every VR path draws them as solids.
             const assets::Shape* drawn=&lod->second;
-            if(!shadow) if(const auto* model=render::substitute_asteroid_model(lod->second,pose,asteroid_models_,render::AsteroidDetail::full)) drawn=model;
+            if(!shadow) if(const auto* model=render::substitute_asteroid_model(lod->second,pose,asteroid_models_)) drawn=model;
             const uint32_t pass_key=uint32_t(item.handle)|(shadow?source_shadow_pass:0U);
             if(compute_solids_ && (!shadow || compute_shadows_) && !pose.simple_scaled_sprite
                 && !drawn->faces.empty()

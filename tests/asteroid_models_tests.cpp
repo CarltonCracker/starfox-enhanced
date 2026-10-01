@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
     RenderPose pose;
     pose.simple_scaled_sprite = true;
     pose.simple_sprite_world_size = 128;
-    require(starfox::render::substitute_asteroid_model(unknown, pose, AsteroidModels::super_fx) == nullptr
+    require(starfox::render::substitute_asteroid_model(unknown, pose, AsteroidModels::super_fx_high) == nullptr
         && pose.simple_scaled_sprite && pose.scale == 1.0, "an unknown sprite was replaced");
 
     if (argc == 3) {
@@ -142,7 +142,7 @@ int main(int argc, char** argv) {
             require(starfox::render::substitute_asteroid_model(source, untouched, AsteroidModels::sprite) == nullptr,
                 std::string{item.colour} + " was replaced in SPRITE mode");
             auto replaced = sprite;
-            const auto* model = starfox::render::substitute_asteroid_model(source, replaced, AsteroidModels::super_fx);
+            const auto* model = starfox::render::substitute_asteroid_model(source, replaced, AsteroidModels::super_fx_high);
             require(model != nullptr, std::string{item.colour} + " has no 3D model");
             require(!replaced.simple_scaled_sprite && replaced.scale > 0.0, std::string{item.colour} + " pose was not converted");
             const auto square = whole_sprite ? double(sprite.simple_sprite_world_size)
@@ -153,13 +153,28 @@ int main(int argc, char** argv) {
             }
             // The per-texture match is cached; repeats must agree with the first.
             auto repeated = sprite;
-            require(starfox::render::substitute_asteroid_model(source, repeated, AsteroidModels::super_fx) == model
+            require(starfox::render::substitute_asteroid_model(source, repeated, AsteroidModels::super_fx_high) == model
                 && repeated.scale == replaced.scale, std::string{item.colour} + " cached match changed");
+            // HIGH is always full detail and MEDIUM always the middle level;
+            // LOW follows on-screen size and drops to the simplest far away.
+            require(model == starfox::render::asteroid_model_for_texture(source.textures.front()),
+                std::string{item.colour} + " HIGH did not use the full model");
+            auto medium = sprite;
+            require(starfox::render::substitute_asteroid_model(source, medium, AsteroidModels::super_fx_medium) == model + 1,
+                std::string{item.colour} + " MEDIUM did not use the middle level");
+            auto near = sprite;near.z = 64.0;
+            require(starfox::render::substitute_asteroid_model(source, near, AsteroidModels::super_fx_low) == model,
+                std::string{item.colour} + " LOW did not use full detail up close");
+            auto far = sprite;far.z = 30000.0;
+            require(starfox::render::substitute_asteroid_model(source, far, AsteroidModels::super_fx_low) == model + 2,
+                std::string{item.colour} + " LOW did not use the simplest level far away");
+            require(near.scale == replaced.scale && far.scale == replaced.scale && medium.scale == replaced.scale,
+                std::string{item.colour} + " changing detail level resized the rock");
             // A texture rewritten at the same address must not reuse a stale match.
             auto& texels = source.textures.front().texels;
             texels.front() = static_cast<std::uint8_t>(texels.front() ^ 0x0fU);
             auto rewritten = sprite;
-            require(starfox::render::substitute_asteroid_model(source, rewritten, AsteroidModels::super_fx) == nullptr,
+            require(starfox::render::substitute_asteroid_model(source, rewritten, AsteroidModels::super_fx_high) == nullptr,
                 std::string{item.colour} + " matched a rewritten texture from cache");
         }
     }

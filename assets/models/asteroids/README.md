@@ -5,7 +5,7 @@ released under the MIT License (see `LICENSE`). They contain no cartridge
 image data; colours come from the player's ROM at runtime.
 
 Low-poly stand-ins for the cartridge's asteroid sprites, drawn when
-3D OPTIONS > 3D ASTEROIDS is SUPER FX STYLE. Each file is the `native/`
+3D OPTIONS > 3D ASTEROIDS is a SUPER FX mode. Each file is the `native/`
 export of one model set made for this project (the matching high-detail
 `ue5/` meshes and textures are kept outside the repository).
 

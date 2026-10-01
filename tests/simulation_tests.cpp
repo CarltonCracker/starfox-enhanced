@@ -7179,9 +7179,12 @@ int main(int argc, char** argv) {
         require(boot_game.pregame_selection() == 42U
                 && boot_game.asteroid_models() == starfox::render::AsteroidModels::sprite,
                 "3D ASTEROIDS missing or not default SPRITE");
-        drive_boot({0, starfox::input::a, 0});
-        require(boot_game.asteroid_models() == starfox::render::AsteroidModels::super_fx,
-                "3D ASTEROIDS did not select SUPER FX STYLE");
+        for (const auto mode : {starfox::render::AsteroidModels::super_fx_low,
+                 starfox::render::AsteroidModels::super_fx_medium,
+                 starfox::render::AsteroidModels::super_fx_high}) {
+            drive_boot({0, starfox::input::a, 0});
+            require(boot_game.asteroid_models() == mode, "3D ASTEROIDS did not step through the SUPER FX levels");
+        }
         drive_boot({0, starfox::input::a, 0});
         require(boot_game.asteroid_models() == starfox::render::AsteroidModels::sprite,
                 "3D ASTEROIDS did not wrap to SPRITE");

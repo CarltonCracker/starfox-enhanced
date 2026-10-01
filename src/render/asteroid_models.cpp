@@ -193,7 +193,7 @@ TextureMatch match_texture(const assets::TextureImage& texture) {
 } // namespace
 
 const assets::Shape* substitute_asteroid_model(
-    const assets::Shape& source, RenderPose& pose, AsteroidModels mode, AsteroidDetail detail) {
+    const assets::Shape& source, RenderPose& pose, AsteroidModels mode) {
     if (mode == AsteroidModels::sprite || pose.explosion_progress != 0U) return nullptr;
     const assets::TextureImage* texture = nullptr;
     double half_size = 0.0;
@@ -216,12 +216,13 @@ const assets::Shape* substitute_asteroid_model(
     if (match.model == nullptr) return nullptr;
     pose.simple_scaled_sprite = false;
     pose.scale = half_size * match.fit;
-    std::size_t level = 0;
-    if (detail == AsteroidDetail::by_screen_size && pose.z > 0.0) {
+    std::size_t level = mode == AsteroidModels::super_fx_medium ? 1U : 0U;
+    if (mode == AsteroidModels::super_fx_low && pose.z > 0.0) {
         // On-screen diameter in native pixels (MOBJ projects with 256/z).
         const auto pixels = pose.scale * match.extent * 256.0 / pose.z;
         level = pixels >= 56.0 ? 0U : pixels >= 24.0 ? 1U : 2U;
-    }    return match.model + std::min(level, asteroid_data::lod_count - 1U);
+    }
+    return match.model + std::min(level, asteroid_data::lod_count - 1U);
 }
 
 }

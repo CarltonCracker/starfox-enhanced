@@ -141,7 +141,9 @@ int main() try {
         menu.selection=2;click();require(menu.preview);menu.sample(press,true);require(menu.preview);
         click();require(!menu.preview);
         menu.selection=3;click();require(menu.page==Page::three_d && menu.asteroid_models==1
-            && menu.labels()[3]=="3D ASTEROIDS: SUPER FX STYLE");
+            && menu.labels()[3]=="3D ASTEROIDS: SUPER FX LOW");
+        click();require(menu.labels()[3]=="3D ASTEROIDS: SUPER FX MEDIUM");
+        click();require(menu.labels()[3]=="3D ASTEROIDS: SUPER FX HIGH");
         click();require(menu.asteroid_models==0 && menu.labels()[3]=="3D ASTEROIDS: SPRITE");
         menu.selection=4;click();require(!menu.ray_tracing && menu.page==Page::options);
         menu.ray_tracing_available=true;click();require(menu.page==Page::three_d && menu.row_count()==6);
@@ -183,7 +185,7 @@ int main() try {
         require(restored.restore_preferences(preferences));
         require(restored.preferences()==preferences);
         require(restored.steer_sensitivity_index==1);
-        require(restored.asteroid_models==1 && restored.asteroid_model_mode()==starfox::render::AsteroidModels::super_fx);
+        require(restored.asteroid_models==1 && restored.asteroid_model_mode()==starfox::render::AsteroidModels::super_fx_low);
         require(restored.ray_tracing && !restored.ray_tracing_available);
         require(restored.enhanced_sky);
         require(!restored.ray_tracing_enabled());

@@ -139,6 +139,50 @@ std::span<const assets::Shape> asteroid_model_shapes() {
     return shapes();
 }
 
+namespace {
+
+// Recognising a texture costs a full texel hash and a silhouette scan, and
+// every sprite or textured quad asks on every frame. Remember each answer,
+// including "not an asteroid", by texture address. A decoded-shape cache
+// can free a texture and later reuse its address, so each entry also keeps
+// a cheap fingerprint that must still match before it is trusted.
+struct TextureMatch {
+    const assets::TextureImage* texture{};
+    std::uint16_t descriptor{};
+    std::size_t size{};
+    std::array<std::uint8_t, 16> sample{};
+    const assets::Shape* model{};
+    // Model scale per world unit of sprite half-size.
+    double fit{};
+};
+
+std::array<std::uint8_t, 16> fingerprint(const assets::TextureImage& texture) {
+    std::array<std::uint8_t, 16> sample{};
+    for (std::size_t index = 0; index < sample.size() && !texture.texels.empty(); ++index) {
+        sample[index] = texture.texels[index * texture.texels.size() / sample.size()];
+    }
+    return sample;
+}
+
+TextureMatch match_texture(const assets::TextureImage& texture) {
+    thread_local std::vector<TextureMatch> matches;
+    const auto sample = fingerprint(texture);
+    for (const auto& match : matches) {
+        if (match.texture == &texture && match.descriptor == texture.descriptor
+            && match.size == texture.texels.size() && match.sample == sample) return match;
+    }
+    if (matches.size() >= 64U) matches.clear();
+    TextureMatch match{&texture, texture.descriptor, texture.texels.size(), sample,
+        asteroid_model_for_texture(texture), 0.0};
+    if (match.model != nullptr) {
+        match.fit = 2.0 * silhouette_fraction(texture) / front_extent(*match.model);
+    }
+    matches.push_back(match);
+    return match;
+}
+
+} // namespace
+
 const assets::Shape* substitute_asteroid_model(
     const assets::Shape& source, RenderPose& pose, AsteroidModels mode) {
     if (mode == AsteroidModels::sprite || pose.explosion_progress != 0U) return nullptr;
@@ -159,11 +203,11 @@ const assets::Shape* substitute_asteroid_model(
             * static_cast<double>(std::uint32_t{1} << source.header.shift) * pose.scale;
     }
     if (texture == nullptr || half_size <= 0.0) return nullptr;
-    const auto* model = asteroid_model_for_texture(*texture);
-    if (model == nullptr) return nullptr;
+    const auto match = match_texture(*texture);
+    if (match.model == nullptr) return nullptr;
     pose.simple_scaled_sprite = false;
-    pose.scale = 2.0 * half_size * silhouette_fraction(*texture) / front_extent(*model);
-    return model;
+    pose.scale = half_size * match.fit;
+    return match.model;
 }
 
 }

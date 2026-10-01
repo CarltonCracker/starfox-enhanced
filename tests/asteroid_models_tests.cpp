@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
         struct Case { const char* shape; const char* colour; };
         for (const auto& item : std::array<Case, 4>{{{"ASTEROID1", "ASTEROID_C"}, {"ASTEROID1", "BREAK_METEOR_C"},
                  {"ASTEROID2", "ASTEROID2_C"}, {"BIG_METEOR", "BIG_METEOR_C"}}}) {
-            const auto source = decoder.decode(low_address(symbols, item.shape, true), {},
+            auto source = decoder.decode(low_address(symbols, item.shape, true), {},
                 static_cast<std::uint16_t>(low_address(symbols, item.colour, false)));
             RenderPose sprite;
             const bool whole_sprite = source.faces.size() == 1U && source.faces.front().sprite;
@@ -146,6 +146,16 @@ int main(int argc, char** argv) {
                 require(std::abs(vertex.x) * replaced.scale <= square * 0.6 && std::abs(vertex.y) * replaced.scale <= square * 0.6,
                     std::string{item.colour} + " model overflows its sprite");
             }
+            // The per-texture match is cached; repeats must agree with the first.
+            auto repeated = sprite;
+            require(starfox::render::substitute_asteroid_model(source, repeated, AsteroidModels::super_fx) == model
+                && repeated.scale == replaced.scale, std::string{item.colour} + " cached match changed");
+            // A texture rewritten at the same address must not reuse a stale match.
+            auto& texels = source.textures.front().texels;
+            texels.front() = static_cast<std::uint8_t>(texels.front() ^ 0x0fU);
+            auto rewritten = sprite;
+            require(starfox::render::substitute_asteroid_model(source, rewritten, AsteroidModels::super_fx) == nullptr,
+                std::string{item.colour} + " matched a rewritten texture from cache");
         }
     }
     std::cout << "asteroid model tests passed\n";

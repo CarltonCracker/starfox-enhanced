@@ -11047,11 +11047,16 @@ int main(int argc, char** argv) {
                         found->second, pose, game.asteroid_models())) {
                     drawn_shape = model;
                 }
+                // The sprites never cast shadows, and asteroids fly in open
+                // space. Keep their models out of the per-frame ray and
+                // shadow scenes, which would otherwise rebuild hundreds of
+                // extra caster triangles for every rock.
+                const bool asteroid_model = drawn_shape != &found->second;
                 draw_model(*drawn_shape, pose, target, false,
                     &target == &superfx_frame
                             && surface_effects
                         ? &superfx_surfaces : nullptr,
-                    capture_shadow_scene ? &shadow_scene : nullptr,
+                    capture_shadow_scene && !asteroid_model ? &shadow_scene : nullptr,
                     starfox::render::GpuModelIdentity{item.handle,
                         game.objects().generation(item.handle), object.shape,
                         object.strategy_address, object.type});

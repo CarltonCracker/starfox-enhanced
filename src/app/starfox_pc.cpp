@@ -11047,16 +11047,21 @@ int main(int argc, char** argv) {
                         found->second, pose, game.asteroid_models())) {
                     drawn_shape = model;
                 }
-                // The sprites never cast shadows, and asteroids fly in open
-                // space. Keep their models out of the per-frame ray and
-                // shadow scenes, which would otherwise rebuild hundreds of
-                // extra caster triangles for every rock.
-                const bool asteroid_model = drawn_shape != &found->second;
-                draw_model(*drawn_shape, pose, target, false,
-                    &target == &superfx_frame
-                            && surface_effects
-                        ? &superfx_surfaces : nullptr,
-                    capture_shadow_scene && !asteroid_model ? &shadow_scene : nullptr,
+                auto* surfaces = &target == &superfx_frame && surface_effects
+                    ? &superfx_surfaces : nullptr;
+                if (drawn_shape != &found->second) {
+                    // The GPU model path rasterises each model over the whole
+                    // frame (~0.4 ms per rock at 4x), so a field of rocks cost
+                    // more than everything else combined. Project rocks into
+                    // the shared raster command stream instead: consecutive
+                    // rocks share one raster pass, still in painter order
+                    // with the other models. Asteroids never cast shadows,
+                    // so they also stay out of the ray and shadow scenes.
+                    renderer.draw(*drawn_shape, pose, target, false, surfaces, nullptr);
+                    continue;
+                }
+                draw_model(*drawn_shape, pose, target, false, surfaces,
+                    capture_shadow_scene ? &shadow_scene : nullptr,
                     starfox::render::GpuModelIdentity{item.handle,
                         game.objects().generation(item.handle), object.shape,
                         object.strategy_address, object.type});

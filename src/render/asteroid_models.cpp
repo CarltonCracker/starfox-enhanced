@@ -41,13 +41,15 @@ assets::DiffuseShadeTables shade_tables(const asteroid_data::ModelData& data) {
     return tables;
 }
 
-assets::Shape build_shape(const asteroid_data::ModelData& data, std::size_t index) {
+assets::Shape build_shape(const asteroid_data::ModelData& data, std::size_t index, std::size_t level) {
+    const auto& mesh = data.lods[level];
+    const auto shape_index = index * asteroid_data::lod_count + level;
     assets::Shape shape;
-    shape.name = "ASTEROID_MODEL_" + std::to_string(index);
-    shape.header.address = kModelAddressBase + static_cast<std::uint32_t>(index);
+    shape.name = "ASTEROID_MODEL_" + std::to_string(index) + "_LOD" + std::to_string(level);
+    shape.header.address = kModelAddressBase + static_cast<std::uint32_t>(shape_index);
     shape.header.size = static_cast<std::int16_t>(asteroid_data::unit);
     shape.header.radius = static_cast<std::uint16_t>(asteroid_data::unit);
-    for (const auto& vertex : data.vertices) {
+    for (const auto& vertex : mesh.vertices) {
         shape.vertices.push_back({vertex[0], vertex[1], vertex[2]});
     }
     // Lit ramp materials first (SHADESTAB2 lookups), then unlit accents such
@@ -62,13 +64,13 @@ assets::Shape build_shape(const asteroid_data::ModelData& data, std::size_t inde
     shape.has_diffuse_shade_tables = true;
     // One visibility triple per face gives each triangle its own facing test,
     // standing in for the retail shapes' BSP trees.
-    for (std::size_t face_index = 0; face_index < data.faces.size(); ++face_index) {
-        const auto& corners = data.faces[face_index];
+    for (std::size_t face_index = 0; face_index < mesh.faces.size(); ++face_index) {
+        const auto& corners = mesh.faces[face_index];
         shape.visibilities.push_back({corners[0], corners[1], corners[2]});
         assets::Face face;
         face.visibility_index = static_cast<std::int16_t>(face_index);
-        face.colour_id = data.colours[face_index];
-        const auto& normal = data.normals[face_index];
+        face.colour_id = mesh.colours[face_index];
+        const auto& normal = mesh.normals[face_index];
         face.normal = {normal[0], normal[1], normal[2]};
         face.vertex_indices = {corners[0], corners[1], corners[2]};
         shape.faces.push_back(std::move(face));
@@ -108,7 +110,9 @@ const std::vector<assets::Shape>& shapes() {
     static const auto built = [] {
         std::vector<assets::Shape> result;
         for (std::size_t index = 0; index < asteroid_data::models.size(); ++index) {
-            result.push_back(build_shape(*asteroid_data::models[index], index));
+            for (std::size_t level = 0; level < asteroid_data::lod_count; ++level) {
+                result.push_back(build_shape(*asteroid_data::models[index], index, level));
+            }
         }
         return result;
     }();
@@ -130,7 +134,9 @@ const assets::Shape* asteroid_model_for_texture(const assets::TextureImage& text
     if (texture.texels.size() != 32U * 32U && texture.texels.size() != 64U * 64U) return nullptr;
     const auto hash = asteroid_texture_hash(texture);
     for (std::size_t index = 0; index < asteroid_data::models.size(); ++index) {
-        if (asteroid_data::models[index]->texture_hash == hash) return &shapes()[index];
+        if (asteroid_data::models[index]->texture_hash == hash) {
+            return &shapes()[index * asteroid_data::lod_count];
+        }
     }
     return nullptr;
 }
@@ -151,9 +157,11 @@ struct TextureMatch {
     std::uint16_t descriptor{};
     std::size_t size{};
     std::array<std::uint8_t, 16> sample{};
-    const assets::Shape* model{};
-    // Model scale per world unit of sprite half-size.
+    const assets::Shape* model{}; // Full detail; simpler levels follow it.
+    // Model scale per world unit of sprite half-size, and the full model's
+    // front extent, which every level shares so switching never resizes.
     double fit{};
+    double extent{};
 };
 
 std::array<std::uint8_t, 16> fingerprint(const assets::TextureImage& texture) {
@@ -173,9 +181,10 @@ TextureMatch match_texture(const assets::TextureImage& texture) {
     }
     if (matches.size() >= 64U) matches.clear();
     TextureMatch match{&texture, texture.descriptor, texture.texels.size(), sample,
-        asteroid_model_for_texture(texture), 0.0};
+        asteroid_model_for_texture(texture), 0.0, 0.0};
     if (match.model != nullptr) {
-        match.fit = 2.0 * silhouette_fraction(texture) / front_extent(*match.model);
+        match.extent = front_extent(*match.model);
+        match.fit = 2.0 * silhouette_fraction(texture) / match.extent;
     }
     matches.push_back(match);
     return match;
@@ -184,7 +193,7 @@ TextureMatch match_texture(const assets::TextureImage& texture) {
 } // namespace
 
 const assets::Shape* substitute_asteroid_model(
-    const assets::Shape& source, RenderPose& pose, AsteroidModels mode) {
+    const assets::Shape& source, RenderPose& pose, AsteroidModels mode, AsteroidDetail detail) {
     if (mode == AsteroidModels::sprite || pose.explosion_progress != 0U) return nullptr;
     const assets::TextureImage* texture = nullptr;
     double half_size = 0.0;
@@ -207,7 +216,12 @@ const assets::Shape* substitute_asteroid_model(
     if (match.model == nullptr) return nullptr;
     pose.simple_scaled_sprite = false;
     pose.scale = half_size * match.fit;
-    return match.model;
+    std::size_t level = 0;
+    if (detail == AsteroidDetail::by_screen_size && pose.z > 0.0) {
+        // On-screen diameter in native pixels (MOBJ projects with 256/z).
+        const auto pixels = pose.scale * match.extent * 256.0 / pose.z;
+        level = pixels >= 56.0 ? 0U : pixels >= 24.0 ? 1U : 2U;
+    }    return match.model + std::min(level, asteroid_data::lod_count - 1U);
 }
 
 }

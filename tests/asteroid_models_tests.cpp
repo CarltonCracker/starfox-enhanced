@@ -102,7 +102,12 @@ std::uint32_t low_address(const starfox::assets::SymbolMap& symbols, const char*
 
 int main(int argc, char** argv) {
     const auto shapes = starfox::render::asteroid_model_shapes();
-    require(shapes.size() == 4U, "expected grey, orange, face and crater models");
+    require(shapes.size() == 12U, "expected three levels of grey, orange, face and crater models");
+    for (std::size_t model = 0; model < 4U; ++model) {
+        require(shapes[model * 3U].faces.size() > shapes[model * 3U + 1U].faces.size()
+            && shapes[model * 3U + 1U].faces.size() > shapes[model * 3U + 2U].faces.size()
+            && shapes[model * 3U + 2U].faces.size() <= 64U, "levels of detail must get simpler");
+    }
     for (const auto& shape : shapes) check_model(shape);
 
     // Unknown textures and SPRITE mode never substitute, and leave the pose alone.

@@ -19,16 +19,27 @@ inline constexpr std::uint8_t asteroid_model_mode_count = 2U;
 inline constexpr std::array<std::string_view, asteroid_model_mode_count>
     asteroid_model_names{"SPRITE", "SUPER FX STYLE"};
 
+// Each model has simpler versions for rocks that are small on screen, as
+// retail shapes do through their LOD pointers. The desktop renderers pay
+// for every face each frame; VR caches geometry and asks for full detail.
+enum class AsteroidDetail : std::uint8_t {
+    by_screen_size,
+    full,
+};
+
 // When `pose` draws `source` as a recognised asteroid (a whole-object sprite,
 // or a lone textured quad such as BIG_METEOR), returns the 3D model and
 // rewrites `pose` to draw it at the sprite's size and orientation. Otherwise
 // returns nullptr and leaves `pose` untouched. Models are matched by texel
 // content, so Original and Star Fox EX share them.
 const assets::Shape* substitute_asteroid_model(
-    const assets::Shape& source, RenderPose& pose, AsteroidModels mode);
+    const assets::Shape& source, RenderPose& pose, AsteroidModels mode,
+    AsteroidDetail detail = AsteroidDetail::by_screen_size);
 
 // Exposed for tests.
 [[nodiscard]] std::uint32_t asteroid_texture_hash(const assets::TextureImage& texture) noexcept;
+// Full-detail model for a texture, or nullptr.
 [[nodiscard]] const assets::Shape* asteroid_model_for_texture(const assets::TextureImage& texture);
+// Every level of every model, full detail first within each model.
 [[nodiscard]] std::span<const assets::Shape> asteroid_model_shapes();
 }

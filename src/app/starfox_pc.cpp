@@ -9200,11 +9200,11 @@ int main(int argc, char** argv) {
             std::optional<starfox::render::shadows::ReceiverPlane> reflection_ground;
             bool mono_shadows_deferred=false,cpu_casters_collected=false;
             std::array<bool,2> stereo_resident_shadow{};
-            superfx_ui.record_to(nullptr);comms_hud.record_to(nullptr);
+            superfx_ui.record_to(nullptr);comms_hud.record_to(nullptr);superfx_hud.record_to(nullptr);
             superfx_ui.clear(0U);
             superfx_hud.clear(0U);
             comms_hud.clear(0U);
-            std::array<starfox::render::RasterCommands,2> host_ink_commands;
+            std::array<starfox::render::RasterCommands,3> host_ink_commands;
             if (controls_scene) controls_player_layer.clear(0U);
             const auto begin_late_cartridge=[&]() {
                 if(late_cartridge) return;
@@ -9269,9 +9269,16 @@ int main(int argc, char** argv) {
                 background_renderer.recording=deferred_background.get();background_renderer.target=&framebuffer;
                 framebuffer.record_to(&deferred_background->pending);
             }
+            // GPU FAST also records the Super FX HUD layer (cockpit lines,
+            // comms face, meters). Otherwise it is drawn into a CPU image at
+            // stored resolution and uploaded whole every frame: about 4.9 MB
+            // of pixels and layer tags per frame at 4x 32:9.
+            const bool record_superfx_hud=record_background && game.gpu_fast()
+                && !std::getenv("STARFOX_TEST_UNRECORDED_SUPERFX_HUD");
             if(record_background) {
-                for(unsigned i=0;i<2;++i) {
-                    auto& target=i?superfx_ui:comms_hud;
+                for(unsigned i=0;i<3;++i) {
+                    if(i==2 && !record_superfx_hud) continue;
+                    auto& target=i==2?superfx_hud:i?superfx_ui:comms_hud;
                     host_ink_commands[i].reset(target.stored_width(),target.stored_height());
                     target.record_to(&host_ink_commands[i]);
                 }
@@ -11779,7 +11786,7 @@ int main(int argc, char** argv) {
                 superfx_offset_y + comms_offset.y, false);
             composite_superfx(
                 superfx_ui, superfx_ui_offset_x, superfx_offset_y, false);
-            comms_hud.record_to(nullptr);superfx_ui.record_to(nullptr);
+            comms_hud.record_to(nullptr);superfx_ui.record_to(nullptr);superfx_hud.record_to(nullptr);
 
             // Everything in this final cartridge pass is above the world and
             // host HUD. Record it for all scenes, not just title screens.

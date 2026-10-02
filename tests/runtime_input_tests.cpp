@@ -798,6 +798,31 @@ int main() {
         require(!starfox::app::save_pregame_settings(pregame_test_path, settings),
             "invalid language setting was saved");
     }
+    {
+        // GPU_RENDERER is optional: older files lack it, and a value from a
+        // newer build must not reset every other setting.
+        auto fast = saved_pregame;fast.gpu_renderer = 1;
+        require(starfox::app::save_pregame_settings(pregame_test_path, fast)
+            && starfox::app::load_pregame_settings(pregame_test_path, loaded_pregame)
+            && loaded_pregame == fast, "GPU FAST setting round trip failed");
+        std::string kept;
+        {
+            std::ifstream saved{pregame_test_path};
+            for (std::string line; std::getline(saved, line);)
+                if (line.rfind("GPU_RENDERER ", 0) != 0) kept += line + '\n';
+        }
+        std::ofstream{pregame_test_path} << kept;
+        require(starfox::app::load_pregame_settings(pregame_test_path, loaded_pregame)
+            && loaded_pregame.gpu_renderer == 0U && loaded_pregame.timing_mode == fast.timing_mode,
+            "settings without GPU_RENDERER did not load as GPU ACCURATE");
+        std::ofstream{pregame_test_path, std::ios::app} << "GPU_RENDERER 2\n";
+        require(starfox::app::load_pregame_settings(pregame_test_path, loaded_pregame)
+            && loaded_pregame.gpu_renderer == 0U,
+            "unknown GPU_RENDERER value did not fall back to GPU ACCURATE");
+        auto invalid = saved_pregame;invalid.gpu_renderer = 2;
+        require(!starfox::app::save_pregame_settings(pregame_test_path, invalid),
+            "invalid GPU renderer setting was saved");
+    }
     for (std::uint8_t style = 0; style < starfox::render::effect_count; ++style) {
         auto settings = saved_pregame;
         settings.effect = style;

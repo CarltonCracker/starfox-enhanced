@@ -71,6 +71,15 @@ enum class RendererMode : std::uint8_t {
     software,
 };
 
+// Which GPU path draws the scene while renderer_mode is gpu. This is a host
+// preference: it is saved as the optional pregame.cfg key GPU_RENDERER and
+// is deliberately absent from save states.
+enum class GpuRenderer : std::uint8_t {
+    accurate, // the original per-model GPU path, the parity reference
+    fast,     // the GPU FAST paths; output must match accurate exactly
+};
+inline constexpr std::size_t gpu_renderer_count = 2U;
+
 // Internal supersampling of the host-rendered 3D layer. Cartridge 2D art is
 // unaffected and keeps its source raster.
 enum class RenderScale : std::uint8_t {
@@ -498,6 +507,16 @@ public:
     }
     void set_renderer_mode(RendererMode mode) noexcept {
         renderer_mode_ = mode;
+    }
+    [[nodiscard]] GpuRenderer gpu_renderer() const noexcept {
+        return gpu_renderer_;
+    }
+    void set_gpu_renderer(GpuRenderer renderer) noexcept {
+        gpu_renderer_ = renderer;
+    }
+    [[nodiscard]] bool gpu_fast() const noexcept {
+        return renderer_mode_ == RendererMode::gpu
+            && gpu_renderer_ == GpuRenderer::fast;
     }
     [[nodiscard]] bool msu1_music() const noexcept { return msu1_music_; }
     void set_msu1_music(bool enabled) noexcept {
@@ -1200,6 +1219,7 @@ private:
     bool preview_start_requested_{};
     bool vsync_{};
     RendererMode renderer_mode_{RendererMode::gpu};
+    GpuRenderer gpu_renderer_{GpuRenderer::accurate};
     bool msu1_music_{};
     bool msu1_available_{true};
     bool rumble_{true};

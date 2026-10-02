@@ -192,6 +192,8 @@ struct PregameSettings {
     std::uint8_t material{};
     std::array<std::uint8_t,6> environment{};
     bool planet_select_cheat{};
+    // 0=GPU ACCURATE (default), 1=GPU FAST. Optional key GPU_RENDERER.
+    std::uint8_t gpu_renderer{};
 
     [[nodiscard]] bool operator==(const PregameSettings&) const = default;
 };

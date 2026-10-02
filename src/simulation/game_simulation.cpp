@@ -1456,8 +1456,16 @@ GameTickResult GameSimulation::tick_pregame_menu(
             | starfox::input::right | starfox::input::select
             | starfox::input::a | starfox::input::b)) != 0U;
     if (change_renderer) {
-        renderer_mode_ = renderer_mode_ == RendererMode::gpu
-            ? RendererMode::software : RendererMode::gpu;
+        // SOFTWARE <-> GPU ACCURATE <-> GPU FAST, wrapping. Left/B step back.
+        const bool backward = (menu_input.pressed
+            & (starfox::input::left | starfox::input::b)) != 0U;
+        const unsigned position = renderer_mode_ == RendererMode::software ? 0U
+            : gpu_renderer_ == GpuRenderer::fast ? 2U : 1U;
+        const unsigned next = (position + (backward ? 2U : 1U)) % 3U;
+        renderer_mode_ = next == 0U ? RendererMode::software : RendererMode::gpu;
+        if (next != 0U) {
+            gpu_renderer_ = next == 2U ? GpuRenderer::fast : GpuRenderer::accurate;
+        }
         queue_sound_effect(0x11U);
     }
 

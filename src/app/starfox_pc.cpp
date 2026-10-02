@@ -6096,6 +6096,7 @@ int main(int argc, char** argv) {
                 game.material(),
                 game.environment(),
                 game.planet_select_cheat(),
+                static_cast<std::uint8_t>(game.gpu_renderer()),
             };
         };
         {
@@ -6157,6 +6158,9 @@ int main(int argc, char** argv) {
             game.set_renderer_mode(
                 static_cast<starfox::simulation::RendererMode>(
                     saved_pregame.renderer_mode));
+            game.set_gpu_renderer(saved_pregame.gpu_renderer == 1U
+                ? starfox::simulation::GpuRenderer::fast
+                : starfox::simulation::GpuRenderer::accurate);
             game.set_msu1_available(msu1_pack.available());
             game.set_msu1_music(saved_pregame.msu1_music);
             game.set_rumble(saved_pregame.rumble);
@@ -6176,6 +6180,10 @@ int main(int argc, char** argv) {
                 game.set_renderer_mode(value == "SOFTWARE" || value == "1"
                     ? starfox::simulation::RendererMode::software
                     : starfox::simulation::RendererMode::gpu);
+                // GPU and GPU_ACCURATE select the original path.
+                game.set_gpu_renderer(value == "GPU_FAST"
+                    ? starfox::simulation::GpuRenderer::fast
+                    : starfox::simulation::GpuRenderer::accurate);
             }
             if (const auto* forced_enhanced = std::getenv(
                     "STARFOX_TEST_ENHANCED")) {
@@ -12337,9 +12345,11 @@ int main(int argc, char** argv) {
                                 :
 #endif
                             game.renderer_mode()
-                                    == starfox::simulation::RendererMode::gpu
-                                ? std::string_view{"GPU"}
-                                : std::string_view{"SOFTWARE"},
+                                    != starfox::simulation::RendererMode::gpu
+                                ? std::string_view{"SOFTWARE"}
+                                : game.gpu_fast()
+                                ? std::string_view{"GPU FAST"}
+                                : std::string_view{"GPU ACCURATE"},
                             row_y[4], game.pregame_selection() == 4U);
                         const auto msu1_value = game.msu1_available()
                             ? on_off(game.msu1_music())

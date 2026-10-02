@@ -886,6 +886,10 @@ bool load_pregame_settings(
         } else if (name == "LANGUAGE") {
             if (value < 0 || value > 5) return false;
             loaded.language = static_cast<std::uint8_t>(value);
+        } else if (name == "GPU_RENDERER") {
+            // Optional. An unknown value (for example from a newer build)
+            // falls back to ACCURATE instead of rejecting the whole file.
+            loaded.gpu_renderer = value == 1 ? 1U : 0U;
         } else if (name == "MODEL_SMOOTHING") {
             if (value < 0 || value > 3) return false;
             loaded.model_smoothing = static_cast<std::uint8_t>(value);
@@ -1001,7 +1005,8 @@ bool save_pregame_settings(
         || (settings.selected_level != 0U && (settings.selected_level < 11U
             || settings.selected_level > 79U || settings.selected_level % 10U == 0U))
         || settings.language > 5U || settings.experience > 1U || settings.music_volume > 100U
-        || settings.sfx_volume > 100U || settings.render_scale > 3U || settings.model_smoothing > 3U) {
+        || settings.sfx_volume > 100U || settings.render_scale > 3U || settings.model_smoothing > 3U
+        || settings.gpu_renderer > 1U) {
         return false;
     }
     constexpr std::array<std::uint16_t, 8> valid_fps{
@@ -1078,7 +1083,9 @@ bool save_pregame_settings(
            << "ON_SCREEN_CONTROLS "
            << static_cast<unsigned>(settings.on_screen_controls) << '\n'
            << "SWAP_FACE_BUTTONS "
-           << static_cast<unsigned>(settings.swap_face_buttons) << '\n';
+           << static_cast<unsigned>(settings.swap_face_buttons) << '\n'
+           << "GPU_RENDERER "
+           << static_cast<unsigned>(settings.gpu_renderer) << '\n';
     return static_cast<bool>(output);
 }
 

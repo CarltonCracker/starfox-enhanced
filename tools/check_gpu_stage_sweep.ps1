@@ -2,6 +2,8 @@ param([string]$OutputDirectory='tmp/gpu-stage-sweep',
     [ValidateSet('direct3d12','vulkan')][string]$GpuDriver='direct3d12',
     [ValidateSet('ORIGINAL','EX')][string[]]$Experiences=@('ORIGINAL','EX'),
     [ValidateSet('4_3','16_9','32_9')][string]$DisplayMode='16_9',
+    [ValidateSet('ACCURATE','FAST')][string]$GpuRenderer='ACCURATE',
+    [ValidateSet(1,2,4)][int[]]$RenderScale=@(1),
     [switch]$IncludeSpecialRoutes,
     [switch]$RasterOnly,
     [switch]$AllowUniformFinal,
@@ -53,22 +55,22 @@ try {
             # underlying harness reports the PID; never restart that process.
             & "$PSScriptRoot/check_gpu_native.ps1" -OutputDirectory "$OutputDirectory/$experience-$level" `
                 -Experience $experience -Rom $rom -Symbols $symbols -Level $level -GpuDriver $GpuDriver `
-                -Ticks $Ticks -Frames $Frames -Warmup 0 -Scales 1 -PresentationFps 60 `
+                -GpuRenderer $GpuRenderer -Ticks $Ticks -Frames $Frames -Warmup 0 -Scales $RenderScale -PresentationFps 60 `
                 -DefaultPipeline -Geometry:(!$RasterOnly) -RasterOnly:$RasterOnly `
                 -PresentationCapture -AllowUniformFinal:$AllowUniformFinal `
                 -RequireNoCpuUpload:$RequireNoCpuUpload -Bloom 0
             # Verify the requested aspect reached final presentation, rather
             # than comparing two equally wrong inherited display settings.
             $expectedWidth=switch($DisplayMode){'4_3'{299};'16_9'{400};'32_9'{800}}
-            foreach($mode in @('cpu','gpu')) {
-                $capture=Join-Path "$OutputDirectory/$experience-$level" "$experience-$level-$Ticks-60fps-1x-$mode-presentation.bmp"
+            foreach($scale in $RenderScale) {foreach($mode in @('cpu','gpu')) {
+                $capture=Join-Path "$OutputDirectory/$experience-$level" "$experience-$level-$Ticks-60fps-${scale}x-$mode-presentation.bmp"
                 $header=[IO.File]::ReadAllBytes([IO.Path]::GetFullPath($capture))
                 if($header.Length -lt 26 -or $header[0] -ne 66 -or $header[1] -ne 77 -or
                     [BitConverter]::ToInt32($header,18) -ne $expectedWidth -or
                     [Math]::Abs([BitConverter]::ToInt32($header,22)) -ne 224) {
                     throw "Unexpected final presentation dimensions: $capture ($DisplayMode)"
                 }
-            }
+            }}
             ++$passed
             Write-Output "Stage sweep: $passed passed; $experience $level"
         }

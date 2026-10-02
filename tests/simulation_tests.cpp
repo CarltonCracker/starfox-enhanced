@@ -7072,14 +7072,26 @@ int main(int argc, char** argv) {
         drive_boot({0, starfox::input::down, 0});
         require(boot_game.pregame_selection() == 4U,
                 "pre-game cursor did not reach RENDERER");
+        require(boot_game.gpu_renderer()
+                    == starfox::simulation::GpuRenderer::accurate,
+                "pre-game renderer did not default to GPU ACCURATE");
+        // SOFTWARE <-> GPU ACCURATE <-> GPU FAST, wrapping in both directions.
+        drive_boot({0, starfox::input::a, 0});
+        require(boot_game.gpu_fast(),
+                "pre-game renderer option did not step forward to GPU FAST");
         drive_boot({0, starfox::input::a, 0});
         require(boot_game.renderer_mode()
                     == starfox::simulation::RendererMode::software,
-                "pre-game renderer option did not select software");
+                "pre-game renderer option did not wrap to software");
+        drive_boot({0, starfox::input::left, 0});
+        require(boot_game.gpu_fast(),
+                "pre-game renderer option did not step back to GPU FAST");
         drive_boot({0, starfox::input::left, 0});
         require(boot_game.renderer_mode()
-                    == starfox::simulation::RendererMode::gpu,
-                "pre-game renderer option did not return to GPU");
+                    == starfox::simulation::RendererMode::gpu
+                    && boot_game.gpu_renderer()
+                        == starfox::simulation::GpuRenderer::accurate,
+                "pre-game renderer option did not return to GPU ACCURATE");
         drive_boot({0, starfox::input::down, 0});
         require(boot_game.pregame_selection() == 5U,
                 "pre-game cursor did not reach MSU-1 MUSIC");

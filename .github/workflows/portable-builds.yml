@@ -353,14 +353,11 @@ jobs:
             | jq -e '.CADisableMinimumFrameDurationOnPhone == true' >/dev/null
           [[ " $(lipo -archs "${binary}") " == *" arm64 "* ]]
           package="StarFoxEnhanced-0.0.8-ios-arm64-unsigned"
-          mkdir -p "${package}/Payload"
-          cp -R "${app}" "${package}/Payload/"
-          cp platform/apple/IOS_INSTALL.md "${package}/README.md"
-          ditto -c -k --sequesterRsrc --keepParent "${package}" "${package}.zip"
+          python3 tools/package_ios.py --app "${app}" --output "${package}.ipa"
       - uses: actions/upload-artifact@v4
         with:
           name: StarFoxEnhanced-0.0.8-ios-arm64-unsigned
-          path: StarFoxEnhanced-0.0.8-ios-arm64-unsigned.zip
+          path: StarFoxEnhanced-0.0.8-ios-arm64-unsigned.ipa
           if-no-files-found: error
       - name: Add to GitHub release
         if: github.event_name == 'push' || inputs.release_tag != ''
@@ -371,7 +368,7 @@ jobs:
         run: |
           tag="${REQUESTED_TAG:-${GITHUB_REF_NAME}}"
           gh release upload "${tag}" \
-            StarFoxEnhanced-0.0.8-ios-arm64-unsigned.zip --clobber
+            StarFoxEnhanced-0.0.8-ios-arm64-unsigned.ipa --clobber
 
   android-arm64:
     if: ${{ !inputs.quest_only }}
@@ -657,7 +654,7 @@ jobs:
         run: |
           cd packages
           shopt -s nullglob
-          assets=( *.zip *.apk )
+          assets=( *.zip *.apk *.ipa )
           if ((${#assets[@]} == 0)); then
             echo 'No verified release packages were produced.' >&2
             exit 1

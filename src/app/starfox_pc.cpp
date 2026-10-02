@@ -11604,7 +11604,9 @@ int main(int argc, char** argv) {
             const auto composite_superfx = [&framebuffer, viewport_origin, boss_roll,
                                                 &ppu,&resident_raster,&resident_layer,&superfx_frame,
                                                 &deferred_background,&late_cartridge,&background_cpu_coverage,&temporal_background,&dlss,
-                                                &software_reflections,&software_reflection_background,&window](
+                                                &software_reflections,&software_reflection_background,&window,
+                                                skip_empty_ink=game.gpu_fast()
+                                                    && !std::getenv("STARFOX_TEST_KEEP_EMPTY_HOST_INK")](
                                                const auto& source,
                                                std::int32_t offset_x,
                                                std::int32_t offset_y,
@@ -11649,6 +11651,10 @@ int main(int argc, char** argv) {
                     resident_layer=settings;framebuffer.begin_write_coverage();return;
                 }
                 if(auto* source_commands=source.command_buffer()) {
+                    // GPU FAST: an empty recording is a fully transparent
+                    // layer. Skip it, rather than replaying it into a fresh
+                    // stored-resolution CPU image or merging it on the GPU.
+                    if(skip_empty_ink && source_commands->commands.empty()) return;
                     auto* destination=late_cartridge && framebuffer.command_buffer()==&late_cartridge->pending
                         ?late_cartridge.get():deferred_background && framebuffer.command_buffer()==&deferred_background->pending
                         ?deferred_background.get():nullptr;

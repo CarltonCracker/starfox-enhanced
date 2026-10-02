@@ -131,16 +131,21 @@ dispatched over the whole output; *raster commands* are CPU-recorded
    one per model plus the layers. This is the target of Phase 1B.
 3. **Upload grows with output pixels: about 1.7 bytes per output pixel.**
    ORIGINAL LEVEL1_2 goes from 298 KiB per frame at 1× 16:9 to 4,948 KiB
-   at 4× 32:9. A temporary per-site trace (not committed) attributed
-   4,865 KiB/frame of ORIGINAL LEVEL1_2 at 4× 32:9 (Direct3D 12) to the
-   command upload in `GpuRaster::enqueue_commands`. Raster commands
-   themselves are 1.4 KB. The rest is CPU binning:
-   `RasterCommands::bin_rows()` builds per-row, per-64-pixel-tile command
-   lists on the CPU every frame for the scene's recorded raster layers, on
-   both drivers. A GPU binning path already exists (`STARFOX_TEST_GPU_BINS`,
-   used for Vulkan native raster) but scene raster draws do not use it. The
-   ORIGINAL LEVEL2_3 cutscene has no such layers, and its upload stays at
+   at 4× 32:9. Temporary traces (not committed) attributed 4,865 KiB/frame
+   of ORIGINAL LEVEL1_2 at 4× 32:9 (Direct3D 12) to the texel payload of the
+   scene's recorded raster layer. Its commands are 1.4 KB and already use
+   GPU binning. Almost all of the payload is one snapshot from
+   `composite_transparent_layer`: the 800×192 `superfx_hud` layer (cockpit
+   HUD lines, comms face, meters) is cleared and drawn on the CPU at stored
+   resolution (3200×768), then uploaded as pixels plus layer tags (2.4 MB
+   each) every gameplay frame. The remaining 64 KiB is a VRAM snapshot. The
+   ORIGINAL LEVEL2_3 cutscene has no gameplay HUD, and its upload stays at
    277 KiB at every scale.
+
+   *Correction:* the first version of this finding blamed per-frame CPU
+   binning (`RasterCommands::bin_rows()`). That was wrong. Scene raster
+   draws are created with `gpu_binning` set (`GpuSceneRecording::flush`).
+
 4. **Per-model mesh packing is small in the asteroid field.** In the same
    trace, all of LEVEL1_2's ~18 uploads per frame came from the whole-object
    billboard texture upload (`gpu_model.cpp`, ~18 KiB per frame in total).

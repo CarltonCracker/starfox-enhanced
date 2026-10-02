@@ -66,8 +66,8 @@ try {
                 $capture=Join-Path "$OutputDirectory/$experience-$level" "$experience-$level-$Ticks-60fps-${scale}x-$mode-presentation.bmp"
                 $header=[IO.File]::ReadAllBytes([IO.Path]::GetFullPath($capture))
                 if($header.Length -lt 26 -or $header[0] -ne 66 -or $header[1] -ne 77 -or
-                    [BitConverter]::ToInt32($header,18) -ne $expectedWidth -or
-                    [Math]::Abs([BitConverter]::ToInt32($header,22)) -ne 224) {
+                    [BitConverter]::ToInt32($header,18) -ne $expectedWidth*$scale -or
+                    [Math]::Abs([BitConverter]::ToInt32($header,22)) -ne 224*$scale) {
                     throw "Unexpected final presentation dimensions: $capture ($DisplayMode)"
                 }
             }}

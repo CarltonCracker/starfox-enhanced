@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_clip.hpp"
+#include "starfox/render/gpu_scene_counters.hpp"
 #if defined(STARFOX_SDL_GPU_EFFECTS)
 #include <SDL3/SDL.h>
 #include "shaders/generated/clip_portable.hpp"
@@ -138,7 +139,7 @@ void* GpuClip::enqueue(void* device,void* command,void* points,void* corners,
         SDL_PushGPUComputeUniformData(cmd,0,&uniforms,sizeof(uniforms));
         SDL_GPUStorageBufferReadWriteBinding binding{};binding.buffer=impl_->output;binding.cycle=true;
         if(trace) std::cerr<<"clip-enqueue: begin\n";
-        auto* pass=SDL_BeginGPUComputePass(cmd,nullptr,0,&binding,1);Impl::require(pass);
+        auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,&binding,1);Impl::require(pass);
         if(trace) std::cerr<<"clip-enqueue: bind pipeline\n";
         SDL_BindGPUComputePipeline(pass,continuous?impl_->continuous_pipeline:impl_->pipeline);
         SDL_GPUBuffer* inputs[]{static_cast<SDL_GPUBuffer*>(points),static_cast<SDL_GPUBuffer*>(corners),
@@ -220,7 +221,7 @@ void* GpuClip::enqueue_spans(void* command,void* materials,bool winding_independ
         // per terrain tile until submission completes (several GiB at 4x).
         bindings[0].buffer=impl_->spans;bindings[0].cycle=!reuse_span_scratch;
         bindings[1].buffer=impl_->masks;bindings[1].cycle=!copied;
-        auto* pass=SDL_BeginGPUComputePass(cmd,nullptr,0,bindings,2);Impl::require(pass);
+        auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,bindings,2);Impl::require(pass);
         SDL_BindGPUComputePipeline(pass,impl_->spans_pipeline);
         SDL_GPUBuffer* inputs[]{impl_->output,static_cast<SDL_GPUBuffer*>(materials),
             static_cast<SDL_GPUBuffer*>(order?order->indices:materials),

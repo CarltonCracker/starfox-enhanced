@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_model.hpp"
+#include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/packed_projection.hpp"
 #include "starfox/render/packed_faces.hpp"
 #include "starfox/render/gpu_bsp.hpp"
@@ -114,7 +115,7 @@ struct GpuModel::Impl {
         auto* copy=SDL_BeginGPUCopyPass(command);require(copy);
         for(unsigned i=0;i<2;++i) {
             SDL_GPUTransferBufferLocation from{axis_ray_upload,i?sizes[0]:0};
-            SDL_GPUBufferRegion to{axis_ray_buffers[i],0,sizes[i]};SDL_UploadToGPUBuffer(copy,&from,&to,true);
+            SDL_GPUBufferRegion to{axis_ray_buffers[i],0,sizes[i]};scene_counters::upload_buffer(copy,&from,&to,true);
         }
         SDL_EndGPUCopyPass(copy);
         if(vertices.continuous) out.points=axis_ray_projection.enqueue_continuous(device,command,axis_ray_buffers[0],Uint32(point_count),axis_ray_buffers[1],Uint32(pose_count),&out.residuals);
@@ -179,11 +180,11 @@ struct GpuModel::Impl {
         auto* cmd=static_cast<SDL_GPUCommandBuffer*>(command);
         auto* copy=SDL_BeginGPUCopyPass(cmd);require(copy);
         SDL_GPUTransferBufferLocation from{upload,0};SDL_GPUBufferRegion to{buffers[9],0,bytes};
-        SDL_UploadToGPUBuffer(copy,&from,&to,true);
+        scene_counters::upload_buffer(copy,&from,&to,true);
         if(depth) {
             SDL_GPUTransferBufferLocation plane_from{upload,bytes};
             SDL_GPUBufferRegion plane_to{geometry_planes,0,16};
-            SDL_UploadToGPUBuffer(copy,&plane_from,&plane_to,true);
+            scene_counters::upload_buffer(copy,&plane_from,&plane_to,true);
         }
         SDL_EndGPUCopyPass(copy);
         if(!billboard_pipeline) {
@@ -237,7 +238,7 @@ struct GpuModel::Impl {
         config.material={texture->u_mask,texture->v_mask,settings.colour_index_base,pose.palette_override?256U+*pose.palette_override:0U};
         SDL_PushGPUComputeUniformData(cmd,0,&config,sizeof(config));
         SDL_GPUStorageBufferReadWriteBinding binding{};binding.buffer=billboard_spans;binding.cycle=true;
-        auto* pass=SDL_BeginGPUComputePass(cmd,nullptr,0,&binding,1);require(pass);
+        auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,&binding,1);require(pass);
         SDL_BindGPUComputePipeline(pass,billboard_pipeline);SDL_DispatchGPUCompute(pass,(rows+63)/64,1,1);SDL_EndGPUComputePass(pass);
         const GpuGeometryDepthInput plane{geometry_planes,1,float(settings.focal_length*scale),float(settings.focal_length*scale),float(pose.vanish_x*scale),float(pose.vanish_y*scale),true};
         // Sprites remain unlit; their plane identifier is only a temporal guide.
@@ -294,7 +295,7 @@ struct GpuModel::Impl {
         SDL_GPUStorageBufferReadWriteBinding bindings[2]{};
         bindings[0].buffer=surface_materials;bindings[1].buffer=geometry_planes;
         bindings[0].cycle=bindings[1].cycle=true;
-        auto* pass=SDL_BeginGPUComputePass(command,nullptr,0,bindings,2);require(pass);
+        auto* pass=scene_counters::begin_compute_pass(command,nullptr,0,bindings,2);require(pass);
         SDL_BindGPUComputePipeline(pass,surface_pipeline);
         SDL_GPUBuffer* inputs[]{static_cast<SDL_GPUBuffer*>(camera),buffers[6],buffers[7],buffers[8],buffers[11]};
         SDL_BindGPUComputeStorageBuffers(pass,0,inputs,5);SDL_DispatchGPUCompute(pass,(settings.count+31)/32,1,1);SDL_EndGPUComputePass(pass);
@@ -504,7 +505,7 @@ GpuRasterOutput GpuModel::enqueue(void* device,void* command,const assets::Shape
         SDL_UnmapGPUTransferBuffer(next,impl_->upload);
         auto* cmd=static_cast<SDL_GPUCommandBuffer*>(command);auto* copy=SDL_BeginGPUCopyPass(cmd);Impl::require(copy);offset=0;
         for(unsigned i=0;i<sizes.size();++i){
-            if(sizes[i]){SDL_GPUTransferBufferLocation from{impl_->upload,offset};SDL_GPUBufferRegion to{impl_->buffers[i],0,sizes[i]};SDL_UploadToGPUBuffer(copy,&from,&to,true);}
+            if(sizes[i]){SDL_GPUTransferBufferLocation from{impl_->upload,offset};SDL_GPUBufferRegion to{impl_->buffers[i],0,sizes[i]};scene_counters::upload_buffer(copy,&from,&to,true);}
             offset+=sizes[i];
         }
         SDL_EndGPUCopyPass(copy);const auto& b=impl_->buffers;void* camera=nullptr;

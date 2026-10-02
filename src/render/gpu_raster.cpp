@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_raster.hpp"
+#include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/temporal_jitter.hpp"
 #include <cstring>
 #include <bit>
@@ -246,6 +247,8 @@ struct GpuRaster::Impl {
         const void* data[]{batch.commands.data(),batch.rows.data(),batch.indices.data(),batch.texels.data()};
         const std::size_t bytes[]{batch.commands.size()*sizeof(RasterCommand),gpu_bins?0:batch.rows.size()*4,
             gpu_bins?0:batch.indices.size()*4,batch.texels.size()};
+        scene_counters::add(scene_counters::Counter::raster_commands,batch.commands.size());
+        scene_counters::add(scene_counters::Counter::raster_bytes,bytes[0]);
         Uint32 offsets[4]{},lengths[4]{};std::uint64_t total=0;
         for(unsigned i=0;i<4;++i) {
             // GPU bin passes initialize these buffers completely. They need
@@ -273,7 +276,7 @@ struct GpuRaster::Impl {
         for(unsigned i=0;i<4;++i) {
             if(lengths[i]==0) continue;
             SDL_GPUTransferBufferLocation source{upload,offsets[i]};SDL_GPUBufferRegion destination{buffers[i],0,lengths[i]};
-            SDL_UploadToGPUBuffer(copy,&source,&destination,true);
+            scene_counters::upload_buffer(copy,&source,&destination,true);
         }
         SDL_EndGPUCopyPass(copy);
         if(gpu_bins) {
@@ -282,7 +285,7 @@ struct GpuRaster::Impl {
                 bins[0].cycle=bins[1].cycle=stage==0;
                 const Uint32 config[]{batch.width(),batch.height(),Uint32(batch.commands.size()),stage};
                 SDL_PushGPUComputeUniformData(command,0,config,sizeof(config));
-                auto* bin_pass=SDL_BeginGPUComputePass(command,nullptr,0,bins,2);require_raster(bin_pass);
+                auto* bin_pass=scene_counters::begin_compute_pass(command,nullptr,0,bins,2);require_raster(bin_pass);
                 SDL_BindGPUComputePipeline(bin_pass,bins_pipeline);SDL_BindGPUComputeStorageBuffers(bin_pass,0,buffers,1);
                 const auto work=stage==0?Uint32(tiles+1):stage==3?1U:
                     (stage==2 || stage==4)?Uint32(tiles):Uint32(batch.commands.size()*8);
@@ -294,10 +297,11 @@ struct GpuRaster::Impl {
         buffer(6,16);
         SDL_GPUStorageBufferReadWriteBinding outputs[3]{};outputs[0].buffer=buffers[4];outputs[1].buffer=buffers[5];outputs[2].buffer=buffers[6];
         outputs[0].cycle=outputs[1].cycle=outputs[2].cycle=true;
-        auto* pass=SDL_BeginGPUComputePass(command,nullptr,0,outputs,3);require_raster(pass);
+        auto* pass=scene_counters::begin_compute_pass(command,nullptr,0,outputs,3);require_raster(pass);
         SDL_GPUBuffer* inputs[]{buffers[0],buffers[1],buffers[2],buffers[3],buffers[0],buffers[0],buffers[0],buffers[0]};
         SDL_BindGPUComputePipeline(pass,pipeline);SDL_BindGPUComputeStorageBuffers(pass,0,inputs,8);
         SDL_DispatchGPUCompute(pass,(output_width+63)/64,output_height,1);SDL_EndGPUComputePass(pass);
+        scene_counters::add(scene_counters::Counter::full_frame_dispatches);
         width=output_width;height=output_height;resident_surfaces=keep_surfaces;
         if(borrowed) {command=nullptr;++generation;return;}
         if(frame) {
@@ -474,7 +478,7 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
             // Queue ordering permits reuse; cycling here retains one large
             // bin allocation for every terrain patch in a submitted frame.
             bindings[0].cycle=bindings[1].cycle=false;
-            auto* bin_pass=SDL_BeginGPUComputePass(cmd,nullptr,0,bindings,2);require_raster(bin_pass);
+            auto* bin_pass=scene_counters::begin_compute_pass(cmd,nullptr,0,bindings,2);require_raster(bin_pass);
             SDL_BindGPUComputePipeline(bin_pass,impl_->bins_pipeline);
             auto* input=static_cast<SDL_GPUBuffer*>(spans);SDL_BindGPUComputeStorageBuffers(bin_pass,0,&input,1);
             SDL_DispatchGPUCompute(bin_pass,(Uint32(tiles)+63)/64,1,1);SDL_EndGPUComputePass(bin_pass);
@@ -496,7 +500,7 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
         // Fused draws alternate two non-aliasing renderers. The previous
         // contents have already been consumed before this ordered write.
         outputs[0].cycle=outputs[1].cycle=outputs[2].cycle=background==nullptr;
-        auto* pass=SDL_BeginGPUComputePass(cmd,nullptr,0,outputs,3);require_raster(pass);
+        auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,outputs,3);require_raster(pass);
         SDL_BindGPUComputePipeline(pass,impl_->pipeline);
         // Bins are unused for row spans. For solid-only input, texels also
         // bind an existing read-only buffer rather than an empty placeholder.
@@ -509,6 +513,7 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
             background && background->geometry_depth?static_cast<SDL_GPUBuffer*>(background->geometry_depth):source};
         SDL_BindGPUComputeStorageBuffers(pass,0,inputs,8);
         SDL_DispatchGPUCompute(pass,(outputWidth+63)/64,outputHeight,1);SDL_EndGPUComputePass(pass);
+        scene_counters::add(scene_counters::Counter::full_frame_dispatches);
         impl_->status="GPU-generated row spans rasterized resident";
         return {device,impl_->buffers[4],output_surfaces?impl_->buffers[5]:nullptr,outputWidth,outputHeight,++impl_->generation,
             output_depth?impl_->buffers[6]:nullptr};

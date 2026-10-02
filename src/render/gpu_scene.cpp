@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_scene.hpp"
+#include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/temporal_jitter.hpp"
 #include "starfox/render/gpu_model.hpp"
 #include "starfox/render/gpu_projection.hpp"
@@ -385,7 +386,7 @@ struct GpuScene::Impl {
         std::memcpy(mapped,source.triangles.data(),bytes);SDL_UnmapGPUTransferBuffer(device,ray_upload);
         auto* copy=SDL_BeginGPUCopyPass(command);require(copy);
         SDL_GPUTransferBufferLocation from{ray_upload,0};SDL_GPUBufferRegion to{found->buffer,0,Uint32(bytes)};
-        SDL_UploadToGPUBuffer(copy,&from,&to,false);SDL_EndGPUCopyPass(copy);
+        scene_counters::upload_buffer(copy,&from,&to,false);SDL_EndGPUCopyPass(copy);
         }
         GpuRayGeometrySettings settings;settings.triangles=Uint32(source.triangles.size());
         settings.points=source.point_count;settings.mode=source.mode;
@@ -417,7 +418,7 @@ struct GpuScene::Impl {
                 std::memcpy(data,source.material_topology.data(),bytes);SDL_UnmapGPUTransferBuffer(device,ray_material_upload);
                 auto* copy=SDL_BeginGPUCopyPass(command);require(copy);
                 SDL_GPUTransferBufferLocation from{ray_material_upload,0};SDL_GPUBufferRegion to{ray_material_topology,0,Uint32(bytes)};
-                SDL_UploadToGPUBuffer(copy,&from,&to,true);SDL_EndGPUCopyPass(copy);
+                scene_counters::upload_buffer(copy,&from,&to,true);SDL_EndGPUCopyPass(copy);
                 const GpuRayMaterialTarget material_target{ray_vertices,ray_capacity,ray_material_offset+ray_vertex_count/3*64U,false};
                 const GpuRayMaterialLookup material_lookup{source.material_lookup,source.material_lookup_count};
                 auto* packed=static_cast<SDL_GPUBuffer*>(ray_expander.enqueue_materials(device,command,ray_material_topology,
@@ -551,7 +552,7 @@ GpuRasterOutput GpuScene::enqueue(void* command,const GpuRasterOutput& front,con
         // copy for every model/layer (especially costly at 4×).
         const bool cycle=!impl_->batch_encoding || !impl_->batch_slot_written[slot];
         outputs[0].cycle=outputs[1].cycle=outputs[2].cycle=outputs[3].cycle=cycle;
-        auto* pass=SDL_BeginGPUComputePass(cmd,nullptr,0,outputs,4);Impl::require(pass);SDL_BindGPUComputePipeline(pass,impl_->pipeline);
+        auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,outputs,4);Impl::require(pass);SDL_BindGPUComputePipeline(pass,impl_->pipeline);
         SDL_GPUBuffer* inputs[]{static_cast<SDL_GPUBuffer*>(front.pixels),static_cast<SDL_GPUBuffer*>(front.surfaces?front.surfaces:front.pixels),
             static_cast<SDL_GPUBuffer*>(back?back->pixels:front.pixels),static_cast<SDL_GPUBuffer*>(back && back->surfaces?back->surfaces:front.pixels),
             static_cast<SDL_GPUBuffer*>(front.geometry_depth?front.geometry_depth:front.pixels),
@@ -559,6 +560,7 @@ GpuRasterOutput GpuScene::enqueue(void* command,const GpuRasterOutput& front,con
             static_cast<SDL_GPUBuffer*>(front.motion?front.motion:front.pixels),
             static_cast<SDL_GPUBuffer*>(back && back->motion?back->motion:front.pixels)};
         SDL_BindGPUComputeStorageBuffers(pass,0,inputs,8);SDL_DispatchGPUCompute(pass,(Uint32(count)+63)/64,1,1);SDL_EndGPUComputePass(pass);
+        scene_counters::add(scene_counters::Counter::full_frame_dispatches);
         if(impl_->batch_encoding) impl_->batch_slot_written[slot]=true;
         impl_->status="GPU scene painter merge resident";
         return {front.device,impl_->pixels[slot],surface?impl_->surfaces[slot]:nullptr,width,height,++impl_->generation,
@@ -681,6 +683,7 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
             GpuRasterOutput front{};
             bool world_sprite=false;
             if(const auto* model=std::get_if<GpuModelDraw>(&draw)) {
+                scene_counters::add(scene_counters::Counter::model_draws);
                 const auto scale=model->settings.render_scale;
                 auto& renderer=impl_->models[model_slot];model_slot^=1U;
                 const bool custom=model->logical_viewport[0]!=0;

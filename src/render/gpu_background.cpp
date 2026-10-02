@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_background.hpp"
+#include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/temporal_jitter.hpp"
 #include <algorithm>
 #include <array>
@@ -113,7 +114,7 @@ GpuRasterOutput GpuBackground::enqueue(void* device,void* command,const simulati
         auto* cmd=static_cast<SDL_GPUCommandBuffer*>(command);
         auto* copy=SDL_BeginGPUCopyPass(cmd);Impl::require(copy);
         SDL_GPUTransferBufferLocation from{impl_->upload,0};SDL_GPUBufferRegion to{impl_->memory,0,upload_bytes};
-        SDL_UploadToGPUBuffer(copy,&from,&to,true);SDL_EndGPUCopyPass(copy);
+        scene_counters::upload_buffer(copy,&from,&to,true);SDL_EndGPUCopyPass(copy);
         if(s.layer==2) {
             impl_->initialize_bg2();
             const unsigned flags=(s.extend_horizontal?1U:0U)|(s.wrap_horizontal?2U:0U)
@@ -138,7 +139,7 @@ GpuRasterOutput GpuBackground::enqueue(void* device,void* command,const simulati
                 SDL_GPUStorageBufferReadWriteBinding outputs[2]{};
                 outputs[0].buffer=impl_->pixels;outputs[1].buffer=impl_->prepared;
                 outputs[0].cycle=outputs[1].cycle=phase==0;
-                auto* pass=SDL_BeginGPUComputePass(cmd,nullptr,0,outputs,2);Impl::require(pass);
+                auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,outputs,2);Impl::require(pass);
                 SDL_BindGPUComputePipeline(pass,impl_->bg2_pipeline);SDL_BindGPUComputeStorageBuffers(pass,0,&impl_->memory,1);
                 SDL_DispatchGPUCompute(pass,phase?(logical_width+63)/64:1,1,1);SDL_EndGPUComputePass(pass);
             }
@@ -165,7 +166,7 @@ GpuRasterOutput GpuBackground::enqueue(void* device,void* command,const simulati
             std::bit_cast<std::int32_t>(s.raster_jitter[0]),std::bit_cast<std::int32_t>(s.raster_jitter[1])};
         SDL_PushGPUComputeUniformData(cmd,0,constants.data(),sizeof(constants));
         SDL_GPUStorageBufferReadWriteBinding output{};output.buffer=impl_->pixels;output.cycle=true;
-        auto* pass=SDL_BeginGPUComputePass(cmd,nullptr,0,&output,1);Impl::require(pass);
+        auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,&output,1);Impl::require(pass);
         SDL_BindGPUComputePipeline(pass,impl_->pipeline);
         SDL_BindGPUComputeStorageBuffers(pass,0,&impl_->memory,1);
         SDL_DispatchGPUCompute(pass,(width+7)/8,(height+7)/8,1);SDL_EndGPUComputePass(pass);

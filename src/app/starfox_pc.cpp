@@ -37,6 +37,7 @@
 #include "starfox/render/vulkan_hardware_rt.hpp"
 #include "starfox/render/gpu_raster.hpp"
 #include "starfox/render/gpu_scene.hpp"
+#include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/gpu_effects.hpp"
 #include "starfox/render/gpu_fsr1.hpp"
 #include "starfox/render/sdl_gpu_effects.hpp"
@@ -13039,6 +13040,8 @@ int main(int argc, char** argv) {
                         << '/' << unsigned(circle.affected_layers) << '\n';
                 }
             }
+            starfox::render::scene_counters::end_frame(std::cerr,presented_frames,
+                presented_frames>=profile_warmup);
             ++presented_frames;
 #if defined(__ANDROID__)
             if (game.renderer_mode() == starfox::simulation::RendererMode::gpu
@@ -13065,6 +13068,7 @@ int main(int argc, char** argv) {
                         <<" present="<<f[7]<<" bg="<<f[8]<<" flow="<<f[9]<<" terrain-batches="<<f[10]
                         <<" scene-retire="<<f[11]<<" scene-encode="<<f[12]<<" scene-submit="<<f[13]<<" draws="<<f[14]<<'\n';
                 }
+                starfox::render::scene_counters::print_summary(std::cerr);
                 if(capture_results && !results_capture_ready)
                     throw std::runtime_error("Results capture deadline reached without a visible completed tally");
                 if(results_capture_ready) std::cerr<<"results-capture: frame="<<presented_frames

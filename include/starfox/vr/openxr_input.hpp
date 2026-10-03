@@ -1,7 +1,10 @@
 #pragma once
 #include <openxr/openxr.h>
 #include "starfox/simulation/rumble_sequencer.hpp"
+#include "starfox/vr/system_layer.hpp"
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <string>
 #include <optional>
@@ -26,8 +29,17 @@ struct InputApi {
 struct VrControls {
     XrVector2f steer{};
     bool fire{},bomb{},boost{},brake{},menu{},menu_pressed{},roll_left{},roll_right{};
-    bool select{},select_pressed{};
-    bool stick_left{},stick_right{},reset_pressed{};
+    // `select` / `select_pressed` are the L View *short press*: a one-poll tap
+    // reported on release (see SystemLayer). `view_down` is the raw level.
+    bool select{},select_pressed{},view_down{};
+    bool stick_left{},stick_right{};
+    // Non-Frame targets keep the original four-input reset chord (both
+    // bumpers/triggers plus both stick clicks).
+    bool reset_pressed{};
+    // System layer one-shots (standard section 1), Steam Frame only. The recentre events are
+    // applied by the application at the next stereo frame boundary;
+    // recentre_height_pressed also recalibrates standing height.
+    bool recentre_pressed{},recentre_height_pressed{},menu_chord_pressed{};
     std::uint32_t active_actions{};
     // Physical menu confirmation is independent of gameplay fire on Frame.
     bool menu_confirm{},menu_confirm_active{};
@@ -61,20 +73,40 @@ inline void desktop_face_buttons(VrControls& controls,bool steam_frame,
 
 // SDL's level-state sampler also runs while the XR session is unfocused; the
 // caller discards those controls but retains these edge states for resume.
+// With the system layer (Steam Frame only) the View short/hold and Menu+View
+// chord timing matches the OpenXR path. Without it, every other target keeps its
+// original behaviour: Select on the press edge and the four-input chord resets
+// the game (the application still opens its menu from Menu+Select edges).
 class DesktopControlEdges {
 public:
-    [[nodiscard]] VrControls sample(VrControls controls) noexcept {
+    explicit DesktopControlEdges(bool system_layer=false) noexcept
+        : system_layer_(system_layer) {}
+    [[nodiscard]] VrControls sample(VrControls controls,
+        double now=SystemLayer::steady_seconds()) noexcept {
         controls.menu_pressed=controls.menu&&!menu_;
-        controls.select_pressed=controls.select&&!select_;
-        const bool reset=controls.roll_left&&controls.roll_right
-            &&controls.stick_left&&controls.stick_right;
-        controls.reset_pressed=reset&&!reset_;
-        menu_=controls.menu;select_=controls.select;reset_=reset;
+        menu_=controls.menu;
+        if(!system_layer_) {
+            controls.select_pressed=controls.select&&!select_;
+            const bool reset=controls.roll_left&&controls.roll_right
+                &&controls.stick_left&&controls.stick_right;
+            controls.reset_pressed=reset&&!reset_;
+            select_=controls.select;reset_=reset;
+            return controls;
+        }
+        const bool view=controls.select;
+        const auto events=system_.update(view,controls.menu,now);
+        controls.view_down=view;
+        controls.select=controls.select_pressed=events.view_tap;
+        controls.recentre_pressed=events.recentre||events.recentre_height;
+        controls.recentre_height_pressed=events.recentre_height;
+        controls.menu_chord_pressed=events.open_menu;
         return controls;
     }
-    void reset() noexcept {menu_=select_=reset_=false;}
+    void reset() noexcept {menu_=select_=reset_=false;system_.reset();}
 private:
+    bool system_layer_{};
     bool menu_{},select_{},reset_{};
+    SystemLayer system_;
 };
 
 class OpenXrInput {
@@ -91,13 +123,24 @@ public:
     void set_frame_player(bool enabled) noexcept {frame_player_=enabled;}
     [[nodiscard]] bool frame_player() const noexcept {return frame_player_;}
     bool initialize(XrInstance,XrSession,bool frame_interaction_enabled=false);
-    bool poll(bool focused);
+    // `now` is monotonic seconds for the View hold timing; tests inject it.
+    bool poll(bool focused,double now=SystemLayer::steady_seconds());
+    // Steam Frame system layer (View hold recentre, Menu+View chord, haptic
+    // buzz). Off by default, which keeps the original grip/reset-chord input.
+    void set_system_layer(bool enabled) noexcept {system_layer_=enabled;}
+    [[nodiscard]] bool system_layer() const noexcept {return system_layer_;}
     [[nodiscard]] bool focused() const noexcept {return focused_;}
     // The authored dual-band sample maps to XR's single actuator channel by
     // max(low, high), with an unspecified frequency and the native 40 ms pulse.
     bool apply_haptics(const starfox::simulation::RumbleEffect&) noexcept;
     void stop_haptics() noexcept;
     [[nodiscard]] bool haptics_available() const noexcept;
+    // User strength 0..1, applied to every OpenXR haptic output. 1 (the default)
+    // leaves haptics as they were; the Steam Frame menu default is 0.6.
+    void set_haptics_strength(float strength) noexcept {
+        haptics_strength_=std::isfinite(strength)?std::clamp(strength,0.F,1.F):1.F;
+    }
+    [[nodiscard]] float haptics_strength() const noexcept {return haptics_strength_;}
     std::array<std::optional<XrPosef>,2> aim_poses(XrSpace base,XrTime time) const noexcept;
     void close() noexcept;
     const VrControls& controls() const noexcept {return controls_;}
@@ -111,9 +154,15 @@ private:
     std::array<XrPath,4> haptic_profiles_{};
     std::array<bool,2> haptic_bound_hands_{},haptic_started_hands_{};
     std::uint32_t haptic_profile_count_{};
-    VrControls controls_{};bool menu_armed_{},select_armed_{};
+    // System haptic: 0.6 amplitude, 80 ms, both hands, scaled by the strength
+    // setting. Not tracked as started rumble, so gameplay stop calls leave it.
+    void pulse_system() noexcept;
+    VrControls controls_{};bool menu_armed_{},select_armed_{},reset_armed_{};
     bool frame_player_{};
-    bool reset_armed_{},focused_{};
+    bool system_layer_{};
+    SystemLayer system_;
+    float haptics_strength_{1.F};
+    bool focused_{};
     std::string status_;
 };
 }

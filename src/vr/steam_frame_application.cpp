@@ -497,6 +497,7 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
     }
     starfox::vr::OpenXrInput input;
     input.set_frame_player(true);
+    input.set_system_layer(true);
     if(!input.initialize(runtime.instance(),session.handle(),
         runtime.supports_frame_controller_interaction())) {
         std::cerr<<input.status()<<'\n';return 5;
@@ -787,7 +788,7 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
     if(startup.open && !preferences_path.empty()) try {
         if(std::filesystem::exists(preferences_path)) {
             const auto size=std::filesystem::file_size(preferences_path);
-            if((size!=16 && size!=20 && size!=26 && size!=27)
+            if((size!=16 && size!=20 && size!=26 && size!=27 && size!=28)
                 || !startup.restore_preferences(starfox::state::read_file(preferences_path)))
                 std::cerr<<"Invalid VR preferences; using defaults\n";
         }
@@ -807,11 +808,24 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
     const LiveGame* last_render_game{};
     std::optional<unsigned> startup_revision;
     auto last_profile=std::chrono::steady_clock::now();
+    std::optional<std::chrono::steady_clock::time_point> exit_requested_at;
     FrameWait frame_wait;
     while((!host.frame_limit || submitted<host.frame_limit)
           && (host.time_limit.count()==0 || std::chrono::steady_clock::now()-started<host.time_limit)
           && !session.exit_requested()) {
-        if((startup.exit_requested && !renderer.frame_pending()) || (host.stop_requested && host.stop_requested())) {cancelled=true;break;}
+        if(host.stop_requested && host.stop_requested()) {cancelled=true;break;}
+        if(startup.exit_requested && !renderer.frame_pending()) {
+            // Quit to Steam: end the OpenXR session through the runtime
+            // (STOPPING -> xrEndSession -> EXITING) and leave once it reports
+            // exit; the bounded wait covers a runtime that never answers.
+            const auto now=std::chrono::steady_clock::now();
+            if(!exit_requested_at) {
+                if(!session.request_exit()) std::cerr<<session.status()<<'\n';
+                exit_requested_at=now;
+            } else if(session.exit_requested() || now-*exit_requested_at>std::chrono::seconds(2)) {
+                cancelled=true;break;
+            }
+        }
         renderer.set_head_translation(startup.presentation.translation_scale());
         const auto result=renderer.step_async([&](unsigned eye,uint32_t image,const auto& tracking_camera,XrTime time) {
             if(!input_time || time!=*input_time) {
@@ -821,6 +835,7 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
                 if(parked_game) {preview_game=std::move(live);live=std::move(parked_game);}
                 const bool session_focused=session.state()==XR_SESSION_STATE_FOCUSED;
                 if(!input.poll(session_focused)) return starfox::vr::StereoRenderer::EyeResult::failed;
+                input.set_haptics_strength(startup.haptics_strength());
                 const bool input_focused=input.focused();
                 const auto desktop_sample=host.desktop_controls
                     ? host.desktop_controls() : starfox::vr::VrControls{};
@@ -834,7 +849,10 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
                 if(live) try {
                     const auto profile_start=std::chrono::steady_clock::now();
                     const bool focused=input_focused;
-                    if(focused && controls.reset_pressed) {
+                    // Frame: the RESET GAME menu row. Elsewhere: the four-input chord.
+                    bool reset_game=false;
+                    if(startup.reset_requested) {startup.reset_requested=false;reset_game=focused;}
+                    if(reset_game) {
                         sandbox.cancel();
                         auto restarted=bundle?std::make_unique<LiveGame>(
                             starfox::assets::RomImage(initial_extended?bundle->starfox_ex_rom:bundle->original_rom),
@@ -851,8 +869,10 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
                         startup.selected_level=0;++startup.revision;startup_release=true;
                         sprite_revision.reset();uploaded_backgrounds.clear();uploaded_sprites.clear();
                     }
-                    if(focused && !startup.open && !startup_release && controls.menu && controls.select
-                        && (controls.menu_pressed || controls.select_pressed)) {
+                    // Frame: Menu + View held 0.5 s (SystemLayer) opens this port's own
+                    // runtime menu, which is its VR settings; it never leaves the app.
+                    const bool open_chord=controls.menu_chord_pressed;
+                    if(focused && !startup.open && !startup_release && open_chord) {
                         startup.language=live->game.language();startup.god_mode=live->game.god_mode();
                         startup.default_laser=live->game.default_laser();
                         startup.msu_available=live->game.msu1_available();startup.msu_music=live->game.msu1_music();
@@ -870,6 +890,12 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
                     if(recenter_revision!=startup.recenter_revision) {
                         recenter_revision=startup.recenter_revision;
                         renderer.request_recenter();ui_anchor.reset();
+                    }
+                    if(focused && controls.recentre_pressed) {
+                        // L View hold: 1 s recentres yaw and horizontal position
+                        // (height kept); 3 s also recalibrates height. Applied at
+                        // the next stereo frame boundary like the menu row.
+                        renderer.request_recenter(controls.recentre_height_pressed);ui_anchor.reset();
                     }
                     if(was_menu && (!startup.open || startup.exit_requested) && !preferences_path.empty()
                         && startup.preferences()!=saved_preferences) try {
@@ -1680,6 +1706,7 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
         // wait. Do not add another fixed millisecond after it.
         else if(!draw.pending()) frame_wait.pause();
     }
+    if(startup.exit_requested) cancelled=true; // Quit to Steam is a clean cancel.
     if(!cancelled && host.frame_limit && submitted<host.frame_limit) {std::cerr<<"Eye rendering diagnostic incomplete: "<<submitted<<"/"<<host.frame_limit<<" stereo frames\n";return 8;}
     if(!cancelled && live && !live->logic_ticks) {std::cerr<<"Live game diagnostic never advanced a focused source tick\n";return 8;}
     std::cout<<"Submitted "<<submitted<<" fenced stereo "<<(render_game?"live game models":render_model?"cartridge model":render_triangle?"triangle":"clear")<<" frames. Experimental presentation; parity incomplete.\n";

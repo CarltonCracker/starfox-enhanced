@@ -34,6 +34,11 @@ std::filesystem::path executable_directory(const char* argv0) {
 }
 #endif
 
+#if defined(STARFOX_STEAM_FRAME)
+constexpr bool steam_frame_player=true;
+#else
+constexpr bool steam_frame_player=false;
+#endif
 class DesktopGamepad {
 public:
     DesktopGamepad() {
@@ -121,7 +126,7 @@ public:
     }
 private:
     bool initialized_{},rumbling_{};
-    starfox::vr::DesktopControlEdges edges_;
+    starfox::vr::DesktopControlEdges edges_{steam_frame_player};
     SDL_Gamepad* gamepad_{};
 };
 }

@@ -121,6 +121,12 @@ set(STARFOX_RETAIL_GERMANY_V10_PATCH_FILE
     "${CMAKE_CURRENT_SOURCE_DIR}/assets/patches/retail-germany-v10-to-usa-v12.bps")
 
 include(FetchContent)
+if(APPLE AND (STARFOX_BUILD_RUNTIME OR STARFOX_BUILD_VR))
+    # SDL enables Objective-C++ for its Apple sources. Enable it in the root
+    # project first so newer CMake versions publish compiler rules to this
+    # directory before SDL's nested project configures.
+    enable_language(OBJCXX)
+endif()
 if(STARFOX_BUILD_VR)
     include(cmake/OpenXR.cmake)
 endif()

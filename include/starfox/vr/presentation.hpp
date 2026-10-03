@@ -23,6 +23,16 @@ inline Matrix4 multiply_matrix(const Matrix4& a,const Matrix4& b) noexcept {
         for(unsigned k=0;k<4;++k) out[c*4+r]+=a[k*4+r]*b[c*4+k];
     return out;
 }
+// Seat in the cutscene Arwing's canopy, ~0.3 m above its top, in the scaled
+// ship reference; saved offsets remain additive.
+inline constexpr std::array<float,3> cockpit_seat_m{0.F,.95F,.75F};
+// The cabin encloses the live ship enlarged to pilot size. The world shares
+// that enlargement so the native ship, its shots and the scenery match the
+// cabin; world_scale stays a multiplier on top.
+inline constexpr float cockpit_ship_scale=24.F; // ~9.4 m Arwing; the cabin fits inside the fuselage
+inline float cockpit_world_scale(const PresentationPreferences& preferences) noexcept {
+    return preferences.scale()*cockpit_ship_scale;
+}
 inline constexpr float interface_panel_distance=1.75F;
 inline constexpr float interface_panel_width=1.15F;
 // Initial comfort value, not tuned on hardware yet. Keep the original angular size.

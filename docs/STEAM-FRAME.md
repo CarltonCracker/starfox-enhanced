@@ -114,6 +114,7 @@ The Frame's runtime menu has a VR PRESENTATION page. Settings are saved in
 | Camera | Existing (default) or pilot, with X, Y, Z cockpit offsets in centimetres |
 | World scale | Bounded range, cockpit offsets stay in real centimetres |
 | Head translation | 0, 50, 100, 150 or 200%. Changes the head centre only, so IPD is untouched |
+| Follow ship rotation | Off by default. Only does anything in the pilot view |
 
 Profiling is opt-in. `--profile-csv FILE` writes one row per submitted stereo
 frame (host cadence, CPU stage times, per-eye submit-to-fence time, and Vulkan
@@ -161,6 +162,24 @@ never plays both. It only runs for Original with the rumble setting on. EX has
 no authored rumble. With no output to send to, the registers aren't touched, so
 game state is the same as the flat build.
 
+The cockpit view uses the cartridge's own COCKPIT geometry, decoded from your
+asset bundle at runtime (122 triangles, with a topology check before my
+materials go on), so no Nintendo geometry is in the repo. The rear of the cabin
+is authored by me as OBJ files in `assets/vr/cockpit-c`, turned into
+`src/vr/cockpit_assets.inc` by `tools/generate_cockpit_assets.py` (a test
+checks it's current). The pilot sits in the cutscene Arwing (`MY_DEMOS`) at
+24x, with the world scaled to match. The seat position is a fit I tuned by
+hand, not where the original game puts the camera.
+
+With Follow ship rotation on, steering is relative to the view. Once per logic
+tick I project the world X/Y plane through the same ship basis the view uses
+and pick the closest of the eight directions, so left on the stick stays left
+when you're banked 90 degrees. Turning also felt jerky, because the source
+moves in steps every 20 Hz tick. In pilot view the camera now follows a
+quadratic B-spline through the last three ticks (about half a tick behind), and
+Follow's rotation eases toward its target with a 0.1 s time constant and a 90
+degree cap, so fast barrel rolls keep their direction.
+
 ## Files outside src/vr
 
 Flat builds shouldn't change, apart from the items marked below.
@@ -187,6 +206,9 @@ rumble actions, `OpenXrRuntime::set_frame_extensions` enables the two Frame
 extensions, and `source_ui_text_packet` only draws ( ) + for the Frame menu.
 `starfox_pcvr` has no profiling options and finds its folders the way it did.
 
+`set_inset_decals` switches on the inset-sign decal rule, and only the Frame
+loop calls it. `C_TYPE` is optional in the scene symbols.
+
 ## What I've tested
 
 Host side, the ctest suite passes on macOS apart from a few tests that already
@@ -207,9 +229,17 @@ buttons respond, that the gameplay HUD is fine without the black backing, that
 Original's authored rumble reacts to boosting and destroying things, and that
 the closer HUD fixes the ship-over-HUD problem.
 
+The tower logo decal fix looked stable. Follow ship rotation was rough and hard
+to steer when banked at first, and with the view-relative steering and the
+smoothing it feels good now. I've worn the cockpit view too. The cockpit
+geometry and input tests need your own Original and EX bundles, so CI doesn't
+run them.
+
 ## Known limitations
 
 You need your own ROM and a devkit-enabled Frame, and there's no store
 packaging. I haven't measured frame times on the device. The profiler is there
 for that, but I haven't captured a run, and I haven't compared against Proton
 or FEX.
+
+The cockpit is new, and other people may want the seat position adjusted.

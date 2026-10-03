@@ -2,6 +2,7 @@
 #include "starfox/vr/stereo_renderer.hpp"
 #include "starfox/vr/frame_menu.hpp"
 #include "starfox/vr/scene_interpolation.hpp"
+#include "starfox/vr/game_model_pose.hpp"
 #include "starfox/vr/source_sprites.hpp"
 #include "starfox/render/hud_layout.hpp"
 #include "starfox/render/scaled_text_renderer.hpp"
@@ -10,6 +11,7 @@
 #include <deque>
 #include <iostream>
 #include <limits>
+#include <numbers>
 #include <stdexcept>
 #include <vector>
 using namespace starfox::vr;
@@ -22,6 +24,129 @@ std::array<float,4> point(const Matrix4& m,std::array<float,4> p) {
     std::array<float,4> out{};
     for(unsigned r=0;r<4;++r) for(unsigned c=0;c<4;++c) out[r]+=m[c*4+r]*p[c];
     return out;
+}
+// Cockpit display smoothing through three ticks, measured through the real
+// content path (interpolate_scene_poses + game_model_matrix) on static points.
+void verify_cockpit_smoothing() {
+    using namespace starfox;
+    const auto rotation=[](double yaw,double roll) {
+        const double cy=std::cos(yaw),sy=std::sin(yaw),cr=std::cos(roll),sr=std::sin(roll);
+        const double m[9]{cy*cr,sr,-sy*cr, -cy*sr,cr,sy*sr, sy,0,cy}; // column-major
+        simulation::MatrixQ15 out{};for(unsigned i=0;i<9;++i)out[i]=int16_t(std::lround(m[i]*32767));
+        return out;
+    };
+    const auto wrap=[](double v) {auto w=std::fmod(v+32768.,65536.);if(w<0)w+=65536.;return int32_t(std::lround(w-32768.));};
+    // Tick k: camera and pilot move by `velocity(k)`; view yaws and the ship rolls by `turn(k)`.
+    const auto tick=[&](double k,auto position,auto turn,bool cut=false) {
+        GameSceneSnapshot s;s.flow=simulation::GameFlowState::gameplay;s.pilot_tracking=true;s.player=7;
+        const auto at=position(k);const auto angle=turn(k);
+        s.camera={wrap(at[0]+(cut?9000:0)),wrap(at[1]),wrap(at[2]),0,0,0};
+        s.view_matrix=rotation(angle,0);
+        render::ObjectPresentationSnapshot pilot;pilot.generation=2;pilot.strategy_address=1;
+        pilot.transform={wrap(at[0]+40+(cut?9000:0)),wrap(at[1]-30),wrap(at[2]+600),0,0,0};
+        pilot.rotation_matrix=rotation(angle*.5,angle*2);s.pilot_reference=pilot;
+        return s;
+    };
+    const auto eye=[&](const GameSceneSnapshot* older,const GameSceneSnapshot& previous,const GameSceneSnapshot& current,
+        double alpha,const PresentationPreferences& prefs,std::array<int32_t,3> world) {
+        auto before=previous,now=current;
+        render::ObjectPresentationSnapshot object;object.generation=1;object.rotation_matrix=rotation(0,0);
+        object.transform={world[0],world[1],world[2],0,0,0};
+        now.objects.emplace_back();now.objects.back().handle=900;now.objects.back().presentation=object;
+        before.transforms[900]=object;now.transforms[900]=object;
+        const auto poses=interpolate_scene_poses(before,now,alpha,{});
+        const auto model=*game_model_matrix(poses.back(),256);
+        const auto pres=older?presentation_scene_matrix(*older,previous,current,alpha,prefs):presentation_scene_matrix(previous,current,alpha,prefs);
+        const auto p=point(pres,{model[12],model[13],model[14],1});
+        return std::array<double,3>{p[0],p[1],p[2]};
+    };
+    const auto distance=[](auto a,auto b) {return std::hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);};
+    const std::array<std::array<int32_t,3>,2> statics{{{32740,-200,9000},{-32000,400,3000}}};
+    for(bool follow:{false,true}) {
+        PresentationPreferences prefs;prefs.cockpit=true;prefs.follow_ship_rotation=follow;
+        // Uniform translation across the 16-bit wrap: the B-spline is the linear path half a tick later.
+        const auto steady=[](double k) {return std::array<double,3>{32700+60*k,-10*k,250*k};};
+        const auto still=[](double) {return .3;};
+        const auto s0=tick(0,steady,still),s1=tick(1,steady,still),s2=tick(2,steady,still);
+        for(double alpha:{0.,.25,.5})for(const auto& x:statics) {
+            require(distance(eye(&s0,s1,s2,alpha,prefs,x),eye(nullptr,s0,s1,alpha+.5,prefs,x))<1e-3,
+                "Cockpit smoothing is not the linear path half a tick later");
+            require(presentation_instrument_matrix(s0,s1,s2,alpha,prefs)==presentation_instrument_matrix(s0,s1,alpha+.5,prefs),
+                "Smoothed cabin left the smoothed pilot");
+        }
+        // Accelerating, turning flight: position and velocity stay continuous across a
+        // tick, where the linear path changes velocity abruptly.
+        const auto speeding=[](double k) {return std::array<double,3>{40*k*k,-15*k*k,250*k+30*k*k};};
+        const auto turning=[](double k) {return .02*k*k;};
+        const auto t0=tick(0,speeding,turning),t1=tick(1,speeding,turning),t2=tick(2,speeding,turning),t3=tick(3,speeding,turning);
+        constexpr double h=1e-2; // larger than Q15 rotation rounding, smaller than the curvature
+        for(const auto& x:statics) {
+            const auto end=eye(&t0,t1,t2,1,prefs,x),start=eye(&t1,t2,t3,0,prefs,x);
+            require(distance(end,start)<1e-3,"Cockpit smoothing jumps at a tick");
+            const auto before=eye(&t0,t1,t2,1-h,prefs,x),after=eye(&t1,t2,t3,h,prefs,x);
+            std::array<double,3> v0{},v1{};for(unsigned i=0;i<3;++i) {v0[i]=(end[i]-before[i])/h;v1[i]=(after[i]-start[i])/h;}
+            const auto lin_end=eye(nullptr,t1,t2,1,prefs,x),lin_before=eye(nullptr,t1,t2,1-h,prefs,x);
+            const auto lin_start=eye(nullptr,t2,t3,0,prefs,x),lin_after=eye(nullptr,t2,t3,h,prefs,x);
+            std::array<double,3> l0{},l1{};for(unsigned i=0;i<3;++i) {l0[i]=(lin_end[i]-lin_before[i])/h;l1[i]=(lin_after[i]-lin_start[i])/h;}
+            require(distance(l0,l1)>10*distance(v0,v1) && distance(v0,v1)<.05*std::hypot(v0[0],v0[1],v0[2]),
+                "Cockpit smoothing does not keep velocity continuous across ticks");
+        }
+        // A cut before previous restarts there; a cut before current jumps like the linear path.
+        const auto c0=tick(0,steady,still,true);
+        for(const auto& x:statics) {
+            require(distance(eye(&c0,s1,s2,0,prefs,x),eye(nullptr,s1,s2,0,prefs,x))<1e-3,"Smoothing replayed a cut");
+            require(distance(eye(&s0,c0,s2,.3,prefs,x),eye(nullptr,c0,s2,.3,prefs,x))<1e-3,"Smoothing crossed a cut");
+        }
+        auto off=prefs;off.cockpit=false;
+        require(presentation_scene_matrix(t0,t1,t2,.4,off)==presentation_scene_matrix(t1,t2,.4,off)
+            && presentation_instrument_matrix(t0,t1,t2,.4,off)==identity_matrix,"Smoothing changed a non-cockpit view");
+    }
+}
+void verify_follow_ease() {
+    using namespace starfox;
+    const auto rotation=[](double yaw,double roll) {
+        const double cy=std::cos(yaw),sy=std::sin(yaw),cr=std::cos(roll),sr=std::sin(roll);
+        const double m[9]{cy*cr,sr,-sy*cr, -cy*sr,cr,sy*sr, sy,0,cy};
+        simulation::MatrixQ15 out{};for(unsigned i=0;i<9;++i)out[i]=int16_t(std::lround(m[i]*32767));
+        return out;
+    };
+    const auto roll_of=[](const simulation::MatrixQ15& m) {return std::atan2(double(m[1]),double(m[0]));};
+    const auto same=[](const simulation::MatrixQ15& a,const simulation::MatrixQ15& b) {
+        for(unsigned i=0;i<9;++i) if(std::abs(int(a[i])-int(b[i]))>3) return false;
+        return true;
+    };
+    CockpitFollowEase ease;
+    const auto start=rotation(.4,.3);
+    require(same(ease.update(start,true,10),start),"Follow ease did not start at the source attitude");
+    require(same(ease.update(start,true,10+1/90.),start),"Follow ease drifted from a still attitude");
+    // A 40 degree bank eases in: one frame moves by 1-exp(-dt/tau), and it settles within about 0.5 s.
+    const double bank=40*std::numbers::pi/180;
+    const auto banked=rotation(0,bank);ease.reset();(void)ease.update(rotation(0,0),true,0);
+    const double first=roll_of(ease.update(banked,true,1/90.));
+    require(std::abs(first-bank*(1-std::exp(-1/90./CockpitFollowEase::time_constant_seconds)))<.002,"Follow ease rate wrong");
+    double t=1/90.;simulation::MatrixQ15 shown{};
+    for(;t<.6;t+=1/90.) shown=ease.update(banked,true,t);
+    require(std::abs(roll_of(shown)-bank)<.01,"Follow ease did not settle");
+    // A cut or a long gap snaps; a large jump never trails by more than 90 degrees.
+    require(same(ease.update(rotation(0,-bank),false,t+=1/90.),rotation(0,-bank)),"Follow ease crossed a cut");
+    require(same(ease.update(rotation(0,bank),true,t+1),rotation(0,bank)),"Follow ease resumed after a pause");
+    ease.reset();(void)ease.update(rotation(0,0),true,0);
+    const double far=170*std::numbers::pi/180;
+    require(std::abs(roll_of(ease.update(rotation(0,far),true,1/90.)))>(far-std::numbers::pi/2)-.01,"Follow ease trailed by more than 90 degrees");
+    // Passing the source attitude reproduces the unfollowed-ease scene; Follow OFF ignores it.
+    GameSceneSnapshot a,b,c;
+    for(auto* s:{&a,&b,&c}) {
+        s->flow=simulation::GameFlowState::gameplay;s->pilot_tracking=true;s->player=7;s->view_matrix=rotation(.1,0);
+        render::ObjectPresentationSnapshot pilot;pilot.generation=2;pilot.strategy_address=1;s->pilot_reference=pilot;
+    }
+    a.pilot_reference->rotation_matrix=rotation(0,.1);b.pilot_reference->rotation_matrix=rotation(0,.3);c.pilot_reference->rotation_matrix=rotation(0,.6);
+    PresentationPreferences prefs;prefs.cockpit=prefs.follow_ship_rotation=true;
+    const auto attitude=cockpit_follow_attitude(a,b,c,.4,prefs);require(attitude && attitude->continuous,"Follow attitude missing");
+    close_matrix(presentation_scene_matrix(a,b,c,.4,prefs,&attitude->rotation),presentation_scene_matrix(a,b,c,.4,prefs));
+    require(presentation_scene_matrix(a,b,c,.4,prefs,&start)!=presentation_scene_matrix(a,b,c,.4,prefs),"Follow attitude ignored");
+    auto off=prefs;off.follow_ship_rotation=false;
+    require(!cockpit_follow_attitude(a,b,c,.4,off),"Follow attitude outside Follow ship rotation");
+    require(presentation_scene_matrix(a,b,c,.4,off,&start)==presentation_scene_matrix(a,b,c,.4,off),"Follow attitude changed Follow OFF");
 }
 template<typename T> T handle(uintptr_t n) {return reinterpret_cast<T>(n);}
 struct Fake {
@@ -133,10 +258,13 @@ int main() try {
         auto on=off;on.follow_ship_rotation=true;
         for(unsigned axis=0;axis<3;++axis) {
             pilot.rotation_matrix=rotations[axis];now.pilot_reference=pilot;
-            close_matrix(presentation_scene_matrix(now,now,.5,off),identity_matrix);
+            auto off_rotation=presentation_scene_matrix(now,now,.5,off);
+            off_rotation[12]=off_rotation[13]=off_rotation[14]=0;
+            auto enlarged=identity_matrix;enlarged[0]=enlarged[5]=enlarged[10]=cockpit_world_scale(off);
+            close_matrix(off_rotation,enlarged);
             const auto following=presentation_scene_matrix(now,now,.5,on);
-            const auto moved=point(following,axis==2?std::array<float,4>{1,0,-4,1}:std::array<float,4>{0,0,-4,1});
-            require(std::abs(moved[axis==0?1:axis==1?0:1]-(axis==2?.5F:-2.F))<.001F,
+            const auto moved=point(following,axis==2?std::array<float,4>{1,0,-4,0}:std::array<float,4>{0,0,-4,0});
+            require(std::abs(moved[axis==0?1:axis==1?0:1]-(axis==2?.5F:-2.F)*cockpit_world_scale(on))<.01F,
                 "Ship pitch/yaw/bank turned world in wrong direction");
             close_matrix(presentation_instrument_matrix(now,now,.5,on),identity_matrix);
             require(presentation_instrument_matrix(now,now,.5,off)!=identity_matrix,"Legacy rotating HUD changed");
@@ -153,7 +281,8 @@ int main() try {
             const auto uncalibrated=presentation_scene_matrix(now,now,.5,on);
             auto local=multiply_matrix(uncalibrated,model);
             auto expected=identity_matrix;
-            expected[0]=on.scale()/256;expected[5]=expected[10]=-on.scale()/256;
+            expected[0]=cockpit_world_scale(on)/256;expected[5]=expected[10]=-cockpit_world_scale(on)/256;
+            for(unsigned i=0;i<3;++i)expected[12+i]=-cockpit_seat_m[i];
             close_matrix(local,expected,.001F);
             on.origin_x=25;on.origin_y=-15;on.origin_z=35;
             const auto scene=presentation_scene_matrix(now,now,.5,on);
@@ -163,7 +292,9 @@ int main() try {
             // Calibration uses physical metres in the rotating ship frame.
             for(unsigned i=0;i<3;++i)
                 require(std::abs(scene[12+i]-uncalibrated[12+i]-stable[12+i])<.001F,"Rotating pivot calibration scaled or changed axis");
-            const auto pivot=point(model,{.25F*256/on.scale(),.15F*256/on.scale(),-.35F*256/on.scale(),1});
+            const float world=cockpit_world_scale(on);
+            const auto pivot=point(model,{.25F*256/world,
+                (.15F-cockpit_seat_m[1])*256/world,(-.35F-cockpit_seat_m[2])*256/world,1});
             const auto centered=point(scene,pivot);
             for(unsigned i=0;i<3;++i) require(std::abs(centered[i])<.001F,"Calibrated pilot pivot moved under rotation");
             // Application composes tracking on the left for every world pass.
@@ -223,8 +354,11 @@ int main() try {
         require(presentation_scene_matrix(before,now,.5,preferences)==identity_matrix,"Default camera changed");
         preferences.cockpit=true;
         const auto cockpit=presentation_scene_matrix(before,now,.5,preferences);
-        require(std::abs(cockpit[12]+1)<.001F && std::abs(cockpit[13]-.5F)<.001F
-            && std::abs(cockpit[14]-4)<.001F,"Pilot reference not in source view space");
+        const float ship=cockpit_ship_scale;
+        // Q15 rounding scales with the enlarged world.
+        require(std::abs(cockpit[12]+ship)<.001F*ship && std::abs(cockpit[13]-(.5F*ship-cockpit_seat_m[1]))<.001F*ship
+            && std::abs(cockpit[14]-(4*ship-cockpit_seat_m[2]))<.001F*ship,"Pilot reference not in ship-scaled source view space");
+        require(cockpit[0]==ship && cockpit[5]==ship && cockpit[10]==ship,"Cockpit world not enlarged to the cabin's ship");
         preferences.origin_x=25;
         const auto offset=presentation_scene_matrix(before,now,.5,preferences);
         require(std::abs(offset[12]-cockpit[12]+.25F)<.001F,"Calibrated origin changed wrong axis");
@@ -243,7 +377,7 @@ int main() try {
         require(presentation_scene_matrix(before,now,.5,preferences)==identity_matrix,"Missing pilot reference invented");
         preferences.world_scale=5;
         const auto scaled=presentation_scene_matrix(before,now,.5,preferences);
-        require(scaled[0]==2 && scaled[5]==2 && scaled[10]==2,"World scale missing");
+        require(scaled[0]==2 && scaled[5]==2 && scaled[10]==2,"World scale missing outside the cockpit");
         for(bool ex:{false,true}) {
             const auto layout=layout_a_hud(ex);
             const int label_y=(ex?186:183)+layout[render::HudElement::shield].y;
@@ -346,6 +480,8 @@ int main() try {
     require(quad.acquire()==ImageWait::waiting && !quad.image_index(),"Quad timeout exposed image");
     require(quad.cancel()==ImageWait::waiting,"Quad cancellation released unwaited image");
     image_pending=false;require(quad.cancel()==ImageWait::ready && !quad.layer(session.space(),{}),"Cancelled quad submitted");
+    verify_cockpit_smoothing();
+    verify_follow_ease();
     std::cout<<"Presentation camera, source HUD grouping and fenced projection+quad tests passed (no headset).\n";
     return 0;
 } catch(const std::exception& e) {std::cerr<<e.what()<<'\n';return 1;}

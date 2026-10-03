@@ -14,9 +14,12 @@
 #include <vector>
 
 namespace {
+using starfox::vr::VrControlAction;
+using starfox::vr::vr_control_bit;
 volatile std::sig_atomic_t interrupted=0;
 void interrupt(int) {interrupted=1;}
 
+#if defined(STARFOX_STEAM_FRAME)
 #if defined(STARFOX_STEAM_FRAME)
 std::filesystem::path executable_directory(const char* argv0) {
     const char* base_path = SDL_GetBasePath();
@@ -29,6 +32,7 @@ std::filesystem::path executable_directory(const char* argv0) {
     return std::filesystem::absolute(argv0).parent_path();
 }
 #endif
+#endif
 
 class DesktopGamepad {
 public:
@@ -37,14 +41,16 @@ public:
         if(!initialized_) std::cerr<<"Gamepad input unavailable: "<<SDL_GetError()<<'\n';
     }
     ~DesktopGamepad() {
+        stop_rumble();
         if(gamepad_) SDL_CloseGamepad(gamepad_);
         if(initialized_) SDL_QuitSubSystem(SDL_INIT_GAMEPAD);
     }
     starfox::vr::VrControls sample() {
         starfox::vr::VrControls controls;
-        if(!initialized_) return controls;
+        if(!initialized_) return edges_.sample(controls);
         SDL_PumpEvents();
         if(gamepad_ && !SDL_GamepadConnected(gamepad_)) {
+            stop_rumble();
             SDL_CloseGamepad(gamepad_);gamepad_=nullptr;
         }
         if(!gamepad_) {
@@ -54,7 +60,18 @@ public:
             SDL_free(ids);
             if(gamepad_) std::cout<<"PCVR gamepad connected: "<<SDL_GetGamepadName(gamepad_)<<'\n';
         }
-        if(!gamepad_) {last_menu_=last_select_=last_reset_=false;return controls;}
+        if(!gamepad_) return edges_.sample(controls);
+        controls.active_actions = vr_control_bit(VrControlAction::steer)
+            | vr_control_bit(VrControlAction::fire)
+            | vr_control_bit(VrControlAction::bomb)
+            | vr_control_bit(VrControlAction::boost)
+            | vr_control_bit(VrControlAction::brake)
+            | vr_control_bit(VrControlAction::menu)
+            | vr_control_bit(VrControlAction::roll_left)
+            | vr_control_bit(VrControlAction::roll_right)
+            | vr_control_bit(VrControlAction::select)
+            | vr_control_bit(VrControlAction::stick_left)
+            | vr_control_bit(VrControlAction::stick_right);
         const auto button=[&](SDL_GamepadButton name) {return SDL_GetGamepadButton(gamepad_,name);};
         const auto axis=[&](SDL_GamepadAxis name) {
             return std::clamp(float(SDL_GetGamepadAxis(gamepad_,name))/32767.F,-1.F,1.F);
@@ -75,27 +92,43 @@ public:
         controls.brake=button(SDL_GAMEPAD_BUTTON_NORTH);
         controls.menu=button(SDL_GAMEPAD_BUTTON_START);
         controls.select=button(SDL_GAMEPAD_BUTTON_BACK);
+#if defined(STARFOX_STEAM_FRAME)
+        controls.roll_left=button(SDL_GAMEPAD_BUTTON_LEFT_SHOULDER);
+        controls.roll_right=button(SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER);
+#else
         controls.roll_left=axis(SDL_GAMEPAD_AXIS_LEFT_TRIGGER)>.35F;
         controls.roll_right=axis(SDL_GAMEPAD_AXIS_RIGHT_TRIGGER)>.35F;
+#endif
         controls.stick_left=button(SDL_GAMEPAD_BUTTON_LEFT_STICK);
         controls.stick_right=button(SDL_GAMEPAD_BUTTON_RIGHT_STICK);
-        controls.menu_pressed=controls.menu && !last_menu_;
-        controls.select_pressed=controls.select && !last_select_;
-        const bool reset=controls.roll_left && controls.roll_right
-            && controls.stick_left && controls.stick_right;
-        controls.reset_pressed=reset && !last_reset_;
-        last_menu_=controls.menu;last_select_=controls.select;last_reset_=reset;
-        return controls;
+        return edges_.sample(controls);
+    }
+    bool rumble(std::uint16_t low,std::uint16_t high,std::uint32_t duration_ms) noexcept {
+        if(!gamepad_) return false;
+        const bool succeeded=SDL_RumbleGamepad(gamepad_,low,high,duration_ms);
+        if(succeeded) rumbling_=low!=0U || high!=0U;
+        return succeeded;
+    }
+    void stop_rumble() noexcept {
+        if(gamepad_ && rumbling_)
+            static_cast<void>(SDL_RumbleGamepad(gamepad_,0U,0U,0U));
+        rumbling_=false;
     }
 private:
-    bool initialized_{},last_menu_{},last_select_{},last_reset_{};
+    bool initialized_{},rumbling_{};
+    starfox::vr::DesktopControlEdges edges_;
     SDL_Gamepad* gamepad_{};
 };
 }
 
 int main(int argc,char** argv) try {
 #if defined(STARFOX_STEAM_FRAME)
+#if defined(STARFOX_STEAM_FRAME)
     const auto directory=executable_directory(argc>0?argv[0]:nullptr);
+#else
+    // PCVR and Quest keep resolving their folder exactly as before.
+    const auto directory=std::filesystem::absolute(argv[0]).parent_path();
+#endif
 #else
     // PCVR and Quest keep resolving their folder exactly as before.
     const auto directory=std::filesystem::absolute(argv[0]).parent_path();
@@ -169,12 +202,17 @@ int main(int argc,char** argv) try {
     // The diagnostic host defaults to 120 frames / 30 seconds. A player
     // executable must run until an actual exit, never expire mid-game.
     host.frame_limit=0;host.time_limit=std::chrono::seconds(0);
+    host.steam_frame=steam_frame;
     host.cartridge_save_path=data/"starfox-ex.srm";
     std::signal(SIGINT,interrupt);
     std::signal(SIGTERM,interrupt);
     host.stop_requested=[] {return interrupted!=0;};
     DesktopGamepad gamepad;
     host.desktop_controls=[&gamepad] {return gamepad.sample();};
+    host.desktop_rumble=[&gamepad](std::uint16_t low,std::uint16_t high,std::uint32_t duration) {
+        return gamepad.rumble(low,high,duration);
+    };
+    host.stop_desktop_rumble=[&gamepad] {gamepad.stop_rumble();};
     std::vector<std::string> arguments{argv[0],"--bundle",bundle.string()};
     if(enhanced_sky) arguments.emplace_back("--enhanced-sky");
     if(!msu.empty()) {arguments.emplace_back("--msu");arguments.push_back(msu);}

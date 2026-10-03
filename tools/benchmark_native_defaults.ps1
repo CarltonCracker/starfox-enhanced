@@ -28,6 +28,8 @@ param([string]$Executable='build/current/starfox_pc.exe',
  [switch]$UnbatchedTerrain,
  # GPU FAST A/B: restore the per-model full-frame raster pass.
  [switch]$FullFrameModelRaster,
+ # Prefer the low-power adapter (an integrated GPU on hybrid systems).
+ [switch]$LowPowerGpu,
  [switch]$GodMode,
  [ValidateRange(0,1000000)][int]$SlowFrameUs=0)
 $ErrorActionPreference='Stop'
@@ -65,6 +67,7 @@ try {
  if($EnhancedSky){$settings.STARFOX_TEST_ENVIRONMENT_3='1'}
  if($UnbatchedTerrain){$settings.STARFOX_TEST_UNBATCHED_TERRAIN='1'}
  if($FullFrameModelRaster){$settings.STARFOX_TEST_FULL_FRAME_MODEL_RASTER='1'}
+ if($LowPowerGpu){$settings.STARFOX_TEST_LOW_POWER_GPU='1'}
  if($AsteroidModels){$settings.STARFOX_TEST_ASTEROID_MODELS=$AsteroidModels}
  if($TraceSceneCost){$settings.STARFOX_TRACE_SCENE_COST='1'}
  if($SlowFrameUs){$settings.STARFOX_TRACE_SLOW_FRAME_US=[string]$SlowFrameUs}

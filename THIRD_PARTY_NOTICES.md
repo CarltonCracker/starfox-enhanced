@@ -223,3 +223,10 @@ Copyright 2015-2023 The Khronos Group Inc.
 The VR targets use these headers under `Apache-2.0 OR MIT`. Licence texts:
 <https://www.apache.org/licenses/LICENSE-2.0> and
 <https://opensource.org/licenses/MIT>.
+
+## sfvr
+
+A small C99 library written for the Steam Frame ports of several games, vendored
+in `third_party/sfvr` at the commit recorded in `third_party/sfvr/VERSION`. It
+has no public repository. It is distributed here under this project's GPL-3.0,
+as its README says for vendored copies.

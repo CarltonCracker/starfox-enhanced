@@ -2,6 +2,7 @@
 #include <openxr/openxr.h>
 #include "starfox/simulation/rumble_sequencer.hpp"
 #include "starfox/vr/system_layer.hpp"
+#include "sfvr/sfvr_haptics.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -130,9 +131,16 @@ public:
     void set_system_layer(bool enabled) noexcept {system_layer_=enabled;}
     [[nodiscard]] bool system_layer() const noexcept {return system_layer_;}
     [[nodiscard]] bool focused() const noexcept {return focused_;}
-    // The authored dual-band sample maps to XR's single actuator channel by
-    // max(low, high), with an unspecified frequency and the native 40 ms pulse.
+    // All OpenXR haptic output goes through one sfvr_haptic_queue. The authored
+    // dual-band sample is queued with sfvr_haptic_rumble (max(low, high), the
+    // native 40 ms pulse, both hands); the system buzz (SFVR_HAPTIC_SYSTEM) is
+    // queued by poll() on a hold step. Nothing reaches xrApplyHapticFeedback
+    // until flush_haptics(), which the caller runs once per frame: overlapping
+    // pulses coalesce to the strongest, and the HAPTICS STRENGTH setting scales
+    // the result.
     bool apply_haptics(const starfox::simulation::RumbleEffect&) noexcept;
+    void flush_haptics() noexcept;
+    // Stops started rumble and drops queued rumble. A pending system buzz stays.
     void stop_haptics() noexcept;
     [[nodiscard]] bool haptics_available() const noexcept;
     // User strength 0..1, applied to every OpenXR haptic output. 1 (the default)
@@ -154,9 +162,8 @@ private:
     std::array<XrPath,4> haptic_profiles_{};
     std::array<bool,2> haptic_bound_hands_{},haptic_started_hands_{};
     std::uint32_t haptic_profile_count_{};
-    // System haptic: 0.6 amplitude, 80 ms, both hands, scaled by the strength
-    // setting. Not tracked as started rumble, so gameplay stop calls leave it.
-    void pulse_system() noexcept;
+    sfvr_haptic_queue haptic_queue_{};
+    bool system_buzz_pending_{},rumble_queued_{};
     VrControls controls_{};bool menu_armed_{},select_armed_{},reset_armed_{};
     bool frame_player_{};
     bool system_layer_{};

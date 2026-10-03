@@ -447,7 +447,7 @@ int main() try {
         FrameMenu presentation_menu;presentation_menu.page=Page::presentation;
         presentation_menu.sample({},true);presentation_menu.sample(press,true);
         require(presentation_menu.presentation.cockpit && !presentation_menu.presentation.follow_ship_rotation);
-        require(presentation_menu.row_count()==9 && presentation_menu.labels()[1]=="FOLLOW SHIP ROTATION: OFF");
+        require(presentation_menu.row_count()==10 && presentation_menu.labels()[1]=="FOLLOW SHIP ROTATION: OFF");
         presentation_menu.selection=1;presentation_menu.sample({},true);presentation_menu.sample(press,true);
         require(presentation_menu.presentation.follow_ship_rotation && presentation_menu.labels()[1]=="FOLLOW SHIP ROTATION: ON");
         require(migrated.restore_preferences(presentation_menu.preferences()) && migrated.presentation.follow_ship_rotation);
@@ -455,7 +455,23 @@ int main() try {
         require(migrated.restore_preferences(std::span(version6).first(26)) && migrated.presentation.cockpit
             && !migrated.presentation.follow_ship_rotation);
         require(!migrated.restore_preferences(version6)); // Version and size must agree.
-        require(presentation_menu.preferences()[4]==8 && presentation_menu.preferences().size()==28);
+        require(presentation_menu.preferences()[4]==9 && presentation_menu.preferences().size()==29);
+        // REFRESH RATE: 90 Hz default, 120 Hz, then the system setting; saved in v9.
+        require(presentation_menu.labels()[8]=="REFRESH RATE: 90 HZ" && presentation_menu.refresh_target()==90.F);
+        presentation_menu.selection=8;presentation_menu.sample({},true);presentation_menu.sample(press,true);
+        require(presentation_menu.labels()[8]=="REFRESH RATE: 120 HZ" && presentation_menu.refresh_target()==120.F);
+        {FrameMenu saved;require(saved.restore_preferences(presentation_menu.preferences()) && saved.refresh_target()==120.F);}
+        presentation_menu.sample({},true);presentation_menu.sample(press,true);
+        require(presentation_menu.labels()[8]=="REFRESH RATE: SYSTEM" && !presentation_menu.refresh_target());
+        {FrameMenu saved;require(saved.restore_preferences(presentation_menu.preferences()) && !saved.refresh_target());}
+        {auto version8=presentation_menu.preferences();version8[4]=8;FrameMenu older;older.refresh_choice=1;
+            require(older.restore_preferences(std::span(version8).first(28)) && older.refresh_target()==90.F);
+            auto invalid=presentation_menu.preferences();invalid[28]=3;require(!older.restore_preferences(invalid));}
+        presentation_menu.refresh_override=144.F;
+        require(presentation_menu.labels()[8]=="REFRESH RATE: 144 HZ ENV" && presentation_menu.refresh_target()==144.F);
+        presentation_menu.refresh_override.reset();
+        presentation_menu.sample({},true);presentation_menu.sample(press,true);
+        require(presentation_menu.refresh_target()==90.F);
         presentation_menu.selection=7;presentation_menu.sample({},true);presentation_menu.sample(press,true);
         require(presentation_menu.recenter_revision==1);
         presentation_menu.presentation={true,false,5,-100,100,35};
@@ -510,8 +526,8 @@ int main() try {
                 && !migrated7.unlocked_pace && migrated7.presentation.cockpit
                 && migrated7.presentation.follow_ship_rotation && migrated7.presentation.origin_x==10
                 && migrated7.presentation.origin_y==-20 && migrated7.presentation.origin_z==30);
-            require(migrated7.preferences()[4]==8 && migrated7.preferences()[27]==60);
-            require(!migrated7.restore_preferences(v7)); // v7 header with a v8-sized record.
+            require(migrated7.preferences()[4]==9 && migrated7.preferences()[27]==60 && migrated7.preferences()[28]==0);
+            require(!migrated7.restore_preferences(v7)); // v7 header with a v9-sized record.
             auto bad=old.preferences();bad[27]=101;require(!migrated7.restore_preferences(bad));
         }
         // Physical B (bomb) is back on every page, in addition to the BACK rows.
@@ -653,7 +669,8 @@ int main() try {
     const starfox::simulation::RumbleEffect authored{0x1111U,0x8888U,40U};
     require(input.haptics_strength()==1.F); // Unscaled unless the menu says otherwise.
     input.set_haptics_strength(1.F);
-    require(input.apply_haptics(authored) && haptic_applies==2);
+    require(input.apply_haptics(authored) && haptic_applies==0); // Queued, not yet sent.
+    input.flush_haptics();require(haptic_applies==2);
     require(std::abs(haptic_amplitude-float(0x8888U)/65535.F)<.00001F
         && haptic_duration==40'000'000 && haptic_api_valid);
     const auto stops_before_focus=haptic_stops;
@@ -662,11 +679,13 @@ int main() try {
     const auto applies_before_unfocused=haptic_applies;
     require(!input.apply_haptics(authored) && haptic_applies==applies_before_unfocused);
     require(input.poll(true) && input.focused());
-    require(input.apply_haptics(authored));
+    require(input.apply_haptics(authored));input.flush_haptics();
     fail_haptic=true;
-    require(!input.apply_haptics(authored) && haptic_stops==stops_before_focus+4);
+    require(input.apply_haptics(authored));input.flush_haptics(); // The failure surfaces at the flush.
+    require(haptic_stops==stops_before_focus+4
+        && input.status().find("Apply OpenXR haptics failed")!=std::string::npos);
     fail_haptic=false;
-    require(input.apply_haptics(authored));
+    require(input.apply_haptics(authored));input.flush_haptics();
     fail_haptic_stop=true;input.stop_haptics();
     require(haptic_stops==stops_before_focus+6
         && input.status().find("Stop OpenXR haptics failed")!=std::string::npos);
@@ -685,14 +704,22 @@ int main() try {
         // --- Haptic strength: every OpenXR output is scaled, 0 silences it.
         input.set_haptics_strength(.5F);
         auto applies=haptic_applies;
-        require(input.apply_haptics(authored) && haptic_applies==applies+2
+        require(input.apply_haptics(authored) && haptic_applies==applies); // Nothing before the flush.
+        input.flush_haptics();
+        require(haptic_applies==applies+2
             && std::abs(haptic_amplitude-float(0x8888U)/65535.F*.5F)<.00001F && haptic_duration==40'000'000);
+        input.flush_haptics();require(haptic_applies==applies+2); // An empty queue sends nothing.
         input.set_haptics_strength(.25F);
-        require(input.apply_haptics({0xFFFFU,0x0000U,40U})
-            && std::abs(haptic_amplitude-.25F)<.00001F);
+        require(input.apply_haptics({0xFFFFU,0x0000U,40U}));input.flush_haptics();
+        require(std::abs(haptic_amplitude-.25F)<.00001F);
+        // Overlapping pulses in one frame coalesce into the strongest, once per hand.
+        input.set_haptics_strength(1.F);applies=haptic_applies;
+        require(input.apply_haptics({0x2000U,0x1000U,40U}) && input.apply_haptics({0x8000U,0x4000U,40U}));
+        input.flush_haptics();
+        require(haptic_applies==applies+2 && std::abs(haptic_amplitude-float(0x8000U)/65535.F)<.00001F);
         input.set_haptics_strength(0.F);
-        applies=haptic_applies;const auto stops=haptic_stops;
-        require(input.apply_haptics(authored) && haptic_applies==applies && haptic_stops>stops);
+        applies=haptic_applies;
+        require(input.apply_haptics(authored));input.flush_haptics();require(haptic_applies==applies);
         input.set_haptics_strength(7.F);require(input.haptics_strength()==1.F);
         input.set_haptics_strength(-1.F);require(input.haptics_strength()==0.F);
         input.set_haptics_strength(std::numeric_limits<float>::quiet_NaN());require(input.haptics_strength()==1.F);
@@ -702,7 +729,7 @@ int main() try {
         independent_buttons=true;button_states={};
         const auto view=[&](bool down) {button_states[9]=down;};
         const auto menu_button=[&](bool down) {button_states[6]=down;};
-        const auto poll_at=[&](double at) {require(input.poll(true,at));return input.controls();};
+        const auto poll_at=[&](double at) {require(input.poll(true,at));input.flush_haptics();return input.controls();};
         require(input.poll(false,0.0));
         poll_at(10.0); // Released: armed.
         input.set_haptics_strength(1.F);
@@ -746,6 +773,20 @@ int main() try {
         view(true);poll_at(50.0);poll_at(51.0);input.stop_haptics();
         require(haptic_applies==applies+2 && haptic_stops==stopped);
         view(false);poll_at(51.1);
+        // A stop between the poll that queues the buzz and the frame's flush keeps it.
+        view(true);poll_at(52.0);applies=haptic_applies;
+        require(input.poll(true,53.0) && haptic_applies==applies);
+        input.stop_haptics();input.flush_haptics();
+        require(haptic_applies==applies+2 && haptic_duration==80'000'000);
+        view(false);poll_at(53.1);
+        // Rumble and the buzz in the same frame coalesce: one pulse per hand,
+        // strongest amplitude, longest duration.
+        view(true);poll_at(54.0);applies=haptic_applies;
+        require(input.poll(true,55.0) && input.apply_haptics(authored));
+        input.flush_haptics();
+        require(haptic_applies==applies+2 && std::abs(haptic_amplitude-.6F)<.00001F
+            && haptic_duration==80'000'000);
+        view(false);poll_at(55.1);
 
         // Menu + View held 0.5 s opens the runtime menu once; the View press is
         // swallowed (no tap, no recentre) even when held for seconds afterwards.
@@ -819,6 +860,13 @@ int main() try {
         button_states[13]=true;require(legacy.poll(true,0.5) && legacy.controls().reset_pressed);
         require(legacy.poll(true,0.6) && !legacy.controls().reset_pressed); // Never repeat while held.
         button_states={};require(legacy.poll(true,0.7));
+        // Rumble stays off: the original input has no haptic action, even on Touch.
+        mock_profiles={path_value("/interaction_profiles/oculus/touch_controller"),
+            path_value("/interaction_profiles/oculus/touch_controller")};
+        require(legacy.poll(true,0.8) && !legacy.haptics_available());
+        const auto direct_applies=haptic_applies;
+        require(!legacy.apply_haptics(authored) && haptic_applies==direct_applies);
+        legacy.flush_haptics();require(haptic_applies==direct_applies);
         // View is a plain Select on its press edge. Holding it recentres nothing,
         // and Menu + View is only two buttons (the app opens its menu on the edge).
         button_states[9]=true;

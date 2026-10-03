@@ -37,6 +37,9 @@
 #include "starfox/vr/game_frame_driver.hpp"
 #include "starfox/vr/frame_menu.hpp"
 #include "starfox/vr/decal_surface.hpp"
+#include "starfox/vr/perf_log.hpp"
+#include "starfox/vr/env_overrides.hpp"
+#include "starfox/vr/refresh_rate.hpp"
 #include "starfox/state/files.hpp"
 #include "starfox/vr/pcm_output.hpp"
 #include "starfox/audio/spc700_audio.hpp"
@@ -666,7 +669,8 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
     }
     starfox::vr::VulkanEyeCommands commands;
     if(live && !live->output.open()) {std::cerr<<live->output.status()<<'\n';return 8;}
-    const std::optional<starfox::vr::VulkanEyeCommands::TimestampConfig> timestamp_config=profile_csv.enabled()
+    const bool timing_gpu=starfox::vr::env_override_bool("timing_gpu").value_or(false);
+    const std::optional<starfox::vr::VulkanEyeCommands::TimestampConfig> timestamp_config=profile_csv.enabled() || timing_gpu
         ?std::optional<starfox::vr::VulkanEyeCommands::TimestampConfig>(
             starfox::vr::VulkanEyeCommands::TimestampConfig{
                 device.timestamp_valid_bits(),device.timestamp_period_ns()})
@@ -744,6 +748,9 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
     starfox::vr::CockpitFollowEase follow_ease;
     starfox::vr::Matrix4 instrument_transform=starfox::vr::identity_matrix;
     starfox::vr::FrameMenu startup;
+    startup.haptics_override=starfox::vr::env_override_float("haptics");
+    startup.refresh_override=starfox::vr::env_override_float("refresh_rate");
+    if(startup.haptics_override) std::cout<<"[vr] haptics strength overridden by SFX_VR_HAPTICS: "<<*startup.haptics_override<<'\n';
     startup.ray_tracing_available=ray_supported;startup.ray_tracing=ray_tracing;
     starfox::vr::VulkanScenePipeline circle_pipeline;
     starfox::vr::VulkanSceneBuffer circle_vertices;
@@ -785,10 +792,18 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
             :starfox::assets::SymbolMap::load(alternate_symbols),!initial_extended);
     const auto preferences_path=host.cartridge_save_path.empty()?std::filesystem::path{}
         :host.cartridge_save_path.parent_path()/"vr-preferences.bin";
+    // Refresh and [vr-perf] lines also go to vr-session.log beside the
+    // preferences (stdout is not kept on the Frame); rewritten each launch.
+    std::ofstream session_file;
+    if(!preferences_path.empty()) session_file.open(preferences_path.parent_path()/"vr-session.log",std::ios::trunc);
+    const auto session_log=[&](const std::string& line) {
+        std::cout<<line<<std::endl;
+        if(session_file) session_file<<line<<std::endl;
+    };
     if(startup.open && !preferences_path.empty()) try {
         if(std::filesystem::exists(preferences_path)) {
             const auto size=std::filesystem::file_size(preferences_path);
-            if((size!=16 && size!=20 && size!=26 && size!=27 && size!=28)
+            if((size!=16 && size!=20 && size!=26 && size!=27 && size!=28 && size!=29)
                 || !startup.restore_preferences(starfox::state::read_file(preferences_path)))
                 std::cerr<<"Invalid VR preferences; using defaults\n";
         }
@@ -809,6 +824,14 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
     std::optional<unsigned> startup_revision;
     auto last_profile=std::chrono::steady_clock::now();
     std::optional<std::chrono::steady_clock::time_point> exit_requested_at;
+    starfox::vr::PerfLog perf_log;
+    // XR_FB_display_refresh_rate: request once the session runs (default 90 Hz,
+    // SFX_VR_REFRESH_RATE overrides), drop to 72 after two low focused windows.
+    starfox::vr::RefreshRate refresh_rate(runtime.supports_display_refresh_rate()
+        ?starfox::vr::RefreshApi::from_instance(runtime.instance()):starfox::vr::RefreshApi{});
+    bool refresh_rate_requested=false;
+    std::optional<float> refresh_rate_target;
+    std::optional<XrTime> perf_last_display_time;
     FrameWait frame_wait;
     while((!host.frame_limit || submitted<host.frame_limit)
           && (host.time_limit.count()==0 || std::chrono::steady_clock::now()-started<host.time_limit)
@@ -825,6 +848,22 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
             } else if(session.exit_requested() || now-*exit_requested_at>std::chrono::seconds(2)) {
                 cancelled=true;break;
             }
+        }
+        // REFRESH RATE setting (SFX_VR_REFRESH_RATE overrides): request once the
+        // session runs and again whenever the choice changes.
+        if(session.running() && (!refresh_rate_requested || startup.refresh_target()!=refresh_rate_target)) {
+            refresh_rate_requested=true;refresh_rate_target=startup.refresh_target();
+            std::ostringstream line;
+            if(!refresh_rate_target) {
+                refresh_rate.release();
+                line<<"[vr] display refresh left to the system setting";
+            } else if(refresh_rate.request(session.handle(),*refresh_rate_target)) {
+                line<<"[vr] display refresh offered:";
+                for(const float rate:refresh_rate.offered()) line<<' '<<rate;
+                line<<"; target "<<*refresh_rate_target<<", requested "<<*refresh_rate.requested()
+                    <<", current "<<*refresh_rate.current()<<" Hz";
+            } else line<<"[vr] display refresh request skipped: "<<refresh_rate.status();
+            session_log(line.str());
         }
         renderer.set_head_translation(startup.presentation.translation_scale());
         const auto result=renderer.step_async([&](unsigned eye,uint32_t image,const auto& tracking_camera,XrTime time) {
@@ -966,6 +1005,9 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
                         game_controls.steer={};game_controls.select=game_controls.select_pressed=false;
                     }
                     const auto advance=live->driver->advance(time,game_controls,playing,startup.presentation);
+                    // Once per frame: coalesced rumble plus any system buzz, scaled by
+                    // the HAPTICS STRENGTH setting, goes to the runtime here.
+                    input.flush_haptics();
                     if(!live->game.paused() && sandbox.active()) {
                         sandbox.commit(live->game.objects());live->history->capture();
                     }
@@ -1447,7 +1489,7 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
                         if(!backgrounds.update_models(model_updates)) throw std::runtime_error("Intro planet motion update failed");
                     }
                     const auto profile_end=std::chrono::steady_clock::now();
-                    if(profile_csv.enabled()) {
+                    {   // Always measured: feeds the [vr-perf] line as well as --profile-csv.
                         const auto ms=[](auto a,auto b) {return std::chrono::duration<double,std::milli>(b-a).count();};
                         cpu_frame_profile.logic_ms=ms(profile_start,profile_logic);
                         cpu_frame_profile.models_ms=ms(profile_logic,profile_models);
@@ -1598,7 +1640,7 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
             },[&](VkCommandBuffer command,VkExtent2D,const auto&,XrTime) {
                 if(ray_ready && !ray_frames[eye]->record_release(command)) throw std::runtime_error("Ray shadow release failed");
             },ray_ready?&ray_wait:nullptr);
-            if(profile_csv.enabled() && eye_result==StereoRenderer::EyeResult::complete && eye<eye_frame_profile.size())
+            if(eye_result==StereoRenderer::EyeResult::complete && eye<eye_frame_profile.size())
                 eye_frame_profile[eye]=draw.take_last_eye_timing();
             if(eye_result==StereoRenderer::EyeResult::complete && eye<2 && ray_frames[eye]
                 && ray_frames[eye]->state()==VulkanDxrFrame::State::ready) ray_frames[eye]->retire();
@@ -1664,6 +1706,34 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
         }
         if(result==Result::submitted) {
             ++submitted;
+            {
+                // Standard [vr-perf] line every 10 s (sfvr_perf), beside --profile-csv.
+                // A frame is missed when its display time jumped past 1.5 periods.
+                const double now_s=std::chrono::duration<double>(std::chrono::steady_clock::now()-started).count();
+                starfox::vr::PerfLog::Frame frame;
+                const auto period=renderer.display_period();
+                frame.missed=input_time && perf_last_display_time && period>0
+                    && *input_time-*perf_last_display_time>period+period/2;
+                if(input_time) perf_last_display_time=*input_time;
+                frame.logic_ms=cpu_frame_profile.logic_ms;frame.model_ms=cpu_frame_profile.models_ms;
+                frame.upload_ms=cpu_frame_profile.upload_ms;frame.layer_ms=cpu_frame_profile.layers_ms;
+                for(unsigned eye_index=0;eye_index<2;++eye_index) if(eye_frame_profile[eye_index]) {
+                    frame.eye_ms[eye_index]=eye_frame_profile[eye_index]->submit_to_fence_cpu_ms;
+                    frame.gpu_ms[eye_index]=eye_frame_profile[eye_index]->gpu_timestamp_ms;
+                }
+                perf_log.add_frame(now_s,frame);
+                if(const auto fallback=refresh_rate.observe(now_s,session.state()==XR_SESSION_STATE_FOCUSED)) {
+                    std::ostringstream line;
+                    line<<"[vr] display refresh below 90% for two 10 s windows; requesting "<<*fallback<<" Hz: "
+                        <<(refresh_rate.request(session.handle(),*fallback)?"ok":refresh_rate.status());
+                    session_log(line.str());
+                }
+                if(const auto line=perf_log.poll(now_s)) {
+                    std::ostringstream rate;
+                    if(refresh_rate.current()) rate<<" display="<<*refresh_rate.current()<<"Hz";
+                    session_log(*line+rate.str());
+                }
+            }
             if(profile_csv.enabled()) {
                 const auto now=std::chrono::steady_clock::now();
                 const auto wall_ms=std::chrono::duration<double,std::milli>(now-started).count();

@@ -104,6 +104,22 @@ I picked that layout to match the on-screen control settings. My first attempt
 (A fire, X boost, Y brake) disagreed with them and felt wrong straight away.
 Cartridge control type and the face-button swap setting still apply.
 
+The Frame also gets a small system layer, which is the same for every game I
+port.
+
+| Input | What it does |
+| --- | --- |
+| Left View, short press | Select, and back in menus (sent on release) |
+| Left View, hold 1 s | Recentre, keeping your height. Both controllers buzz |
+| Left View, hold 3 s | Recentre and recalibrate height. Second buzz |
+| Menu + View, hold 0.5 s | Opens the game's runtime menu, which is its VR settings |
+| B | Back on every menu page |
+
+On the Frame the runtime menu has RESET GAME (back to the start menu, saves are
+kept) and QUIT TO STEAM, which ends the OpenXR session cleanly, and the old
+four-input reset chord is off (those inputs are plain game buttons). Controls
+held through a focus change or at launch are ignored until you let go.
+
 ## Settings
 
 The Frame's runtime menu has a VR PRESENTATION page. Settings are saved in
@@ -115,11 +131,30 @@ The Frame's runtime menu has a VR PRESENTATION page. Settings are saved in
 | World scale | Bounded range, cockpit offsets stay in real centimetres |
 | Head translation | 0, 50, 100, 150 or 200%. Changes the head centre only, so IPD is untouched |
 | Follow ship rotation | Off by default. Only does anything in the pilot view |
+| Refresh rate | 90 Hz (default), 120 Hz or SYSTEM |
+
+Haptics strength is on the OPTIONS page: 0 to 100% in 10% steps, default 60%.
+It scales OpenXR haptics only, not desktop gamepad rumble.
 
 Profiling is opt-in. `--profile-csv FILE` writes one row per submitted stereo
 frame (host cadence, CPU stage times, per-eye submit-to-fence time, and Vulkan
 GPU timestamps where the queue supports them), and `--profile-frames N`
 (default 120) stops after N frames. Empty GPU cells mean unavailable.
+
+There are also a few environment overrides, read at startup. They beat the
+saved setting and are never written to the preferences file, and they do
+nothing unless you set them.
+
+| Variable | Meaning |
+| --- | --- |
+| `SFX_VR_HAPTICS` | Haptics strength, 0 to 1 |
+| `SFX_VR_TIMING_GPU` | `1` turns on GPU timestamp queries |
+| `SFX_VR_REFRESH_RATE` | Target refresh in Hz (72 to 144), default 90 |
+
+On the Frame the game prints one `[vr-perf]` line every 10 seconds (fps, missed
+frames, CPU stage times, GPU time or `n/a`, display rate). It and the refresh
+decisions also go to `vr-session.log` in the data folder, since stdout isn't
+kept on the Frame.
 
 ## Design decisions
 
@@ -180,6 +215,23 @@ quadratic B-spline through the last three ticks (about half a tick behind), and
 Follow's rotation eases toward its target with a 0.1 s time constant and a 90
 degree cap, so fast barrel rolls keep their direction.
 
+The shared conventions (L View timing, haptics vocabulary, setting names, the
+`[vr-perf]` line) live in a small C99 library called sfvr, vendored in
+`third_party/sfvr`. I use it across my Steam Frame ports so a player doesn't
+have to relearn anything between games, and its `STANDARD.md` describes the
+conventions. A vendored copy follows the host project's licence, so here it's
+GPL-3.0. `include/starfox/vr/system_layer.hpp` is a thin adapter on top that
+adds only the Menu + View chord.
+
+The refresh rate is requested with `XR_FB_display_refresh_rate`. By default I
+ask for the highest rate the runtime offers at or below 90 Hz, because the
+Frame's system 120 Hz setting doesn't apply to the game on its own (the
+runtime offered 72 to 144 and the request was logged). If the focused frame
+rate stays under 90% of the current rate for two 10 second windows, the game
+steps down one offered rate at a time to 72 Hz and stays there. Choosing
+SYSTEM stops the requests, though a rate that's already been requested can't be
+withdrawn mid-session.
+
 ## Files outside src/vr
 
 Flat builds shouldn't change, apart from the items marked below.
@@ -209,6 +261,12 @@ extensions, and `source_ui_text_packet` only draws ( ) + for the Frame menu.
 `set_inset_decals` switches on the inset-sign decal rule, and only the Frame
 loop calls it. `C_TYPE` is optional in the scene symbols.
 
+`OpenXrInput::set_system_layer` and `DesktopControlEdges` do the View hold, the
+Menu + View chord and the buzz only for the Frame, and keep the original
+Select-on-press and four-input reset chord otherwise. PCVR and Quest keep their
+original 20-byte preferences file. The Frame writes its own versioned one (v9)
+into its data folder, so don't point both players at the same `--data-dir`.
+
 ## What I've tested
 
 Host side, the ctest suite passes on macOS apart from a few tests that already
@@ -235,6 +293,11 @@ smoothing it feels good now. I've worn the cockpit view too. The cockpit
 geometry and input tests need your own Original and EX bundles, so CI doesn't
 run them.
 
+The system layer, haptics strength, the env overrides, the `[vr-perf]` line and
+the refresh rate request are covered by host tests with a fake OpenXR runtime.
+I haven't tried them in the headset yet, so I don't know how the buzz feels or
+whether the Frame's compositor honours every request.
+
 ## Known limitations
 
 You need your own ROM and a devkit-enabled Frame, and there's no store
@@ -243,3 +306,6 @@ for that, but I haven't captured a run, and I haven't compared against Proton
 or FEX.
 
 The cockpit is new, and other people may want the seat position adjusted.
+
+Menu labels added here have no translations yet and show in English. The
+desktop gamepad fallback has no haptic buzz, and EX has no authored rumble.

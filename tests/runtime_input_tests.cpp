@@ -822,6 +822,14 @@ int main() {
         auto invalid = saved_pregame;invalid.gpu_renderer = 2;
         require(!starfox::app::save_pregame_settings(pregame_test_path, invalid),
             "invalid GPU renderer setting was saved");
+        // 5x-10x render scales belong to GPU FAST.
+        auto ten = saved_pregame;ten.gpu_renderer = 1;ten.render_scale = 9;
+        require(starfox::app::save_pregame_settings(pregame_test_path, ten)
+            && starfox::app::load_pregame_settings(pregame_test_path, loaded_pregame)
+            && loaded_pregame.render_scale == 9U, "GPU FAST 10x render scale round trip failed");
+        auto accurate_ten = saved_pregame;accurate_ten.render_scale = 9;
+        require(!starfox::app::save_pregame_settings(pregame_test_path, accurate_ten),
+            "10x render scale was saved without GPU FAST");
     }
     for (std::uint8_t style = 0; style < starfox::render::effect_count; ++style) {
         auto settings = saved_pregame;

@@ -87,9 +87,19 @@ enum class RenderScale : std::uint8_t {
     scale_2x,
     scale_3x,
     scale_4x,
+    // GPU FAST only, desktop only: native-resolution 3D at 4K (16:9, 10x =
+    // 4000x2240) and 7680x2160 (32:9, 10x = 8000x2240).
+    scale_5x,
+    scale_6x,
+    scale_7x,
+    scale_8x,
+    scale_9x,
+    scale_10x,
 };
 
-inline constexpr std::size_t render_scale_count = 4U;
+inline constexpr std::size_t render_scale_count = 10U;
+// SOFTWARE and GPU ACCURATE keep the upstream 4x ceiling.
+inline constexpr std::size_t standard_render_scale_count = 4U;
 
 enum class PregamePage {
     main,

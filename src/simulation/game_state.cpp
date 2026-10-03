@@ -112,7 +112,7 @@ std::unique_ptr<GameSimulation> GameSimulation::restored_state(
         || !valid_enum(result->timing_mode_, TimingMode::original_speed)
         || !valid_enum(result->display_mode_, DisplayMode::super_ultrawide_32_9)
         || !valid_enum(result->renderer_mode_, RendererMode::software)
-        || !valid_enum(result->render_scale_, RenderScale::scale_4x)
+        || !valid_enum(result->render_scale_, RenderScale::scale_10x)
         || !valid_enum(result->crosshair_colour_, CrosshairColour::orange)
         || !valid_enum(result->two_d_filter_, TwoDFilterMode::scalefx)
         || !valid_enum(result->anti_aliasing_mode_, AntiAliasingMode::heavy)

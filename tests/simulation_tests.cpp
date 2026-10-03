@@ -7170,6 +7170,22 @@ int main(int argc, char** argv) {
                     == starfox::simulation::RenderScale::scale_1x
                     && !boot_game.smooth_polys(),
                 "Render Upscale enabled the replaced legacy effect");
+        // GPU FAST offers 5x-10x on desktop builds; other renderers keep 4x.
+        boot_game.set_gpu_renderer(starfox::simulation::GpuRenderer::fast);
+        drive_boot({0, starfox::input::left, 0});
+        require(boot_game.render_scale()
+                    == starfox::simulation::RenderScale::scale_10x,
+                "GPU FAST Render Upscale did not wrap backward to 10x");
+        boot_game.set_gpu_renderer(starfox::simulation::GpuRenderer::accurate);
+        drive_boot({0, starfox::input::left, 0});
+        require(boot_game.render_scale()
+                    == starfox::simulation::RenderScale::scale_3x,
+                "GPU ACCURATE Render Upscale did not stay within 1x-4x");
+        drive_boot({0, starfox::input::right, 0});
+        drive_boot({0, starfox::input::right, 0});
+        require(boot_game.render_scale()
+                    == starfox::simulation::RenderScale::scale_1x,
+                "GPU ACCURATE Render Upscale did not wrap forward after 4x");
         drive_boot({0, starfox::input::down, 0});
         select_menu_action(boot_game, starfox::simulation::PregamePage::two_d, 18U, &boot_audio);
         require(boot_game.pregame_selection() == 18U,

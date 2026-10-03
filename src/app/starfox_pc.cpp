@@ -466,6 +466,12 @@ constexpr std::array<std::string_view,
     "2X",
     "3X",
     "4X",
+    "5X",
+    "6X",
+    "7X",
+    "8X",
+    "9X",
+    "10X",
 }};
 
 ButtonMask with_swapped_face_buttons(
@@ -495,6 +501,15 @@ std::uint32_t render_scale_index(
 std::uint32_t render_scale_factor(
     starfox::simulation::RenderScale scale) noexcept {
     return render_scale_index(scale) + 1U;
+}
+
+// 5x-10x belong to GPU FAST. A test override or a renderer switch must not
+// hand them to SOFTWARE or GPU ACCURATE.
+std::uint32_t effective_render_scale_factor(
+    const starfox::simulation::GameSimulation& game) noexcept {
+    const auto factor = render_scale_factor(game.render_scale());
+    return game.gpu_fast() ? factor : std::min<std::uint32_t>(factor,
+        static_cast<std::uint32_t>(starfox::simulation::standard_render_scale_count));
 }
 
 std::string_view render_scale_name(
@@ -1802,7 +1817,11 @@ public:
                 || model->settings.focal_length!=temporal_projection->settings.focal_length)
                 temporal_projection_consistent=false;
         }
+        // DLSS/FSR reconstruct from a reduced render; above 4x that would only
+        // render below the output again, and their motion surfaces stop at
+        // 4096 pixels wide. 5x-10x present the native-resolution scene.
         if(!temporal_paused_ && temporal_enabled_ && stereo_mode==0 && output_width && output_height
+            && source_scale<=starfox::simulation::standard_render_scale_count
             && temporal_projection && temporal_projection_consistent
             && (fsr1_enabled() || (dlss_ && dlss_->native_raster()))) {
             const auto spatial=starfox::render::fsr1_input_extent({output_width,output_height},
@@ -7077,7 +7096,7 @@ int main(int argc, char** argv) {
         // Widescreen grows the scene symmetrically to 400x224 while HUD and
         // dialogue retain their original 224x192 coordinates in a centred
         // inset layer.
-        auto render_scale = render_scale_factor(game.render_scale());
+        auto render_scale = effective_render_scale_factor(game);
 #if defined(SDL_PLATFORM_IOS)
         auto ios_logged_scale=render_scale;
         auto ios_logged_flow=game.flow_state();
@@ -8779,7 +8798,7 @@ int main(int argc, char** argv) {
                 ? snes_height : superfx_height;
             const auto scene_offset_y = extend_scene_vertical
                 ? 0 : superfx_offset_y;
-            render_scale = render_scale_factor(game.render_scale());
+            render_scale = effective_render_scale_factor(game);
 #if defined(SDL_PLATFORM_IOS)
             if (render_scale!=ios_logged_scale || game.flow_state()!=ios_logged_flow) {
                 ios_logged_scale=render_scale;

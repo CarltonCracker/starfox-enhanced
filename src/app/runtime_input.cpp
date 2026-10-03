@@ -962,8 +962,10 @@ bool load_pregame_settings(
     }
     // Versions through V9 offered wasteful 5x-10x modes. Preserve those
     // users' intent at the new supported maximum instead of rejecting their
-    // otherwise valid settings file.
-    loaded.render_scale = std::min<std::uint8_t>(loaded.render_scale, 3U);
+    // otherwise valid settings file. GPU FAST brings 5x-10x back; only a file
+    // that also selects GPU FAST keeps them (older builds clamp to 4x).
+    loaded.render_scale = std::min<std::uint8_t>(loaded.render_scale,
+        loaded.gpu_renderer == 1U ? 9U : 3U);
     if (revision < 12) {
         loaded.two_d_filter = loaded.enhanced_graphics ? 1U : 0U;
     }
@@ -1005,7 +1007,7 @@ bool save_pregame_settings(
         || (settings.selected_level != 0U && (settings.selected_level < 11U
             || settings.selected_level > 79U || settings.selected_level % 10U == 0U))
         || settings.language > 5U || settings.experience > 1U || settings.music_volume > 100U
-        || settings.sfx_volume > 100U || settings.render_scale > 3U || settings.model_smoothing > 3U
+        || settings.sfx_volume > 100U || settings.render_scale > (settings.gpu_renderer == 1U ? 9U : 3U) || settings.model_smoothing > 3U
         || settings.gpu_renderer > 1U) {
         return false;
     }

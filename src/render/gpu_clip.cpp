@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_clip.hpp"
+#include "starfox/render/gpu_raster.hpp"
 #include "starfox/render/gpu_scene_counters.hpp"
 #if defined(STARFOX_SDL_GPU_EFFECTS)
 #include <SDL3/SDL.h>
@@ -165,7 +166,7 @@ void* GpuClip::enqueue_spans(void* command,void* materials,bool winding_independ
     if(masked_texels) *masked_texels=nullptr;
 #if defined(STARFOX_SDL_GPU_EFFECTS)
     try {
-        if(render_scale<1 || render_scale>4) throw std::runtime_error("Invalid span render scale");
+        if(render_scale<1 || render_scale>max_gpu_render_scale) throw std::runtime_error("Invalid span render scale");
         if(!command || !materials || !impl_->settings.polygon_count || !impl_->output || !impl_->spans_pipeline)
             throw std::runtime_error("Solid span emission requires clipped polygons and materials");
         if(materials==impl_->spans || materials==impl_->output)

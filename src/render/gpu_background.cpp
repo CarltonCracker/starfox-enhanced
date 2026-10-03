@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_background.hpp"
+#include "starfox/render/gpu_raster.hpp"
 #include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/temporal_jitter.hpp"
 #include <algorithm>
@@ -78,7 +79,7 @@ GpuRasterOutput GpuBackground::enqueue(void* device,void* command,const simulati
     const bool custom=s.logical_viewport[0] || s.logical_viewport[1];
     const auto logical_width=custom?s.logical_viewport[0]:width/(scale?scale:1);
     const auto logical_height=custom?s.logical_viewport[1]:height/(scale?scale:1);
-    if(!valid_raster_jitter(s.raster_jitter) || !device || !command || !width || !height || width>4096 || height>4096 || !scale || scale>4
+    if(!valid_raster_jitter(s.raster_jitter) || !device || !command || !width || !height || width>8192 || height>8192 || !scale || scale>max_gpu_render_scale
         || (!custom && (width%scale || height%scale)) || !logical_width || !logical_height || logical_width>4096 || logical_height>4096 || s.layer<1 || s.layer>3
         || unsigned(s.priority)>2 || unsigned(s.tag)>4 || s.horizontal_origin < -65536 || s.horizontal_origin>65536
         || s.scroll_x < -1000000 || s.scroll_x>1000000 || s.scroll_y < -1000000 || s.scroll_y>1000000 || s.unique_regions.size()>64) {

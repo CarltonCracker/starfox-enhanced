@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_model.hpp"
+#include "starfox/render/gpu_raster.hpp"
 #include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/packed_projection.hpp"
 #include "starfox/render/packed_faces.hpp"
@@ -324,7 +325,7 @@ GpuRasterOutput GpuModel::enqueue(void* device,void* command,const assets::Shape
 #if defined(STARFOX_SDL_GPU_EFFECTS)
     try {
         if(SDL_getenv("STARFOX_TRACE_GPU_MODEL_DISPATCH")) std::cerr<<"model-enqueue: "<<shape.name<<'\n';
-        if(!device || !command || !width || !height || width>32767 || height>32767 || settings.render_scale<1 || settings.render_scale>4)
+        if(!device || !command || !width || !height || width>32767 || height>32767 || settings.render_scale<1 || settings.render_scale>max_gpu_render_scale)
             throw std::runtime_error("Invalid GPU model input");
         if(previous_pose && background)
             throw std::runtime_error("Temporal model draws must be merged after motion generation");

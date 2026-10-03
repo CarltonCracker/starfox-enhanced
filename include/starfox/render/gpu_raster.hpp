@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 namespace starfox::render {
+// Highest render scale the GPU scene path accepts (GPU FAST 10x).
+inline constexpr std::uint32_t max_gpu_render_scale = 10U;
 void replay_raster_commands(const RasterCommands&,Framebuffer&,SurfaceBuffer*,bool clear_target=true);
 // Borrowed SDL GPU buffers, valid until the next render or device release.
 // pixels packs index/tag/surface-palette/valid into four bytes; surfaces is

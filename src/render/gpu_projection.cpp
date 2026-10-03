@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_projection.hpp"
+#include "starfox/render/gpu_raster.hpp"
 #include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/temporal_jitter.hpp"
 #include "starfox/render/grid_projection.hpp"
@@ -245,7 +246,7 @@ void* GpuProjection::enqueue_text(void* device,void* command,const ScaledTextRen
     try {
         const bool custom=logical_viewport[0] || logical_viewport[1];
         if(!device || !command || !width || !height || width>8192 || height>8192
-            || !scale || scale>4 || (!custom && (width%scale || height%scale))
+            || !scale || scale>max_gpu_render_scale || (!custom && (width%scale || height%scale))
             || (custom && (!logical_viewport[0] || !logical_viewport[1]
                 || logical_viewport[0]>2048 || logical_viewport[1]>2048)) || frame.glyphs.size()>256
             || frame.character_size< -1 || frame.character_size>254

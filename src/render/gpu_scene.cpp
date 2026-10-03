@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_scene.hpp"
+#include "starfox/render/gpu_raster.hpp"
 #include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/temporal_jitter.hpp"
 #include "starfox/render/gpu_model.hpp"
@@ -34,7 +35,7 @@ std::optional<std::vector<GpuSceneDraw>> resize_scene_raster(
                 unsigned scale;
                 if constexpr(std::is_same_v<T,GpuModelDraw>) scale=draw.settings.render_scale;
                 else scale=draw.scale;
-                if(scale<1 || scale>4 || width%scale || height%scale) return false;
+                if(scale<1 || scale>max_gpu_render_scale || width%scale || height%scale) return false;
                 const std::array<std::uint32_t,2> logical{width/scale,height/scale};
                 if constexpr(std::is_same_v<T,GpuBackgroundDraw>) draw.settings.logical_viewport=logical;
                 else draw.logical_viewport=logical;
@@ -147,33 +148,33 @@ void GpuSceneRecording::flush(RasterCommands& pending) {
 }
 void GpuSceneRecording::append_model(RasterCommands& pending,GpuModelDraw draw) {
     const auto scale=draw.settings.render_scale;
-    if(!draw.shape || scale<1 || scale>4 || width_%scale || height_%scale)
+    if(!draw.shape || scale<1 || scale>max_gpu_render_scale || width_%scale || height_%scale)
         throw std::runtime_error("Invalid recorded scene model");
     flush(pending);draws_.emplace_back(std::move(draw));
 }
 void GpuSceneRecording::finish(RasterCommands& pending) {flush(pending);}
 void GpuSceneRecording::append_indexed_layer(RasterCommands& pending,RasterCommands source,
     const LayerCompositeSettings& settings,std::uint32_t source_scale,std::uint32_t destination_scale) {
-    if(!source_scale || source_scale>4 || !destination_scale || destination_scale>4)
+    if(!source_scale || source_scale>max_gpu_render_scale || !destination_scale || destination_scale>max_gpu_render_scale)
         throw std::runtime_error("Invalid indexed layer scales");
     if(source.commands.empty()) return;
     flush(pending);raster_.push_back(std::move(source));
     draws_.emplace_back(GpuIndexedLayerDraw{&raster_.back(),settings,source_scale,destination_scale,{width_,height_}});
 }
 void GpuSceneRecording::append_background(RasterCommands& pending,GpuBackgroundDraw draw) {
-    if(!draw.ppu || !draw.scale || draw.scale>4 || width_%draw.scale || height_%draw.scale
+    if(!draw.ppu || !draw.scale || draw.scale>max_gpu_render_scale || width_%draw.scale || height_%draw.scale
         || draw.settings.layer<1 || draw.settings.layer>3)
         throw std::runtime_error("Invalid recorded background");
     flush(pending);draws_.emplace_back(std::move(draw));
 }
 void GpuSceneRecording::append_text(RasterCommands& pending,GpuTextDraw draw) {
-    if(!draw.scale || draw.scale>4 || width_%draw.scale || height_%draw.scale || draw.frame.glyphs.size()>256)
+    if(!draw.scale || draw.scale>max_gpu_render_scale || width_%draw.scale || height_%draw.scale || draw.frame.glyphs.size()>256)
         throw std::runtime_error("Invalid recorded text");
     if(draw.frame.glyphs.empty()) return;
     flush(pending);draws_.emplace_back(std::move(draw));
 }
 void GpuSceneRecording::append_particles(RasterCommands& pending,GpuParticleDraw draw) {
-    if(!draw.scale || draw.scale>4 || width_%draw.scale || height_%draw.scale
+    if(!draw.scale || draw.scale>max_gpu_render_scale || width_%draw.scale || height_%draw.scale
         || draw.frame.particles.size()>300)
         throw std::runtime_error("Invalid recorded particles");
     std::erase_if(draw.frame.particles,[&](const auto& p){return !p.life || p.owner!=draw.frame.owner;});
@@ -181,14 +182,14 @@ void GpuSceneRecording::append_particles(RasterCommands& pending,GpuParticleDraw
     flush(pending);draws_.emplace_back(std::move(draw));
 }
 void GpuSceneRecording::append_dust(RasterCommands& pending,GpuDustDraw draw) {
-    if(!draw.scale || draw.scale>4 || width_%draw.scale || height_%draw.scale
+    if(!draw.scale || draw.scale>max_gpu_render_scale || width_%draw.scale || height_%draw.scale
         || draw.frame.points.size()>simulation::kMaximumDustPoints)
         throw std::runtime_error("Invalid recorded dust");
     if(draw.frame.points.empty()) return;
     flush(pending);draws_.emplace_back(std::move(draw));
 }
 void GpuSceneRecording::append_grid(RasterCommands& pending,GpuGridDraw draw) {
-    if(!draw.scale || draw.scale>4 || width_%draw.scale || height_%draw.scale)
+    if(!draw.scale || draw.scale>max_gpu_render_scale || width_%draw.scale || height_%draw.scale)
         throw std::runtime_error("Invalid recorded grid scale");
     flush(pending);draws_.emplace_back(std::move(draw));
 }
@@ -511,7 +512,7 @@ GpuRasterOutput GpuScene::enqueue(void* command,const GpuRasterOutput& front,con
     try {
         if(!impl_->owned_encoding && impl_->pending()) throw std::runtime_error("Finish submitted scene work before borrowed enqueue");
         impl_->resident={};
-        if(layer && (!layer->source_scale || layer->source_scale>4 || !layer->scale || layer->scale>4
+        if(layer && (!layer->source_scale || layer->source_scale>max_gpu_render_scale || !layer->scale || layer->scale>max_gpu_render_scale
             || !layer->reference_size[0] || !layer->reference_size[1]
             || !front.width || !front.height || front.width%layer->source_scale || front.height%layer->source_scale))
             throw std::runtime_error("Invalid GPU indexed layer mapping");
@@ -587,7 +588,7 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
             if(const auto* model=std::get_if<GpuModelDraw>(&draw)) {
                 const auto scale=model->settings.render_scale;
                 const bool custom=model->logical_viewport[0] || model->logical_viewport[1];
-                if(!model->shape || scale<1 || scale>4 || (!custom && (width%scale || height%scale
+                if(!model->shape || scale<1 || scale>max_gpu_render_scale || (!custom && (width%scale || height%scale
                     || width/scale>32767 || height/scale>32767)) || (custom &&
                     (!model->logical_viewport[0] || !model->logical_viewport[1] || model->logical_viewport[0]>32767 || model->logical_viewport[1]>32767)))
                     throw std::runtime_error("Invalid GPU scene model layout");
@@ -603,14 +604,14 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
                     if(ray_triangles>1'000'000) throw std::runtime_error("GPU ray scene topology too large");
                 }
             } else if(const auto* layer=std::get_if<GpuIndexedLayerDraw>(&draw)) {
-                if(!layer->commands || !layer->source_scale || layer->source_scale>4 || !layer->scale || layer->scale>4
+                if(!layer->commands || !layer->source_scale || layer->source_scale>max_gpu_render_scale || !layer->scale || layer->scale>max_gpu_render_scale
                     || !layer->reference_size[0] || !layer->reference_size[1]
                     || layer->commands->width()%layer->source_scale || layer->commands->height()%layer->source_scale)
                     throw std::runtime_error("Invalid indexed scene layer");
             } else if(const auto* bg=std::get_if<GpuBackgroundDraw>(&draw)) {
                 const auto logical=bg->settings.logical_viewport;
                 const bool custom=logical[0] || logical[1];
-                if(!bg->ppu || !bg->scale || bg->scale>4
+                if(!bg->ppu || !bg->scale || bg->scale>max_gpu_render_scale
                     || (!custom && (width%bg->scale || height%bg->scale))
                     || (custom && (!logical[0] || !logical[1] || logical[0]>4096 || logical[1]>4096))
                     || bg->settings.layer<1 || bg->settings.layer>3)
@@ -618,7 +619,7 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
             } else if(const auto* text=std::get_if<GpuTextDraw>(&draw)) {
                 const auto logical=text->logical_viewport;
                 const bool custom=logical[0] || logical[1];
-                if(!text->scale || text->scale>4
+                if(!text->scale || text->scale>max_gpu_render_scale
                     || (!custom && (width%text->scale || height%text->scale))
                     || (custom && (!logical[0] || !logical[1] || logical[0]>2048 || logical[1]>2048))
                     || text->frame.glyphs.size()>256)
@@ -626,7 +627,7 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
             } else if(const auto* particles=std::get_if<GpuParticleDraw>(&draw)) {
                 const auto logical=particles->logical_viewport;
                 const bool custom=logical[0] || logical[1];
-                if(!particles->scale || particles->scale>4
+                if(!particles->scale || particles->scale>max_gpu_render_scale
                     || (!custom && (width%particles->scale || height%particles->scale))
                     || (custom && (logical[0]<2 || logical[1]<2 || logical[0]>32767 || logical[1]>32767))
                     || particles->frame.particles.size()>300)
@@ -634,7 +635,7 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
             } else if(const auto* dust=std::get_if<GpuDustDraw>(&draw)) {
                 const auto logical=dust->logical_viewport;
                 const bool custom=logical[0] || logical[1];
-                if(!dust->scale || dust->scale>4
+                if(!dust->scale || dust->scale>max_gpu_render_scale
                     || (!custom && (width%dust->scale || height%dust->scale))
                     || (custom && (logical[0]<2 || logical[1]<2 || logical[0]>32767 || logical[1]>32767))
                     || dust->frame.points.size()>simulation::kMaximumDustPoints
@@ -644,7 +645,7 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
             } else if(const auto* grid=std::get_if<GpuGridDraw>(&draw)) {
                 const auto logical=grid->logical_viewport;
                 const bool custom=logical[0] || logical[1];
-                if(!grid->scale || grid->scale>4
+                if(!grid->scale || grid->scale>max_gpu_render_scale
                     || (!custom && (width%grid->scale || height%grid->scale))
                     || (custom && (!logical[0] || !logical[1] || logical[0]>32767 || logical[1]>32767)))
                     throw std::runtime_error("Invalid GPU grid layout");

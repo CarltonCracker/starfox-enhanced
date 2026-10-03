@@ -44,6 +44,9 @@ struct GpuComposite::Impl {
     SDL_GPUTexture* rgba{};SDL_GPUCommandBuffer* command{};SDL_GPUFence* fence{};
     Uint32 width{},height{};bool valid{},has_depth{},has_motion{};
     std::vector<Uint32> packed;
+    // Raw inputs that produced `packed`, so an unchanged CPU layer can skip
+    // the per-pixel pack/compare loop. Valid only right after that loop ran.
+    std::array<std::vector<Uint8>,5> packedInputs;bool packedInputsValid{},packedInputsTags{};
     std::vector<std::pair<Uint32,Uint32>> dirtySpans;
     std::array<Uint32,256> cachedPalette{};
     Uint32 cachedUniformValue{},cachedUniformBytes{},lastCpuUploadBytes{},lastPaletteUploadBytes{};
@@ -217,6 +220,22 @@ struct GpuComposite::Impl {
         if(!uniform && !striped) {
             const bool comparePrevious=allowCpuCache && cachedPackedValid && capacities[0]>=bytes
                 && cachedUniformBytes==bytes && packed.size()==count;
+            // A static CPU layer (the launch tunnel draws one every frame) packs
+            // to exactly the previous words: nothing is dirty and nothing is
+            // uploaded. Proving that with memcmp over the raw inputs costs far
+            // less than the per-pixel loop below (~4 ms at 4x 32:9).
+            // STARFOX_TEST_REPACK_STATIC_CPU_LAYER=1 always runs the loop.
+            const std::array<std::span<const Uint8>,5> inputs{std::span<const Uint8>{cpu.pixels()},
+                cpu.layer_tags_enabled()?std::span<const Uint8>{cpu.layer_tags()}:std::span<const Uint8>{},
+                foreground,backgroundCoverage,afterLate};
+            const bool sameInputs=comparePrevious && packedInputsValid
+                && packedInputsTags==cpu.layer_tags_enabled()
+                && !std::getenv("STARFOX_TEST_REPACK_STATIC_CPU_LAYER")
+                && std::equal(inputs.begin(),inputs.end(),packedInputs.begin(),[](auto now,const auto& before) {
+                    return now.size()==before.size() && (now.empty() || std::memcmp(now.data(),before.data(),now.size())==0);
+                });
+            if(sameInputs) {uniform=false;uniformValue=packed[0];}
+            else {
             packed.resize(count);
             uniform=true;
             for(Uint32 y=0;y<cpu.stored_height();++y) {
@@ -241,7 +260,10 @@ struct GpuComposite::Impl {
                 }
             }
             if(!comparePrevious) dirtySpans.emplace_back(0,Uint32(count));
-        }
+            for(std::size_t i=0;i<inputs.size();++i) packedInputs[i].assign(inputs[i].begin(),inputs[i].end());
+            packedInputsTags=cpu.layer_tags_enabled();packedInputsValid=true;
+            }
+        } else packedInputsValid=false;
         const bool gpuUniform=allowCpuCache && uniform;
         const bool gpuStriped=allowCpuCache && striped;
         if(gpuUniform || gpuStriped) dirtySpans.clear();
@@ -428,6 +450,7 @@ bool GpuComposite::compose(const GpuRasterOutput& source,std::uint32_t scale,con
     try {if(!impl_->device) impl_->initialize(static_cast<SDL_GPUDevice*>(source.device));impl_->compose(source,scale,cpu,foreground,settings,palette,late,background,afterLate,worldOnly,mapping,jitter);return true;}
     catch(const std::exception& e) {if(impl_->command) {SDL_CancelGPUCommandBuffer(impl_->command);impl_->command=nullptr;}
         impl_->valid=false;impl_->cachedUniformValid=impl_->cachedPackedValid=impl_->cachedPaletteValid=false;
+        impl_->packedInputsValid=false;
         impl_->status=e.what();return false;}
 #else
     (void)source;(void)scale;(void)cpu;(void)foreground;(void)settings;(void)palette;(void)late;(void)background;(void)afterLate;(void)worldOnly;(void)mapping;return false;

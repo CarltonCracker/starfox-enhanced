@@ -197,3 +197,29 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+## OpenXR SDK 1.1.63 (loader)
+
+Source: <https://github.com/KhronosGroup/OpenXR-SDK>
+
+Pinned revision: `f2448a8797c85814aa892efc1ab8707900fbcc78`
+
+Copyright 2015-2026 The Khronos Group Inc.
+
+The VR targets build the OpenXR loader as a static library. The loader sources
+are dual-licensed `Apache-2.0 OR MIT`, and the loader's bundled jsoncpp is
+public domain or MIT. The per-file licence data in the upstream source is
+authoritative. Licence texts: <https://www.apache.org/licenses/LICENSE-2.0> and
+<https://opensource.org/licenses/MIT>.
+
+## Vulkan-Headers
+
+Source: <https://github.com/KhronosGroup/Vulkan-Headers>
+
+Pinned revision: `e5323cdea4ed92dfe825397f6047b8604a40423c`
+
+Copyright 2015-2023 The Khronos Group Inc.
+
+The VR targets use these headers under `Apache-2.0 OR MIT`. Licence texts:
+<https://www.apache.org/licenses/LICENSE-2.0> and
+<https://opensource.org/licenses/MIT>.

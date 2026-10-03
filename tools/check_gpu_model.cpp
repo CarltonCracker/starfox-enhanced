@@ -1,5 +1,6 @@
 #include "starfox/render/gpu_model.hpp"
 #include "starfox/render/gpu_scene.hpp"
+#include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/packed_faces.hpp"
 #include "starfox/render/face_material.hpp"
 #include "starfox/assets/shape_decoder.hpp"
@@ -320,12 +321,16 @@ int main(int argc,char** argv)try {
                     front=legacy.enqueue_commands(device,command,batch,metadata,((view+layer/2)&1U)!=0);
                     if(!front.pixels) {SDL_CancelGPUCommandBuffer(command);throw std::runtime_error(legacy.status());}
                 } else if(mixed_batch) {
+                    // GPU FAST: batch draws opt into the bounded in-place raster.
+                    const bool bounded=std::getenv("STARFOX_TEST_BOUNDED_MODEL_RASTER")!=nullptr;
                     if(recorded_batch) {
-                        recording.append_model(pending,{&shape,layer_pose,settings,metadata});
+                        starfox::render::GpuModelDraw recorded{&shape,layer_pose,settings,metadata};
+                        recorded.bounded_raster=bounded;
+                        recording.append_model(pending,recorded);
                         continue;
                     }
                     starfox::render::GpuModelDraw model_draw{&shape,layer_pose,settings,metadata};
-                    model_draw.geometry_depth=terrain;
+                    model_draw.geometry_depth=terrain;model_draw.bounded_raster=bounded;
                     draws.emplace_back(model_draw);
                     continue;
                 } else {
@@ -523,5 +528,12 @@ int main(int argc,char** argv)try {
     if(scene_mode) std::cout<<(mixed_scene?"Five-layer mixed":"Three-layer model")<<" resident composition: black writes, independent surfaces and ping-pong reuse passed\n";
     if(recorded_batch) std::cout<<"Recorded CPU fallback: pixels, layer tags, write coverage and surface samples match direct rendering exactly\n";
     if(queued_batch) std::cout<<"Four changing submissions without readback before each compared frame preserve final geometry and metadata\n";
+    if(std::getenv("STARFOX_TEST_BOUNDED_MODEL_RASTER") && starfox::render::scene_counters::enabled()) {
+        // With STARFOX_TRACE_SCENE_COST, prove batches really took the bounded path.
+        const auto bounded=starfox::render::scene_counters::frame_totals()[
+            std::size_t(starfox::render::scene_counters::Counter::bounded_dispatches)].load();
+        std::cout<<"bounded-dispatches="<<bounded<<'\n';
+        require(bounded!=0);
+    }
     return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}

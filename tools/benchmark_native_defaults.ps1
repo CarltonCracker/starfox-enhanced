@@ -31,7 +31,10 @@ param([string]$Executable='build/current/starfox_pc.exe',
  # Prefer the low-power adapter (an integrated GPU on hybrid systems).
  [switch]$LowPowerGpu,
  [switch]$GodMode,
- [ValidateRange(0,1000000)][int]$SlowFrameUs=0)
+ [ValidateRange(0,1000000)][int]$SlowFrameUs=0,
+ # Source ticks run before measuring. The default skips LEVEL1_1's opening
+ # launch tunnel; 0 measures it (about 1,030 frames at 60 Hz).
+ [ValidateRange(0,8000)][int]$PrerollTicks=1000)
 $ErrorActionPreference='Stop'
 if($Vsync -and !$Visible){throw 'VSync measurements require Visible; hidden swapchains can be heavily throttled.'}
 foreach($experience in $Experiences) {
@@ -51,7 +54,7 @@ $rows=New-Object System.Collections.Generic.List[object]
 try {
  $settings=@{
   SDL_AUDIODRIVER='dummy';STARFOX_TEST_HIDDEN='1';STARFOX_TEST_FRAMES="$Frames";
-  STARFOX_TEST_SKIP_PREROLL='1';STARFOX_TEST_PREROLL_TICKS='1000';STARFOX_TEST_UNPACED='1';
+  STARFOX_TEST_SKIP_PREROLL='1';STARFOX_TEST_PREROLL_TICKS="$PrerollTicks";STARFOX_TEST_UNPACED='1';
   STARFOX_TEST_PRESENTATION_FPS="$Fps";STARFOX_TEST_TIMING_MODE='ORIGINAL';
   STARFOX_TEST_VSYNC='0';
   STARFOX_TRACE_PROFILE='1';STARFOX_TRACE_PROFILE_DISTRIBUTION='1';STARFOX_TEST_PROFILE_WARMUP='60'

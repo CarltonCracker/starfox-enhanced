@@ -14,7 +14,8 @@ param([string]$Executable='build/current/starfox_pc.exe',
  [ValidateSet('SOFTWARE','GPU','GPU_ACCURATE','GPU_FAST')][string[]]$Renderers=@('SOFTWARE','GPU'),
  # Any stage label from the experience's symbol map, e.g. LEVEL1_2.
  [string[]]$Levels=@('LEVEL1_1','LEVEL2_3'),
- [ValidateRange(1,4)][int[]]$RenderScale=@(1),
+ # 5-10 require GPU_FAST; other renderers are clamped to 4x.
+ [ValidateRange(1,10)][int[]]$RenderScale=@(1),
  [ValidateSet('4_3','16_9','32_9')][string[]]$DisplayMode=@('4_3'),
  # Forwarded as STARFOX_TEST_ASTEROID_MODELS; inert in builds without the
  # 3D asteroid option.

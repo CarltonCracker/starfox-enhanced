@@ -27,7 +27,7 @@ param(
     [switch]$Bomb,
     [switch]$ScrambleWipe,
     [ValidateRange(0,3)][int]$Bloom=2,
-    [ValidateSet(1,2,4)][int[]]$Scales=@(1,2,4),
+    [ValidateRange(1,10)][int[]]$Scales=@(1,2,4),
     [switch]$FpsOverlay,
     [ValidateSet('','Slot','Exit')][string]$PanelOverlay='',
     [ValidateRange(-1,255)][int]$Message=-1

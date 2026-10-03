@@ -97,7 +97,11 @@ int main(int argc,char** argv)try {
         std::cout<<"Pending-work and invalid-dimension rejection preserve caller cancellation; subsequent mixed rendering tests recovery\n";
     }
     const unsigned width=(live_wingman || live_ex61)?400:224,height=(live_wingman || live_ex61)?224:192;
-    SDL_GPUTransferBufferCreateInfo ti{SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD,width*height*((terrain || live_wingman || wobble_bypass || backface || colour_warp || wave || axis || billboard_batch || destruction)?16U:4U)*20+4096,0};
+    // Readback holds scale^2 pixels of colour (4 B) and surfaces (16 B).
+    // STARFOX_TEST_MODEL_SCALE=N (1-10) checks exactly that scale.
+    const unsigned requested_scale=SDL_getenv("STARFOX_TEST_MODEL_SCALE")?unsigned(std::stoul(SDL_getenv("STARFOX_TEST_MODEL_SCALE"))):0U;
+    const unsigned default_squared=(terrain || live_wingman || wobble_bypass || backface || colour_warp || wave || axis || billboard_batch || destruction)?16U:4U;
+    SDL_GPUTransferBufferCreateInfo ti{SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD,width*height*std::max(default_squared,requested_scale*requested_scale)*20+4096,0};
     auto* download=SDL_CreateGPUTransferBuffer(device,&ti);require(download);
     if(mixed_batch) {
         auto* command=SDL_AcquireGPUCommandBuffer(device);require(command);
@@ -176,17 +180,19 @@ int main(int argc,char** argv)try {
         }
         for(unsigned isolated_layer=0;isolated_layer<(isolated_layers?3U:1U);++isolated_layer)
         for(unsigned mode=0;mode<(wobble_combinations?10U:warp_alternate?5U:destruction?5U:alternate?4U:1U);++mode)
-        for(unsigned view:{0U,1U,2U,3U,4U,5U,6U}) for(unsigned scale:{1U,2U,4U}) {
+        for(unsigned view:{0U,1U,2U,3U,4U,5U,6U}) for(unsigned scale:{1U,2U,4U,requested_scale}) {
             if(view==6 && !billboard_batch) continue;
             if(const auto* requested=SDL_getenv("STARFOX_TEST_MODEL_VIEW");requested && view!=std::stoul(requested)) continue;
-            if(const auto* requested=SDL_getenv("STARFOX_TEST_MODEL_SCALE");requested && scale!=std::stoul(requested)) continue;
+            // A requested scale (GPU FAST allows up to 10x) replaces the defaults.
+            if(requested_scale && scale!=requested_scale) continue;
+            if(!scale) continue;
             check_context=name+" mode "+std::to_string(mode)+" view "+std::to_string(view)+" scale "+std::to_string(scale);
             if(SDL_getenv("STARFOX_TEST_CONTINUOUS_FIRST") && view<3) continue;
             if(native_axis && (view>=3 || scale!=1))continue;
             if(native_backface && (view>=3 || scale!=1))continue;
             if(live_wingman && view!=0) continue;
             if(live_ex61 && (view!=0 || scale!=1)) continue;
-            if(scale==4 && !terrain && !live_wingman && !wobble_bypass && !backface && !colour_warp && !wave && !axis && !billboard_batch && !destruction) continue;
+            if(scale==4 && !requested_scale && !terrain && !live_wingman && !wobble_bypass && !backface && !colour_warp && !wave && !axis && !billboard_batch && !destruction) continue;
             if(matrix_only && view>=4) continue;
             starfox::render::RenderSettings settings;settings.render_scale=scale;
             settings.backface_culling=backface;

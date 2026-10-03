@@ -35,7 +35,9 @@ param([string]$Executable='build/current/starfox_pc.exe',
  [ValidateRange(0,1000000)][int]$SlowFrameUs=0,
  # Source ticks run before measuring. The default skips LEVEL1_1's opening
  # launch tunnel; 0 measures it (about 1,030 frames at 60 Hz).
- [ValidateRange(0,8000)][int]$PrerollTicks=1000)
+ [ValidateRange(0,8000)][int]$PrerollTicks=1000,
+ # Window (swapchain) size as WIDTHxHEIGHT, e.g. 3840x2160; empty keeps 1024x896.
+ [ValidatePattern('^(\d+x\d+)?$')][string]$WindowSize='')
 $ErrorActionPreference='Stop'
 if($Vsync -and !$Visible){throw 'VSync measurements require Visible; hidden swapchains can be heavily throttled.'}
 foreach($experience in $Experiences) {
@@ -75,6 +77,7 @@ try {
  if($AsteroidModels){$settings.STARFOX_TEST_ASTEROID_MODELS=$AsteroidModels}
  if($TraceSceneCost){$settings.STARFOX_TRACE_SCENE_COST='1'}
  if($SlowFrameUs){$settings.STARFOX_TRACE_SLOW_FRAME_US=[string]$SlowFrameUs}
+ if($WindowSize){$settings.STARFOX_TEST_WINDOW_SIZE=$WindowSize}
  $settings.STARFOX_TEST_GOD_MODE=if($GodMode){'1'}else{'0'}
  if($Visible) {$settings.Remove('STARFOX_TEST_HIDDEN')}
  if($DisableDlssRuntime) {

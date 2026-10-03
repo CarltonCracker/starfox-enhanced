@@ -1580,8 +1580,20 @@ public:
         auto window_flags = SDL_WINDOW_RESIZABLE;
         if (start_fullscreen) window_flags |= SDL_WINDOW_FULLSCREEN;
 #endif
+        // Benchmarks can present at a real output size (e.g. 3840x2160).
+        int window_width=1024,window_height=896;
+        if (const auto* size=std::getenv("STARFOX_TEST_WINDOW_SIZE");
+            size && std::getenv("STARFOX_TEST_FRAMES")) {
+            char* end=nullptr;
+            const auto width=std::strtol(size,&end,10);
+            const auto height=end && *end=='x' ? std::strtol(end+1,&end,10) : 0L;
+            if (end && *end=='\0' && width>=256 && width<=16384
+                && height>=224 && height<=16384) {
+                window_width=int(width);window_height=int(height);
+            }
+        }
         window_ = SDL_CreateWindow(
-            "Star Fox Enhanced - native PC runtime", 1024, 896,
+            "Star Fox Enhanced - native PC runtime", window_width, window_height,
             window_flags | (std::getenv("STARFOX_TEST_HIDDEN") ? SDL_WINDOW_HIDDEN : 0));
         if (window_ == nullptr) {
             throw std::runtime_error{
@@ -1590,6 +1602,11 @@ public:
         recreate_renderer(renderer_mode);
         if(!std::getenv("STARFOX_TEST_HIDDEN")) SDL_ShowWindow(window_);
         static_cast<void>(SDL_SyncWindow(window_));
+        if (std::getenv("STARFOX_TEST_WINDOW_SIZE")) {
+            int pixels_w=0,pixels_h=0;
+            SDL_GetWindowSizeInPixels(window_,&pixels_w,&pixels_h);
+            std::cerr<<"test-window-pixels: "<<pixels_w<<'x'<<pixels_h<<'\n';
+        }
         // Put an actual black frame on the desktop before ROM decoding, game
         // construction or audio-device setup can begin. A merely-created SDL
         // window can remain compositor-transparent until its first present.

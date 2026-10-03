@@ -199,6 +199,9 @@ void main(uint3 id:SV_DispatchThreadID) {
         if(!sparse && have_pixel && have_surface) break;
     }
     if((reserved&0x40000000U)!=0 && have_pixel) packed|=0x04000000U;
+    // In place, a pixel no command touched already holds its final value.
+    // Skip the read-modify-write of colour, surface and depth.
+    if(in_place && !have_pixel && surface_owner==0) return;
     if(has_back!=0) {
         uint backIndex=id.y*width+id.x;
         uint back=in_place?pixels[backIndex]:back_pixels[backIndex];

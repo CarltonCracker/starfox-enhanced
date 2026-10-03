@@ -111,7 +111,8 @@ void GpuClip::release_device()noexcept {
 }
 void* GpuClip::enqueue(void* device,void* command,void* points,void* corners,
     void* polygons,void* visibility,const NativeClipSettings& settings,bool continuous,
-    void* projection_params,std::uint32_t projection_count,void* point_residuals,std::uint32_t residual_count) {
+    void* projection_params,std::uint32_t projection_count,void* point_residuals,std::uint32_t residual_count,
+    std::uint32_t render_scale,std::array<std::uint32_t,2> raster_size) {
     if(!device || !command || !points || !corners || !polygons || !visibility
         || !settings.polygon_count || settings.polygon_count>65536
         || settings.width<=0 || settings.width>32767 || settings.height<=0 || settings.height>32767) {
@@ -135,9 +136,14 @@ void* GpuClip::enqueue(void* device,void* command,void* points,void* corners,
         if(trace) std::cerr<<"clip-enqueue: uniforms continuous="<<continuous
             <<" polygons="<<settings.polygon_count<<" points="<<settings.point_count
             <<" corners="<<settings.corner_count<<" residuals="<<residual_count<<'\n';
-        auto uniforms=settings;uniforms.reserved[0]=projection_params?projection_count:0;
-        uniforms.reserved[1]=continuous && point_residuals?residual_count:0;
-        SDL_PushGPUComputeUniformData(cmd,0,&uniforms,sizeof(uniforms));
+        struct {NativeClipSettings clip;float stored_scale[2];Uint32 padding[2];} uniforms{settings,{},{}};
+        uniforms.clip.reserved[0]=projection_params?projection_count:0;
+        uniforms.clip.reserved[1]=continuous && point_residuals?residual_count:0;
+        // Same stored scale as enqueue_spans' pointAt (rasterScale or renderScale).
+        const bool custom=raster_size[0] || raster_size[1];
+        uniforms.stored_scale[0]=custom?float(raster_size[0])/settings.width:float(render_scale);
+        uniforms.stored_scale[1]=custom?float(raster_size[1])/settings.height:float(render_scale);
+        SDL_PushGPUComputeUniformData(cmd,0,&uniforms,continuous?sizeof(uniforms):sizeof(uniforms.clip));
         SDL_GPUStorageBufferReadWriteBinding binding{};binding.buffer=impl_->output;binding.cycle=true;
         if(trace) std::cerr<<"clip-enqueue: begin\n";
         auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,&binding,1);Impl::require(pass);

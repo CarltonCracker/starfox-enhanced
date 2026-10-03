@@ -573,7 +573,8 @@ GpuRasterOutput GpuModel::enqueue(void* device,void* command,const assets::Shape
             }
         }
         auto* clipped=impl_->clip.enqueue(device,command,projected,clip_corners,clip_polygons,visible,cs,vertices.continuous,
-            vertices.continuous?b[10]:camera,vertices.continuous?cs.polygon_count:vertex_count,point_residuals,point_residuals?cs.point_count:0);
+            vertices.continuous?b[10]:camera,vertices.continuous?cs.polygon_count:vertex_count,point_residuals,point_residuals?cs.point_count:0,
+            settings.render_scale,raster_size);
         if(!clipped) throw std::runtime_error(impl_->clip.status());
         void* masked_texels=nullptr;
         const bool repeated_rows=(pose.wobble_mode&1U)!=0;

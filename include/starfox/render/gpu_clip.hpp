@@ -28,7 +28,11 @@ public:
     void* enqueue(void* device,void* command,void* points,void* corners,
         void* polygons,void* visibility,const NativeClipSettings& settings,bool continuous=false,
         void* projection_params=nullptr,std::uint32_t projection_count=0,
-        void* point_residuals=nullptr,std::uint32_t residual_count=0);
+        void* point_residuals=nullptr,std::uint32_t residual_count=0,
+        std::uint32_t render_scale=0,std::array<std::uint32_t,2> raster_size={});
+    // render_scale/raster_size: pass the values the following enqueue_spans
+    // will use. Above 4x, continuous vertices are narrowed so spans' scaled
+    // rounding matches the exact value; 0 (or <=4x) leaves output unchanged.
     // Optional continuous projection residuals (32 bytes/point). Retains screen
     // tails through clipping; count must cover every referenced point. Format 2
     // retains raw binary64 screen coordinates (see ContinuousProjectedPoint).

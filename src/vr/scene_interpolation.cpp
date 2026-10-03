@@ -3,6 +3,23 @@
 #include <cmath>
 #include <stdexcept>
 namespace starfox::vr {
+namespace {
+// Source Q15 rotation bases contain small scale/orthogonality errors. Invert
+// the actual authored basis instead of transposing and doubling those errors.
+Matrix4 inverse_pilot_rotation(const Matrix4& rotation) {
+    const double a=rotation[0],b=rotation[4],c=rotation[8];
+    const double d=rotation[1],e=rotation[5],f=rotation[9];
+    const double g=rotation[2],h=rotation[6],i=rotation[10];
+    const double determinant=a*(e*i-f*h)-b*(d*i-f*g)+c*(d*h-e*g);
+    if(!std::isfinite(determinant) || std::abs(determinant)<1e-6) return identity_matrix;
+    auto out=identity_matrix;
+    const double rows[]{e*i-f*h,c*h-b*i,b*f-c*e,
+        f*g-d*i,a*i-c*g,c*d-a*f,d*h-e*g,b*g-a*h,a*e-b*d};
+    for(unsigned r=0;r<3;++r) for(unsigned col=0;col<3;++col)
+        out[col*4+r]=float(rows[r*3+col]/determinant);
+    return out;
+}
+}
 simulation::MatrixQ15 landscape_scene_view(const GameSceneSnapshot& previous,const GameSceneSnapshot& current,double alpha) {
     return simulation::interpolate_rotation_matrix_q15(previous.view_matrix,current.view_matrix,alpha);
 }
@@ -25,6 +42,9 @@ Matrix4 presentation_instrument_matrix(const GameSceneSnapshot& previous,const G
         out[c*4+r]=float(authored[c*3+r])/32768.F*((c==0)==(r==0)?1.F:-1.F);
     const float origin[]{preferences.origin_x*.01F,preferences.origin_y*.01F,preferences.origin_z*.01F};
     for(unsigned r=0;r<3;++r) for(unsigned c=0;c<3;++c) out[12+r]-=out[c*4+r]*origin[c];
+    // Instruments are ship-local. The same inverse camera basis cancels their
+    // authored bank/pitch/yaw, while retaining calibration and local head motion.
+    if(preferences.follow_ship_rotation) out=multiply_matrix(inverse_pilot_rotation(out),out);
     return out;
 }
 Matrix4 presentation_scene_matrix(const GameSceneSnapshot& previous,const GameSceneSnapshot& current,
@@ -57,7 +77,34 @@ Matrix4 presentation_scene_matrix(const GameSceneSnapshot& previous,const GameSc
         double component{};for(unsigned c=0;c<3;++c) component+=delta[c]*view[c*3+r]/32768.;
         out[12+r]=float(component/256.)*(r==0?-scale:scale);
     }
+    if(preferences.follow_ship_rotation) {
+        auto fixed=preferences;fixed.follow_ship_rotation=false;
+        const auto ship=presentation_instrument_matrix(previous,current,alpha,fixed);
+        // Translate to the calibrated pilot first, then rotate the whole source
+        // scene into the ship frame. Tracking is composed later by application.
+        out=multiply_matrix(inverse_pilot_rotation(ship),out);
+    }
     return out;
+}
+std::optional<SteeringMatrix> cockpit_steering_matrix(const GameSceneSnapshot& scene,
+    const PresentationPreferences& preferences) {
+    if(!preferences.follow_ship_rotation || !pilot_view_active(scene,preferences) || scene.paused) return {};
+    auto physical=preferences;physical.world_scale=0;
+    physical.origin_x=physical.origin_y=physical.origin_z=0;
+    const auto cockpit=presentation_scene_matrix(scene,scene,1,physical);
+    auto source_view=identity_matrix;
+    for(unsigned c=0;c<3;++c) for(unsigned r=0;r<3;++r)
+        source_view[c*4+r]=float(scene.view_matrix[c*3+r])/32768.F*((c==0)==(r==0)?1.F:-1.F);
+    // Native steering moves on source world X/Y, not ship-local X/Y. Project
+    // those axes through the same source-view/cockpit basis as world geometry.
+    const auto axes=multiply_matrix(cockpit,source_view);
+    const float determinant=axes[0]*axes[5]-axes[4]*axes[1];
+    // The source movement plane has no unique 2D inverse when viewed edge-on.
+    if(!std::isfinite(determinant) || std::abs(determinant)<1e-6F) return {};
+    // Native Up increases world Y (screen down); C/D invert it. Conjugation
+    // retains that vertical preference on the displayed axis, including bank.
+    const float vertical=(scene.control_type&2U)?1.F:-1.F;
+    return SteeringMatrix{axes[0],vertical*axes[1],vertical*axes[4],axes[5]};
 }
 Matrix4 landscape_camera_motion(const GameSceneSnapshot& previous,const GameSceneSnapshot& current,double alpha) {
     if(!std::isfinite(alpha)) throw std::invalid_argument("Invalid landscape camera fraction");

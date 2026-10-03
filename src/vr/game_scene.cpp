@@ -10,7 +10,7 @@ GameSceneHistory::GameSceneHistory(const simulation::GameSimulation& game,
     const assets::RomImage& rom,const assets::SymbolMap& symbols)
     :game_(game),rom_(rom),trig_(simulation::TrigTables::load(rom,symbols)) {
     constexpr std::array names{"VIEWPOSX","VIEWPOSY","VIEWPOSZ",
-        "VIEWROTXW","VIEWROTYW","VIEWROTZW","VIEWFLOATY","GAMEFRAME","PLAYERFLYMODE","SHADOWHEIGHT","BG2SCROLL","PVIEWPOSY"};
+        "VIEWROTXW","VIEWROTYW","VIEWROTZW","VIEWFLOATY","GAMEFRAME","PLAYERFLYMODE","SHADOWHEIGHT","BG2SCROLL","PVIEWPOSY","C_TYPE"};
     for(size_t i=0;i<names.size();++i) {
         bool found=false;
         for(const auto address:symbols.find(names[i])) {
@@ -18,7 +18,8 @@ GameSceneHistory::GameSceneHistory(const simulation::GameSimulation& game,
                 addresses_[i]=address;found=true;break;
             }
         }
-        if(!found) throw std::runtime_error(std::string("Missing scene RAM symbol: ")+names[i]);
+        // C_TYPE only feeds the Steam Frame's cockpit steering; a bundle without it is fine elsewhere.
+        if(!found && std::string_view(names[i])!="C_TYPE") throw std::runtime_error(std::string("Missing scene RAM symbol: ")+names[i]);
     }
     constexpr std::array tracking_names{"PLAYERONPLANET_STRAT","PLAYERINSPACE_STRAT"};
     for(size_t i=0;i<tracking_names.size();++i) {
@@ -144,6 +145,7 @@ void GameSceneHistory::capture() {
     next->view_matrix=simulation::rotation_matrix_q15(trig_,
         starfox::bit_cast<int16_t>(word(3)),starfox::bit_cast<int16_t>(word(4)),starfox::bit_cast<int16_t>(word(5)));
     next->view_float_y=starfox::bit_cast<int16_t>(word(6));
+    if(addresses_[12]) next->control_type=game_.map().peek_ram_byte(addresses_[12]).value()&3U;
     next->background_vertical_scroll=starfox::bit_cast<int16_t>(word(10));
     next->shadows_enabled=(game_.map().peek_ram_byte(addresses_[8]).value()&8U)!=0;
     next->shadow_height=starfox::bit_cast<int16_t>(word(9));

@@ -180,12 +180,16 @@ if(NOT ANDROID)
     endif()
     add_executable(starfox_vr_input_check tests/openxr_input_tests.cpp)
     target_link_libraries(starfox_vr_input_check PRIVATE starfox_vr_core)
+    add_executable(starfox_vr_cockpit_input_check tests/vr_cockpit_input_tests.cpp)
+    target_link_libraries(starfox_vr_cockpit_input_check PRIVATE starfox_vr_game)
     add_executable(starfox_vr_game_input_check tests/vr_game_input_tests.cpp)
     target_link_libraries(starfox_vr_game_input_check PRIVATE starfox_vr_game)
     add_executable(starfox_vr_rumble_parity_check tests/vr_rumble_parity_tests.cpp)
     target_link_libraries(starfox_vr_rumble_parity_check PRIVATE starfox_vr_game)
     add_executable(starfox_vr_packet_check tests/vr_draw_packet_tests.cpp)
     target_link_libraries(starfox_vr_packet_check PRIVATE starfox_vr_game)
+    add_executable(starfox_vr_decal_check tests/vr_decal_tests.cpp)
+    target_link_libraries(starfox_vr_decal_check PRIVATE starfox_vr_game)
     add_executable(starfox_vr_runtime_check tools/check_openxr_runtime.cpp)
     target_link_libraries(starfox_vr_runtime_check PRIVATE starfox_vr_game)
     add_executable(starfox_vr_session_check tests/openxr_session_tests.cpp)
@@ -252,7 +256,7 @@ if(NOT ANDROID)
         foreach(vr_check IN ITEMS
             starfox_vr_application_tests starfox_vr_runtime_tests
             starfox_vr_audio_check starfox_vr_input_check
-            starfox_vr_packet_check starfox_vr_cache_check
+            starfox_vr_packet_check starfox_vr_decal_check starfox_vr_cockpit_input_check starfox_vr_cache_check
             starfox_vr_session_check starfox_vr_swapchain_check
             starfox_vr_camera_check starfox_vr_device_check
             starfox_vr_targets_check starfox_vr_mesh_check)
@@ -269,6 +273,12 @@ if(NOT ANDROID)
                 set(vr_test_symbols "${STARFOX_EX_SYMBOLS_FILE}")
             endif()
             if(EXISTS "${vr_test_rom}" AND EXISTS "${vr_test_symbols}")
+                add_test(NAME starfox_vr_decal_${vr_variant}
+                    COMMAND starfox_vr_decal_check "${vr_test_rom}" "${vr_test_symbols}")
+                set_tests_properties(starfox_vr_decal_${vr_variant} PROPERTIES LABELS "vr;cartridge" TIMEOUT 60)
+                add_test(NAME starfox_vr_cockpit_input_${vr_variant}
+                    COMMAND starfox_vr_cockpit_input_check "${vr_test_rom}" "${vr_test_symbols}")
+                set_tests_properties(starfox_vr_cockpit_input_${vr_variant} PROPERTIES LABELS "vr;cartridge" TIMEOUT 120)
                 add_test(NAME starfox_vr_game_input_${vr_variant}
                     COMMAND starfox_vr_game_input_check "${vr_test_rom}" "${vr_test_symbols}")
                 set_tests_properties(starfox_vr_game_input_${vr_variant} PROPERTIES LABELS "vr;cartridge" TIMEOUT 120)

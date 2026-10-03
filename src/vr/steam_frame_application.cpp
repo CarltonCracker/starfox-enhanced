@@ -35,6 +35,7 @@
 #include "starfox/vr/background_tiles.hpp"
 #include "starfox/vr/game_frame_driver.hpp"
 #include "starfox/vr/frame_menu.hpp"
+#include "starfox/vr/decal_surface.hpp"
 #include "starfox/state/files.hpp"
 #include "starfox/vr/pcm_output.hpp"
 #include "starfox/audio/spc700_audio.hpp"
@@ -170,6 +171,7 @@ struct LiveGame {
 };
 }
 int starfox::vr::run_steam_frame_application(int argc,char** argv,const ApplicationHost& host) {
+    starfox::vr::set_inset_decals(true);
     if(host.stop_requested && host.stop_requested()) return 0;
     bool graphics=false,loader_only=false,render_clear=false,render_triangle=false,render_model=false,render_game=false;
     const char* model_rom=nullptr;const char* model_symbols=nullptr;const char* model_name=nullptr;const char* msu_path=nullptr;
@@ -779,7 +781,8 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
         :host.cartridge_save_path.parent_path()/"vr-preferences.bin";
     if(startup.open && !preferences_path.empty()) try {
         if(std::filesystem::exists(preferences_path)) {
-            if((std::filesystem::file_size(preferences_path)!=16 && std::filesystem::file_size(preferences_path)!=20 && std::filesystem::file_size(preferences_path)!=26)
+            const auto size=std::filesystem::file_size(preferences_path);
+            if((size!=16 && size!=20 && size!=26 && size!=27)
                 || !startup.restore_preferences(starfox::state::read_file(preferences_path)))
                 std::cerr<<"Invalid VR preferences; using defaults\n";
         }
@@ -931,7 +934,7 @@ int starfox::vr::run_steam_frame_application(int argc,char** argv,const Applicat
                         game_controls.fire=game_controls.bomb=game_controls.boost=game_controls.brake=false;
                         game_controls.steer={};game_controls.select=game_controls.select_pressed=false;
                     }
-                    const auto advance=live->driver->advance(time,game_controls,playing);
+                    const auto advance=live->driver->advance(time,game_controls,playing,startup.presentation);
                     if(!live->game.paused() && sandbox.active()) {
                         sandbox.commit(live->game.objects());live->history->capture();
                     }

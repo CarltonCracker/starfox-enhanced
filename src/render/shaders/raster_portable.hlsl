@@ -21,7 +21,7 @@ RWStructuredBuffer<float> geometry_depth:register(u2,space1);
 cbuffer Settings:register(b0,space2) {
     uint width,height,want_surface,reserved;
     uint has_back,has_back_surface,take_surface,padding;
-    uint texel_bytes,reserved1,reserved2,reserved3;
+    uint texel_bytes,reserved1,reserved2,bounded; // bounded: 1=box origin in rows[12..13], 2=background is the output
     uint want_depth,plane_count,has_back_depth,depth_padding;
     float4 depth_projection; // focal x/y, center x/y in output pixels.
     float2 rasterJitter;uint2 jitterPadding;
@@ -35,6 +35,10 @@ int waveShift(int x,int offset,uint frame) {
 }
 [numthreads(64,1,1)]
 void main(uint3 id:SV_DispatchThreadID) {
+    // GPU FAST dispatches only the model's screen box (row spans leave rows[]
+    // unused). Uncovered pixels in the box rewrite their own value.
+    if((bounded&1U)!=0) id.xy+=uint2(rows[12],rows[13]);
+    bool in_place=(bounded&2U)!=0;
     uint outputWidth=reserved1!=0?reserved1:width,outputHeight=reserved2!=0?reserved2:height;
     if(id.x>=outputWidth || id.y>=outputHeight) return;
     uint outputIndex=id.y*outputWidth+id.x;
@@ -196,12 +200,14 @@ void main(uint3 id:SV_DispatchThreadID) {
     }
     if((reserved&0x40000000U)!=0 && have_pixel) packed|=0x04000000U;
     if(has_back!=0) {
-        uint back=back_pixels[id.y*width+id.x];
+        uint backIndex=id.y*width+id.x;
+        uint back=in_place?pixels[backIndex]:back_pixels[backIndex];
         if(!have_pixel) packed=(packed&0x01ff0000U)|(back&0x1c00ffffU);
-        if(want_depth!=0 && !have_pixel && has_back_depth!=0) depth=back_depth[id.y*width+id.x];
+        if(want_depth!=0 && !have_pixel && has_back_depth!=0)
+            depth=in_place?geometry_depth[backIndex]:back_depth[backIndex];
         if((packed&0x01000000U)==0 && has_back_surface!=0 && (back&0x01000000U)!=0) {
             packed=(packed&0x1c00ffffU)|(back&0x01ff0000U);
-            surface=back_surfaces[id.y*width+id.x];
+            surface=in_place?surfaces[backIndex]:back_surfaces[backIndex];
         }
     }
     pixels[outputIndex]=packed;

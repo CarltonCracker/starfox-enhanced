@@ -132,13 +132,14 @@ struct GpuModel::Impl {
     }
     GpuRasterOutput billboard(void* next_device,void* command,const assets::Shape& shape,
         const RenderPose& pose,const RenderSettings& settings,std::uint32_t width,std::uint32_t height,
-        bool surfaces,const GpuRasterOutput* background,std::array<std::uint32_t,2> raster_size={},std::array<float,2> jitter={},bool depth=false) {
+        bool surfaces,const GpuRasterOutput* background,std::array<std::uint32_t,2> raster_size={},std::array<float,2> jitter={},bool depth=false,
+        bool bounded=false) {
         auto* next=static_cast<SDL_GPUDevice*>(next_device);
         if(device!=next){release();device=next;}
         const auto scale=settings.render_scale;
         const auto* texture=texture_for_colour(shape,pose.simple_sprite_colour,pose.colour_frame);
         if(!texture || pose.simple_sprite_world_size<=0 || pose.z<128)
-            return raster.enqueue_row_spans(device,command,nullptr,0,width*scale,height*scale,surfaces,nullptr,true,background,false,0,0,0,nullptr,raster_size,jitter);
+            return raster.enqueue_row_spans(device,command,nullptr,0,width*scale,height*scale,surfaces,nullptr,true,background,false,0,0,0,nullptr,raster_size,jitter,bounded);
         for(auto value:{pose.x,pose.y,pose.z,pose.vanish_x,pose.vanish_y})
             if(!std::isfinite(value) || std::abs(value)>1000000)
                 throw std::runtime_error("GPU billboard coordinate exceeds compensated range");
@@ -242,7 +243,7 @@ struct GpuModel::Impl {
         SDL_BindGPUComputePipeline(pass,billboard_pipeline);SDL_DispatchGPUCompute(pass,(rows+63)/64,1,1);SDL_EndGPUComputePass(pass);
         const GpuGeometryDepthInput plane{geometry_planes,1,float(settings.focal_length*scale),float(settings.focal_length*scale),float(pose.vanish_x*scale),float(pose.vanish_y*scale),true};
         // Sprites remain unlit; their plane identifier is only a temporal guide.
-        return raster.enqueue_row_spans(device,command,billboard_spans,1,width*scale,rows,surfaces,buffers[9],true,background,false,0,0,0,depth?&plane:nullptr,raster_size,jitter);
+        return raster.enqueue_row_spans(device,command,billboard_spans,1,width*scale,rows,surfaces,buffers[9],true,background,false,0,0,0,depth?&plane:nullptr,raster_size,jitter,bounded);
     }
     struct SurfaceSettings {
         Uint32 count,points,corners,fractional_camera;
@@ -312,7 +313,7 @@ void GpuModel::release_device()noexcept {
 #endif
 }
 GpuRasterOutput GpuModel::enqueue(void* device,void* command,const assets::Shape& shape,const RenderPose& unjittered_pose,
-    const RenderSettings& settings,std::uint32_t width,std::uint32_t height,bool surface_metadata,const GpuRasterOutput* background,GpuModelDiagnostics* diagnostics,bool geometry_depth,GpuModelRaySource* ray_source,const RenderPose* previous_pose,std::array<float,2> raster_jitter,std::array<std::uint32_t,2> raster_size) {
+    const RenderSettings& settings,std::uint32_t width,std::uint32_t height,bool surface_metadata,const GpuRasterOutput* background,GpuModelDiagnostics* diagnostics,bool geometry_depth,GpuModelRaySource* ray_source,const RenderPose* previous_pose,std::array<float,2> raster_jitter,std::array<std::uint32_t,2> raster_size,bool bounded_raster) {
     auto pose=unjittered_pose;
     if(diagnostics) *diagnostics={};
     if(ray_source) {const bool requested=ray_source->request_materials,reference=ray_source->reference_materials;
@@ -343,7 +344,7 @@ GpuRasterOutput GpuModel::enqueue(void* device,void* command,const assets::Shape
             pose.vanish_y+=raster_jitter[1]/scale_y;
         }
         if(pose.simple_scaled_sprite) {
-            auto output=impl_->billboard(device,command,shape,pose,settings,width,height,surface_metadata,background,raster_size,raster_jitter,geometry_depth);
+            auto output=impl_->billboard(device,command,shape,pose,settings,width,height,surface_metadata,background,raster_size,raster_jitter,geometry_depth,bounded_raster);
             if(!output.pixels) throw std::runtime_error(impl_->raster.status());
             if(previous_pose && output.geometry_depth && !background
                 && previous_pose->simple_scaled_sprite
@@ -451,7 +452,8 @@ GpuRasterOutput GpuModel::enqueue(void* device,void* command,const assets::Shape
         }
         const auto vertex_count=std::uint32_t(vertices.continuous?vertices.continuous_vertices.size():vertices.native_vertices.size());
         if(!vertex_count || faces.polygons.empty()) {
-            auto output=impl_->raster.enqueue_row_spans(device,command,nullptr,0,raster_width,raster_height,surface_metadata,nullptr,true,background);
+            auto output=impl_->raster.enqueue_row_spans(device,command,nullptr,0,raster_width,raster_height,surface_metadata,nullptr,true,background,
+                false,0,0,0,nullptr,{},{},bounded_raster);
             if(!output.pixels) throw std::runtime_error(impl_->raster.status());
             impl_->status="Empty GPU model cleared resident";return output;
         }
@@ -583,7 +585,7 @@ GpuRasterOutput GpuModel::enqueue(void* device,void* command,const assets::Shape
             float((vertices.continuous?pose.vanish_x:vertices.native_pose.vanish[0])*scale_x),
             float((vertices.continuous?pose.vanish_y:vertices.native_pose.vanish[1])*scale_y)};
         auto output=impl_->raster.enqueue_row_spans(device,command,spans,slots,raster_width,raster_height,surface_metadata,repeated_rows?masked_texels:b[9],true,background,pose.wave_mode,pose.wave_offset,pose.animation_frame,
-            repeated_rows?impl_->clip.mask_buffer_bytes():std::uint32_t(faces.texels.size()),planar_depth?&depth_input:nullptr);
+            repeated_rows?impl_->clip.mask_buffer_bytes():std::uint32_t(faces.texels.size()),planar_depth?&depth_input:nullptr,{},{},bounded_raster);
         if(!output.pixels) throw std::runtime_error(impl_->raster.status());
         if(previous_pose && output.geometry_depth && !background && planar_depth
             && !pose.explosion_progress && !previous_pose->explosion_progress

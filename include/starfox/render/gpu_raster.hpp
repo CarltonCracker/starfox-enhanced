@@ -58,7 +58,12 @@ public:
         std::uint32_t polygon_count,std::uint32_t width,std::uint32_t height,bool surface_metadata=false,void* texels=nullptr,bool pixel_coverage=false,
         const GpuRasterOutput* background=nullptr,bool wave_rows=false,
         std::int16_t wave_offset=0,std::uint32_t wave_frame=0,std::uint32_t texel_bytes=0,
-        const GpuGeometryDepthInput* geometry_depth=nullptr,std::array<std::uint32_t,2> raster_size={},std::array<float,2> raster_jitter={});
+        const GpuGeometryDepthInput* geometry_depth=nullptr,std::array<std::uint32_t,2> raster_size={},std::array<float,2> raster_jitter={},
+        // GPU FAST: draw straight into background's buffers, dispatching only
+        // the screen box the spans cover. Falls back to the full-frame copy
+        // when that can't be exact (wave rows, jitter, custom size, missing
+        // background surface/depth planes).
+        bool bounded_in_place=false);
     // Upload legacy raster commands onto a caller-owned command buffer, for
     // ordered interleaving with GpuModel/GpuScene. No submit/readback/wait.
     // Result has explicit write coverage; consume before the next operation.

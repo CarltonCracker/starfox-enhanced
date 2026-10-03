@@ -705,7 +705,8 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
                 front=renderer.enqueue(device,command,*model->shape,pose,model->settings,
                     custom?model->logical_viewport[0]:width/scale,custom?model->logical_viewport[1]:height/scale,model->surface_metadata,fuse_model && output.pixels?&output:nullptr,nullptr,model->geometry_depth,
                     casts_rays?&rays:nullptr,previous?&*previous:nullptr,model_jitter,
-                    custom?std::array<std::uint32_t,2>{width,height}:std::array<std::uint32_t,2>{});
+                    custom?std::array<std::uint32_t,2>{width,height}:std::array<std::uint32_t,2>{},
+                    fuse_model && output.pixels && model->bounded_raster);
                 if(!front.pixels) throw std::runtime_error(renderer.status());
                 if(casts_rays) {
                     if(!rays.points) {

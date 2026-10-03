@@ -9121,6 +9121,11 @@ int main(int argc, char** argv) {
             const bool record_models=record_raster && window.native_gpu_enabled()
                 && (std::getenv("STARFOX_DISABLE_GPU_GEOMETRY")==nullptr || game.stereo_output()!=0U);
             if(record_models) recorded_scene.reset(superfx_frame.stored_width(),superfx_frame.stored_height());
+            // GPU FAST rasters each fused model only within its screen box,
+            // in place; STARFOX_TEST_FULL_FRAME_MODEL_RASTER restores the
+            // per-model full-frame pass for A/B.
+            const bool bounded_model_raster=game.gpu_fast()
+                && !std::getenv("STARFOX_TEST_FULL_FRAME_MODEL_RASTER");
             bool ray_scene_complete=true;
             controls_model_draws.clear();
             const auto draw_model=[&](const starfox::assets::Shape& shape,
@@ -9170,6 +9175,7 @@ int main(int argc, char** argv) {
                         shadows!=nullptr && !pose.simple_scaled_sprite
                             && std::any_of(shape.faces.begin(),shape.faces.end(),[](const auto& face){return !face.sprite && face.vertex_indices.size()>=3;})};
                     draw.emissive = emissive_beam;
+                    draw.bounded_raster = bounded_model_raster;
                     draw.ray_materials = game.reflective_surfaces()!=0
                         || (game.ray_tracing() && game.environment()[0]
                             && (game.environment()[1]==0
@@ -10919,6 +10925,7 @@ int main(int argc, char** argv) {
                             // Preserve relief normals for lighting/reflections.
                             starfox::render::GpuModelDraw draw{&mesh.shape,pose,terrain_settings,surface_effects};
                             draw.geometry_depth=true;draw.ray_geometry=capture_shadow_scene;draw.ray_materials=game.reflective_surfaces()!=0;
+                            draw.bounded_raster=bounded_model_raster;
                             // Static landscape is already sorted far-to-near.
                             // Do not route each tile through the world-sprite
                             // merge/motion path: it allocates full-screen
@@ -10942,6 +10949,7 @@ int main(int argc, char** argv) {
                         pose.vanish_y=game.map().read_native_word(vanish_y_address)+(extend_scene_vertical?superfx_offset_y:0);
                         starfox::render::GpuModelDraw draw{&batch.shape,pose,terrain_settings,surface_effects};
                         draw.geometry_depth=true;draw.ray_geometry=capture_shadow_scene;draw.ray_materials=game.reflective_surfaces()!=0;
+                        draw.bounded_raster=bounded_model_raster;
                         recorded_scene.append_model(raster_commands,draw);
                     }
                     if(test_frames && presented_frames+1U==test_frames)

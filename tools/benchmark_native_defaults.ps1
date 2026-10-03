@@ -101,7 +101,7 @@ try {
    $summary=@($lines | Where-Object {$_ -match '^(logic/audio|frame-work|present-interval|input-to-present|render)-distribution-us|^render-profile-us|^presentation-pacing:'})
    if($summary.Count -ne 7) {throw "Incomplete profiling metrics: $name"}
    $counters=@($lines | Where-Object {$_ -match '^scene-counters-distribution '})
-   if($TraceSceneCost -and $counters.Count -ne 6) {throw "Incomplete scene counters: $name"}
+   if($TraceSceneCost -and $counters.Count -ne 7) {throw "Incomplete scene counters: $name"}
    Write-Output $name;Write-Output $summary;Write-Output $counters
    $row=[ordered]@{experience=$experience;level=$level;renderer=$renderer;driver=$driver;scale=$scale;display=$display;traced=[bool]$TraceSceneCost}
    foreach($line in $summary) {

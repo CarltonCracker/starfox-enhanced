@@ -41,6 +41,9 @@ struct GpuModelDraw {
     bool emissive{}; // Clear hidden receiver metadata; overrides ray_geometry for light beams.
     bool ray_materials{}; // Optional reflection data; shadows do not pay its packing cost.
     bool ray_material_reference{}; // Explicit diagnostic only.
+    // GPU FAST: when fused onto the running scene, raster only the model's
+    // screen box, in place. Set by the app; never inferred.
+    bool bounded_raster{};
 };
 struct GpuRasterDraw {
     RasterCommands* commands{};

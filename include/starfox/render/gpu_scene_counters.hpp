@@ -26,6 +26,7 @@ enum class Counter : std::size_t {
     model_draws,           // GpuModelDraw entries encoded
     compute_passes,        // compute passes begun by scene encoders
     full_frame_dispatches, // raster/merge passes dispatched over the whole output
+    bounded_dispatches,    // GPU FAST model rasters limited to their screen box
     raster_commands,       // CPU-recorded RasterCommand entries uploaded
     raster_bytes,          // bytes of those RasterCommand entries
     upload_bytes,          // bytes copied CPU->GPU by scene encoders
@@ -33,7 +34,7 @@ enum class Counter : std::size_t {
 };
 
 inline constexpr std::array<std::string_view,std::size_t(Counter::count)> counter_names{
-    "models","compute-passes","full-frame-dispatches","raster-commands","raster-bytes","upload-bytes"};
+    "models","compute-passes","full-frame-dispatches","bounded-dispatches","raster-commands","raster-bytes","upload-bytes"};
 
 using Totals=std::array<std::uint64_t,std::size_t(Counter::count)>;
 

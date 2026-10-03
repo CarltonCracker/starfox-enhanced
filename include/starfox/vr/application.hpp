@@ -4,6 +4,7 @@
 #include <chrono>
 #include <functional>
 #include <filesystem>
+#include <optional>
 namespace starfox::vr {
 // Callbacks run on the rendering thread. Retain Android JNI global references
 // until run_application returns. Zero frame/time limits mean unlimited.
@@ -18,6 +19,7 @@ struct ApplicationHost {
     std::function<VrControls()> desktop_controls;
     // Dual-band SDL fallback for cartridge-authored rumble when the active
     // OpenXR profile has no usable haptic output action.
+    std::function<bool()> desktop_rumble_available;
     std::function<bool(std::uint16_t,std::uint16_t,std::uint32_t)> desktop_rumble;
     std::function<void()> stop_desktop_rumble;
     // True only for the native Steam Frame player (set by starfox_steamframe).
@@ -25,6 +27,9 @@ struct ApplicationHost {
     // menu and controls. Every other host keeps the original loop.
     bool steam_frame{};
     std::filesystem::path cartridge_save_path;
+    // Optional per-submitted-frame CSV. Supplying a path enables bounded
+    // profiling; desktop hosts choose the frame limit explicitly.
+    std::optional<std::filesystem::path> profile_csv_path;
 };
 // Shared experimental loop. Full game presentation parity remains incomplete.
 int run_application(int argc, char** argv, const ApplicationHost& host = {});

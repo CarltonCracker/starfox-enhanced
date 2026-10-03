@@ -1,5 +1,6 @@
 #include "starfox/vr/openxr_input.hpp"
 #include "starfox/vr/startup_menu.hpp"
+#include "starfox/vr/frame_menu.hpp"
 #include "starfox/vr/game_input.hpp"
 #include <cmath>
 #include <cstring>
@@ -66,10 +67,10 @@ XrResult XRAPI_PTR suggest(XrInstance,const XrInteractionProfileSuggestedBinding
             == "/interaction_profiles/valve/frame_controller_valve");
         const std::array<std::pair<unsigned,const char*>,19> expected{{
             {0,"/user/hand/left/input/thumbstick"},
-            {1,"/user/hand/right/input/a/click"},
+            {1,"/user/hand/right/input/x/click"},
             {2,"/user/hand/right/input/b/click"},
-            {3,"/user/hand/right/input/x/click"},
-            {4,"/user/hand/right/input/y/click"},
+            {3,"/user/hand/right/input/y/click"},
+            {4,"/user/hand/right/input/a/click"},
             {5,"/user/hand/right/input/menu/click"},
             {6,"/user/hand/left/input/bumper/click"},
             {7,"/user/hand/right/input/bumper/click"},
@@ -174,7 +175,9 @@ XrResult XRAPI_PTR locate(XrSpace,XrSpace,XrTime,XrSpaceLocation* out) {
     out->pose.orientation.w=1;return XR_SUCCESS;
 }
 }
-int main() try {
+
+// The original runtime menu, exactly as the PCVR and Quest loop uses it.
+void original_menu_tests() {
     {
         StartupMenu menu;using Page=StartupMenu::Page;
         VrControls press;press.fire=true;
@@ -307,6 +310,168 @@ int main() try {
         require(!restored.restore_preferences(std::span(preferences).first(15)));
         require(restored.preferences()==preferences);
     }
+}
+int main() try {
+    original_menu_tests();
+    {
+        FrameMenu menu;using Page=FrameMenu::Page;
+        VrControls press;press.fire=true;
+        const auto click=[&] {menu.sample({},true);menu.sample(press,true);};
+        require(menu.labels()[0].find("EXPERIENCE")==0 && menu.labels()[3]=="OPTIONS" && menu.labels()[4]=="START GAME");
+        menu.selection=1;click();require(!menu.unlocked_pace);menu.sample(press,true);require(!menu.unlocked_pace);
+        menu.selection=2;click();require(!menu.msu_music && menu.labels()[2]=="MSU-1 MUSIC: NOT FOUND");
+        menu.msu_available=true;click();require(menu.msu_music);
+        menu.sample(press,true);require(menu.msu_music);
+        click();require(!menu.msu_music);
+        menu.selection=3;click();require(menu.page==Page::options && menu.selection==0);
+        menu.sample(press,true);require(menu.page==Page::options);
+        click();require(menu.page==Page::cheats);
+        require(menu.labels()[0].find("GOD MODE")==0 && menu.labels()[1].find("LEVEL SELECT")==0 && menu.labels()[6]=="BACK");
+        click();require(menu.god_mode);menu.sample(press,true);require(menu.god_mode);
+        menu.selection=2;
+        for(unsigned expected:{1U,2U,0U}) {click();require(menu.default_laser==expected);menu.sample(press,true);require(menu.default_laser==expected);}
+        menu.selection=1;menu.level_choices[0]={0,11,21};click();require(menu.selected_level==11);
+        menu.selection=3;click();require(menu.infinite_bombs);
+        menu.selection=4;click();require(menu.infinite_boost);
+        menu.selection=5;click();require(menu.infinite_lives);
+        menu.sample(press,true);require(menu.infinite_lives);
+        menu.selection=6;click();require(menu.page==Page::options && menu.open);
+        menu.selection=1;click();require(menu.crosshair_colour==1);
+        menu.selection=2;click();require(menu.swap_face_buttons);
+        menu.sample(press,true);require(menu.swap_face_buttons);
+        VrControls original;original.fire=true;original.bomb=true;original.menu=true;
+        original.steer={.25F,-.5F};
+        auto swapped=menu.gameplay_controls(original);
+        require(!swapped.fire && !swapped.bomb && swapped.boost && swapped.brake && swapped.menu);
+        require(swapped.steer.x==original.steer.x && swapped.steer.y==original.steer.y);
+        click();require(!menu.swap_face_buttons);
+        require(menu.gameplay_controls(original).fire && menu.gameplay_controls(original).bomb);
+        menu.selection=3;click();require(menu.music_volume==0);
+        click();require(menu.music_volume==10);
+        menu.selection=4;click();require(menu.sfx_volume==0);
+        menu.selection=5;click();require(menu.language==1);
+        require(menu.localized_labels()[5]==U"言語: 日本語");
+        require(menu.first_visible_row()==0);
+        menu.selection=6;require(menu.first_visible_row()==1);
+        menu.selection=7;require(menu.first_visible_row()==2);
+        menu.selection=8;require(menu.first_visible_row()==3);
+        VrControls down;down.steer.y=-1;
+        menu.sample({},true);menu.sample(down,true);require(menu.selection==9);
+        menu.sample(down,true);require(menu.selection==9);
+        VrControls up;up.steer.y=1;
+        menu.sample({},true);menu.sample(up,true);require(menu.selection==8);
+        for(unsigned language=0;language<6;++language) {
+            menu.language=language;
+            for(const auto page:{Page::main,Page::options,Page::cheats,Page::three_d,Page::two_d}) {
+                menu.page=page;
+                require(menu.localized_labels().size()==menu.row_count());
+                for(const auto& label:menu.localized_labels()) require(!label.empty());
+                if(menu.language>=1 && menu.language<=4 && (page==Page::two_d || page==Page::three_d))
+                    require(!menu.localized_labels().front().starts_with(U"WORLD EFFECT")
+                        && !menu.localized_labels().front().starts_with(U"MODEL EFFECT"));
+            }
+        }
+        menu.page=Page::options;menu.selection=6;click();require(menu.page==Page::three_d && !menu.ray_tracing);
+        require(menu.row_count()==4 && menu.labels().back()=="BACK" && !menu.preview);
+        click();require(menu.model_effect==1 && !menu.ray_tracing);
+        menu.selection=2;click();require(menu.preview);menu.sample(press,true);require(menu.preview);
+        click();require(!menu.preview);
+        menu.selection=3;click();require(!menu.ray_tracing && menu.page==Page::options);
+        menu.ray_tracing_available=true;click();require(menu.page==Page::three_d);
+        menu.selection=3;click();require(menu.ray_tracing);
+        menu.sample(press,true);require(menu.ray_tracing);
+        menu.selection=4;click();require(menu.page==Page::options && menu.selection==6);
+        menu.selection=7;click();require(menu.page==Page::two_d);
+        click();require(menu.world_effect==4);
+        menu.selection=1;click();require(menu.world_intensity==0);
+        menu.selection=2;click();require(menu.preview);
+        menu.selection=3;click();require(menu.enhanced_sky && menu.page==Page::two_d && menu.row_count()==5);
+        menu.sample(press,true);require(menu.enhanced_sky);
+        menu.selection=4;click();require(menu.page==Page::options);
+        menu.selection=8;click();require(menu.steer_sensitivity_index==1
+            && menu.labels()[8]=="STICK SENSITIVITY: 40%");
+        VrControls steer;steer.steer={1.F,-.5F};
+        const auto softened=menu.gameplay_controls(steer);
+        require(std::abs(softened.steer.x-.4F)<.001F
+            && std::abs(softened.steer.y+.2F)<.001F);
+        menu.selection=10;click();require(menu.page==Page::main && menu.selection==3);
+        menu.alternate_available=true;menu.selection=0;click();require(menu.extended && menu.selected_level==0);
+        menu.open_runtime();require(menu.selection==4 && menu.page==Page::main && menu.labels()[4]=="RESUME");
+        menu.selection=0;click();require(menu.extended && menu.labels()[0].find("LOCKED")!=std::string::npos);
+        menu.selection=4;click();require(!menu.open);
+        menu.language=5;menu.default_laser=2;menu.crosshair_colour=7;
+        for(unsigned style:{14U,15U,16U}) {
+            menu.model_effect=style;menu.world_effect=style;
+            FrameMenu effect_copy;
+            require(effect_copy.restore_preferences(menu.preferences()));
+            require(effect_copy.model_effect==style && effect_copy.world_effect==style);
+            require(FrameMenu::style_name(style)!="OFF");
+        }
+        require(FrameMenu::next_style(13)==14 && FrameMenu::next_style(16)==0);
+        require(FrameMenu::next_style(13,true)==14 && FrameMenu::next_style(16,true)==0);
+        menu.music_volume=30;menu.sfx_volume=70;menu.msu_music=true;
+        const auto preferences=menu.preferences();
+        FrameMenu restored;
+        require(restored.restore_preferences(preferences));
+        require(restored.preferences()==preferences);
+        require(restored.steer_sensitivity_index==1);
+        require(restored.ray_tracing && !restored.ray_tracing_available);
+        require(restored.enhanced_sky);
+        require(!restored.ray_tracing_enabled());
+        restored.page=Page::three_d;
+        require(restored.row_count()==4 && restored.labels().back()=="BACK" && !restored.preview);
+        restored.ray_tracing_available=true;
+        require(restored.ray_tracing_enabled());
+        restored.ray_tracing=false;
+        require(!restored.ray_tracing_enabled());
+        restored.ray_tracing=true;restored.ray_tracing_available=false;
+        restored.page=Page::main;
+        std::array<uint8_t,16> legacy{};std::copy(preferences.begin(),preferences.begin()+16,legacy.begin());
+        legacy[4]=1;legacy[11]&=1;legacy[15]&=1;
+        FrameMenu migrated;require(migrated.restore_preferences(legacy) && !migrated.ray_tracing && !migrated.infinite_lives);
+        std::array<uint8_t,20> version4{};std::copy_n(preferences.begin(),20,version4.begin());version4[4]=4;version4[11]&=3;
+        require(migrated.restore_preferences(version4) && !migrated.enhanced_sky
+            && migrated.model_effect==menu.model_effect && migrated.world_effect==menu.world_effect);
+        require(restored.open && !restored.runtime && !restored.extended
+            && !restored.alternate_available && restored.page==Page::main
+            && restored.selection==0 && restored.selected_level==0);
+        require(!migrated.presentation.cockpit && migrated.presentation.translation_scale()==1.F && migrated.presentation.scale()==1.F);
+        for(unsigned version=1;version<=5;++version) {
+            auto old=preferences;old[4]=uint8_t(version);old[11]&=version==1?1:version<5?3:255;old[15]&=version<3?1:3;
+            migrated.presentation={true,false,5,50,-50,100};
+            require(migrated.restore_preferences(std::span(old).first(version<4?16:20)));
+            require(!migrated.presentation.cockpit && migrated.presentation.translation_scale()==1.F && migrated.presentation.scale()==1.F
+                && migrated.presentation.origin_x==0 && migrated.presentation.origin_y==0 && migrated.presentation.origin_z==0);
+        }
+        FrameMenu presentation_menu;presentation_menu.page=Page::presentation;
+        presentation_menu.sample({},true);presentation_menu.sample(press,true);
+        require(presentation_menu.presentation.cockpit);
+        presentation_menu.selection=6;presentation_menu.sample({},true);presentation_menu.sample(press,true);
+        require(presentation_menu.recenter_revision==1);
+        presentation_menu.presentation={true,false,5,-100,100,35};
+        require(migrated.restore_preferences(presentation_menu.preferences()) && migrated.presentation.origin_z==35
+            && migrated.presentation.origin_x==-100 && migrated.presentation.translation_scale()==0.F && migrated.presentation.scale()==2.F);
+        presentation_menu.presentation.head_translation=3;
+        require(migrated.restore_preferences(presentation_menu.preferences())
+            && migrated.presentation.translation_scale()==1.5F);
+        presentation_menu.page=Page::main;presentation_menu.selection=5;
+        presentation_menu.sample({},true);presentation_menu.sample(press,true);
+        require(presentation_menu.page==Page::exit_confirmation && presentation_menu.selection==0 && !presentation_menu.exit_requested);
+        presentation_menu.sample({},true);presentation_menu.sample(press,true);
+        require(presentation_menu.page==Page::main && !presentation_menu.exit_requested);
+        presentation_menu.sample({},true);presentation_menu.sample(press,true);
+        presentation_menu.selection=1;presentation_menu.sample({},true);presentation_menu.sample(press,true);
+        require(presentation_menu.exit_requested);
+        // Invalid fields reject the entire record without partial mutation.
+        for(size_t index=0;index<preferences.size();++index) {
+            auto corrupt=preferences;corrupt[index]=255;
+            const auto revision=restored.revision;
+            require(!restored.restore_preferences(corrupt));
+            require(restored.preferences()==preferences && restored.revision==revision);
+        }
+        require(!restored.restore_preferences(std::span(preferences).first(15)));
+        require(restored.preferences()==preferences);
+    }
     InputApi api{create_set,destroy_set,create_action,path,suggest,attach,sync,boolean,
         vector,current_profile,apply_haptic,stop_haptic,create_space,destroy_space,locate};
     OpenXrInput input(api);
@@ -392,6 +557,12 @@ int main() try {
     mock_profiles={path_value("/interaction_profiles/valve/frame_controller_valve"),
         path_value("/interaction_profiles/valve/frame_controller_valve")};
     require(input.poll(true) && input.haptics_available());
+    independent_buttons=true;button_states={};button_states[5]=true; // Frame A -> brake
+    require(input.poll(true) && input.controls().brake && !input.controls().fire
+        && input.controls().menu_confirm && input.controls().menu_confirm_active);
+    button_states[5]=false;button_states[2]=true; // Frame X -> fire
+    require(input.poll(true) && input.controls().fire && !input.controls().menu_confirm);
+    independent_buttons=false;button_states={};
     require(input.apply_haptics(authored)); // The advertised Frame binding is usable too.
     mock_profiles={XR_NULL_PATH,XR_NULL_PATH};
     const auto applies_before_unbound=haptic_applies;
@@ -436,6 +607,26 @@ int main() try {
         pad.menu=true;pad.menu_pressed=true;
         selected=select_vr_control_sources(xr,pad);
         require(!selected.fire && selected.menu && selected.menu_pressed);
+
+        for(bool frame:{false,true}) {
+            VrControls face;
+            desktop_face_buttons(face,frame,true,false,false,false);
+            require(face.menu_confirm && face.menu_confirm_active);
+            require(face.fire==!frame && face.brake==frame && !face.boost && !face.bomb);
+            desktop_face_buttons(face,frame,false,false,true,false);
+            require(!face.menu_confirm && face.fire==frame && face.boost==!frame);
+            desktop_face_buttons(face,frame,false,false,false,true);
+            require(face.boost==frame && face.brake==!frame);
+        }
+        xr.menu_confirm_active=true;xr.menu_confirm=false;
+        pad.menu_confirm_active=true;pad.menu_confirm=true;
+        require(!select_vr_control_sources(xr,pad).menu_confirm);
+        xr.menu_confirm_active=false;
+        require(select_vr_control_sources(xr,pad).menu_confirm);
+        FrameMenu physical_menu;physical_menu.selection=5;
+        VrControls physical_a;desktop_face_buttons(physical_a,true,true,false,false,false);
+        physical_menu.sample({},true);physical_menu.sample(physical_a,true);
+        require(physical_menu.page==FrameMenu::Page::exit_confirmation);
 
         DesktopControlEdges edges;
         VrControls held;

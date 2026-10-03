@@ -88,9 +88,37 @@ want another bundle, data folder or MSU-1 pack, pass `--bundle PATH`,
 
 ## Controls
 
-For now the Frame uses the OpenXR bindings that were already there (the
-simple, Touch and Index profiles, plus the gamepad fallback). Frame-specific
-bindings aren't in yet.
+The Frame profile (`/interaction_profiles/valve/frame_controller_valve`) is only
+enabled when the runtime advertises `XR_VALVE_frame_controller_interaction`.
+The other OpenXR profiles and the gamepad fallback keep working.
+
+| Frame input | Game |
+| --- | --- |
+| Left stick or D-pad | Steer |
+| A / B / X / Y | Brake / bomb / shoot / boost |
+| Bumpers | Roll left and right |
+| Right Menu | Start and pause, and confirm in menus |
+| Left View | Select |
+
+I picked that layout to match the on-screen control settings. My first attempt
+(A fire, X boost, Y brake) disagreed with them and felt wrong straight away.
+Cartridge control type and the face-button swap setting still apply.
+
+## Settings
+
+The Frame's runtime menu has a VR PRESENTATION page. Settings are saved in
+`vr-preferences.bin`, and older preference files load with the defaults.
+
+| Setting | Notes |
+| --- | --- |
+| Camera | Existing (default) or pilot, with X, Y, Z cockpit offsets in centimetres |
+| World scale | Bounded range, cockpit offsets stay in real centimetres |
+| Head translation | 0, 50, 100, 150 or 200%. Changes the head centre only, so IPD is untouched |
+
+Profiling is opt-in. `--profile-csv FILE` writes one row per submitted stereo
+frame (host cadence, CPU stage times, per-eye submit-to-fence time, and Vulkan
+GPU timestamps where the queue supports them), and `--profile-frames N`
+(default 120) stops after N frames. Empty GPU cells mean unavailable.
 
 ## Design decisions
 
@@ -105,9 +133,37 @@ state, and the Frame is just another OpenXR runtime. So the target is a new
 platform entry (`STARFOX_STEAM_FRAME`, a path layout, a package) and not a
 second renderer.
 
+The Frame has its own loop and menu, so that PCVR and Quest stay exactly as they
+are. `src/vr/steam_frame_application.cpp` and `include/starfox/vr/frame_menu.hpp`
+are copies of `application.cpp` and `startup_menu.hpp` with the Frame changes.
+`run_application` hands over to the Frame loop only when `host.steam_frame` is
+set, which only `starfox_steamframe` does. The cost is duplication. Diffing each
+copy against its original shows what the Frame changes, if you'd like to merge
+them back later.
+
+The HUD is the part I changed most. Menus, pause, map and briefing go on a
+1024x896 mono quad layer, 1.15 m wide and 1.75 m away. The gameplay HUD and
+dialogue sit at 0.75 m with the same angular size, because with the HUD at
+1.75 m the player's ship could be nearer than the HUD that should be in front
+of it (the player ship reaches about 0.87 m from the eye). The title and
+controls screens use one flat 1.75 m quad on purpose, so their animated ship
+previews are flat. Reticle and warning sprites keep their original 2 m plane.
+I also removed the dark 254x78 panel that the first VR HUD drew behind the
+gameplay HUD. It was opaque, and it covered a big part of the view. The 0.75 m
+distance is a starting value and isn't comfort tuned.
+
+Rumble uses the cartridge's own authored sequence. I moved the `RUMBLE_*`
+register sequencer out of `starfox_pc.cpp` into `src/simulation/` so the flat
+build and VR share it. In VR it advances once per 60 Hz source raster (not per
+eye submission), turns the two bands into one OpenXR amplitude with
+`max(low, high)` for 40 ms, and prefers OpenXR haptics over SDL rumble but
+never plays both. It only runs for Original with the rumble setting on. EX has
+no authored rumble. With no output to send to, the registers aren't touched, so
+game state is the same as the flat build.
+
 ## Files outside src/vr
 
-Flat builds shouldn't change.
+Flat builds shouldn't change, apart from the items marked below.
 
 `include/starfox/compat/bit_cast.hpp` plus about two dozen call sites in
 `src/render`, `src/simulation`, `src/app`, `src/timing` and the state archive
@@ -120,6 +176,17 @@ Apple, which newer CMake needs before SDL's nested project, and adds the
 Steam Frame option with guards, the SDL fetch for standalone VR builds and the
 new tests. `.gitignore` gets `.DS_Store`.
 
+`src/app/starfox_pc.cpp` now builds its rumble output on the shared sequencer.
+The behaviour is meant to be identical.
+
+Everything VR-facing is Frame-only. `application.cpp` has two added lines (the
+hand-over) and `startup_menu.hpp` is untouched. The shared classes the Frame
+loop also uses keep their original behaviour unless the Frame player asks for
+more: `OpenXrInput::set_frame_player` adds the Index profile, the D-pad and
+rumble actions, `OpenXrRuntime::set_frame_extensions` enables the two Frame
+extensions, and `source_ui_text_packet` only draws ( ) + for the Frame menu.
+`starfox_pcvr` has no profiling options and finds its folders the way it did.
+
 ## What I've tested
 
 Host side, the ctest suite passes on macOS apart from a few tests that already
@@ -130,6 +197,15 @@ package passes the hash, allowlist and ELF checks.
 On the Frame itself I've run the flat ARM64 build (menus, audio and gameplay
 are fine) and the native VR build, which gets to `FOCUSED` with two eye
 swapchains and lets me navigate the menus and play.
+
+I haven't run PCVR or Quest on hardware for this. Their code is unchanged, and
+host tests cover the original paths (the original menu, input, decals and
+runtime setup).
+
+I've also confirmed on the headset that the controller profile loads and the
+buttons respond, that the gameplay HUD is fine without the black backing, that
+Original's authored rumble reacts to boosting and destroying things, and that
+the closer HUD fixes the ship-over-HUD problem.
 
 ## Known limitations
 

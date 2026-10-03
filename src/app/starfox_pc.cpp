@@ -385,6 +385,16 @@ starfox::render::GpuEffectSettings::HorizontalWipe gpu_horizontal_wipe(
     return w;
 }
 
+// STARFOX_TRACE_GPU_PASS_COST reports presentation passes slower than this.
+// STARFOX_TRACE_GPU_PASS_COST_US overrides the 20 ms default (0 = every frame).
+std::uint64_t gpu_pass_cost_threshold_us() noexcept {
+    static const std::uint64_t value=[] {
+        const auto* text=std::getenv("STARFOX_TRACE_GPU_PASS_COST_US");
+        return text?std::strtoull(text,nullptr,10):20000ULL;
+    }();
+    return value;
+}
+
 std::uint32_t display_width_for(
     starfox::simulation::DisplayMode mode) noexcept {
     switch (mode) {
@@ -2178,6 +2188,7 @@ public:
         bool display_frame=true,bool force_replay=false) {
         const bool trace_native_cost=std::getenv("STARFOX_TRACE_GPU_PASS_COST")!=nullptr;
         const auto native_begin=trace_native_cost?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
+        std::chrono::steady_clock::time_point layers_at=native_begin;
         const auto source=eye_output?*eye_output:native_output();
         const bool visible_circle=circle.active && circle.radius!=0U
             && (circle.affected_layers&0x3fU)!=0U;
@@ -2279,6 +2290,7 @@ public:
                     effects.isolated_overlays[i]->scene.draws())) {isolated_ready=false;break;}
             isolated_outputs[i]=isolated_overlay_scenes_[i].resident_output();
         }
+        if(trace_native_cost) layers_at=std::chrono::steady_clock::now();
         if(!force_replay && steady && late_ready && background_ready && isolated_ready && native_composite_.compose(source,source_scale,
                 frame,frame.write_coverage(),layer,palette,has_late?&late_output:nullptr,
                 effects.background?&background_output:nullptr,{},false,
@@ -2509,8 +2521,9 @@ public:
                 if(trace_native_cost) {
                     const auto done=std::chrono::steady_clock::now();
                     const auto us=[](auto a,auto b){return std::chrono::duration_cast<std::chrono::microseconds>(b-a).count();};
-                    if(us(native_begin,done)>=20000)
-                        std::cerr<<"gpu-native-cost-us compose="<<us(native_begin,composed_at)
+                    if(std::uint64_t(us(native_begin,done))>=gpu_pass_cost_threshold_us())
+                        std::cerr<<"gpu-native-cost-us layers="<<us(native_begin,layers_at)
+                            <<" compose="<<us(layers_at,composed_at)
                             <<" setup="<<us(composed_at,effects_begin)<<" effects="<<us(effects_begin,effects_done)
                             <<" draw="<<us(effects_done,done)<<'\n';
                 }
@@ -3551,7 +3564,7 @@ private:
         if(trace_pass_cost) {
             const auto done=std::chrono::steady_clock::now();
             const auto us=[](auto a,auto b){return std::chrono::duration_cast<std::chrono::microseconds>(b-a).count();};
-            if(us(pass_begin,done)>=20000)
+            if(std::uint64_t(us(pass_begin,done))>=gpu_pass_cost_threshold_us())
                 std::cerr<<"gpu-pass-cost-us flush="<<us(pass_begin,flushed)
                     <<" apply="<<us(flushed,done)<<" present="<<(settings.presentation_texture!=nullptr)<<'\n';
         }
@@ -5642,6 +5655,21 @@ int main(int argc, char** argv) {
     };
 #endif
 #if defined(_WIN32) && !defined(STARFOX_UWP)
+    // Profiling: STARFOX_PIX_GPU_CAPTURER names PIX's WinPixGpuCapturer.dll,
+    // loaded before any D3D12 device exists. With STARFOX_PIX_CAPTURE_FRAME=N
+    // and STARFOX_PIX_CAPTURE_FILE=path.wpix, presentation frame N is captured
+    // programmatically (CaptureNextFrame, as PIXGpuCaptureNextFrames does).
+    using PixCaptureNextFrames = HRESULT(WINAPI*)(PCWSTR, UINT32);
+    PixCaptureNextFrames pix_capture_next_frames = nullptr;
+    if (const auto* capturer = std::getenv("STARFOX_PIX_GPU_CAPTURER")) {
+        if (auto* module = LoadLibraryA(capturer))
+            pix_capture_next_frames = reinterpret_cast<PixCaptureNextFrames>(
+                reinterpret_cast<void*>(GetProcAddress(module, "CaptureNextFrame")));
+        if (!pix_capture_next_frames)
+            std::cerr << "PIX GPU capturer failed to load: " << capturer << std::endl;
+    }
+#endif
+#if defined(_WIN32) && !defined(STARFOX_UWP)
     // Keep the lock alive through the catch block and its modal error dialog.
     // If it lived inside try, stack unwinding released it before MessageBoxA;
     // a second launch could then enter and display an identical second box.
@@ -5851,6 +5879,9 @@ int main(int argc, char** argv) {
         log_uwp_startup("window and renderer created");
 #endif
         std::string initial_map = "BOOT";
+        // Tools that cannot pass program arguments (PIX's pixtool launch)
+        // select the start map here; a MAP argument still takes precedence.
+        if (const auto* test_map = std::getenv("STARFOX_TEST_MAP")) initial_map = test_map;
         const starfox::audio::Msu1Pack msu1_pack{
             find_msu1_pack(executable_directory)};
 #if defined(STARFOX_HAS_EMBEDDED_ASSETS)
@@ -13073,6 +13104,20 @@ int main(int argc, char** argv) {
             }
             starfox::render::scene_counters::end_frame(std::cerr,presented_frames,
                 presented_frames>=profile_warmup);
+#if defined(_WIN32) && !defined(STARFOX_UWP)
+            if (pix_capture_next_frames) {
+                static const auto pix_frame = [] {
+                    const auto* text = std::getenv("STARFOX_PIX_CAPTURE_FRAME");
+                    return text ? std::strtoull(text, nullptr, 10) : 0ULL;
+                }();
+                const auto* file = std::getenv("STARFOX_PIX_CAPTURE_FILE");
+                if (file && pix_frame && presented_frames + 1U == pix_frame) {
+                    const std::filesystem::path target{file};
+                    const auto result = pix_capture_next_frames(target.wstring().c_str(), 1U);
+                    std::cerr << "pix-capture: frame=" << pix_frame << " result=" << std::hex << result << std::dec << std::endl;
+                }
+            }
+#endif
             ++presented_frames;
 #if defined(__ANDROID__)
             if (game.renderer_mode() == starfox::simulation::RendererMode::gpu

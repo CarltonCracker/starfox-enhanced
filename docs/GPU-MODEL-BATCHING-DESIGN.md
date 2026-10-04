@@ -97,15 +97,24 @@ keeps every model's records alive until the batch raster.
    the union screen box (same shader, larger dispatch).
 2. **Binning:** today's tile lists (stage 6/9) store every polygon slot per
    tile (`tiles × (slots + 1) × 4` bytes). For a 20-model batch at 4× 32:9
-   that would be ~107 MB, so batches use **count → prefix-sum → scatter**
-   binning (the existing stages 1–4 shape) over the box's tiles, sized by
-   actual overlaps. Scatter is made **ordered**: each record's slot within
-   a tile list comes from a per-tile counter after an exclusive prefix over
-   record index. In practice this is a second stable pass that sorts each
-   tile's entries ascending, so the raster can keep its "walk from the top,
-   stop at the first covering command" early exit. (Alternative: unordered
-   scatter plus the raster's existing `sparse` owner comparison, which
-   needs no sort but loses the early exit. The prototype will measure both.)
+   that would be ~107 MB, so batches use **compact ordered lists** over the
+   box's tiles, sized by actual overlaps.
+
+   *As built (raster_bins stages 10–14):* one 64-lane group per box row
+   stages the row's polygon spans through groupshared memory, 64 at a time.
+   Each lane owns two tile columns and counts (stage 10) and later fills
+   (stage 14) its tiles by walking polygons in ascending order. So every
+   list is in painter order without a sort or atomics, and matches stage 6
+   entry for entry. Stages 11–13 are an exclusive scan of the box tile counts
+   into CSR offsets. The raster reads `[offset[t], offset[t+1])` and keeps
+   its "walk from the top, stop at the first covering command" early exit.
+   If a fill would overflow the 64 MiB list budget, the raster detects it on
+   the GPU and walks every polygon, which is slow but exact.
+
+   The same lists replace the dense lists wherever a dense list would
+   exceed its 64 MiB cap under GPU FAST: single bounded models, and the
+   full-frame grid, dust and particle row spans. That fixes the 10× cliff in
+   `docs/GPU-FAST-10X-OCT2026.md`.
 3. **Raster:** one 1B-style in-place indirect dispatch over the union box,
    with `command_count = Σ slots` and the global arena as the command
    buffer.

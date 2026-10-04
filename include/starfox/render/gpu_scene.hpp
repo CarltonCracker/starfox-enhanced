@@ -182,6 +182,10 @@ public:
     bool readback(Framebuffer&,SurfaceBuffer*);
     void release_device()noexcept;
     const std::string& status()const noexcept;
+    // GPU FAST scene options, set by the app; never inferred. Grid, dust and
+    // particle row spans then bin into compact tile lists when dense lists
+    // would not fit. Models carry their own GpuModelDraw::bounded_raster.
+    void set_gpu_fast(bool enabled)noexcept;
 private:
     struct Impl;std::unique_ptr<Impl> impl_;
 };
@@ -202,6 +206,7 @@ public:
         std::uint32_t eye_width,std::uint32_t eye_height,
         std::span<const GpuSceneDraw> frame,double separation,double convergence);
     void release_device() noexcept { resident_ready_=false;for(auto& eye:eyes_) eye.release_device(); }
+    void set_gpu_fast(bool enabled) noexcept {for(auto& eye:eyes_) eye.set_gpu_fast(enabled);}
 private:
     std::array<GpuScene,2> eyes_;
     bool resident_ready_{};

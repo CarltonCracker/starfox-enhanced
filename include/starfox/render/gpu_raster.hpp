@@ -65,7 +65,11 @@ public:
         // the screen box the spans cover. Falls back to the full-frame copy
         // when that can't be exact (wave rows, jitter, custom size, missing
         // background surface/depth planes).
-        bool bounded_in_place=false);
+        bool bounded_in_place=false,
+        // GPU FAST: when a dense per-tile list would exceed its 64 MiB cap,
+        // bin into compact ordered lists instead of walking every polygon.
+        // STARFOX_TEST_COMPACT_SPAN_TILES=1 uses them whenever allowed.
+        bool compact_tiles=false);
     // Upload legacy raster commands onto a caller-owned command buffer, for
     // ordered interleaving with GpuModel/GpuScene. No submit/readback/wait.
     // Result has explicit write coverage; consume before the next operation.

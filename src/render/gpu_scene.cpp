@@ -267,6 +267,7 @@ void GpuSceneRecording::replay(Framebuffer& frame,SurfaceBuffer* surfaces) const
 struct GpuScene::Impl {
     std::string status{"GPU scene merge unavailable"};
     std::array<std::uint64_t,4> submission_cost{};
+    bool gpu_fast{};
     GpuModel models[2];
     GpuRaster raster;
     GpuBackground background;
@@ -500,6 +501,7 @@ struct GpuScene::Impl {
 GpuScene::GpuScene():impl_(std::make_unique<Impl>()){}
 GpuScene::~GpuScene()=default;
 const std::string& GpuScene::status()const noexcept{return impl_->status;}
+void GpuScene::set_gpu_fast(bool enabled)noexcept{impl_->gpu_fast=enabled;}
 std::array<std::uint64_t,4> GpuScene::submission_cost()const noexcept{return impl_->submission_cost;}
 void GpuScene::release_device()noexcept {
 #if defined(STARFOX_SDL_GPU_EFFECTS)
@@ -707,7 +709,7 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
                     custom?model->logical_viewport[0]:width/scale,custom?model->logical_viewport[1]:height/scale,model->surface_metadata,fuse_model && output.pixels?&output:nullptr,nullptr,model->geometry_depth,
                     casts_rays?&rays:nullptr,previous?&*previous:nullptr,model_jitter,
                     custom?std::array<std::uint32_t,2>{width,height}:std::array<std::uint32_t,2>{},
-                    fuse_model && output.pixels && model->bounded_raster);
+                    fuse_model && output.pixels && model->bounded_raster,model->bounded_raster);
                 if(!front.pixels) throw std::runtime_error(renderer.status());
                 if(casts_rays) {
                     if(!rays.points) {
@@ -748,7 +750,8 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
                 auto* spans=projection.enqueue_particle_spans(command,height,particles->scale,
                     static_cast<std::uint8_t>(PixelLayer::three_d),frame.pose.effect_clip_left,frame.pose.effect_clip_right,mapping,jitter);
                 if(!spans) throw std::runtime_error(projection.status());
-                front=impl_->grid_raster.enqueue_row_spans(device,command,spans,std::uint32_t(count),width,height,false,nullptr,true);
+                front=impl_->grid_raster.enqueue_row_spans(device,command,spans,std::uint32_t(count),width,height,false,nullptr,true,
+                    nullptr,false,0,0,0,nullptr,{},{},false,impl_->gpu_fast);
                 if(!front.pixels) throw std::runtime_error(impl_->grid_raster.status());
             } else if(const auto* dust=std::get_if<GpuDustDraw>(&draw)) {
                 if(dust->frame.points.empty()) continue;
@@ -761,7 +764,8 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
                 auto* spans=projection.enqueue_dust_spans(command,height,dust->scale,
                     static_cast<std::uint8_t>(PixelLayer::world_geometry),std::int16_t(dust->frame.exclude_left),std::int16_t(dust->frame.exclude_right),mapping,jitter);
                 if(!spans) throw std::runtime_error(projection.status());
-                front=impl_->grid_raster.enqueue_row_spans(device,command,spans,std::uint32_t(dust->frame.points.size()),width,height,false,nullptr,true);
+                front=impl_->grid_raster.enqueue_row_spans(device,command,spans,std::uint32_t(dust->frame.points.size()),width,height,false,nullptr,true,
+                    nullptr,false,0,0,0,nullptr,{},{},false,impl_->gpu_fast);
                 if(!front.pixels) throw std::runtime_error(impl_->grid_raster.status());
             } else if(const auto* grid=std::get_if<GpuGridDraw>(&draw)) {
                 auto& projection=impl_->grid_projection;
@@ -774,7 +778,8 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
                 auto* spans=projection.enqueue_grid_spans(command,height,grid->scale,grid->colour,
                     static_cast<std::uint8_t>(PixelLayer::world_geometry),grid->lines?grid->line_start.data():nullptr,mapping,jitter);
                 if(!spans) throw std::runtime_error(projection.status());
-                front=impl_->grid_raster.enqueue_row_spans(device,command,spans,grid->lines?675:225,width,height,false,nullptr,true);
+                front=impl_->grid_raster.enqueue_row_spans(device,command,spans,grid->lines?675:225,width,height,false,nullptr,true,
+                    nullptr,false,0,0,0,nullptr,{},{},false,impl_->gpu_fast);
                 if(!front.pixels) throw std::runtime_error(impl_->grid_raster.status());
             } else {
                 const auto& raster=std::get<GpuRasterDraw>(draw);

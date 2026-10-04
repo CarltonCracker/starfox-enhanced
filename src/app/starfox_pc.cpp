@@ -1719,6 +1719,13 @@ public:
     void set_touch_layout_config(const starfox::app::TouchLayoutConfig* config) noexcept {
         touch_layout_config_=config;
     }
+    // GPU FAST scene options (compact row-span tile lists for grid, dust and
+    // particles). Models carry their own bounded_raster flag.
+    void set_gpu_fast(bool enabled) noexcept {
+        native_scene_.set_gpu_fast(enabled);late_scene_.set_gpu_fast(enabled);
+        background_scene_.set_gpu_fast(enabled);native_stereo_scene_.set_gpu_fast(enabled);
+        for(auto& scene:isolated_overlay_scenes_) scene.set_gpu_fast(enabled);
+    }
     void set_touch_editor(bool active,
         std::optional<starfox::app::TouchGroup> selected={}) noexcept {
         touch_editor_active_=active;
@@ -9193,6 +9200,7 @@ int main(int argc, char** argv) {
             // per-model full-frame pass for A/B.
             const bool bounded_model_raster=game.gpu_fast()
                 && !std::getenv("STARFOX_TEST_FULL_FRAME_MODEL_RASTER");
+            window.set_gpu_fast(game.gpu_fast());
             bool ray_scene_complete=true;
             controls_model_draws.clear();
             const auto draw_model=[&](const starfox::assets::Shape& shape,

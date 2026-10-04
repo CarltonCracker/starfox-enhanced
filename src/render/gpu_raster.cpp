@@ -220,8 +220,46 @@ struct GpuRaster::Impl {
         SDL_GPUBufferCreateInfo box{SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_READ|SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE,64,0};
         bounds=SDL_CreateGPUBuffer(device,&box);require_raster(bounds);
         SDL_GPUBufferCreateInfo args{SDL_GPU_BUFFERUSAGE_INDIRECT|SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_READ
-            |SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE,32,0};
+            |SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE,48,0};
         bounds_args=SDL_CreateGPUBuffer(device,&args);require_raster(bounds_args);
+    }
+    // One raster_bins stage over row spans, with the screen box as rows[].
+    // Each stage's results are consumed in order by the next pass.
+    void bins_stage(SDL_GPUCommandBuffer* cmd,SDL_GPUBuffer* source,Uint32 width,Uint32 height,Uint32 polygons,
+        Uint32 stage,SDL_GPUBuffer* second,Uint32 groups,bool indirect,Uint32 offset) {
+        // [4] is buffers[2]'s length in uints: the compact list capacity.
+        const Uint32 config[]{width,height,polygons,stage,sizes[2]/4,0,0,0};
+        SDL_PushGPUComputeUniformData(cmd,0,config,sizeof(config));
+        SDL_GPUStorageBufferReadWriteBinding bindings[2]{};
+        bindings[0].buffer=bounds;bindings[1].buffer=second;
+        auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,bindings,2);require_raster(pass);
+        SDL_BindGPUComputePipeline(pass,bins_pipeline);SDL_BindGPUComputeStorageBuffers(pass,0,&source,1);
+        if(indirect) SDL_DispatchGPUComputeIndirect(pass,bounds_args,offset);
+        else SDL_DispatchGPUCompute(pass,groups,1,1);
+        SDL_EndGPUComputePass(pass);
+    }
+    // Screen box of the row spans (stages 7-8): bounds/bounds_args.
+    void span_box(SDL_GPUCommandBuffer* cmd,SDL_GPUBuffer* source,Uint32 width,Uint32 height,Uint32 polygons) {
+        initialize_bins();bounds_buffers();
+        const auto records=std::uint64_t(polygons)*height;
+        bins_stage(cmd,source,width,height,polygons,7,bounds_args,Uint32((records+63)/64),false,0);
+        bins_stage(cmd,source,width,height,polygons,8,bounds_args,1,false,0);
+    }
+    // GPU FAST compact ordered tile lists in buffers[2] (stages 10-14), after
+    // span_box. Memory follows actual overlaps, capped like the dense lists
+    // at 64 MiB; a fill that overflows makes the raster walk every polygon.
+    void compact_lists(SDL_GPUCommandBuffer* cmd,SDL_GPUBuffer* source,Uint32 width,Uint32 height,Uint32 polygons) {
+        const auto tiles=std::uint64_t((width+63)/64)*height;
+        const auto header=tiles+1+(tiles+63)/64+1;
+        constexpr std::uint64_t budget=64ULL*1024*1024/4;
+        const auto capacity=std::min<std::uint64_t>(tiles*polygons,budget>header?budget-header:0);
+        buffer(2,Uint32((header+capacity)*4));
+        bins_stage(cmd,source,width,height,polygons,10,buffers[2],0,true,32);
+        bins_stage(cmd,source,width,height,polygons,11,buffers[2],0,true,16);
+        bins_stage(cmd,source,width,height,polygons,12,buffers[2],1,false,0);
+        bins_stage(cmd,source,width,height,polygons,13,buffers[2],0,true,16);
+        bins_stage(cmd,source,width,height,polygons,14,buffers[2],0,true,32);
+        scene_counters::add(scene_counters::Counter::compact_tile_lists);
     }
     void transfer(SDL_GPUTransferBuffer*& target,Uint32& capacity,Uint32 bytes,SDL_GPUTransferBufferUsage usage) {
         if(target && capacity>=bytes) return;
@@ -296,7 +334,7 @@ struct GpuRaster::Impl {
             SDL_GPUStorageBufferReadWriteBinding bins[2]{};bins[0].buffer=buffers[1];bins[1].buffer=buffers[2];
             for(Uint32 stage=0;stage<6;++stage) {
                 bins[0].cycle=bins[1].cycle=stage==0;
-                const Uint32 config[]{batch.width(),batch.height(),Uint32(batch.commands.size()),stage};
+                const Uint32 config[]{batch.width(),batch.height(),Uint32(batch.commands.size()),stage,0,0,0,0};
                 SDL_PushGPUComputeUniformData(command,0,config,sizeof(config));
                 auto* bin_pass=scene_counters::begin_compute_pass(command,nullptr,0,bins,2);require_raster(bin_pass);
                 SDL_BindGPUComputePipeline(bin_pass,bins_pipeline);SDL_BindGPUComputeStorageBuffers(bin_pass,0,buffers,1);
@@ -435,7 +473,7 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
     std::uint32_t polygon_count,std::uint32_t width,std::uint32_t height,bool surfaces,void* texels,bool pixel_coverage,
     const GpuRasterOutput* background,bool wave_rows,std::int16_t wave_offset,std::uint32_t wave_frame,std::uint32_t texel_bytes,
     const GpuGeometryDepthInput* geometry_depth,std::array<std::uint32_t,2> raster_size,std::array<float,2> jitter,
-    bool bounded_in_place) {
+    bool bounded_in_place,bool compact_tiles) {
 #if defined(STARFOX_SDL_GPU_EFFECTS)
     if(!device || !command || (!spans && polygon_count!=0)) return {};
     if(!impl_ || impl_->device!=device) impl_=std::make_unique<Impl>();
@@ -484,34 +522,28 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
             // Nothing to draw: the background already is the result.
             if(!spans || !polygon_count) {impl_->status="GPU FAST empty model kept background";return result;}
             auto* cmd=static_cast<SDL_GPUCommandBuffer*>(command);
-            impl_->initialize_bins();impl_->bounds_buffers();
             auto* source=static_cast<SDL_GPUBuffer*>(spans);
-            const auto bins_pass=[&](Uint32 stage,SDL_GPUBuffer* second,Uint32 groups,bool indirect,Uint32 offset) {
-                const Uint32 config[]{width,height,polygon_count,stage};
-                SDL_PushGPUComputeUniformData(cmd,0,config,sizeof(config));
-                // Box, arguments and bins are consumed in order by the next pass.
-                SDL_GPUStorageBufferReadWriteBinding bindings[2]{};
-                bindings[0].buffer=impl_->bounds;bindings[1].buffer=second;
-                auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,bindings,2);require_raster(pass);
-                SDL_BindGPUComputePipeline(pass,impl_->bins_pipeline);SDL_BindGPUComputeStorageBuffers(pass,0,&source,1);
-                if(indirect) SDL_DispatchGPUComputeIndirect(pass,impl_->bounds_args,offset);
-                else SDL_DispatchGPUCompute(pass,groups,1,1);
-                SDL_EndGPUComputePass(pass);
-            };
-            bins_pass(7,impl_->bounds_args,Uint32((records+63)/64),false,0);
-            bins_pass(8,impl_->bounds_args,1,false,0);
+            impl_->span_box(cmd,source,width,height,polygon_count);
             const auto tiles=std::uint64_t((width+63)/64)*height;
             const auto list_bytes=tiles*(std::uint64_t(polygon_count)+1)*4;
-            const bool tiled=list_bytes<=64U*1024*1024 && !SDL_getenv("STARFOX_TEST_DISABLE_TILED_SPANS");
-            if(tiled) {impl_->buffer(2,Uint32(list_bytes));bins_pass(9,impl_->buffers[2],0,true,16);}
+            const bool binned=!SDL_getenv("STARFOX_TEST_DISABLE_TILED_SPANS");
+            const bool compact=binned && compact_tiles
+                && (list_bytes>64U*1024*1024 || SDL_getenv("STARFOX_TEST_COMPACT_SPAN_TILES"));
+            const bool tiled=binned && !compact && list_bytes<=64U*1024*1024;
+            if(tiled) {
+                impl_->buffer(2,Uint32(list_bytes));
+                impl_->bins_stage(cmd,source,width,height,polygon_count,9,impl_->buffers[2],0,true,16);
+            }
+            if(compact) impl_->compact_lists(cmd,source,width,height,polygon_count);
             const Uint32 settings[]{width,height,output_surfaces?1U:0U,0x80000000U|(pixel_coverage?0x40000000U:0U)|polygon_count,
-                1U,output_surfaces?1U:0U,surfaces?1U:0U,tiled?0x80000000U:0U,
+                1U,output_surfaces?1U:0U,surfaces?1U:0U,tiled?0x80000000U:compact?0x40000000U:0U,
                 texels?texel_bytes:0U,0,0,3U,
                 output_depth?1U:0U,geometry_depth?geometry_depth->count:0U,output_depth?1U:0U,0,
                 std::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_x:1.f),
                 std::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_y:1.f),
                 std::bit_cast<Uint32>(geometry_depth?geometry_depth->center_x:0.f),
-                std::bit_cast<Uint32>(geometry_depth?geometry_depth->center_y:0.f),0,0,0,0};
+                std::bit_cast<Uint32>(geometry_depth?geometry_depth->center_y:0.f),0,0,
+                compact?impl_->sizes[2]/4:0U,0};
             SDL_PushGPUComputeUniformData(cmd,0,settings,sizeof(settings));
             // Placeholders only bind the shader's unused surface/depth slots.
             if(!output_surfaces) impl_->buffer(5,16);
@@ -522,7 +554,7 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
             outputs[2].buffer=output_depth?static_cast<SDL_GPUBuffer*>(background->geometry_depth):impl_->buffers[6];
             auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,outputs,3);require_raster(pass);
             SDL_BindGPUComputePipeline(pass,impl_->pipeline);
-            SDL_GPUBuffer* inputs[]{source,impl_->bounds,tiled?impl_->buffers[2]:source,texels?static_cast<SDL_GPUBuffer*>(texels):source,
+            SDL_GPUBuffer* inputs[]{source,impl_->bounds,(tiled || compact)?impl_->buffers[2]:source,texels?static_cast<SDL_GPUBuffer*>(texels):source,
                 source,source,geometry_depth?static_cast<SDL_GPUBuffer*>(geometry_depth->planes):source,source};
             SDL_BindGPUComputeStorageBuffers(pass,0,inputs,8);
             SDL_DispatchGPUComputeIndirect(pass,impl_->bounds_args,0);SDL_EndGPUComputePass(pass);
@@ -544,11 +576,18 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
         auto* cmd=static_cast<SDL_GPUCommandBuffer*>(command);
         const auto tiles=std::uint64_t((width+63)/64)*height;
         const auto list_bytes=tiles*(std::uint64_t(polygon_count)+1)*4;
-        const bool tiled=spans && polygon_count && !wave_rows && list_bytes<=64U*1024*1024
-            && !SDL_getenv("STARFOX_TEST_DISABLE_TILED_SPANS");
+        const bool binned=spans && polygon_count && !wave_rows && !SDL_getenv("STARFOX_TEST_DISABLE_TILED_SPANS");
+        const bool compact=binned && compact_tiles && (records+63)/64<=65535U
+            && (list_bytes>64U*1024*1024 || SDL_getenv("STARFOX_TEST_COMPACT_SPAN_TILES"));
+        const bool tiled=binned && !compact && list_bytes<=64U*1024*1024;
+        if(compact) {
+            auto* source=static_cast<SDL_GPUBuffer*>(spans);
+            impl_->span_box(cmd,source,width,height,polygon_count);
+            impl_->compact_lists(cmd,source,width,height,polygon_count);
+        }
         if(tiled) {
             impl_->initialize_bins();impl_->buffer(1,4);impl_->buffer(2,Uint32(list_bytes));
-            const Uint32 bin_settings[]{width,height,polygon_count,6};
+            const Uint32 bin_settings[]{width,height,polygon_count,6,0,0,0,0};
             SDL_PushGPUComputeUniformData(cmd,0,bin_settings,sizeof(bin_settings));
             SDL_GPUStorageBufferReadWriteBinding bindings[2]{};
             bindings[0].buffer=impl_->buffers[1];bindings[1].buffer=impl_->buffers[2];
@@ -563,14 +602,14 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
         }
         const Uint32 settings[]{width,height,output_surfaces?1U:0U,0x80000000U|(pixel_coverage?0x40000000U:0U)|polygon_count,
             background?1U:0U,background && background->surfaces?1U:0U,surfaces?1U:0U,
-            wave_rows?(1U|(std::uint32_t(std::uint16_t(wave_offset))<<1U)|((wave_frame&15U)<<17U)):(tiled?0x80000000U:0U),
+            wave_rows?(1U|(std::uint32_t(std::uint16_t(wave_offset))<<1U)|((wave_frame&15U)<<17U)):(tiled?0x80000000U:compact?0x40000000U:0U),
             texels?texel_bytes:0U,custom?outputWidth:0,custom?outputHeight:0,0,
             output_depth?1U:0U,geometry_depth?geometry_depth->count:0U,background && background->geometry_depth?1U:0U,0,
             std::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_x:1.f),
             std::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_y:1.f),
             std::bit_cast<Uint32>(geometry_depth?geometry_depth->center_x:0.f),
             std::bit_cast<Uint32>(geometry_depth?geometry_depth->center_y:0.f),
-            std::bit_cast<Uint32>(jitter[0]),std::bit_cast<Uint32>(jitter[1]),0,0};
+            std::bit_cast<Uint32>(jitter[0]),std::bit_cast<Uint32>(jitter[1]),compact?impl_->sizes[2]/4:0U,0};
         SDL_PushGPUComputeUniformData(cmd,0,settings,sizeof(settings));
         SDL_GPUStorageBufferReadWriteBinding outputs[3]{};
         outputs[0].buffer=impl_->buffers[4];outputs[1].buffer=impl_->buffers[5];
@@ -584,7 +623,8 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
         // bind an existing read-only buffer rather than an empty placeholder.
         if(!spans) impl_->buffer(0,4);
         auto* source=spans?static_cast<SDL_GPUBuffer*>(spans):impl_->buffers[0];
-        SDL_GPUBuffer* inputs[]{source,source,tiled?impl_->buffers[2]:source,texels?static_cast<SDL_GPUBuffer*>(texels):source,
+        SDL_GPUBuffer* inputs[]{source,compact?impl_->bounds:source,(tiled || compact)?impl_->buffers[2]:source,
+            texels?static_cast<SDL_GPUBuffer*>(texels):source,
             background?static_cast<SDL_GPUBuffer*>(background->pixels):source,
             background && background->surfaces?static_cast<SDL_GPUBuffer*>(background->surfaces):source,
             geometry_depth?static_cast<SDL_GPUBuffer*>(geometry_depth->planes):source,

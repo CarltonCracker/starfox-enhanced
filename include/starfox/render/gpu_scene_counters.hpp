@@ -30,11 +30,13 @@ enum class Counter : std::size_t {
     raster_commands,       // CPU-recorded RasterCommand entries uploaded
     raster_bytes,          // bytes of those RasterCommand entries
     upload_bytes,          // bytes copied CPU->GPU by scene encoders
+    compact_tile_lists,    // GPU FAST compact ordered row-span tile lists built
     count,
 };
 
 inline constexpr std::array<std::string_view,std::size_t(Counter::count)> counter_names{
-    "models","compute-passes","full-frame-dispatches","bounded-dispatches","raster-commands","raster-bytes","upload-bytes"};
+    "models","compute-passes","full-frame-dispatches","bounded-dispatches","raster-commands","raster-bytes","upload-bytes",
+    "compact-tile-lists"};
 
 using Totals=std::array<std::uint64_t,std::size_t(Counter::count)>;
 

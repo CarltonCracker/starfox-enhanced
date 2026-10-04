@@ -65,7 +65,8 @@ public:
         bool geometry_depth=false,GpuModelRaySource* ray_source=nullptr,
         const RenderPose* previous_pose=nullptr,std::array<float,2> raster_jitter={},
         std::array<std::uint32_t,2> raster_size={},
-        bool bounded_raster=false); // GPU FAST: see GpuRaster::enqueue_row_spans
+        bool bounded_raster=false, // GPU FAST: see GpuRaster::enqueue_row_spans
+        bool compact_tiles=false); // GPU FAST: compact tile lists past the dense cap
     void release_device() noexcept;
     const std::string& status()const noexcept;
 private:

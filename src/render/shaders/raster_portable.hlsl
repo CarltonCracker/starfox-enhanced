@@ -24,7 +24,7 @@ cbuffer Settings:register(b0,space2) {
     uint texel_bytes,reserved1,reserved2,bounded; // bounded: 1=box origin in rows[12..13], 2=background is the output
     uint want_depth,plane_count,has_back_depth,depth_padding;
     float4 depth_projection; // focal x/y, center x/y in output pixels.
-    float2 rasterJitter;uint2 jitterPadding;
+    float2 rasterJitter;uint2 jitterPadding; // jitterPadding.x: compact list length in uints
 };
 // Source wave arithmetic uses signed 16-bit wrapping before both phase steps.
 int waveShift(int x,int offset,uint frame) {
@@ -67,13 +67,28 @@ void main(uint3 id:SV_DispatchThreadID) {
     uint row=id.y*((width+63)/64)+id.x/64;
     uint begin=row_spans?0:rows[row];
     if(tiled_spans) begin=row*((reserved&0x3fffffffU)+1)+1;
-    for(uint cursor=tiled_spans?begin+indices[begin-1]:row_spans?(reserved&0x3fffffffU)*(wave_rows?2U:1U):rows[row+1];cursor>begin;) {
+    // GPU FAST compact lists (raster_bins stages 10-14): CSR offsets per box
+    // tile, box in rows[11..14]. An overflowed fill walks every polygon.
+    bool compact_spans=row_spans && !tiled_spans && (padding&0x40000000U)!=0;
+    uint compact_end=0;
+    if(compact_spans) {
+        uint tiles=((width+63)/64)*height,entries=tiles+1+(tiles+63)/64+1;
+        uint box_tiles=rows[14];
+        if(entries+indices[box_tiles]>jitterPadding.x) compact_spans=false;
+        else {
+            uint column=(id.x-rows[12])/64,box_row=id.y-rows[13];
+            bool inside=id.x>=rows[12] && id.y>=rows[13] && column<rows[11] && box_row*rows[11]+column<box_tiles;
+            uint tile=box_row*rows[11]+column;
+            begin=inside?entries+indices[tile]:0;compact_end=inside?entries+indices[tile+1]:0;
+        }
+    }
+    for(uint cursor=compact_spans?compact_end:tiled_spans?begin+indices[begin-1]:row_spans?(reserved&0x3fffffffU)*(wave_rows?2U:1U):rows[row+1];cursor>begin;) {
         --cursor;
         bool wave_candidate=wave_rows && (cursor&1U)!=0;
         int source_y=int(id.y)-(wave_candidate?wave_delta:0);
         if(source_y<0 || source_y>=int(height)) continue;
         uint polygon=wave_rows?cursor/2U:cursor;
-        uint command_index=tiled_spans?indices[cursor]:row_spans?polygon*height+uint(source_y):indices[cursor+(sparse?height*((width+63)/64):0)];
+        uint command_index=(tiled_spans || compact_spans)?indices[cursor]:row_spans?polygon*height+uint(source_y):indices[cursor+(sparse?height*((width+63)/64):0)];
         uint owner=command_index+1;
         // Sparse atomic scatter is unordered. Once both independent owners
         // outrank this command, neither coverage nor texture transparency

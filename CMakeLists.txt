@@ -1714,9 +1714,13 @@ if(STARFOX_BUILD_TESTS)
                 "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_steam_frame_cmake_guards.py"
                 --cmake "${CMAKE_COMMAND}"
                 --generator "${CMAKE_GENERATOR}")
-        add_test(NAME starfox_steam_frame_package_validation
-            COMMAND "${Python3_EXECUTABLE}"
-                "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_steam_frame_package_validation.py")
+        # The Linux package fixture checks POSIX executable permission bits.
+        # Windows cannot represent those bits for its extensionless fixtures.
+        if(UNIX)
+            add_test(NAME starfox_steam_frame_package_validation
+                COMMAND "${Python3_EXECUTABLE}"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_steam_frame_package_validation.py")
+        endif()
         add_test(NAME starfox_backdrop_catalog
             COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_backdrop_catalog.py")
         add_test(NAME starfox_enhanced_palette_trace

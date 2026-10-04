@@ -359,6 +359,8 @@ struct PresentationEffects {
     std::array<starfox::render::shadows::GpuShadowOutput,2> stereo_resident_shadows;
     std::uint32_t shadow_width{}, shadow_height{};
     std::int32_t shadow_offset_y{};
+    // Ray buffers hold frame pixels x ray_scale_num / ray_scale_den (0: 1:1).
+    std::uint32_t ray_scale_num{}, ray_scale_den{};
     std::uint8_t chromatic_aberration{};
     std::uint8_t hdr_effect{};
     bool touch_controls{};
@@ -509,6 +511,16 @@ std::uint32_t effective_render_scale_factor(
     const starfox::simulation::GameSimulation& game) noexcept {
     const auto factor = render_scale_factor(game.render_scale());
     return game.gpu_fast() ? factor : std::min<std::uint32_t>(factor,
+        static_cast<std::uint32_t>(starfox::simulation::standard_render_scale_count));
+}
+
+// Above 4x, GPU FAST traces ray-traced shadows and reflections at 4x: their
+// detail matches 4x play while models and everything else keep the full
+// render scale. Rays dominate the 5x-10x frame (11 ms of 25 ms at 10x 32:9).
+// STARFOX_TEST_FULL_RES_RAYS=1 traces at the render scale instead.
+std::uint32_t ray_trace_scale(std::uint32_t render_scale) noexcept {
+    static const bool full=std::getenv("STARFOX_TEST_FULL_RES_RAYS")!=nullptr;
+    return full ? render_scale : std::min<std::uint32_t>(render_scale,
         static_cast<std::uint32_t>(starfox::simulation::standard_render_scale_count));
 }
 
@@ -2405,6 +2417,7 @@ public:
             settings.reflection_intensity=effects.reflection_intensity;
             settings.reflection_material=effects.reflection_material;
             settings.reflection_offset_y=effects.reflection_offset_y;
+            settings.ray_scale_num=effects.ray_scale_num;settings.ray_scale_den=effects.ray_scale_den;
             if(effects.shadow_mask || effects.resident_shadow.buffer) {
                 if(effects.shadow_mask) settings.shadow_mask=*effects.shadow_mask;
                 settings.resident_shadow=effects.resident_shadow;settings.shadow_width=effects.shadow_width;
@@ -3115,6 +3128,7 @@ public:
         early_gpu.reflection_intensity=effects.reflection_intensity;
         early_gpu.reflection_material=effects.reflection_material;
         early_gpu.reflection_offset_y=effects.reflection_offset_y;
+        early_gpu.ray_scale_num=effects.ray_scale_num;early_gpu.ray_scale_den=effects.ray_scale_den;
         if(effects.shadow_mask || effects.resident_shadow.buffer) {
             if(effects.shadow_mask) early_gpu.shadow_mask=*effects.shadow_mask;
             early_gpu.resident_shadow=effects.resident_shadow;
@@ -3145,11 +3159,15 @@ public:
             cpu_shadow=&fallback_shadow;
         }
         if (!early_on_gpu && cpu_shadow != nullptr) {
+            // A capped ray scale maps frame pixels to the nearest mask pixel.
+            const std::uint32_t ray_num=effects.ray_scale_den?effects.ray_scale_num:1U;
+            const std::uint32_t ray_den=effects.ray_scale_den?effects.ray_scale_den:1U;
             for (std::uint32_t y=0; y<framebuffer.stored_height(); ++y) {
-                const auto sy=static_cast<int>(y)-effects.shadow_offset_y;
+                const auto frame_y=static_cast<int>(y)-effects.shadow_offset_y;
+                const auto sy=frame_y<0?frame_y:static_cast<int>(std::uint32_t(frame_y)*ray_num/ray_den);
                 if (sy<0 || sy>=static_cast<int>(effects.shadow_height)) continue;
                 for (std::uint32_t x=0; x<framebuffer.stored_width(); ++x) {
-                    const auto sx=x;
+                    const auto sx=x*ray_num/ray_den;
                     if (sx>=effects.shadow_width) continue;
                     const auto layer=framebuffer.layer_stored(x,y);
                     if (layer!=starfox::render::PixelLayer::background
@@ -11167,11 +11185,12 @@ int main(int argc, char** argv) {
                     ground=starfox::render::shadows::ReceiverPlane{
                         {point.x,point.y,point.z},{normal.x,normal.y,normal.z}};
                 }
+                const auto ray_scale=ray_trace_scale(render_scale);
                 const starfox::render::shadows::Camera shadow_camera{
-                    superfx_frame.stored_width(),superfx_frame.stored_height(),256.0*render_scale,
-                        static_cast<double>(game.map().read_native_word(vanish_x_address)+superfx_ui_offset_x)*render_scale,
+                    superfx_frame.stored_width()*ray_scale/render_scale,superfx_frame.stored_height()*ray_scale/render_scale,256.0*ray_scale,
+                        static_cast<double>(game.map().read_native_word(vanish_x_address)+superfx_ui_offset_x)*ray_scale,
                         static_cast<double>(game.map().read_native_word(vanish_y_address)
-                            +(extend_scene_vertical?superfx_offset_y:0))*render_scale};
+                            +(extend_scene_vertical?superfx_offset_y:0))*ray_scale};
                 reflection_ground=ground;
                 const bool resident_casters=resident_raster && record_models
                     && ray_scene_complete && window.ray_caster_vertices()!=0;
@@ -12723,10 +12742,11 @@ int main(int argc, char** argv) {
                 ray_water.world_to_view[row*3+col]=float(view_matrix[col*3+row])/32768.f;
             const auto* water_input=water_requested && reflection_ground?&ray_water:nullptr;
             if((game.reflective_surfaces() || water_input) && hardware_ray_tracing && resident_raster) {
+                const auto ray_scale=ray_trace_scale(render_scale);
                 const starfox::render::shadows::Camera reflection_camera{
-                    superfx_frame.stored_width(),superfx_frame.stored_height(),256.0*render_scale,
-                    double(game.map().read_native_word(vanish_x_address)+superfx_ui_offset_x)*render_scale,
-                    double(game.map().read_native_word(vanish_y_address)+(extend_scene_vertical?superfx_offset_y:0))*render_scale};
+                    superfx_frame.stored_width()*ray_scale/render_scale,superfx_frame.stored_height()*ray_scale/render_scale,256.0*ray_scale,
+                    double(game.map().read_native_word(vanish_x_address)+superfx_ui_offset_x)*ray_scale,
+                    double(game.map().read_native_word(vanish_y_address)+(extend_scene_vertical?superfx_offset_y:0))*ray_scale};
                 bool reflected=false;
                 std::optional<starfox::render::GpuBackgroundDraw> enhanced_reflection_background;
                 const starfox::render::GpuBackgroundDraw* reflection_background=nullptr;
@@ -12763,6 +12783,7 @@ int main(int argc, char** argv) {
                         presentation_effects.reflection_intensity=std::array<unsigned,4>{0,35,65,100}[game.reflective_surfaces()]
                             ;
                     presentation_effects.reflection_offset_y=scene_offset_y*int(render_scale);
+                    if(ray_trace_scale(render_scale)!=render_scale) {presentation_effects.ray_scale_num=ray_trace_scale(render_scale);presentation_effects.ray_scale_den=render_scale;}
                     if(test_frames && presented_frames+1U==test_frames)
                         std::cerr<<"reflection-scene: GPU resident, intensity="<<presentation_effects.reflection_intensity
                             <<", background="<<(reflection_background?"authored BG2":"fallback")
@@ -12781,9 +12802,10 @@ int main(int argc, char** argv) {
                     presentation_effects.stereo_resident_shadows[eye]=window.stereo_shadow_output(eye);
                 if(!shadow_mask.empty()) presentation_effects.shadow_mask=&shadow_mask;
                 if(resident_shadow) presentation_effects.resident_shadow=window.shadow_output();
-                presentation_effects.shadow_width=superfx_frame.stored_width();
-                presentation_effects.shadow_height=superfx_frame.stored_height();
+                presentation_effects.shadow_width=superfx_frame.stored_width()*ray_trace_scale(render_scale)/render_scale;
+                presentation_effects.shadow_height=superfx_frame.stored_height()*ray_trace_scale(render_scale)/render_scale;
                 presentation_effects.shadow_offset_y=scene_offset_y*static_cast<int>(render_scale);
+                if(ray_trace_scale(render_scale)!=render_scale) {presentation_effects.ray_scale_num=ray_trace_scale(render_scale);presentation_effects.ray_scale_den=render_scale;}
             }
             if (game.in_setup_menu() && !menu_peek) {
                 presentation_effects.setup_overlay = &setup_overlay;

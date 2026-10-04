@@ -168,7 +168,7 @@ void* GpuClip::enqueue(void* device,void* command,void* points,void* corners,
     return nullptr;
 #endif
 }
-void* GpuClip::enqueue_spans(void* command,void* materials,bool winding_independent,std::uint32_t render_scale,const GpuSpanOrder* order,std::uint32_t line_thickness,void* source_texels,std::uint32_t source_texel_bytes,void** masked_texels,std::array<std::uint32_t,2> raster_size,bool reuse_span_scratch) {
+void* GpuClip::enqueue_spans(void* command,void* materials,bool winding_independent,std::uint32_t render_scale,const GpuSpanOrder* order,std::uint32_t line_thickness,void* source_texels,std::uint32_t source_texel_bytes,void** masked_texels,std::array<std::uint32_t,2> raster_size,bool reuse_span_scratch,bool parallel_clear) {
     if(masked_texels) *masked_texels=nullptr;
 #if defined(STARFOX_SDL_GPU_EFFECTS)
     try {
@@ -216,23 +216,32 @@ void* GpuClip::enqueue_spans(void* command,void* materials,bool winding_independ
             SDL_GPUBufferLocation from{static_cast<SDL_GPUBuffer*>(source_texels),0},to{impl_->masks,0};
             SDL_CopyGPUBufferToBuffer(copy,&from,&to,source_texel_bytes,true);SDL_EndGPUCopyPass(copy);
         }
-        const Uint32 settings[]{slots,width,height,winding_independent?1U:0U,
+        Uint32 settings[]{slots,width,height,winding_independent?1U:0U,
             render_scale,impl_->continuous?1U:0U,order?1U:0U,s.polygon_count,
             order?order->first:0U,order?order->tree_index:0U,line_thickness,0,
             masked_texels?1U:0U,source_texel_bytes,mask_stride,custom?1U:0U,
             std::bit_cast<Uint32>(float(width)/s.width),std::bit_cast<Uint32>(float(height)/s.height),0,0};
-        SDL_PushGPUComputeUniformData(cmd,0,settings,sizeof(settings));
         SDL_GPUStorageBufferReadWriteBinding bindings[2]{};
         // Ordered model batches rasterize these rows before the next model
         // overwrites them. Cycling would retain a full polygon*height buffer
         // per terrain tile until submission completes (several GiB at 4x).
         bindings[0].buffer=impl_->spans;bindings[0].cycle=!reuse_span_scratch;
         bindings[1].buffer=impl_->masks;bindings[1].cycle=!copied;
-        auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,bindings,2);Impl::require(pass);
-        SDL_BindGPUComputePipeline(pass,impl_->spans_pipeline);
         SDL_GPUBuffer* inputs[]{impl_->output,static_cast<SDL_GPUBuffer*>(materials),
             static_cast<SDL_GPUBuffer*>(order?order->indices:materials),
             static_cast<SDL_GPUBuffer*>(order?order->results:materials)};
+        const bool clear_first=parallel_clear && !SDL_getenv("STARFOX_TEST_SERIAL_SPAN_CLEAR");
+        if(clear_first) {
+            settings[11]=1;SDL_PushGPUComputeUniformData(cmd,0,settings,sizeof(settings));
+            auto* clear=scene_counters::begin_compute_pass(cmd,nullptr,0,bindings,2);Impl::require(clear);
+            SDL_BindGPUComputePipeline(clear,impl_->spans_pipeline);SDL_BindGPUComputeStorageBuffers(clear,0,inputs,4);
+            SDL_DispatchGPUCompute(clear,Uint32((std::uint64_t(slots)*height+255)/256),1,1);SDL_EndGPUComputePass(clear);
+            // The span pass writes over the cleared records: never cycle them away.
+            settings[11]=2;bindings[0].cycle=bindings[1].cycle=false;
+        }
+        SDL_PushGPUComputeUniformData(cmd,0,settings,sizeof(settings));
+        auto* pass=scene_counters::begin_compute_pass(cmd,nullptr,0,bindings,2);Impl::require(pass);
+        SDL_BindGPUComputePipeline(pass,impl_->spans_pipeline);
         SDL_BindGPUComputeStorageBuffers(pass,0,inputs,4);
         SDL_DispatchGPUCompute(pass,(slots+31)/32,1,1);SDL_EndGPUComputePass(pass);
         if(masked_texels) *masked_texels=impl_->masks;

@@ -580,7 +580,7 @@ GpuRasterOutput GpuModel::enqueue(void* device,void* command,const assets::Shape
         const bool repeated_rows=(pose.wobble_mode&1U)!=0;
         auto* spans=impl_->clip.enqueue_spans(command,materials,custom_raster || settings.render_scale>1,settings.render_scale,colour_warp?nullptr:&order,settings.wireframe_thickness,
             repeated_rows?b[9]:nullptr,repeated_rows?std::uint32_t(faces.texels.size()):0,repeated_rows?&masked_texels:nullptr,raster_size,
-            diagnostics==nullptr);
+            diagnostics==nullptr,compact_tiles);
         if(!spans) throw std::runtime_error(impl_->clip.status());
         const GpuGeometryDepthInput depth_input{impl_->geometry_planes,polygons,
             float(settings.focal_length*scale_x),float(settings.focal_length*scale_y),

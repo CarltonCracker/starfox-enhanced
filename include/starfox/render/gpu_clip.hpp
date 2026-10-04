@@ -77,7 +77,11 @@ public:
     void* enqueue_spans(void* command,void* materials,bool winding_independent=false,std::uint32_t render_scale=1,
         const GpuSpanOrder* order=nullptr,std::uint32_t line_thickness=1,
         void* source_texels=nullptr,std::uint32_t source_texel_bytes=0,void** masked_texels=nullptr,
-        std::array<std::uint32_t,2> raster_size={},bool reuse_span_scratch=false);
+        std::array<std::uint32_t,2> raster_size={},bool reuse_span_scratch=false,
+        // GPU FAST: clear the span records in a separate parallel pass instead
+        // of one thread per polygon writing every row
+        // (STARFOX_TEST_SERIAL_SPAN_CLEAR=1 restores the serial clear).
+        bool parallel_clear=false);
     void release_device() noexcept;
     const std::string& status() const noexcept;
 private:

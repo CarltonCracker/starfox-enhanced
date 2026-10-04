@@ -79,10 +79,21 @@ bool beginSegment(inout Tracer t,uint base,uint size,int y) {
 }
 [numthreads(32,1,1)]
 void main(uint3 id:SV_DispatchThreadID) {
+    // GPU FAST (padding bit 0): clear every span record in its own pass,
+    // eight per thread, coalesced across the group. Bit 1 tells the span
+    // pass the records are already clear.
+    if((padding&1U)!=0) {
+        uint records=count*uint(height),group=id.x/32,lane=id.x%32;
+        for(uint j=0;j<8;++j) {
+            uint index=(group*8+j)*32+lane;
+            if(index<records) commands[index]=(Command)0;
+        }
+        return;
+    }
     if(id.x>=count) return;
     uint commandBase=id.x*uint(height);
     Command empty=(Command)0;
-    for(int row=0;row<height;++row) commands[commandBase+uint(row)]=empty;
+    if((padding&2U)==0) for(int row=0;row<height;++row) commands[commandBase+uint(row)]=empty;
     uint maskBase=maskOffset+id.x*uint(height)*maskStride;
     if(maskEnabled!=0) for(uint at=0;at<uint(height)*maskStride;at+=4) masks.Store(maskBase+at,0);
     uint polygon=id.x;

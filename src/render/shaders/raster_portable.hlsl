@@ -220,11 +220,13 @@ void main(uint3 id:SV_DispatchThreadID) {
     if(has_back!=0) {
         uint backIndex=id.y*width+id.x;
         uint back=in_place?pixels[backIndex]:back_pixels[backIndex];
-        if(!have_pixel) packed=(packed&0x01ff0000U)|(back&0x1c00ffffU);
+        // Uncovered pixels keep the background's flags, including the
+        // emissive-beam bit 29 (scene_portable).
+        if(!have_pixel) packed=(packed&0x01ff0000U)|(back&0x3c00ffffU);
         if(want_depth!=0 && !have_pixel && has_back_depth!=0)
             depth=in_place?geometry_depth[backIndex]:back_depth[backIndex];
         if((packed&0x01000000U)==0 && has_back_surface!=0 && (back&0x01000000U)!=0) {
-            packed=(packed&0x1c00ffffU)|(back&0x01ff0000U);
+            packed=(packed&0x3c00ffffU)|(back&0x01ff0000U);
             surface=in_place?surfaces[backIndex]:back_surfaces[backIndex];
         }
     }

@@ -574,7 +574,10 @@ void main(uint3 id : SV_DispatchThreadID) {
     } else if(stage==15) {
         int sy=int(p.y)-shadowY;
         uint layer=tag(p);
-        if(p.x<shadowWidth && sy>=0 && sy<int(shadowHeight) && (layer==0 || layer==2 || layer==4 || layer==5)) {
+        // Emissive beams (packed bit 29, composite_portable) are lights, not
+        // receivers: the source draws its shadow polygon beneath them.
+        bool beam=reserved==1 && (layerTags.Load(indexOf(p)*4)&0x20000000u)!=0;
+        if(!beam && p.x<shadowWidth && sy>=0 && sy<int(shadowHeight) && (layer==0 || layer==2 || layer==4 || layer==5)) {
             uint i=uint(sy)*(shadowEnabled==3?((shadowWidth+3u)&~3u):shadowWidth)+p.x;
             uint shade=shadowEnabled==2 ? shadowMask.Load(i*4)
                 : (shadowMask.Load(i&~3u)>>((i&3u)*8))&255u;

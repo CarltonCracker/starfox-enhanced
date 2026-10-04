@@ -1,5 +1,6 @@
 #include "starfox/vr/openxr_input.hpp"
 #include "starfox/vr/startup_menu.hpp"
+#include "starfox/vr/startup_preferences.hpp"
 #include "starfox/vr/game_input.hpp"
 #include <cmath>
 #include <cstring>
@@ -8,6 +9,7 @@
 #include <stdexcept>
 #include <source_location>
 #include <vector>
+#include <chrono>
 using namespace starfox::vr;
 namespace {
 void require(bool value,const std::source_location where=std::source_location::current()) {if(!value) throw std::runtime_error("VR input assertion failed at line "+std::to_string(where.line()));}
@@ -136,15 +138,21 @@ int main() try {
             }
         }
         menu.page=Page::options;menu.selection=6;click();require(menu.page==Page::three_d && !menu.ray_tracing);
-        require(menu.row_count()==4 && menu.labels().back()=="BACK" && !menu.preview);
+        require(menu.row_count()==5 && menu.labels().back()=="BACK" && !menu.preview);
         click();require(menu.model_effect==1 && !menu.ray_tracing);
         menu.selection=2;click();require(menu.preview);menu.sample(press,true);require(menu.preview);
         click();require(!menu.preview);
-        menu.selection=3;click();require(!menu.ray_tracing && menu.page==Page::options);
-        menu.ray_tracing_available=true;click();require(menu.page==Page::three_d);
+        menu.selection=3;click();require(menu.page==Page::three_d && menu.asteroid_models==1
+            && menu.labels()[3]=="3D ASTEROIDS: SUPER FX LOW");
+        click();require(menu.labels()[3]=="3D ASTEROIDS: SUPER FX MEDIUM");
+        click();require(menu.labels()[3]=="3D ASTEROIDS: SUPER FX HIGH");
+        click();require(menu.asteroid_models==0 && menu.labels()[3]=="3D ASTEROIDS: SPRITE");
+        menu.selection=4;click();require(!menu.ray_tracing && menu.page==Page::options);
+        menu.ray_tracing_available=true;click();require(menu.page==Page::three_d && menu.row_count()==6);
         menu.selection=3;click();require(menu.ray_tracing);
         menu.sample(press,true);require(menu.ray_tracing);
-        menu.selection=4;click();require(menu.page==Page::options && menu.selection==6);
+        menu.selection=4;click();require(menu.asteroid_models==1 && menu.page==Page::three_d);
+        menu.selection=5;click();require(menu.page==Page::options && menu.selection==6);
         menu.selection=7;click();require(menu.page==Page::two_d);
         click();require(menu.world_effect==4);
         menu.selection=1;click();require(menu.world_intensity==0);
@@ -179,11 +187,12 @@ int main() try {
         require(restored.restore_preferences(preferences));
         require(restored.preferences()==preferences);
         require(restored.steer_sensitivity_index==1);
+        require(restored.asteroid_models==1 && restored.asteroid_model_mode()==starfox::render::AsteroidModels::super_fx_low);
         require(restored.ray_tracing && !restored.ray_tracing_available);
         require(restored.enhanced_sky);
         require(!restored.ray_tracing_enabled());
         restored.page=Page::three_d;
-        require(restored.row_count()==4 && restored.labels().back()=="BACK" && !restored.preview);
+        require(restored.row_count()==5 && restored.labels().back()=="BACK" && !restored.preview);
         restored.ray_tracing_available=true;
         require(restored.ray_tracing_enabled());
         restored.ray_tracing=false;
@@ -193,9 +202,45 @@ int main() try {
         std::array<uint8_t,16> legacy{};std::copy(preferences.begin(),preferences.begin()+16,legacy.begin());
         legacy[4]=1;legacy[11]&=1;legacy[15]&=1;
         StartupMenu migrated;require(migrated.restore_preferences(legacy) && !migrated.ray_tracing && !migrated.infinite_lives);
-        auto version4=preferences;version4[4]=4;version4[11]&=3;
+        std::array<uint8_t,20> version4{};std::copy(preferences.begin(),preferences.begin()+20,version4.begin());
+        version4[4]=4;version4[11]&=3;
         require(migrated.restore_preferences(version4) && !migrated.enhanced_sky
-            && migrated.model_effect==menu.model_effect && migrated.world_effect==menu.world_effect);
+            && migrated.model_effect==menu.model_effect && migrated.world_effect==menu.world_effect
+            && migrated.asteroid_models==0);
+        // Version 6 carries the asteroid mode; a 20-byte record cannot claim it.
+        auto short_version6=version4;short_version6[4]=6;
+        require(!migrated.restore_preferences(short_version6));
+        // Exercise the very same bounded file loader used by application.cpp.
+        // In particular, v6 must not be rejected by a stale 16/20-byte gate.
+        const auto file=std::filesystem::temp_directory_path()/
+            ("starfox-vr-preferences-"+std::to_string(
+                std::chrono::steady_clock::now().time_since_epoch().count())+".bin");
+        struct RemoveFile {
+            std::filesystem::path path;
+            ~RemoveFile() {std::error_code error;std::filesystem::remove(path,error);}
+        } cleanup{file};
+        const auto write_record=[&](std::span<const uint8_t> record) {
+            std::ofstream output(file,std::ios::binary|std::ios::trunc);
+            output.write(reinterpret_cast<const char*>(record.data()),record.size());
+            output.close();require(bool(output));
+        };
+        StartupMenu from_disk;
+        write_record(preferences);
+        require(load_startup_preferences(from_disk,file));
+        require(from_disk.preferences()==preferences);
+        write_record(legacy);require(load_startup_preferences(from_disk,file));
+        require(from_disk.asteroid_models==0 && !from_disk.ray_tracing);
+        write_record(version4);require(load_startup_preferences(from_disk,file));
+        require(from_disk.model_effect==menu.model_effect);
+        const auto before_invalid=from_disk.preferences();
+        write_record(short_version6);require(!load_startup_preferences(from_disk,file));
+        require(from_disk.preferences()==before_invalid);
+        std::array<uint8_t,22> oversized{};
+        std::copy(preferences.begin(),preferences.end(),oversized.begin());
+        write_record(oversized);require(!load_startup_preferences(from_disk,file));
+        require(from_disk.preferences()==before_invalid);
+        write_record({});require(!load_startup_preferences(from_disk,file));
+        require(from_disk.preferences()==before_invalid);
         require(restored.open && !restored.runtime && !restored.extended
             && !restored.alternate_available && restored.page==Page::main
             && restored.selection==0 && restored.selected_level==0);

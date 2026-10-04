@@ -50,10 +50,11 @@ void compare(const Readback& a,const Readback& b,const std::string& what) {
     }
 }
 
-// Bounded dispatches since the last call (scene counters are always on here).
-std::uint64_t take_bounded() {
-    return scene_counters::frame_totals()[std::size_t(scene_counters::Counter::bounded_dispatches)].exchange(0);
+// Counter totals since the last call (scene counters are always on here).
+std::uint64_t take(scene_counters::Counter counter) {
+    return scene_counters::frame_totals()[std::size_t(counter)].exchange(0);
 }
+std::uint64_t take_bounded() {return take(scene_counters::Counter::bounded_dispatches);}
 
 // The renderer reads switches with std::getenv; on Windows SDL's environment
 // is separate from the C runtime's, so set both.
@@ -99,7 +100,7 @@ int main(int argc,char** argv) try {
     if(!device) throw std::runtime_error(SDL_GetError());
     std::cout<<"GPU adapter: "<<SDL_GetStringProperty(SDL_GetGPUDeviceProperties(device),SDL_PROP_GPU_DEVICE_NAME_STRING,"unknown")<<'\n';
     GpuScene full_frame,sequential,batched;
-    unsigned cases=0;std::uint64_t bounded_total=0;
+    unsigned cases=0;std::uint64_t bounded_total=0,compact_total=0;
     const char* view_names[]{"flat","banked","near-plane"};
     const char* layout_names[]{"overlap","spread","splits"};
     for(unsigned scale:{1U,2U,4U,10U}) for(unsigned view=0;view<3;++view) for(unsigned layout=0;layout<3;++layout) {
@@ -126,7 +127,7 @@ int main(int argc,char** argv) try {
             if(layout==2 && k==7) add(*lines,0,0,near,true,false);
         }
         for(auto& draw:draws) std::get<GpuModelDraw>(draw).bounded_raster=false;
-        take_bounded();
+        take_bounded();take(scene_counters::Counter::compact_tile_lists);
         const auto reference=render(full_frame,device,scale,draws);
         if(take_bounded()) throw std::runtime_error("Full-frame reference took the bounded path: "+what);
         for(auto& draw:draws) std::get<GpuModelDraw>(draw).bounded_raster=true;
@@ -136,6 +137,12 @@ int main(int argc,char** argv) try {
         const auto dispatches=take_bounded();
         if(!dispatches) throw std::runtime_error("No bounded model raster dispatched: "+what);
         bounded_total+=dispatches;
+        // STARFOX_TEST_COMPACT_SPAN_TILES must really switch the bounded
+        // rasters to compact tile lists.
+        const auto compact=take(scene_counters::Counter::compact_tile_lists);
+        if(std::getenv("STARFOX_TEST_COMPACT_SPAN_TILES") && compact<dispatches)
+            throw std::runtime_error("Compact tile lists not used: "+what);
+        compact_total+=compact;
         // Splits also run with an arena too small for more than a few models.
         if(layout==2) set_env("STARFOX_TEST_MODEL_BATCH_ARENA_BYTES","4194304");
         const auto candidate=render(batched,device,scale,draws);
@@ -149,6 +156,7 @@ int main(int argc,char** argv) try {
     full_frame.release_device();sequential.release_device();batched.release_device();
     SDL_DestroyGPUDevice(device);SDL_Quit();
     std::cout<<cases<<" model batch cases: full-frame, bounded and batched rasters identical"
-        " (colours, layer tags, coverage, surfaces, depth); "<<bounded_total<<" bounded dispatches\n";
+        " (colours, layer tags, coverage, surfaces, depth); "<<bounded_total<<" bounded dispatches, "
+        <<compact_total<<" compact tile lists\n";
     return 0;
 } catch(const std::exception& e) {std::cerr<<e.what()<<'\n';return 1;}

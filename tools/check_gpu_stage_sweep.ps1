@@ -10,6 +10,8 @@ param([string]$OutputDirectory='tmp/gpu-stage-sweep',
     [switch]$RequireNoCpuUpload,
     [switch]$LowPowerGpu,
     [switch]$TraceGpuModelDispatch,
+    # GPU FAST: force compact row-span tile lists at every scale (A/B).
+    [switch]$CompactSpanTiles,
     [string[]]$Levels=@(), [ValidateRange(0,8000)][int]$Ticks=1000,
     [ValidateRange(1,240)][int]$Frames=12)
 $ErrorActionPreference='Stop'
@@ -34,6 +36,7 @@ try {
     }
     if($LowPowerGpu){$settings.STARFOX_TEST_LOW_POWER_GPU='1'}
     if($TraceGpuModelDispatch){$settings.STARFOX_TRACE_GPU_MODEL_DISPATCH='1'}
+    if($CompactSpanTiles){$settings.STARFOX_TEST_COMPACT_SPAN_TILES='1'}
     # Environment upgrades are persisted in the user's configuration. Clearing
     # process variables alone does not reset them; baseline comparisons must
     # explicitly select OFF without modifying the saved configuration.

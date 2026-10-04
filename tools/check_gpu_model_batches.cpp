@@ -123,7 +123,7 @@ int main(int argc,char** argv) try {
             const double near=view==2?24+3.0*k:180+40.0*k;
             if(layout==0) add(shape,(int(k%3)-1)*6.0,(int(k%2)*2-1)*4.0,near,true,false);
             else if(layout==1) add(shape,(int(k%5)-2)*90.0,(int(k/5)-1)*60.0,near*2,true,false);
-            else add(shape,(int(k%3)-1)*8.0,0,near,k!=9,k==5);
+            else add(shape,(int(k%3)-1)*8.0,0,near,k!=9,k==4 || k==5); // k==4 lands on the renderer holding the running scene
             if(layout==2 && k==7) add(*lines,0,0,near,true,false);
         }
         for(auto& draw:draws) std::get<GpuModelDraw>(draw).bounded_raster=false;

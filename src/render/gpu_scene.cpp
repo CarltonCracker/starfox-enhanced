@@ -681,6 +681,7 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
         }
         GpuRasterOutput output{};
         unsigned model_slot=0;
+        int output_owner=-1; // model renderer whose raster buffers hold output
         const bool fused=!std::getenv("STARFOX_TEST_SEPARATE_SCENE_MERGE");
         for(const auto& draw:draws) {
             GpuRasterOutput front{};
@@ -688,6 +689,12 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
             if(const auto* model=std::get_if<GpuModelDraw>(&draw)) {
                 scene_counters::add(scene_counters::Counter::model_draws);
                 const auto scale=model->settings.render_scale;
+                // Never hand a draw to the renderer whose raster buffers hold
+                // the running scene. GPU FAST in-place draws can keep it there
+                // across many models; that renderer's own raster (an emissive
+                // or unfused model) would cycle or alias them and lose the scene.
+                if(int(model_slot)==output_owner) model_slot^=1U;
+                const unsigned renderer_slot=model_slot;
                 auto& renderer=impl_->models[model_slot];model_slot^=1U;
                 const bool custom=model->logical_viewport[0]!=0;
                 world_sprite=model->geometry_depth && model->identity.has_value();
@@ -718,12 +725,15 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
                     }
                     else impl_->append_rays(static_cast<SDL_GPUCommandBuffer*>(command),rays);
                 }
-                if(fuse_model) {output=front;continue;}
+                if(fuse_model) {
+                    if(front.pixels!=output.pixels) output_owner=int(renderer_slot);
+                    output=front;continue;
+                }
             } else if(const auto* layer=std::get_if<GpuIndexedLayerDraw>(&draw)) {
                 front=impl_->raster.enqueue_commands(device,command,*layer->commands,false,true);
                 if(!front.pixels) throw std::runtime_error(impl_->raster.status());
                 const auto back=output;
-                output=enqueue(command,front,back.pixels?&back:nullptr,false,false,layer,width,height);
+                output=enqueue(command,front,back.pixels?&back:nullptr,false,false,layer,width,height);output_owner=-1;
                 if(!output.pixels) throw std::runtime_error(impl_->status);
                 continue;
             } else if(const auto* bg=std::get_if<GpuBackgroundDraw>(&draw)) {
@@ -790,6 +800,7 @@ GpuRasterOutput GpuScene::enqueue_batch(void* device,void* command,std::uint32_t
             }
             const auto back=output;
             const auto* model_draw=std::get_if<GpuModelDraw>(&draw);
+            output_owner=-1;
             output=enqueue(command,front,back.pixels?&back:nullptr,world_sprite,
                 model_draw && model_draw->emissive);
             if(!output.pixels) throw std::runtime_error(impl_->status);

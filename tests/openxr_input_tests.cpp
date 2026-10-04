@@ -1,5 +1,6 @@
 #include "starfox/vr/openxr_input.hpp"
 #include "starfox/vr/startup_menu.hpp"
+#include "starfox/vr/startup_preferences.hpp"
 #include "starfox/vr/game_input.hpp"
 #include <cmath>
 #include <cstring>
@@ -8,6 +9,7 @@
 #include <stdexcept>
 #include <source_location>
 #include <vector>
+#include <chrono>
 using namespace starfox::vr;
 namespace {
 void require(bool value,const std::source_location where=std::source_location::current()) {if(!value) throw std::runtime_error("VR input assertion failed at line "+std::to_string(where.line()));}
@@ -208,6 +210,37 @@ int main() try {
         // Version 6 carries the asteroid mode; a 20-byte record cannot claim it.
         auto short_version6=version4;short_version6[4]=6;
         require(!migrated.restore_preferences(short_version6));
+        // Exercise the very same bounded file loader used by application.cpp.
+        // In particular, v6 must not be rejected by a stale 16/20-byte gate.
+        const auto file=std::filesystem::temp_directory_path()/
+            ("starfox-vr-preferences-"+std::to_string(
+                std::chrono::steady_clock::now().time_since_epoch().count())+".bin");
+        struct RemoveFile {
+            std::filesystem::path path;
+            ~RemoveFile() {std::error_code error;std::filesystem::remove(path,error);}
+        } cleanup{file};
+        const auto write_record=[&](std::span<const uint8_t> record) {
+            std::ofstream output(file,std::ios::binary|std::ios::trunc);
+            output.write(reinterpret_cast<const char*>(record.data()),record.size());
+            output.close();require(bool(output));
+        };
+        StartupMenu from_disk;
+        write_record(preferences);
+        require(load_startup_preferences(from_disk,file));
+        require(from_disk.preferences()==preferences);
+        write_record(legacy);require(load_startup_preferences(from_disk,file));
+        require(from_disk.asteroid_models==0 && !from_disk.ray_tracing);
+        write_record(version4);require(load_startup_preferences(from_disk,file));
+        require(from_disk.model_effect==menu.model_effect);
+        const auto before_invalid=from_disk.preferences();
+        write_record(short_version6);require(!load_startup_preferences(from_disk,file));
+        require(from_disk.preferences()==before_invalid);
+        std::array<uint8_t,22> oversized{};
+        std::copy(preferences.begin(),preferences.end(),oversized.begin());
+        write_record(oversized);require(!load_startup_preferences(from_disk,file));
+        require(from_disk.preferences()==before_invalid);
+        write_record({});require(!load_startup_preferences(from_disk,file));
+        require(from_disk.preferences()==before_invalid);
         require(restored.open && !restored.runtime && !restored.extended
             && !restored.alternate_available && restored.page==Page::main
             && restored.selection==0 && restored.selected_level==0);

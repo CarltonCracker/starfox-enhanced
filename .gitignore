@@ -33,3 +33,4 @@ Starfox-Assets.BIN
 /Android/
 __pycache__/
 *.pyc
+.DS_Store

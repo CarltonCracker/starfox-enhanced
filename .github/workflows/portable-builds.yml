@@ -700,7 +700,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             clang lld llvm cmake ninja-build python3 curl tar coreutils \
-            binutils pkg-config
+            binutils pkg-config zip
       - name: Cross-build and validate clean Frame package
         env:
           STARFOX_CMAKE_DEBUG_TRY_COMPILE: "1"
@@ -710,6 +710,12 @@ jobs:
           tools/build_steam_frame.sh . \
             "$RUNNER_TEMP/starfox-steam-frame-build" \
             "$RUNNER_TEMP/starfox-steam-frame-package"
+      - name: Archive validated Steam Frame runtime
+        shell: bash
+        run: |
+          cd "$RUNNER_TEMP/starfox-steam-frame-package"
+          zip -qr "$GITHUB_WORKSPACE/StarFoxEnhanced-0.0.8-steam-frame-arm64.zip" .
+          unzip -t "$GITHUB_WORKSPACE/StarFoxEnhanced-0.0.8-steam-frame-arm64.zip"
       - name: Preserve cross-build diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -731,7 +737,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: StarFoxEnhanced-0.0.8-steam-frame-arm64
-          path: ${{ runner.temp }}/starfox-steam-frame-package/
+          # Keep Linux executable permissions inside the release ZIP.
+          path: StarFoxEnhanced-0.0.8-steam-frame-arm64.zip
           if-no-files-found: error
           retention-days: 7
       - uses: actions/upload-artifact@v4
@@ -741,10 +748,71 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+      - name: Upload Steam Frame release package
+        if: github.event_name == 'push' || inputs.release_tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          files: StarFoxEnhanced-0.0.8-steam-frame-arm64.zip
+          draft: true
+
+  ps5-homebrew:
+    if: ${{ !inputs.quest_only }}
+    name: PS5 native RADV homebrew title
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # PS5 launcher backgrounds must be DDS payloads, not LFS pointers.
+          lfs: true
+      - name: Test PS5 policies and SDL patcher
+        shell: bash
+        run: |
+          g++ -std=c++20 -O2 -I include tests/ps5_port_tests.cpp \
+            -o "$RUNNER_TEMP/starfox-ps5-port-tests"
+          "$RUNNER_TEMP/starfox-ps5-port-tests"
+          python3 tests/test_ps5_sdl_patch.py
+      - name: Build and package native PS5 title
+        env:
+          STARFOX_PS5_TITLE_ID: PPSA99764
+        shell: bash
+        run: |
+          # Build paths are relative to /src inside the pinned Docker image.
+          bash tools/build_ps5.sh . build/ps5 "$RUNNER_TEMP/StarFoxEnhanced-ps5"
+          title="$RUNNER_TEMP/StarFoxEnhanced-ps5/$STARFOX_PS5_TITLE_ID"
+          for required in eboot.bin sce_module/libc.prx sce_sys/param.json \
+            sce_sys/icon0.png sce_sys/pic0.dds sce_sys/pic1.dds; do
+            test -s "$title/$required"
+          done
+          if find "$RUNNER_TEMP/StarFoxEnhanced-ps5" -type f \
+            \( -iname '*.sfc' -o -iname '*.smc' -o -iname 'Starfox-Assets.BIN' \
+               -o -iname 'Starfox-MSU1.PAK' \) -print -quit | grep -q .; then
+            echo 'Private game assets must not be included in the PS5 release.' >&2
+            exit 1
+          fi
+          cd "$RUNNER_TEMP"
+          zip -qr "$GITHUB_WORKSPACE/StarFoxEnhanced-0.0.8-ps5.zip" StarFoxEnhanced-ps5
+          unzip -t "$GITHUB_WORKSPACE/StarFoxEnhanced-0.0.8-ps5.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: StarFoxEnhanced-0.0.8-ps5
+          path: StarFoxEnhanced-0.0.8-ps5.zip
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload PS5 release package
+        if: github.event_name == 'push' || inputs.release_tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          files: StarFoxEnhanced-0.0.8-ps5.zip
+          draft: true
+
   release-checksums:
     name: Release package checksums
-    needs: [windows-x64, windows-x86, xbox-uwp-x64, linux-x64, macos-universal, ios-device, android-arm64, quest-arm64, windows-pcvr, switch-homebrew, vita-homebrew]
-    if: ${{ always() && !inputs.quest_only && (github.event_name == 'push' || inputs.release_tag != '') }}
+    needs: [windows-x64, windows-x86, xbox-uwp-x64, linux-x64, macos-universal, ios-device, android-arm64, quest-arm64, windows-pcvr, switch-homebrew, vita-homebrew, linux-vr-host-tests, steam-frame-arm64, ps5-homebrew]
+    # Implicit success() keeps incomplete/failed platform runs in draft.
+    if: ${{ !inputs.quest_only && (github.event_name == 'push' || inputs.release_tag != '') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -759,6 +827,8 @@ jobs:
         shell: bash
         run: |
           cd packages
+          test -s StarFoxEnhanced-0.0.8-ps5.zip
+          test -s StarFoxEnhanced-0.0.8-steam-frame-arm64.zip
           shopt -s nullglob
           assets=( *.zip *.apk *.ipa )
           if ((${#assets[@]} == 0)); then

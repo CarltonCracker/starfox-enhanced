@@ -33,6 +33,7 @@
 #include "starfox/vr/background_tiles.hpp"
 #include "starfox/vr/game_frame_driver.hpp"
 #include "starfox/vr/startup_menu.hpp"
+#include "starfox/vr/startup_preferences.hpp"
 #include "starfox/state/files.hpp"
 #include "starfox/vr/pcm_output.hpp"
 #include "starfox/audio/spc700_audio.hpp"
@@ -602,8 +603,7 @@ int starfox::vr::run_application(int argc,char** argv,const ApplicationHost& hos
         :host.cartridge_save_path.parent_path()/"vr-preferences.bin";
     if(startup.open && !preferences_path.empty()) try {
         if(std::filesystem::exists(preferences_path)) {
-            if((std::filesystem::file_size(preferences_path)!=16 && std::filesystem::file_size(preferences_path)!=20)
-                || !startup.restore_preferences(starfox::state::read_file(preferences_path)))
+            if(!starfox::vr::load_startup_preferences(startup,preferences_path))
                 std::cerr<<"Invalid VR preferences; using defaults\n";
         }
     } catch(const std::exception& error) {
@@ -798,6 +798,7 @@ int starfox::vr::run_application(int argc,char** argv,const ApplicationHost& hos
                     // The startup/runtime panel replaces the scene. Do not
                     // compile or upload invisible game resources while it is open.
                     if(!startup.open || startup.preview) {
+                    live->models.set_asteroid_models(startup.asteroid_model_mode());
                     auto packets=live->models.assemble_world_interpolated(*live->history->previous(),*live->history->current(),alpha,srgb,true);
                     if(live->game.paused()) {
                         if(!sandbox.active()) {

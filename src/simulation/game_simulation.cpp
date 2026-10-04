@@ -1240,6 +1240,14 @@ GameTickResult GameSimulation::tick_pregame_menu(
             + ((menu_input.pressed & starfox::input::left) ? 3U : 1U)) % 4U));
         queue_sound_effect(0x11U);
     }
+    if (graphics_page && pregame_selection_ == 42U
+        && (menu_input.pressed & (starfox::input::a | starfox::input::select
+            | starfox::input::left | starfox::input::right))) {
+        const auto count = render::asteroid_model_mode_count;
+        set_asteroid_models(static_cast<std::uint8_t>((static_cast<unsigned>(asteroid_models_)
+            + ((menu_input.pressed & starfox::input::left) ? count - 1U : 1U)) % count));
+        queue_sound_effect(0x11U);
+    }
     if (graphics_page && pregame_selection_ == 28U
         && (menu_input.pressed & (starfox::input::a | starfox::input::select
             | starfox::input::left | starfox::input::right))) {
@@ -1457,8 +1465,8 @@ GameTickResult GameSimulation::tick_pregame_menu(
             | starfox::input::right | starfox::input::select
             | starfox::input::a | starfox::input::b)) != 0U;
     if (change_renderer) {
-        renderer_mode_ = renderer_mode_ == RendererMode::gpu
-            ? RendererMode::software : RendererMode::gpu;
+        set_renderer_mode(renderer_mode_ == RendererMode::gpu
+            ? RendererMode::software : RendererMode::gpu);
         queue_sound_effect(0x11U);
     }
 

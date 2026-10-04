@@ -3,6 +3,13 @@
 #include "starfox/render/effects.hpp"
 #include "starfox/render/frame_persistence.hpp"
 #include <functional>
+#if defined(STARFOX_PS5)
+extern "C" void StarfoxPS5_PollGamepads(void);
+extern "C" void StarfoxPS5_InstallLog(void);
+extern "C" const char* StarfoxPS5_DataPath(void);
+extern "C" void StarfoxPS5_ProcessSetup(void);
+extern "C" void StarfoxPS5_HideSplashScreen(void);
+#endif
 #include "starfox/render/bloom.hpp"
 #include "starfox/render/object_snapshot.hpp"
 #include "starfox/audio/msu1_audio.hpp"
@@ -60,6 +67,7 @@
 #include "starfox/render/terrain_profile.hpp"
 #include "starfox/render/sprite_renderer.hpp"
 #include "starfox/render/colour_math.hpp"
+#include "starfox/render/asteroid_models.hpp"
 #include "starfox/render/model_smoothing.hpp"
 #include "starfox/simulation/game_simulation.hpp"
 #include "starfox/simulation/math.hpp"
@@ -892,6 +900,11 @@ std::filesystem::path choose_runtime_input(
         "Starfox-Assets.BIN was not found. Create it on a PC with "
         "starfox_asset_builder, then copy it to "
         "ux0:data/StarFoxEnhanced/Starfox-Assets.BIN"};
+#elif defined(STARFOX_PS5)
+    throw std::runtime_error{
+        "Starfox-Assets.BIN was not found. Create it on a PC with "
+        "starfox_asset_builder, then copy it to "
+        "/data/StarFoxEnhanced/ or into the title folder beside eboot.bin"};
 #elif defined(STARFOX_UWP)
     if (renderer == nullptr) {
         throw std::runtime_error{
@@ -1161,6 +1174,8 @@ std::filesystem::path writable_runtime_directory(
     return executable_directory.empty()
         ? std::filesystem::path{"sdmc:/switch/StarFoxEnhanced"}
         : executable_directory;
+#elif defined(STARFOX_PS5)
+    return std::filesystem::path{StarfoxPS5_DataPath()};
 #elif defined(SDL_PLATFORM_VITA)
     // The installed application directory under ux0:app is read-only.
     // Keep generated assets, optional music, settings, and SRAM together in
@@ -1213,6 +1228,10 @@ std::filesystem::path find_msu1_pack(
 #if defined(SDL_PLATFORM_VITA)
     candidates.emplace_back(std::filesystem::path{
         "ux0:data/StarFoxEnhanced"} / starfox::audio::msu1_pack_filename);
+#endif
+#if defined(STARFOX_PS5)
+    candidates.emplace_back(std::filesystem::path{
+        "/data/StarFoxEnhanced"} / starfox::audio::msu1_pack_filename);
 #endif
 #if defined(STARFOX_UWP)
     // Preserve packs copied to the nested SDL preference directory used by
@@ -1326,6 +1345,13 @@ RuntimeAssetSet load_or_compile_runtime_assets(
     companion_candidates.emplace_back(
         "ux0:data/StarFoxEnhanced/Starfox-Assets.BIN");
 #endif
+#if defined(STARFOX_PS5)
+    // /data may be readable while the data folder fell back to the sandbox,
+    // and the title folder (/app0) is always readable; a companion found in
+    // either is copied into the writable data folder like any other.
+    companion_candidates.emplace_back("/data/StarFoxEnhanced/Starfox-Assets.BIN");
+    companion_candidates.emplace_back(executable_directory / "Starfox-Assets.BIN");
+#endif
 #if defined(STARFOX_UWP)
     // Migrate companions provisioned according to the first UWP build's
     // nested SDL preference path into the now-documented LocalState root.
@@ -1346,9 +1372,20 @@ RuntimeAssetSet load_or_compile_runtime_assets(
             / "Star Fox Enhanced" / "Starfox-Assets.BIN");
     }
 #endif
+#if defined(STARFOX_PS5)
+    // The console shows no file picker: the error names every place checked.
+    std::string checked;
+#endif
     for (const auto& requested : companion_candidates) {
         const auto candidate = resolve_companion_case(requested);
+#if defined(STARFOX_PS5)
+        if (!std::filesystem::is_regular_file(candidate)) {
+            checked += "\n  " + candidate.string() + ": not found";
+            continue;
+        }
+#else
         if (!std::filesystem::is_regular_file(candidate)) continue;
+#endif
         try {
             const auto bytes = read_binary_file(candidate);
             auto assets = unpack_runtime_assets(
@@ -1357,7 +1394,12 @@ RuntimeAssetSet load_or_compile_runtime_assets(
                 write_asset_companion(companion_path, bytes);
             }
             return assets;
+#if defined(STARFOX_PS5)
+        } catch (const std::exception& error) {
+            checked += "\n  " + candidate.string() + ": " + error.what();
+#else
         } catch (const std::exception&) {
+#endif
             // An update can legitimately invalidate a previously compiled
             // companion. Rebuild it below from the user's validated retail
             // image; if that image is unavailable, the resulting error tells
@@ -1366,6 +1408,15 @@ RuntimeAssetSet load_or_compile_runtime_assets(
     }
 
     auto retail = find_required_retail(executable_directory);
+#if defined(STARFOX_PS5)
+    if (!retail) {
+        std::cerr << "Starfox-Assets.BIN candidates:" << checked << '\n';
+        throw std::runtime_error{
+            "Starfox-Assets.BIN was not usable. Create it on a PC with "
+            "starfox_asset_builder and copy it to /data/StarFoxEnhanced/ or "
+            "beside eboot.bin. Checked:" + checked};
+    }
+#endif
     if (!retail) {
         const auto selected = choose_runtime_input(companion_path, renderer);
 #if defined(SDL_PLATFORM_IOS)
@@ -1422,6 +1473,13 @@ class SdlContext {
 public:
     SdlContext() {
         starfox::app::configure_native_gamepad_support();
+#if defined(STARFOX_PS5)
+        // The console has no visible stderr; SDL's log goes to sdl.log.
+        StarfoxPS5_InstallLog();
+        SDL_SetHintWithPriority(SDL_HINT_VIDEO_DRIVER, "ps5", SDL_HINT_OVERRIDE);
+        SDL_SetHintWithPriority(SDL_HINT_AUDIO_DRIVER, "ps5", SDL_HINT_OVERRIDE);
+        SDL_SetHintWithPriority(SDL_HINT_GPU_DRIVER, "vulkan", SDL_HINT_OVERRIDE);
+#endif
 #if defined(__SWITCH__)
         // AUDOUT owns two device buffers.  Keep each one short enough that
         // button/fire audio remains perceptually attached to its video frame.
@@ -1440,6 +1498,9 @@ public:
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_AUDIO)) {
             throw std::runtime_error{std::string{"SDL_Init: "} + SDL_GetError()};
         }
+#if defined(STARFOX_PS5)
+        StarfoxPS5_PollGamepads();
+#endif
     }
 
     ~SdlContext() { SDL_Quit(); }
@@ -3664,6 +3725,10 @@ private:
         // uploads the same pixels to a texture without changing their content.
         const auto* renderer_driver = mode == starfox::simulation::RendererMode::software
             ? "opengles2" : "gpu";
+#elif defined(STARFOX_PS5)
+        // The PS5 has no CPU presentation path: SDL GPU on RADV only.
+        const auto* renderer_driver = "gpu";
+        mode = starfox::simulation::RendererMode::gpu;
 #else
         const auto* renderer_driver = mode == starfox::simulation::RendererMode::software
             ? "software" : std::string_view(SDL_GetCurrentVideoDriver())=="dummy"?nullptr:"gpu";
@@ -3678,7 +3743,11 @@ private:
         if(renderer_driver && std::string_view(renderer_driver)=="gpu") {
             const auto props=SDL_CreateProperties();
             if(!props) throw std::runtime_error(SDL_GetError());
+#if defined(STARFOX_PS5)
+            constexpr bool hardware = true;
+#else
             const bool hardware=std::getenv("STARFOX_TEST_SOFTWARE_GPU")==nullptr;
+#endif
             if(std::getenv("STARFOX_TEST_FRAMES") && std::getenv("STARFOX_TEST_LOW_POWER_GPU"))
                 SDL_SetBooleanProperty(props,SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN,true);
             if(std::getenv("STARFOX_TEST_FRAMES") && std::getenv("STARFOX_TEST_GPU_VALIDATION"))
@@ -3726,10 +3795,12 @@ private:
             if(!renderer_) renderer_=SDL_CreateRenderer(window_,"software");
         }
 #endif
+#if !defined(STARFOX_PS5)
         if(!renderer_ && renderer_driver && std::string_view(renderer_driver)=="gpu") {
             std::cerr<<"SDL GPU unavailable: "<<SDL_GetError()<<"; using native renderer fallback\n";
             renderer_=SDL_CreateRenderer(window_,nullptr);
         }
+#endif
         if (renderer_ == nullptr) {
             throw std::runtime_error{
                 std::string{"SDL_CreateRenderer: "} + SDL_GetError()};
@@ -5481,6 +5552,8 @@ std::filesystem::path executable_path(const char* argv0) {
     }
     return std::filesystem::path{
         "sdmc:/switch/StarFoxEnhanced/StarFoxEnhanced.nro"};
+#elif defined(STARFOX_PS5)
+    return std::filesystem::path{"/app0/eboot.bin"};
 #elif defined(SDL_PLATFORM_VITA)
     // Vita application files live under the title-id directory, while all
     // writable companions are deliberately redirected to ux0:data above.
@@ -5638,6 +5711,9 @@ int main(int argc, char** argv) {
         }
     }
 #endif
+#if defined(STARFOX_PS5)
+    StarfoxPS5_ProcessSetup();
+#endif
     std::optional<StartupTrace> startup_trace;
     try {
         bool startup_fullscreen = false;
@@ -5777,6 +5853,9 @@ int main(int argc, char** argv) {
                 else if(std::string_view(forced)=="GPU") startup_renderer=starfox::simulation::RendererMode::gpu;
             }
         }
+#if defined(STARFOX_PS5)
+        startup_renderer = starfox::simulation::RendererMode::gpu;
+#endif
         // SDL creates its swapchain with the renderer. Set the saved DLSS
         // preference first so OFF starts on the unwrapped native swapchain.
         auto startup_dlss_mode=saved_pregame.dlss_mode;
@@ -6054,6 +6133,7 @@ int main(int argc, char** argv) {
                 game.material(),
                 game.environment(),
                 game.planet_select_cheat(),
+                static_cast<std::uint8_t>(game.asteroid_models()),
             };
         };
         {
@@ -6195,6 +6275,7 @@ int main(int argc, char** argv) {
             game.set_bloom(saved_pregame.bloom);
             game.set_bloom_2d(saved_pregame.bloom_2d);
             game.set_model_smoothing(saved_pregame.model_smoothing);
+            game.set_asteroid_models(saved_pregame.asteroid_models);
             game.set_language(saved_pregame.language);
             if (const auto* language = std::getenv("STARFOX_TEST_LANGUAGE"))
                 game.set_language(static_cast<std::uint8_t>(std::atoi(language)));
@@ -6227,6 +6308,8 @@ int main(int argc, char** argv) {
                 game.set_hdr_effect(static_cast<std::uint8_t>(std::atoi(hdr)));
             if (const auto* smoothing = std::getenv("STARFOX_TEST_MODEL_SMOOTHING"))
                 game.set_model_smoothing(static_cast<std::uint8_t>(std::atoi(smoothing)));
+            if (const auto* asteroids = std::getenv("STARFOX_TEST_ASTEROID_MODELS"))
+                game.set_asteroid_models(static_cast<std::uint8_t>(std::atoi(asteroids)));
             if (const auto* separated = std::getenv("STARFOX_TEST_SEPARATED_MODELS"))
                 game.set_smooth_polys(std::atoi(separated) != 0);
             if (saved_pregame.effect == static_cast<std::uint8_t>(starfox::render::Effect::bloom)
@@ -9062,6 +9145,9 @@ int main(int argc, char** argv) {
             superfx_surfaces.clear();
             const bool record_raster=(std::getenv("STARFOX_TEST_GPU_RASTER") || window.native_gpu_enabled())
                 && game.renderer_mode()==starfox::simulation::RendererMode::gpu && !gpu_raster_failed;
+#if defined(STARFOX_PS5)
+            if (!record_raster) throw std::runtime_error{"Native GPU rasterizer unavailable"};
+#endif
             bool resident_raster=false;
             std::unique_ptr<DeferredBackground> deferred_background;
             std::unique_ptr<DeferredBackground> late_cartridge;
@@ -10996,10 +11082,25 @@ int main(int argc, char** argv) {
                     pose.simple_sprite_colour = object.extended[21];
                     pose.simple_sprite_world_size = diameter;
                 }
-                draw_model(found->second, pose, target, false,
-                    &target == &superfx_frame
-                            && surface_effects
-                        ? &superfx_surfaces : nullptr,
+                const auto* drawn_shape = &found->second;
+                if (const auto* model = starfox::render::substitute_asteroid_model(
+                        found->second, pose, game.asteroid_models())) {
+                    drawn_shape = model;
+                }
+                auto* surfaces = &target == &superfx_frame && surface_effects
+                    ? &superfx_surfaces : nullptr;
+                if (drawn_shape != &found->second) {
+                    // The GPU model path rasterises each model over the whole
+                    // frame (~0.4 ms per rock at 4x), so a field of rocks cost
+                    // more than everything else combined. Project rocks into
+                    // the shared raster command stream instead: consecutive
+                    // rocks share one raster pass, still in painter order
+                    // with the other models. Asteroids never cast shadows,
+                    // so they also stay out of the ray and shadow scenes.
+                    renderer.draw(*drawn_shape, pose, target, false, surfaces, nullptr);
+                    continue;
+                }
+                draw_model(*drawn_shape, pose, target, false, surfaces,
                     capture_shadow_scene ? &shadow_scene : nullptr,
                     starfox::render::GpuModelIdentity{item.handle,
                         game.objects().generation(item.handle), object.shape,
@@ -11525,13 +11626,21 @@ int main(int argc, char** argv) {
                     recorded_scene.finish(raster_commands);
                     resident_raster=!std::getenv("STARFOX_CAPTURE_INDEXED_PATH")
                         && window.submit_scene(recorded_scene,superfx_frame.stored_width(),superfx_frame.stored_height(),game.stereo_output(),framebuffer.stored_width(),framebuffer.stored_height(),framebuffer.draw_scale(),superfx_frame.draw_scale());
+#if defined(STARFOX_PS5)
+                    if (!resident_raster) throw std::runtime_error{"Native GPU scene submission failed"};
+#else
                     if(!resident_raster) recorded_scene.replay(superfx_frame,metadata);
+#endif
                 } else {
                 resident_raster=window.native_gpu_enabled()
                     && !std::getenv("STARFOX_CAPTURE_INDEXED_PATH")
                     && window.submit_native(raster_commands,surface_effects);
                 if(!resident_raster && !gpu_raster.render(raster_commands,superfx_frame,metadata)) {
+#if defined(STARFOX_PS5)
+                    throw std::runtime_error{std::string{"Native GPU rasterization failed: "} + gpu_raster.status()};
+#else
                     starfox::render::replay_raster_commands(raster_commands,superfx_frame,metadata);
+#endif
                     gpu_raster_failed=true;
                 }
                 }
@@ -12232,7 +12341,7 @@ int main(int argc, char** argv) {
                             ? starfox::render::effect_group(game.pregame_selection()==12U?game.effect():game.world_effect())
                             : game.pregame_page() == starfox::simulation::PregamePage::two_d
                                 ? "2D OPTIONS" : "3D OPTIONS", 27, 10U);
-                        std::array<std::int32_t, 42> row_y;
+                        std::array<std::int32_t, 43> row_y;
                         row_y.fill(-1);
                         const auto selected_row=std::size_t(std::find(visual_order.begin(),visual_order.end(),game.pregame_selection())-visual_order.begin());
                         const auto first_visible=!main_page && visual_order.size()>14
@@ -12346,6 +12455,9 @@ int main(int argc, char** argv) {
                             game.pregame_selection() == 18U);
                         draw_graphics_row("3D SMOOTHING", starfox::render::bloom_names[game.model_smoothing()], row_y[19],
                             game.pregame_selection() == 19U);
+                        draw_graphics_row("3D ASTEROIDS", starfox::render::asteroid_model_names[
+                            static_cast<std::size_t>(game.asteroid_models())], row_y[42],
+                            game.pregame_selection() == 42U);
                         draw_graphics_row("2D OPTIONS", "A  OPEN", row_y[20], game.pregame_selection() == 20U);
                         draw_graphics_row("3D OPTIONS", "A  OPEN", row_y[21], game.pregame_selection() == 21U);
                         draw_graphics_row("MODEL EFFECT INTENSITY", std::to_string(game.effect_intensity()) + "%", row_y[22], game.pregame_selection() == 22U);
@@ -12842,6 +12954,11 @@ int main(int argc, char** argv) {
             }
 #endif
             if(presented_frames==0) startup_trace->mark("first game/menu frame presented");
+#if defined(STARFOX_PS5)
+            // The system's launch splash covers the title until the title
+            // hides it (ProsperoEden hides it on its first presented frame).
+            if(presented_frames==0) StarfoxPS5_HideSplashScreen();
+#endif
             const auto profile_present_done = std::chrono::steady_clock::now();
             const auto work_without_pacing=[&](std::chrono::steady_clock::time_point start) {
                 const auto elapsed=static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(

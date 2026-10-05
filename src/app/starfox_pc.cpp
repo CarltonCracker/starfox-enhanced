@@ -12464,7 +12464,7 @@ int main(int argc, char** argv) {
                                 ? std::string_view{"SOFTWARE"}
                                 : game.gpu_fast()
                                 ? std::string_view{"GPU FAST"}
-                                : std::string_view{"GPU ACCURATE"},
+                                : std::string_view{"GPU"},
                             row_y[4], game.pregame_selection() == 4U);
                         const auto msu1_value = game.msu1_available()
                             ? on_off(game.msu1_music())

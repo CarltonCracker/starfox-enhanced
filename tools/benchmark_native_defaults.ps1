@@ -10,7 +10,7 @@ param([string]$Executable='build/current/starfox_pc.exe',
  [ValidateSet('default','direct3d12','vulkan')][string[]]$GpuDriver=@('default'),
  [switch]$DisableDlssRuntime,
  [ValidateSet('ORIGINAL','EX')][string[]]$Experiences=@('ORIGINAL','EX'),
- # GPU is the original path, now named GPU_ACCURATE in the menu.
+ # GPU (GPU_ACCURATE) is the original path, shown as "GPU" in the menu.
  [ValidateSet('SOFTWARE','GPU','GPU_ACCURATE','GPU_FAST')][string[]]$Renderers=@('SOFTWARE','GPU'),
  # Any stage label from the experience's symbol map, e.g. LEVEL1_2.
  [string[]]$Levels=@('LEVEL1_1','LEVEL2_3'),

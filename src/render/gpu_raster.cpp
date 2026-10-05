@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_raster.hpp"
+#include "starfox/compat/bit_cast.hpp"
 #include "starfox/render/gpu_scene_counters.hpp"
 #include "starfox/render/temporal_jitter.hpp"
 #include <cstring>
@@ -343,7 +344,7 @@ struct GpuRaster::Impl {
                 SDL_DispatchGPUCompute(bin_pass,std::max(1U,(work+63)/64),1,1);SDL_EndGPUComputePass(bin_pass);
             }
         }
-        const Uint32 settings[]{batch.width(),batch.height(),keep_surfaces?1U:0U,(gpu_bins?1U:0U)|(coverage?0x40000000U:0U),0,0,keep_surfaces?1U:0U,0,Uint32(batch.texels.size()),custom?output_width:0,custom?output_height:0,0,0,0,0,0,0,0,0,0,std::bit_cast<Uint32>(jitter[0]),std::bit_cast<Uint32>(jitter[1]),0,0};
+        const Uint32 settings[]{batch.width(),batch.height(),keep_surfaces?1U:0U,(gpu_bins?1U:0U)|(coverage?0x40000000U:0U),0,0,keep_surfaces?1U:0U,0,Uint32(batch.texels.size()),custom?output_width:0,custom?output_height:0,0,0,0,0,0,0,0,0,0,starfox::bit_cast<Uint32>(jitter[0]),starfox::bit_cast<Uint32>(jitter[1]),0,0};
         SDL_PushGPUComputeUniformData(command,0,settings,sizeof(settings));
         buffer(6,16);
         SDL_GPUStorageBufferReadWriteBinding outputs[3]{};outputs[0].buffer=buffers[4];outputs[1].buffer=buffers[5];outputs[2].buffer=buffers[6];
@@ -495,6 +496,14 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
         const auto aliases_output=[&](void* input) {
             return input && (input==impl_->buffers[4] || input==impl_->buffers[5] || input==impl_->buffers[6]);
         };
+        // Both raster paths consume this input; validate before the bounded
+        // path's early return rather than only in the full-frame fallback.
+        if(geometry_depth && (!geometry_depth->planes || !geometry_depth->count
+            || aliases_output(geometry_depth->planes)
+            || !std::isfinite(geometry_depth->focal_x) || geometry_depth->focal_x<=0
+            || !std::isfinite(geometry_depth->focal_y) || geometry_depth->focal_y<=0
+            || !std::isfinite(geometry_depth->center_x) || !std::isfinite(geometry_depth->center_y)))
+            throw std::runtime_error("Invalid GPU geometry depth input");
         // Bounded draws write the background's own buffers, which may be this
         // renderer's previous outputs, so they skip the aliasing rule below.
         const auto records=std::uint64_t(polygon_count)*height;
@@ -527,7 +536,7 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
             const auto tiles=std::uint64_t((width+63)/64)*height;
             const auto list_bytes=tiles*(std::uint64_t(polygon_count)+1)*4;
             const bool binned=!SDL_getenv("STARFOX_TEST_DISABLE_TILED_SPANS");
-            const bool compact=binned && compact_tiles
+            const bool compact=binned && compact_tiles && width<=8192U
                 && (list_bytes>64U*1024*1024 || SDL_getenv("STARFOX_TEST_COMPACT_SPAN_TILES"));
             const bool tiled=binned && !compact && list_bytes<=64U*1024*1024;
             if(tiled) {
@@ -539,10 +548,10 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
                 1U,output_surfaces?1U:0U,surfaces?1U:0U,tiled?0x80000000U:compact?0x40000000U:0U,
                 texels?texel_bytes:0U,0,0,3U,
                 output_depth?1U:0U,geometry_depth?geometry_depth->count:0U,output_depth?1U:0U,0,
-                std::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_x:1.f),
-                std::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_y:1.f),
-                std::bit_cast<Uint32>(geometry_depth?geometry_depth->center_x:0.f),
-                std::bit_cast<Uint32>(geometry_depth?geometry_depth->center_y:0.f),0,0,
+                starfox::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_x:1.f),
+                starfox::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_y:1.f),
+                starfox::bit_cast<Uint32>(geometry_depth?geometry_depth->center_x:0.f),
+                starfox::bit_cast<Uint32>(geometry_depth?geometry_depth->center_y:0.f),0,0,
                 compact?impl_->sizes[2]/4:0U,0};
             SDL_PushGPUComputeUniformData(cmd,0,settings,sizeof(settings));
             // Placeholders only bind the shader's unused surface/depth slots.
@@ -562,12 +571,6 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
             impl_->status="GPU FAST row spans rasterized in place within their screen box";
             return result;
         }
-        if(geometry_depth && (!geometry_depth->planes || !geometry_depth->count
-            || aliases_output(geometry_depth->planes)
-            || !std::isfinite(geometry_depth->focal_x) || geometry_depth->focal_x<=0
-            || !std::isfinite(geometry_depth->focal_y) || geometry_depth->focal_y<=0
-            || !std::isfinite(geometry_depth->center_x) || !std::isfinite(geometry_depth->center_y)))
-            throw std::runtime_error("Invalid GPU geometry depth input");
         impl_->resident_valid=false;
         const bool output_surfaces=surfaces || (background && background->surfaces);
         impl_->buffer(4,Uint32(pixels*4));impl_->buffer(5,output_surfaces?Uint32(pixels*16):0);
@@ -577,7 +580,10 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
         const auto tiles=std::uint64_t((width+63)/64)*height;
         const auto list_bytes=tiles*(std::uint64_t(polygon_count)+1)*4;
         const bool binned=spans && polygon_count && !wave_rows && !SDL_getenv("STARFOX_TEST_DISABLE_TILED_SPANS");
-        const bool compact=binned && compact_tiles && (records+63)/64<=65535U
+        // compact_row has two columns per lane: 128 tiles / 8192 pixels.
+        // Wider valid frames retain dense bins or the exact polygon walk;
+        // never leave their right-hand tile counts uninitialized.
+        const bool compact=binned && compact_tiles && width<=8192U && (records+63)/64<=65535U
             && (list_bytes>64U*1024*1024 || SDL_getenv("STARFOX_TEST_COMPACT_SPAN_TILES"));
         const bool tiled=binned && !compact && list_bytes<=64U*1024*1024;
         if(compact) {
@@ -605,11 +611,11 @@ GpuRasterOutput GpuRaster::enqueue_row_spans(void* device,void* command,void* sp
             wave_rows?(1U|(std::uint32_t(std::uint16_t(wave_offset))<<1U)|((wave_frame&15U)<<17U)):(tiled?0x80000000U:compact?0x40000000U:0U),
             texels?texel_bytes:0U,custom?outputWidth:0,custom?outputHeight:0,0,
             output_depth?1U:0U,geometry_depth?geometry_depth->count:0U,background && background->geometry_depth?1U:0U,0,
-            std::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_x:1.f),
-            std::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_y:1.f),
-            std::bit_cast<Uint32>(geometry_depth?geometry_depth->center_x:0.f),
-            std::bit_cast<Uint32>(geometry_depth?geometry_depth->center_y:0.f),
-            std::bit_cast<Uint32>(jitter[0]),std::bit_cast<Uint32>(jitter[1]),compact?impl_->sizes[2]/4:0U,0};
+            starfox::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_x:1.f),
+            starfox::bit_cast<Uint32>(geometry_depth?geometry_depth->focal_y:1.f),
+            starfox::bit_cast<Uint32>(geometry_depth?geometry_depth->center_x:0.f),
+            starfox::bit_cast<Uint32>(geometry_depth?geometry_depth->center_y:0.f),
+            starfox::bit_cast<Uint32>(jitter[0]),starfox::bit_cast<Uint32>(jitter[1]),compact?impl_->sizes[2]/4:0U,0};
         SDL_PushGPUComputeUniformData(cmd,0,settings,sizeof(settings));
         SDL_GPUStorageBufferReadWriteBinding outputs[3]{};
         outputs[0].buffer=impl_->buffers[4];outputs[1].buffer=impl_->buffers[5];

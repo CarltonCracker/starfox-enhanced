@@ -1,6 +1,7 @@
 #include "starfox/app/runtime_input.hpp"
 
 #include "starfox/input/buttons.hpp"
+#include "starfox/render/asteroid_models.hpp"
 #include "starfox/render/effect_types.hpp"
 #include "starfox/render/environment_effects.hpp"
 
@@ -13,6 +14,9 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#if defined(STARFOX_PS5)
+extern "C" const char* StarfoxPS5_DataPath(void);
+#endif
 #if defined(__ANDROID__)
 #include <sys/system_properties.h>
 #endif
@@ -135,7 +139,7 @@ std::filesystem::path legacy_bundle_directory;
 #endif
 
 std::filesystem::path desktop_data_directory() {
-#if defined(STARFOX_UWP) || defined(__ANDROID__) || defined(SDL_PLATFORM_IOS) || defined(SDL_PLATFORM_VITA) || defined(__SWITCH__)
+#if defined(STARFOX_UWP) || defined(__ANDROID__) || defined(SDL_PLATFORM_IOS) || defined(SDL_PLATFORM_VITA) || defined(__SWITCH__) || defined(STARFOX_PS5)
     return {};
 #else
     if (!portable_directory.empty()) return portable_directory;
@@ -178,7 +182,9 @@ std::filesystem::path legacy_bindings_path() {
 }
 
 std::filesystem::path legacy_documents_path(std::string_view filename) {
-#if defined(SDL_PLATFORM_VITA)
+#if defined(STARFOX_PS5)
+    return std::filesystem::path{StarfoxPS5_DataPath()} / filename;
+#elif defined(SDL_PLATFORM_VITA)
     return std::filesystem::path{"ux0:data/StarFoxEnhanced"} / filename;
 #elif defined(STARFOX_UWP)
     // Xbox UWP package files are read-only. SDL maps its preference path to
@@ -305,7 +311,7 @@ std::filesystem::path single_instance_lock_path() {
 }
 
 void set_portable_data_directory(const std::filesystem::path& directory) {
-#if defined(STARFOX_UWP) || defined(__ANDROID__) || defined(SDL_PLATFORM_IOS) || defined(SDL_PLATFORM_VITA) || defined(__SWITCH__)
+#if defined(STARFOX_UWP) || defined(__ANDROID__) || defined(SDL_PLATFORM_IOS) || defined(SDL_PLATFORM_VITA) || defined(__SWITCH__) || defined(STARFOX_PS5)
     static_cast<void>(directory);
 #else
     if (directory.empty() || !directory.is_absolute()) {
@@ -893,6 +899,11 @@ bool load_pregame_settings(
         } else if (name == "MODEL_SMOOTHING") {
             if (value < 0 || value > 3) return false;
             loaded.model_smoothing = static_cast<std::uint8_t>(value);
+        } else if (name == "ASTEROID_MODELS") {
+            // Optional like MODEL_SMOOTHING: absent means sprites, so older
+            // files load unchanged and the revision number is not consumed.
+            if (value < 0 || value >= render::asteroid_model_mode_count) return false;
+            loaded.asteroid_models = static_cast<std::uint8_t>(value);
         } else if (name == "EFFECT_INTENSITY") {
             if (value < 0 || value > 100) return false;
             loaded.effect_intensity = static_cast<std::uint8_t>(value);
@@ -1008,7 +1019,8 @@ bool save_pregame_settings(
             || settings.selected_level > 79U || settings.selected_level % 10U == 0U))
         || settings.language > 5U || settings.experience > 1U || settings.music_volume > 100U
         || settings.sfx_volume > 100U || settings.render_scale > (settings.gpu_renderer == 1U ? 9U : 3U) || settings.model_smoothing > 3U
-        || settings.gpu_renderer > 1U) {
+        || settings.gpu_renderer > 1U
+        || settings.asteroid_models >= render::asteroid_model_mode_count) {
         return false;
     }
     constexpr std::array<std::uint16_t, 8> valid_fps{
@@ -1053,6 +1065,7 @@ bool save_pregame_settings(
            << "BLOOM " << static_cast<unsigned>(settings.bloom) << '\n'
            << "BLOOM_2D " << static_cast<unsigned>(settings.bloom_2d) << '\n'
            << "MODEL_SMOOTHING " << static_cast<unsigned>(settings.model_smoothing) << '\n'
+           << "ASTEROID_MODELS " << static_cast<unsigned>(settings.asteroid_models) << '\n'
            << "LANGUAGE " << static_cast<unsigned>(settings.language) << '\n'
            << "CHROMATIC_ABERRATION " << static_cast<unsigned>(settings.chromatic_aberration) << '\n'
            << "HDR_EFFECT " << static_cast<unsigned>(settings.hdr_effect) << '\n'

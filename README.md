@@ -60,8 +60,10 @@ competition cartridges, Star Fox 2 and unknown revisions are not supported.
 | Android arm64 | Development APK is a CI artifact while release signing is unavailable; see the upgrade notice below. |
 | Nintendo Switch | Homebrew NRO; [setup and optional forwarder](https://github.com/kandowontu2/starfox-enhanced/blob/main/platform/switch/README.md). |
 | PS Vita | Homebrew VPK; [setup](https://github.com/kandowontu2/starfox-enhanced/blob/main/platform/vita/README.md). |
+| PS5 | Homebrew native title (fake-signed folder); [setup](https://github.com/kandowontu2/starfox-enhanced/blob/main/platform/ps5/README.md). |
 | Xbox UWP x64 | Developer Mode required; [setup](https://github.com/kandowontu2/starfox-enhanced/blob/main/platform/uwp/README.md). |
 | Windows PCVR / Quest 3 | Experimental OpenXR packages; [VR setup](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/VR-BUILD.md). |
+| Steam Frame (native, ARM64) | Experimental native OpenXR build that runs on the headset itself; [setup and notes](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/STEAM-FRAME.md). |
 
 Build success does not guarantee identical behavior on every device.
 See the [release notes](https://github.com/kandowontu2/starfox-enhanced/blob/main/docs/RELEASE-0.0.8.md) for verification limits.

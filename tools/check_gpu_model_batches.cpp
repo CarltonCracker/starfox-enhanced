@@ -29,9 +29,10 @@ struct Readback {
     std::vector<SurfaceSample> surfaces;
 };
 
-Readback render(GpuScene& scene,void* device,unsigned scale,const std::vector<GpuSceneDraw>& draws) {
-    const unsigned w=224*scale,h=192*scale;
-    Framebuffer frame(224,192,scale);frame.enable_layer_tags(true);frame.begin_write_coverage();
+Readback render(GpuScene& scene,void* device,unsigned scale,const std::vector<GpuSceneDraw>& draws,
+    unsigned logical_width=224,unsigned logical_height=192) {
+    const unsigned w=logical_width*scale,h=logical_height*scale;
+    Framebuffer frame(logical_width,logical_height,scale);frame.enable_layer_tags(true);frame.begin_write_coverage();
     SurfaceBuffer surfaces(w,h);
     if(!scene.render_resident(device,w,h,draws) || !scene.readback(frame,&surfaces))
         throw std::runtime_error(scene.status());
@@ -151,6 +152,31 @@ int main(int argc,char** argv) try {
         compare(bounded,candidate,"batched vs sequential "+what);
         const auto drawn=std::count_if(reference.coverage.begin(),reference.coverage.end(),[](std::uint8_t b){return b!=0;});
         if(!drawn) throw std::runtime_error("Fixture case drew nothing: "+what);
+        ++cases;
+    }
+    // Compact row kernels own only 128 columns. Wider public-API frames
+    // must keep the exact dense/serial fallback, not drop the right edge.
+    {
+        constexpr unsigned width=8256,height=64;
+        RenderSettings settings;settings.render_scale=1;
+        std::vector<GpuSceneDraw> draws;
+        for(unsigned k=0;k<16;++k) {
+            RenderPose pose;pose.continuous_geometry=pose.subpixel_projection=true;
+            pose.vanish_x=8232;pose.vanish_y=32;pose.z=160+40*k;
+            GpuModelDraw draw{&solids[k],pose,settings,true};draw.geometry_depth=true;
+            draws.emplace_back(draw);
+        }
+        const auto reference=render(full_frame,device,1,draws,width,height);
+        for(auto& draw:draws) std::get<GpuModelDraw>(draw).bounded_raster=true;
+        take(scene_counters::Counter::compact_tile_lists);
+        const auto fallback=render(sequential,device,1,draws,width,height);
+        if(take(scene_counters::Counter::compact_tile_lists))
+            throw std::runtime_error("Oversized frame entered the 128-column compact kernel");
+        compare(reference,fallback,"wide right-edge fallback");
+        bool right=false;
+        for(unsigned y=0;y<height;++y) for(unsigned x=8192;x<width;++x)
+            right|=reference.coverage[std::size_t(y)*width+x]!=0;
+        if(!right) throw std::runtime_error("Wide fallback fixture never drew past compact column 128");
         ++cases;
     }
     full_frame.release_device();sequential.release_device();batched.release_device();

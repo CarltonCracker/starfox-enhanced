@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_clip.hpp"
+#include "starfox/compat/bit_cast.hpp"
 #include "starfox/render/gpu_raster.hpp"
 #include "starfox/render/gpu_scene_counters.hpp"
 #if defined(STARFOX_SDL_GPU_EFFECTS)
@@ -220,7 +221,7 @@ void* GpuClip::enqueue_spans(void* command,void* materials,bool winding_independ
             render_scale,impl_->continuous?1U:0U,order?1U:0U,s.polygon_count,
             order?order->first:0U,order?order->tree_index:0U,line_thickness,0,
             masked_texels?1U:0U,source_texel_bytes,mask_stride,custom?1U:0U,
-            std::bit_cast<Uint32>(float(width)/s.width),std::bit_cast<Uint32>(float(height)/s.height),0,0};
+            starfox::bit_cast<Uint32>(float(width)/s.width),starfox::bit_cast<Uint32>(float(height)/s.height),0,0};
         SDL_GPUStorageBufferReadWriteBinding bindings[2]{};
         // Ordered model batches rasterize these rows before the next model
         // overwrites them. Cycling would retain a full polygon*height buffer

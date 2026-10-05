@@ -1,4 +1,5 @@
 #include "starfox/render/pixel_filter.hpp"
+#include "starfox/compat/bit_cast.hpp"
 #include "starfox/render/environment_effects.hpp"
 #include "starfox/simulation/game_simulation.hpp"
 #include "starfox/simulation/irq_palette.hpp"
@@ -49,12 +50,7 @@ constexpr std::array<RenderScale, render_scale_count> kRenderScales{
 #endif
 // 5x-10x are offered only to GPU FAST on desktop builds; mobile, console and
 // UWP targets keep the 4x ceiling for memory.
-#if defined(STARFOX_IOS_RUNTIME) || defined(__ANDROID__) || defined(__SWITCH__) \
-    || defined(STARFOX_UWP) || defined(SDL_PLATFORM_VITA)
-constexpr bool kHighRenderScales = false;
-#else
-constexpr bool kHighRenderScales = true;
-#endif
+constexpr bool kHighRenderScales = platform_render_scale_limit>standard_render_scale_count;
 constexpr std::array<CrosshairColour, 8> kCrosshairColours{
     CrosshairColour::green,
     CrosshairColour::white,
@@ -79,7 +75,7 @@ constexpr std::uint16_t staff_roll = 49U;
 } // namespace msu_track
 
 std::int16_t signed_word(std::uint16_t value) noexcept {
-    return std::bit_cast<std::int16_t>(value);
+    return starfox::bit_cast<std::int16_t>(value);
 }
 
 input::ButtonMask map_control_type_buttons(
@@ -1253,6 +1249,14 @@ GameTickResult GameSimulation::tick_pregame_menu(
             + ((menu_input.pressed & starfox::input::left) ? 3U : 1U)) % 4U));
         queue_sound_effect(0x11U);
     }
+    if (graphics_page && pregame_selection_ == 42U
+        && (menu_input.pressed & (starfox::input::a | starfox::input::select
+            | starfox::input::left | starfox::input::right))) {
+        const auto count = render::asteroid_model_mode_count;
+        set_asteroid_models(static_cast<std::uint8_t>((static_cast<unsigned>(asteroid_models_)
+            + ((menu_input.pressed & starfox::input::left) ? count - 1U : 1U)) % count));
+        queue_sound_effect(0x11U);
+    }
     if (graphics_page && pregame_selection_ == 28U
         && (menu_input.pressed & (starfox::input::a | starfox::input::select
             | starfox::input::left | starfox::input::right))) {
@@ -1473,13 +1477,8 @@ GameTickResult GameSimulation::tick_pregame_menu(
         // SOFTWARE <-> GPU ACCURATE <-> GPU FAST, wrapping. Left/B step back.
         const bool backward = (menu_input.pressed
             & (starfox::input::left | starfox::input::b)) != 0U;
-        const unsigned position = renderer_mode_ == RendererMode::software ? 0U
-            : gpu_renderer_ == GpuRenderer::fast ? 2U : 1U;
-        const unsigned next = (position + (backward ? 2U : 1U)) % 3U;
-        renderer_mode_ = next == 0U ? RendererMode::software : RendererMode::gpu;
-        if (next != 0U) {
-            gpu_renderer_ = next == 2U ? GpuRenderer::fast : GpuRenderer::accurate;
-        }
+        const auto next=next_renderer_selection(renderer_mode_,gpu_renderer_,backward,hardware_renderer_only);
+        set_renderer_mode(next.first);set_gpu_renderer(next.second);
         if (!gpu_fast() && static_cast<std::size_t>(render_scale_)
                 >= standard_render_scale_count) {
             render_scale_ = RenderScale::scale_4x;
@@ -1720,7 +1719,7 @@ void GameSimulation::detonate_god_nuke() {
         if (object.shape == nuke_shape_
             || object.strategy_address == nuke_explosion_strategy_
             || (object.collision_flags & friend_collision) != 0U
-            || std::bit_cast<std::int8_t>(object.health) < 0) {
+            || starfox::bit_cast<std::int8_t>(object.health) < 0) {
             continue;
         }
 
@@ -2077,7 +2076,7 @@ PlanetPresentationState GameSimulation::planet_presentation_state() const noexce
 void GameSimulation::calculate_meters() {
     map_.write_native_byte(meter_shield_up_, map_.read_native_byte(shield_up_));
     const auto collision_box = map_.read_native_word(player_collision_box_);
-    const auto health = std::bit_cast<std::int8_t>(
+    const auto health = starfox::bit_cast<std::int8_t>(
         map_.read_native_byte(collision_box + 42U));
     map_.write_native_byte(meter_damage_,
         health < 0 ? 0U : static_cast<std::uint8_t>(health));
@@ -2165,7 +2164,10 @@ void GameSimulation::refresh_player_reference() {
 
 void GameSimulation::write_input(const input::TickInput& input) {
     const auto control_type = static_cast<std::uint8_t>(
-        map_.read_native_byte(control_type_) & 3U);
+        map_.read_native_byte(control_type_) & (fixed_native_fire_brake_ ? 2U : 3U));
+    // Only native controller/trigger registers bypass B/Y remapping. The
+    // host front end and hardware-controller samples retain the raw buttons;
+    // vertical inversion (control-type bit 1) remains cartridge controlled.
     const auto mapped_held = map_control_type_buttons(
         input.held, control_type);
     const auto mapped_pressed = map_control_type_buttons(
@@ -5231,7 +5233,7 @@ void GameSimulation::calculate_view() {
         return signed_word(map_.read_native_word(address));
     };
     const auto write_word = [this](std::uint32_t address, std::int16_t value) {
-        map_.write_native_word(address, std::bit_cast<std::uint16_t>(value));
+        map_.write_native_word(address, starfox::bit_cast<std::uint16_t>(value));
     };
     auto rotation_x = read_word(output_rotation_);
     if (map_.read_native_byte(no_x_rotation_) != 0U) {
@@ -5247,7 +5249,7 @@ void GameSimulation::calculate_view() {
     if ((map_.read_native_byte(view_type_) & 2U) == 0U) {
         std::array<std::int16_t, 3> position{};
         for (std::size_t index = 0; index < 3U; ++index) {
-            const auto shake = std::bit_cast<std::int8_t>(
+            const auto shake = starfox::bit_cast<std::int8_t>(
                 map_.read_native_byte(view_shake_ + static_cast<std::uint32_t>(index)));
             position[index] = add16(
                 read_word(previous_view_position_ + static_cast<std::uint32_t>(index * 2U)),
@@ -5927,7 +5929,7 @@ GameTickResult GameSimulation::tick(const input::TickInput& input) {
     // strategies prepare the next frame. FOXIRQ3 publishes this saved value.
     if(map_.read_native_byte(background3_scroll_flag_)!=0U) {
         const auto view=map_.read_native_word(view_point_);
-        const auto x=std::bit_cast<std::int16_t>(map_.read_native_word(
+        const auto x=starfox::bit_cast<std::int16_t>(map_.read_native_word(
             static_cast<std::uint16_t>(view+12U)));
         map_.write_native_word(background3_scroll_,static_cast<std::uint16_t>(
             arithmetic_shift_right(x,3U)-4));

@@ -571,6 +571,11 @@ public:
     }
     void set_secondary_inputs(
         std::span<const input::TickInput> controllers) noexcept;
+    // Host input policy, not cartridge state: keep raw menu buttons intact
+    // while fixing native Y=fire/B=brake across all control types.
+    void set_fixed_native_fire_brake(bool enabled) noexcept {
+        fixed_native_fire_brake_ = enabled;
+    }
     void set_mouse_input(MouseInputState mouse) noexcept {
         mouse_input_ = mouse;
     }
@@ -1257,6 +1262,7 @@ private:
     ColourMathEffectState colour_math_effect_{};
     std::uint8_t wipe_logic_snapshot_{};
     std::array<input::TickInput, 4> secondary_inputs_{};
+    bool fixed_native_fire_brake_{};
     MouseInputState mouse_input_{};
     std::uint16_t ntt_input_{};
     std::uint8_t background_music_hold_phases_{};

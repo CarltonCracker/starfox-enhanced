@@ -257,6 +257,7 @@ add_library(starfox_core
     src/assets/decrunch.cpp
     src/assets/rom.cpp
     src/assets/runtime_bundle.cpp
+    src/assets/runtime_import.cpp
     src/assets/shape_decoder.cpp
     src/render/background_renderer.cpp
     src/render/dust_renderer.cpp
@@ -1274,6 +1275,9 @@ if(STARFOX_BUILD_TESTS)
     add_executable(starfox_bps_tests tests/bps_tests.cpp)
     target_link_libraries(starfox_bps_tests PRIVATE starfox_core)
     add_test(NAME starfox_bps_tests COMMAND starfox_bps_tests)
+    add_executable(starfox_runtime_import_tests tests/runtime_import_tests.cpp)
+    target_link_libraries(starfox_runtime_import_tests PRIVATE starfox_core)
+    add_test(NAME starfox_runtime_import_tests COMMAND starfox_runtime_import_tests "${CMAKE_CURRENT_SOURCE_DIR}")
     add_executable(starfox_pixel_filter_tests tests/pixel_filter_tests.cpp)
     add_executable(starfox_enhanced_terrain_tests tests/enhanced_terrain_tests.cpp)
     target_link_libraries(starfox_enhanced_terrain_tests PRIVATE starfox_core)

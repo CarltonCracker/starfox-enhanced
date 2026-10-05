@@ -2146,7 +2146,10 @@ void GameSimulation::refresh_player_reference() {
 
 void GameSimulation::write_input(const input::TickInput& input) {
     const auto control_type = static_cast<std::uint8_t>(
-        map_.read_native_byte(control_type_) & 3U);
+        map_.read_native_byte(control_type_) & (fixed_native_fire_brake_ ? 2U : 3U));
+    // Only native controller/trigger registers bypass B/Y remapping. The
+    // host front end and hardware-controller samples retain the raw buttons;
+    // vertical inversion (control-type bit 1) remains cartridge controlled.
     const auto mapped_held = map_control_type_buttons(
         input.held, control_type);
     const auto mapped_pressed = map_control_type_buttons(

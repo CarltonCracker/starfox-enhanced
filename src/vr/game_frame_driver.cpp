@@ -15,9 +15,10 @@ GameFrameDriver::GameFrameDriver(simulation::GameSimulation& game,AudioTick audi
         throw std::invalid_argument("VR scene history belongs to a different game");
 }
 GameFrameAdvance GameFrameDriver::advance(XrTime time,const VrControls& controls,bool focused,
-    const PresentationPreferences& presentation) {
+    const PresentationPreferences& presentation,bool fixed_face_buttons) {
     if(failed_) throw std::runtime_error("VR game frame driver requires reconstruction after a failed tick");
     if(!audio_ || time<0) throw std::invalid_argument("Invalid VR frame time/audio callback");
+    game_.set_fixed_native_fire_brake(fixed_face_buttons);
     GameFrameAdvance result;
     // Pause source time when the application loses focus; do not turn the
     // headset pause into a burst of movement or buffered button presses.
@@ -40,6 +41,8 @@ GameFrameAdvance GameFrameDriver::advance(XrTime time,const VrControls& controls
                 // including multiple ticks in one XR advance.
                 const auto steering=scenes_ && !game_.in_setup_menu() && !game_.paused()
                     ?cockpit_steering_matrix(*scenes_->current(),presentation):std::nullopt;
+                // Menu handlers consume raw input. The simulation applies
+                // the fixed fire/brake policy only to native pad registers.
                 const auto tick=game_.tick(input_.consume(steering));++result.logic_ticks;
                 if(!options_open) apu_.insert(apu_.end(),tick.audio_port_writes.begin(),tick.audio_port_writes.end());
                 auto writes=game_.map().take_msu_register_writes();

@@ -15,6 +15,7 @@ public:
     Page page{Page::main};
     bool open{true},god_mode{},extended{},alternate_available{},runtime{};
     bool infinite_bombs{},infinite_boost{},infinite_lives{},swap_face_buttons{};
+    bool fixed_face_buttons{}; // Quest host policy; not a saved preference.
     bool unlocked_pace{true};
     bool msu_available{},msu_music{};
     bool ray_tracing{},ray_tracing_available{};
@@ -97,7 +98,7 @@ public:
     VrControls gameplay_controls(VrControls controls) const noexcept {
         // Native mapping is Y=fire, X=boost, A=bomb, B=brake.
         // Keep menu confirmation unchanged when gameplay buttons are swapped.
-        if(swap_face_buttons) {
+        if(swap_face_buttons && !fixed_face_buttons) {
             std::swap(controls.fire,controls.boost);
             std::swap(controls.bomb,controls.brake);
         }
@@ -136,7 +137,7 @@ public:
             } else if(page==Page::options) {
                 if(selection==0) {page=Page::cheats;selection=0;}
                 else if(selection==1) crosshair_colour=(crosshair_colour+1)%8;
-                else if(selection==2) swap_face_buttons=!swap_face_buttons;
+                else if(selection==2) {if(!fixed_face_buttons) swap_face_buttons=!swap_face_buttons;}
                 else if(selection==3) music_volume=(music_volume+10)%110;
                 else if(selection==4) sfx_volume=(sfx_volume+10)%110;
                 else if(selection==5) language=(language+1)%6;
@@ -199,7 +200,7 @@ public:
         constexpr const char* languages[]{"ENGLISH","JAPANESE","GERMAN","FRENCH","SPANISH","ENGLISH (EUROPE)"};
         constexpr const char* colours[]{"GREEN","WHITE","BLUE","RED","YELLOW","CYAN","MAGENTA","ORANGE"};
         if(page==Page::options) return {"CHEATS",std::string("CROSSHAIR COLOR: ")+colours[crosshair_colour%8],
-            std::string("SWAP A/B + Y/X: ")+(swap_face_buttons?"ON":"OFF"),
+            fixed_face_buttons?"A: FIRE / Y: BRAKE":std::string("SWAP A/B + Y/X: ")+(swap_face_buttons?"ON":"OFF"),
             "MUSIC VOLUME: "+std::to_string(music_volume)+"%","SFX VOLUME: "+std::to_string(sfx_volume)+"%",
             std::string("LANGUAGE: ")+languages[language<6?language:0],"3D OPTIONS","2D OPTIONS",
             "STICK SENSITIVITY: "+std::to_string(steer_sensitivities[steer_sensitivity_index%steer_sensitivities.size()])+"%","BACK"};

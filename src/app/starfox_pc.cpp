@@ -7369,6 +7369,10 @@ int main(int argc, char** argv) {
         MouseCameraState mouse_camera;
         ExMouseInputLatch ex_mouse_input;
         TouchControls touch_controls;
+        const auto touch_controls_enabled = [&] {
+            return game.on_screen_controls()
+                && (gamepad == nullptr || !SDL_GamepadConnected(gamepad));
+        };
         std::uint32_t launch_wipe_reveal_frames{};
         bool window_focused = true;
         bool frame_frozen{};
@@ -7721,6 +7725,7 @@ int main(int argc, char** argv) {
                 } else if (event.type == SDL_EVENT_GAMEPAD_ADDED
                            || event.type == SDL_EVENT_GAMEPAD_REMOVED) {
                     refresh_gamepads();
+                    touch_controls.reset();
                     for (std::size_t player = 0;
                          player < secondary_inputs.size(); ++player) {
                         const auto held = player + 1U < gamepads.size()
@@ -7731,7 +7736,8 @@ int main(int argc, char** argv) {
                 }
                 if (event.type == SDL_EVENT_FINGER_DOWN
                     || event.type == SDL_EVENT_FINGER_MOTION) {
-                    if(!hud_editor.active && !touch_editor.active)
+                    if(touch_controls_enabled()
+                        && !hud_editor.active && !touch_editor.active)
                         touch_controls.update(event.tfinger.fingerID,
                             event.tfinger.x, event.tfinger.y,window.touch_layout());
                 } else if (event.type == SDL_EVENT_FINGER_UP
@@ -8264,7 +8270,7 @@ int main(int argc, char** argv) {
             // Read the remappable in-game L/R actions, not fixed physical
             // shoulder buttons. The setup navigation mask intentionally omits
             // them, so sample the active bindings separately for this chord.
-            const auto touch_buttons = game.on_screen_controls()
+            const auto touch_buttons = touch_controls_enabled()
                 ? touch_controls.buttons() : ButtonMask{};
             const bool reset_held = window_focused && game.in_setup_menu()
                 && !remap_menu.active && !hud_editor.active && !touch_editor.active
@@ -12829,7 +12835,7 @@ int main(int argc, char** argv) {
                     &exit_confirmation_overlay;
             }
             presentation_effects.touch_controls = touch_editor.active
-                || (game.on_screen_controls() && !hud_editor.active
+                || (touch_controls_enabled() && !hud_editor.active
                     && (touch_controls.visible()
                         || std::getenv("STARFOX_TEST_TOUCH_OVERLAY")!=nullptr));
             window.set_touch_editor(touch_editor.active,touch_editor.gesture.selected());

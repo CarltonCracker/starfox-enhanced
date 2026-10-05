@@ -38,19 +38,38 @@ void check_cartridge(const std::vector<uint8_t>& bytes,const std::string& symbol
         controls.fire=true;
         (void)driver.advance(200'000'000,controls,true,{},fixed);
         require((held()&(input::b|input::y))==(input::b|input::y),"Simultaneous actions changed");
+        (void)driver.advance(250'000'000,{},true,{},fixed);
+        controls={};controls.fire=true;
+        (void)driver.advance(275'000'000,controls,true,{},fixed);
+        (void)driver.advance(300'000'000,{},true,{},fixed);
+        require(!(held()&(input::b|input::y)),"Queued tap incorrectly remained held");
+        require((game.map().read_native_word(symbols.find("TRIG0").at(0))&(input::b|input::y))==fire,
+            "Queued press/release did not reach the native fire trigger");
+        require(game.map().read_native_byte(symbols.find("C_TYPE").at(0))==type,"Fixed actions overwrote control type");
+    }
+    // Host Controls handlers read raw TickInput, not the native remapped pad.
+    // Test the real driver boundary: Touch A edits and Touch Y confirms for
+    // every selected type, with both Quest policy and unchanged PCVR policy.
+    for(bool fixed:{false,true}) for(uint8_t type=0;type<4;++type) for(bool brake:{false,true}) {
+        simulation::GameSimulation game(rom,symbols,"CONTMAP");
+        game.set_timing_mode(simulation::TimingMode::unlocked_20_fps);
+        game.map().write_native_byte(symbols.find("C_TYPE").at(0),type);
+        for(unsigned i=0;i<90;++i) (void)game.tick({});
+        (void)game.tick({input::start,input::start,0});(void)game.tick({});
+        require(game.flow_state()==simulation::GameFlowState::controls_choice,"Controls-menu fixture did not enter choice");
+        vr::GameSceneHistory history(game,rom,symbols);
+        vr::GameFrameDriver driver(game,[](auto,auto) {return std::array<uint8_t,4>{};},&history);
+        (void)driver.advance(0,{},true,{},fixed);
+        vr::VrControls controls;controls.fire=!brake;controls.brake=brake;
+        (void)driver.advance(50'000'000,controls,true,{},fixed);
+        if(brake) require(game.flow_state()==simulation::GameFlowState::controls_choice
+            && game.map().fade_direction()<0,"Touch Y no longer confirms the native menu");
+        else require(game.flow_state()==simulation::GameFlowState::controls_type,"Touch A no longer edits native controls");
     }
 }
 }
 int main(int argc,char** argv) try {
     using namespace starfox;
-    constexpr input::ButtonMask other=input::a|input::x|input::start|input::select|input::up|input::left_shoulder;
-    for(uint8_t type=0;type<4;++type) {
-        input::TickInput edges{other,input::y,input::b};
-        const auto result=vr::fixed_face_button_input(edges,type);
-        require(result.held==other,"Unrelated buttons changed");
-        require(result.pressed==((type&1)?input::b:input::y),"Pressed edge not translated");
-        require(result.released==((type&1)?input::y:input::b),"Released edge not translated");
-    }
     vr::StartupMenu menu;menu.fixed_face_buttons=true;menu.swap_face_buttons=true;
     vr::VrControls controls;controls.fire=true;
     require(menu.gameplay_controls(controls).fire && !menu.gameplay_controls(controls).boost,"Saved swap changed Quest A");
@@ -66,6 +85,6 @@ int main(int argc,char** argv) try {
     const auto bundle=assets::decode_runtime_bundle(bytes,assets::runtime_companion_manifest(assets::embedded_asset));
     check_cartridge(bundle.original_rom,bundle.original_symbols);
     check_cartridge(bundle.starfox_ex_rom,bundle.starfox_ex_symbols);
-    std::cout<<"Quest face buttons passed: Original + EX, all four control types, A fire/Y brake, edges, saved swap and vertical inversion\n";
+    std::cout<<"Quest face buttons passed: Original + EX, all four control types, A fire/Y brake, queued press/release, saved swap, vertical inversion and raw Controls-menu actions\n";
     return 0;
 } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}

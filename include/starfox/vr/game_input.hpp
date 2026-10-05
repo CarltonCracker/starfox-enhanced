@@ -8,6 +8,20 @@ namespace starfox::vr {
 // Column-major projection of native pad directions into cockpit pad axes.
 // It contains no physical head pose.
 using SteeringMatrix=std::array<float,4>;
+// Undo only the cartridge's B/Y face-button swap before it processes a Quest
+// action. Keep its vertical inversion and every other pad bit intact. Apply
+// at consumption, including pressed/released edges, so queued taps survive.
+inline input::TickInput fixed_face_button_input(input::TickInput tick,uint8_t control_type) noexcept {
+    if(!(control_type&1U)) return tick;
+    const auto swap=[](input::ButtonMask bits) {
+        auto result=static_cast<input::ButtonMask>(bits&~(input::b|input::y));
+        if(bits&input::b) result|=input::y;
+        if(bits&input::y) result|=input::b;
+        return result;
+    };
+    tick.held=swap(tick.held);tick.pressed=swap(tick.pressed);tick.released=swap(tick.released);
+    return tick;
+}
 // Produces the same SNES-button TickInput consumed by GameSimulation. Native
 // control type/inversion remains the game's responsibility. Default type A:
 // Y fire, A bomb, X boost, B brake, L/R roll. Retains quick taps between ticks.

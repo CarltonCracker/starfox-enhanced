@@ -18,7 +18,7 @@ GameSceneHistory::GameSceneHistory(const simulation::GameSimulation& game,
                 addresses_[i]=address;found=true;break;
             }
         }
-        // C_TYPE only feeds the Steam Frame's cockpit steering; a bundle without it is fine elsewhere.
+        // C_TYPE feeds cockpit steering and the Quest's fixed face-button actions.
         if(!found && std::string_view(names[i])!="C_TYPE") throw std::runtime_error(std::string("Missing scene RAM symbol: ")+names[i]);
     }
     constexpr std::array tracking_names{"PLAYERONPLANET_STRAT","PLAYERINSPACE_STRAT"};

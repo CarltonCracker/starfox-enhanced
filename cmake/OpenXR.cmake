@@ -115,6 +115,8 @@ if(WIN32)
 endif()
 add_executable(starfox_vr_shader_bench EXCLUDE_FROM_ALL tools/benchmark_vr_shaders.cpp)
 target_link_libraries(starfox_vr_shader_bench PRIVATE starfox_vr_core)
+add_executable(starfox_vr_face_input_check EXCLUDE_FROM_ALL tests/quest_face_input_tests.cpp)
+target_link_libraries(starfox_vr_face_input_check PRIVATE starfox_vr_game)
 if(ANDROID)
     # Explicit diagnostic only: dispatch/readback on the headset GPU without XR.
     add_executable(starfox_vr_scene_check EXCLUDE_FROM_ALL tools/check_vulkan_scene.cpp)

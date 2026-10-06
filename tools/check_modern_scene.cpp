@@ -89,7 +89,8 @@ int main(int argc,char** argv) try {
     std::size_t compute_models=0,unsupported_models=0;
     const auto cameras=vr::sbs_eye_cameras(1.75F,float(width)/float(height),.064F,4.F,.05F);
     require(cameras.has_value(),"Invalid stereo cameras");
-    const auto camera=(*cameras)[0]; // Same eye-0 camera as starfox_vr_scene_route_bench.
+    const bool source_camera=std::getenv("STARFOX_MODERN_CAMERA") && std::string(std::getenv("STARFOX_MODERN_CAMERA"))=="source";
+    const auto eye_camera=(*cameras)[0]; // Same eye-0 camera as starfox_vr_scene_route_bench.
     std::vector<double> frame_ms,record_ms,wait_ms;std::size_t rejected=0,frames_drawn=0;
     for(unsigned frame=0;frame<frames;++frame) {
         driver.advance(XrTime(frame)*50'000'000,{},true);
@@ -97,7 +98,9 @@ int main(int argc,char** argv) try {
         if(current->flow!=simulation::GameFlowState::gameplay) continue;
         auto packets=models.assemble_world_interpolated(*previous,*current,.5,true,true);
         require(packets.pending.empty(),"Model assembly pending");
-        for(std::size_t i=0;i<packets.packets.size();++i)  // Live gameplay setback (application.cpp).
+        // source camera: the SNES-faithful flat camera (vr::source_panel_camera),
+        // as MODERN's desktop view will use; no VR seat setback.
+        if(!source_camera) for(std::size_t i=0;i<packets.packets.size();++i)  // Live gameplay setback (application.cpp).
             if((packets.handles[i]&0xffffU)!=0 && packets.handles[i]<0x20000U) packets.packets[i].model[14]-=.25F;
         const auto start=std::chrono::steady_clock::now();
         auto* command=SDL_AcquireGPUCommandBuffer(device);require(command!=nullptr,"Acquire command buffer");
@@ -117,6 +120,7 @@ int main(int argc,char** argv) try {
         depth_target.load_op=SDL_GPU_LOADOP_CLEAR;depth_target.store_op=SDL_GPU_STOREOP_DONT_CARE;
         depth_target.stencil_load_op=SDL_GPU_LOADOP_DONT_CARE;depth_target.stencil_store_op=SDL_GPU_STOREOP_DONT_CARE;
         auto* pass=SDL_BeginGPURenderPass(command,&target,1,&depth_target);require(pass!=nullptr,"Begin render pass");
+        const auto camera=source_camera?vr::source_panel_camera(*current):eye_camera;
         const bool recorded=compute_route?source_scene.record(command,pass,pipelines,camera):scene.record(command,pass,pipelines,camera);
         SDL_EndGPURenderPass(pass);
         require(recorded,"Record MODERN scene: "+pipelines.status());
@@ -140,7 +144,7 @@ int main(int argc,char** argv) try {
         if(capture) {
             const auto* pixels=static_cast<const unsigned char*>(SDL_MapGPUTransferBuffer(device,download,false));
             require(pixels!=nullptr,"Map download");
-            const std::string path=std::string(capture_dir)+"/"+level+"-"+std::to_string(frame)+"-sdl-"+(compute_route?"compute-":"raster-")+SDL_GetGPUDeviceDriver(device)+".bmp";
+            const std::string path=std::string(capture_dir)+"/"+level+"-"+std::to_string(frame)+"-sdl-"+(source_camera?"flat-":"")+(compute_route?"compute-":"raster-")+SDL_GetGPUDeviceDriver(device)+".bmp";
             std::ofstream out(path,std::ios::binary);require(bool(out),"Cannot write "+path);
             const uint32_t row=width*3,padded=(row+3)&~3U;
             unsigned char header[54]{'B','M'};

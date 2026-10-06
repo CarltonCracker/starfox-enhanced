@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <optional>
 namespace starfox::vr {
 // Column-major matrices multiplying column vectors. World/view coordinates
 // are right-handed (+Y up, forward -Z), as in OpenXR LOCAL space. Projection
@@ -26,4 +27,7 @@ inline SceneConstants scene_constants(const EyeCamera& camera) noexcept {
     result.projection=camera.projection;result.effects=camera.effects;
     return result;
 }
+// Compose only the small matrices on the CPU; all model vertex transforms
+// remain in the GPU vertex shader. Model maps object-local to world space.
+std::optional<EyeCamera> model_eye_camera(const EyeCamera&,const Matrix4& model) noexcept;
 }

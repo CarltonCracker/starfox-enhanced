@@ -4,7 +4,7 @@
 add_library(starfox_scene STATIC
     src/vr/shape_mesh.cpp src/vr/shape_bsp.cpp
     src/vr/shape_batch.cpp src/render/face_material.cpp
-    src/vr/scene_material.cpp src/vr/game_model_pose.cpp
+    src/vr/scene_camera.cpp src/vr/scene_material.cpp src/vr/game_model_pose.cpp
     src/vr/game_scene.cpp src/vr/draw_packet.cpp src/vr/source_models.cpp
     src/vr/source_span_model.cpp src/vr/scene_interpolation.cpp src/vr/cockpit.cpp
     src/vr/background_tiles.cpp src/vr/source_sprites.cpp

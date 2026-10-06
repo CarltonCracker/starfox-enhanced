@@ -19,7 +19,7 @@ add_library(starfox_displayxr STATIC src/render/displayxr_runtime.cpp
     src/render/gpu_calibrated_motion_blur.cpp src/render/gpu_calibrated_fsr1.cpp src/render/gpu_calibrated_dlss.cpp
     src/vr/game_scene.cpp src/vr/source_models.cpp
     src/vr/scene_interpolation.cpp src/vr/source_span_model.cpp src/vr/openxr_swapchains.cpp
-    src/vr/openxr_session.cpp src/vr/eye_camera.cpp
+    src/vr/openxr_session.cpp src/vr/eye_camera.cpp src/vr/scene_camera.cpp
     src/vr/game_model_pose.cpp src/vr/draw_packet.cpp src/vr/shape_mesh.cpp
     src/vr/shape_bsp.cpp src/vr/shape_batch.cpp src/vr/scene_material.cpp
     src/vr/scene_packet_validation.cpp src/vr/background_tiles.cpp src/vr/source_sprites.cpp)

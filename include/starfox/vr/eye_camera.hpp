@@ -29,9 +29,6 @@ private:
 // far plane. Invalid/non-finite tracking or projection inputs are rejected.
 std::optional<EyeCamera> eye_camera(const XrView&,float units_per_metre,
     float near_plane,std::optional<float> far_plane=std::nullopt) noexcept;
-// Compose only the small matrices on the CPU; all model vertex transforms
-// remain in the GPU vertex shader. Model maps object-local to world space.
-std::optional<EyeCamera> model_eye_camera(const EyeCamera&,const Matrix4& model) noexcept;
 // Headset-free stereo cameras for SBS. All distances are scene units; aspect
 // is the unsqueezed scene aspect, including when packing Half SBS.
 std::optional<std::array<EyeCamera,2>> sbs_eye_cameras(float vertical_fov,

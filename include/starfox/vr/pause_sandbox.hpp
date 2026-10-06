@@ -1,5 +1,6 @@
 #pragma once
 #include "starfox/vr/source_models.hpp"
+#include <openxr/openxr.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>

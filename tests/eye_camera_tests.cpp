@@ -1,4 +1,5 @@
 #include "starfox/vr/eye_camera.hpp"
+#include "starfox/vr/world_panel_anchor.hpp"
 #include "starfox/vr/presentation.hpp"
 #include "starfox/vr/shadow_camera.hpp"
 #include "starfox/vr/source_shadow_environment.hpp"

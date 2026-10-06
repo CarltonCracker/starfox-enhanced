@@ -1,5 +1,6 @@
 #pragma once
-#include "starfox/vr/eye_camera.hpp"
+#include "starfox/vr/scene_camera.hpp"
+#include <optional>
 namespace starfox::render {struct RenderPose;}
 namespace starfox::vr {
 // Converts an already camera-relative game pose (+Y down, +Z forward) to

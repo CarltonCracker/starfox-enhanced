@@ -1,4 +1,5 @@
 #include "starfox/vr/cockpit.hpp"
+#include "starfox/vr/eye_camera.hpp"
 #include "starfox/vr/source_sprites.hpp"
 #include "starfox/assets/runtime_bundle.hpp"
 #include "starfox/audio/spc700_audio.hpp"

@@ -1,6 +1,7 @@
 #pragma once
 #include "starfox/vr/draw_packet.hpp"
 #include <vulkan/vulkan.h>
+#include "starfox/vr/vulkan_scene_pipeline.hpp"
 #include <memory>
 
 namespace starfox::vr {

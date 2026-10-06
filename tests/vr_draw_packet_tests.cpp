@@ -1,4 +1,5 @@
 #include "starfox/vr/draw_packet.hpp"
+#include "starfox/vr/eye_camera.hpp"
 #include "starfox/vr/backdrop_texture.hpp"
 #include "starfox/vr/enhanced_landscape.hpp"
 #include "starfox/vr/packed_vram.hpp"

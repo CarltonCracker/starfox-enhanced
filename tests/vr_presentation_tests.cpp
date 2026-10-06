@@ -1,4 +1,5 @@
 #include "starfox/vr/openxr_session.hpp"
+#include "starfox/vr/world_panel_anchor.hpp"
 #include "starfox/vr/stereo_renderer.hpp"
 #include "starfox/vr/frame_menu.hpp"
 #include "starfox/vr/scene_interpolation.hpp"

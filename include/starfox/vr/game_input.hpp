@@ -1,4 +1,5 @@
 #pragma once
+#include "starfox/vr/steering_matrix.hpp"
 #include "starfox/vr/openxr_input.hpp"
 #include "starfox/input/buttons.hpp"
 #include "starfox/vr/menu_stick.hpp"

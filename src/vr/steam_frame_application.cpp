@@ -1,4 +1,5 @@
 #include "starfox/vr/application.hpp"
+#include "starfox/vr/world_panel_anchor.hpp"
 #include "starfox/vr/profile_csv.hpp"
 #include "starfox/vr/enhanced_landscape.hpp"
 #include "starfox/render/background_renderer.hpp"

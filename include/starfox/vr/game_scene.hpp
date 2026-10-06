@@ -1,5 +1,5 @@
 #pragma once
-#if !defined(__3DS__) && !defined(STARFOX_SCENE_SOURCE_ONLY) && __has_include("starfox/vr/presentation.hpp") && __has_include(<openxr/openxr.h>)
+#if !defined(__3DS__) && !defined(STARFOX_SCENE_SOURCE_ONLY) && __has_include("starfox/vr/presentation.hpp")
 #include "starfox/vr/presentation.hpp"
 #define STARFOX_SCENE_TRACKED_HELPERS
 #endif

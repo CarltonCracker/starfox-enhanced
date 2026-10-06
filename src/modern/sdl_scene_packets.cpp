@@ -1,0 +1,264 @@
+#include "starfox/modern/sdl_scene_packets.hpp"
+#include "starfox/vr/scene_types.hpp"
+#include "starfox/vr/backdrop_texture.hpp"
+#include "starfox/vr/source_models.hpp"
+#include "modern/shaders/generated/scene_sdl.hpp"
+#include <cstddef>
+#include <cstring>
+#include <stdexcept>
+#include <unordered_map>
+#include <unordered_set>
+namespace starfox::modern {
+namespace {
+void require(bool ok,const std::string& what) {if(!ok) throw std::runtime_error(what);}
+std::string sdl_error(const char* what) {return std::string(what)+": "+SDL_GetError();}
+// One GPU buffer filled through a transfer buffer and a copy pass.
+SDL_GPUBuffer* upload(SDL_GPUDevice* device,SDL_GPUCopyPass* copy,SDL_GPUBufferUsageFlags usage,
+    const void* bytes,uint32_t size) {
+    SDL_GPUBufferCreateInfo info{};info.usage=usage;info.size=size;
+    auto* buffer=SDL_CreateGPUBuffer(device,&info);
+    require(buffer,sdl_error("Create scene buffer"));
+    SDL_GPUTransferBufferCreateInfo transfer_info{};
+    transfer_info.usage=SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;transfer_info.size=size;
+    auto* transfer=SDL_CreateGPUTransferBuffer(device,&transfer_info);
+    if(!transfer) {SDL_ReleaseGPUBuffer(device,buffer);throw std::runtime_error(sdl_error("Create scene transfer"));}
+    void* mapped=SDL_MapGPUTransferBuffer(device,transfer,false);
+    if(!mapped) {
+        SDL_ReleaseGPUTransferBuffer(device,transfer);SDL_ReleaseGPUBuffer(device,buffer);
+        throw std::runtime_error(sdl_error("Map scene transfer"));
+    }
+    std::memcpy(mapped,bytes,size);SDL_UnmapGPUTransferBuffer(device,transfer);
+    SDL_GPUTransferBufferLocation source{transfer,0};
+    SDL_GPUBufferRegion destination{buffer,0,size};
+    SDL_UploadToGPUBuffer(copy,&source,&destination,false);
+    // Release is deferred by SDL until the recorded copy has completed.
+    SDL_ReleaseGPUTransferBuffer(device,transfer);
+    return buffer;
+}
+struct BufferDeleter {
+    SDL_GPUDevice* device{};
+    void operator()(SDL_GPUBuffer* buffer) const noexcept {if(device && buffer) SDL_ReleaseGPUBuffer(device,buffer);}
+};
+using Buffer=std::shared_ptr<SDL_GPUBuffer>;
+Buffer owned(SDL_GPUDevice* device,SDL_GPUBuffer* buffer) {return Buffer(buffer,BufferDeleter{device});}
+}
+vr::SceneConstants sdl_scene_constants(const vr::EyeCamera& camera) noexcept {
+    auto flipped=camera;
+    for(unsigned column=0;column<4;++column) flipped.projection[column*4+1]=-flipped.projection[column*4+1];
+    return vr::scene_constants(flipped);
+}
+SdlScenePipelines::~SdlScenePipelines() {release();}
+void SdlScenePipelines::release() noexcept {
+    if(device_) {
+        for(auto& [key,pipeline]:pipelines_) SDL_ReleaseGPUGraphicsPipeline(device_,pipeline);
+        if(vertex_) SDL_ReleaseGPUShader(device_,vertex_);
+        if(fragment_) SDL_ReleaseGPUShader(device_,fragment_);
+    }
+    pipelines_.clear();vertex_=fragment_=nullptr;device_=nullptr;
+}
+bool SdlScenePipelines::initialize(SDL_GPUDevice* device,SDL_GPUTextureFormat colour,SDL_GPUTextureFormat depth) {
+    release();
+    try {
+        require(device!=nullptr,"Missing SDL GPU device");
+        const auto formats=SDL_GetGPUShaderFormats(device);
+        const bool dxil=(formats&SDL_GPU_SHADERFORMAT_DXIL)!=0;
+        require(dxil || (formats&SDL_GPU_SHADERFORMAT_SPIRV)!=0,"MODERN scene shaders need a SPIR-V or DXIL backend");
+        const auto create=[&](SDL_GPUShaderStage stage) {
+            const bool vertex=stage==SDL_GPU_SHADERSTAGE_VERTEX;
+            SDL_GPUShaderCreateInfo info{};
+            if(dxil) {
+                info.code=vertex?shader::dxil_vertex:shader::dxil_fragment;
+                info.code_size=vertex?sizeof(shader::dxil_vertex):sizeof(shader::dxil_fragment);
+                info.format=SDL_GPU_SHADERFORMAT_DXIL;
+            } else {
+                info.code=vertex?shader::spirv_vertex:shader::spirv_fragment;
+                info.code_size=vertex?sizeof(shader::spirv_vertex):sizeof(shader::spirv_fragment);
+                info.format=SDL_GPU_SHADERFORMAT_SPIRV;
+            }
+            info.entrypoint=vertex?shader::vertex_entry:shader::fragment_entry;
+            info.stage=stage;info.num_storage_buffers=1;info.num_uniform_buffers=1;
+            auto* created=SDL_CreateGPUShader(device,&info);
+            require(created,sdl_error(vertex?"Create MODERN vertex shader":"Create MODERN fragment shader"));
+            return created;
+        };
+        device_=device;colour_=colour;depth_=depth;
+        vertex_=create(SDL_GPU_SHADERSTAGE_VERTEX);
+        fragment_=create(SDL_GPU_SHADERSTAGE_FRAGMENT);
+        status_="MODERN scene pipelines ready";return true;
+    } catch(const std::exception& error) {status_=error.what();release();return false;}
+}
+SDL_GPUGraphicsPipeline* SdlScenePipelines::get(SceneTopology topology,SceneBlend blend,bool depth_test,bool depth_write) {
+    if(!device_) return nullptr;
+    const unsigned key=unsigned(topology)|(unsigned(blend)<<1)|(unsigned(depth_test)<<2)|(unsigned(depth_test && depth_write)<<3);
+    if(const auto found=pipelines_.find(key);found!=pipelines_.end()) return found->second;
+    using V=vr::SceneVertex;
+    const SDL_GPUVertexAttribute attributes[]{
+        {0,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,uint32_t(offsetof(V,position))},
+        {1,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,uint32_t(offsetof(V,color))},
+        {2,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,uint32_t(offsetof(V,odd_color))},
+        {3,0,SDL_GPU_VERTEXELEMENTFORMAT_UINT,uint32_t(offsetof(V,dither_scale))},
+        {4,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,uint32_t(offsetof(V,visibility_a))},
+        {5,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,uint32_t(offsetof(V,visibility_b))},
+        {6,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,uint32_t(offsetof(V,visibility_c))},
+        {7,0,SDL_GPU_VERTEXELEMENTFORMAT_UINT,uint32_t(offsetof(V,visibility_enabled))},
+        {8,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,uint32_t(offsetof(V,group_a))},
+        {9,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,uint32_t(offsetof(V,group_b))},
+        {10,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3,uint32_t(offsetof(V,group_c))},
+        {11,0,SDL_GPU_VERTEXELEMENTFORMAT_UINT,uint32_t(offsetof(V,group_enabled))},
+        {12,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,uint32_t(offsetof(V,uv))},
+        {13,0,SDL_GPU_VERTEXELEMENTFORMAT_UINT4,uint32_t(offsetof(V,texture))},
+        {14,0,SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,uint32_t(offsetof(V,billboard))}};
+    SDL_GPUVertexBufferDescription binding{0,sizeof(V),SDL_GPU_VERTEXINPUTRATE_VERTEX,0};
+    SDL_GPUColorTargetDescription target{};target.format=colour_;
+    auto& state=target.blend_state;
+    state.color_write_mask=SDL_GPU_COLORCOMPONENT_R|SDL_GPU_COLORCOMPONENT_G|SDL_GPU_COLORCOMPONENT_B|SDL_GPU_COLORCOMPONENT_A;
+    state.enable_color_write_mask=true;
+    if(blend==SceneBlend::alpha) { // Matches vulkan_scene_pipeline.cpp SceneBlend::alpha.
+        state.enable_blend=true;
+        state.src_color_blendfactor=SDL_GPU_BLENDFACTOR_SRC_ALPHA;
+        state.dst_color_blendfactor=SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+        state.color_blend_op=SDL_GPU_BLENDOP_ADD;
+        state.src_alpha_blendfactor=SDL_GPU_BLENDFACTOR_ONE;
+        state.dst_alpha_blendfactor=SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+        state.alpha_blend_op=SDL_GPU_BLENDOP_ADD;
+    }
+    SDL_GPUGraphicsPipelineCreateInfo info{};
+    info.vertex_shader=vertex_;info.fragment_shader=fragment_;
+    info.vertex_input_state.vertex_buffer_descriptions=&binding;info.vertex_input_state.num_vertex_buffers=1;
+    info.vertex_input_state.vertex_attributes=attributes;info.vertex_input_state.num_vertex_attributes=15;
+    info.primitive_type=topology==SceneTopology::lines?SDL_GPU_PRIMITIVETYPE_LINELIST:SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
+    info.rasterizer_state.fill_mode=SDL_GPU_FILLMODE_FILL;info.rasterizer_state.cull_mode=SDL_GPU_CULLMODE_NONE;
+    info.rasterizer_state.enable_depth_clip=true; // Vulkan default: clip, never clamp.
+    info.multisample_state.sample_count=SDL_GPU_SAMPLECOUNT_1;
+    info.depth_stencil_state.compare_op=SDL_GPU_COMPAREOP_LESS;
+    info.depth_stencil_state.enable_depth_test=depth_test;
+    info.depth_stencil_state.enable_depth_write=depth_test && depth_write;
+    info.target_info.color_target_descriptions=&target;info.target_info.num_color_targets=1;
+    info.target_info.depth_stencil_format=depth_;info.target_info.has_depth_stencil_target=true;
+    auto* pipeline=SDL_CreateGPUGraphicsPipeline(device_,&info);
+    if(!pipeline) {status_=sdl_error("Create MODERN scene pipeline");return nullptr;}
+    pipelines_.emplace(key,pipeline);
+    return pipeline;
+}
+struct SdlDrawPackets::State {
+    struct Geometry {vr::DrawPacket source;Buffer triangles,lines,texels;uint32_t triangle_count{},line_count{};bool photograph{};};
+    struct Item {vr::Matrix4 model;std::shared_ptr<Geometry> geometry;uint32_t key{};};
+    SDL_GPUDevice* device{};
+    std::vector<Item> items;
+    bool keyed{},depth_test{true},depth_write{true};
+    std::size_t reused{},rejected{};
+};
+SdlDrawPackets::SdlDrawPackets()=default;
+SdlDrawPackets::~SdlDrawPackets()=default;
+void SdlDrawPackets::release() noexcept {state_.reset();}
+std::size_t SdlDrawPackets::size() const noexcept {return state_?state_->items.size():0;}
+std::size_t SdlDrawPackets::reused_packets() const noexcept {return state_?state_->reused:0;}
+std::size_t SdlDrawPackets::rejected_packets() const noexcept {return state_?state_->rejected:0;}
+bool SdlDrawPackets::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* command,
+    std::span<const vr::DrawPacket> packets,std::span<const uint32_t> object_keys,bool depth_test,bool depth_write) {
+    SDL_GPUCopyPass* copy=nullptr;
+    try {
+        require(device && command && packets.size()<=4096,"Invalid MODERN scene upload");
+        if(!object_keys.empty()) {
+            require(object_keys.size()==packets.size(),"MODERN scene key count mismatch");
+            std::unordered_set<uint32_t> unique;
+            for(auto key:object_keys) require(unique.insert(key).second,"Duplicate MODERN scene object key");
+        }
+        for(const auto& packet:packets) {
+            const auto& mesh=packet.geometry;
+            require(mesh.deferred.empty() && mesh.vertex_view().size()%3==0 && mesh.line_view().size()%2==0
+                && vr::model_eye_camera(vr::EyeCamera{},packet.model).has_value(),"Invalid MODERN scene packet");
+        }
+        auto next=std::make_unique<State>();
+        next->device=device;next->keyed=!object_keys.empty();next->depth_test=depth_test;next->depth_write=depth_write;
+        const bool compatible=state_ && state_->device==device;
+        std::unordered_map<uint32_t,const State::Item*> prior;
+        if(compatible && next->keyed && state_->keyed) for(const auto& item:state_->items) prior.emplace(item.key,&item);
+        std::unordered_map<const std::vector<uint32_t>*,Buffer> shared_texels;
+        if(compatible) for(const auto& item:state_->items)
+            if(item.geometry->source.geometry.shared_texels)
+                shared_texels.emplace(item.geometry->source.geometry.shared_texels.get(),item.geometry->texels);
+        const auto copy_pass=[&] {
+            if(!copy) copy=SDL_BeginGPUCopyPass(command);
+            require(copy,sdl_error("Begin MODERN upload pass"));
+            return copy;
+        };
+        const uint32_t transparent=0;
+        for(std::size_t index=0;index<packets.size();++index) {
+            const auto& packet=packets[index];
+            const auto& mesh=packet.geometry;
+            const auto vertices=mesh.vertex_view();
+            const auto lines=mesh.line_view();
+            if(vertices.empty() && lines.empty()) continue;
+            // Connected-grid packets need the grid compute stage; not ported yet.
+            if(!vertices.empty() && vertices.front().texture[3]==vr::gpu_connected_grid_flag) {++next->rejected;continue;}
+            const uint32_t key=next->keyed?object_keys[index]:0;
+            const State::Item* candidate=nullptr;
+            if(next->keyed) {
+                if(const auto found=prior.find(key);found!=prior.end()) candidate=found->second;
+            } else if(compatible && !state_->keyed && next->items.size()<state_->items.size()) candidate=&state_->items[next->items.size()];
+            if(candidate && vr::same_draw_geometry(std::span(&candidate->geometry->source,1),std::span(&packet,1))) {
+                next->items.push_back({packet.model,candidate->geometry,key});++next->reused;continue;
+            }
+            auto geometry=std::make_shared<State::Geometry>();geometry->source=packet;
+            geometry->photograph=!vertices.empty()
+                && (vertices.front().texture[3]&vr::backdrop_texture_flag)==vr::backdrop_texture_flag;
+            const auto words=mesh.texel_view();
+            if(mesh.shared_texels && shared_texels.contains(mesh.shared_texels.get()))
+                geometry->texels=shared_texels.at(mesh.shared_texels.get());
+            else {
+                const auto bytes=words.empty()?std::as_bytes(std::span(&transparent,1)):std::as_bytes(words);
+                geometry->texels=owned(device,upload(device,copy_pass(),SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,
+                    bytes.data(),uint32_t(bytes.size())));
+                if(mesh.shared_texels) shared_texels.emplace(mesh.shared_texels.get(),geometry->texels);
+            }
+            if(!vertices.empty()) {
+                geometry->triangles=owned(device,upload(device,copy_pass(),SDL_GPU_BUFFERUSAGE_VERTEX,
+                    vertices.data(),uint32_t(vertices.size_bytes())));
+                geometry->triangle_count=uint32_t(vertices.size());
+            }
+            if(!lines.empty()) {
+                geometry->lines=owned(device,upload(device,copy_pass(),SDL_GPU_BUFFERUSAGE_VERTEX,
+                    lines.data(),uint32_t(lines.size_bytes())));
+                geometry->line_count=uint32_t(lines.size());
+            }
+            next->items.push_back({packet.model,std::move(geometry),key});
+        }
+        if(copy) {SDL_EndGPUCopyPass(copy);copy=nullptr;}
+        state_=std::move(next);status_="MODERN scene uploaded";return true;
+    } catch(const std::exception& error) {
+        if(copy) SDL_EndGPUCopyPass(copy);
+        status_=error.what();return false;
+    }
+}
+bool SdlDrawPackets::record(SDL_GPUCommandBuffer* command,SDL_GPURenderPass* pass,SdlScenePipelines& pipelines,
+    const vr::EyeCamera& camera) const {
+    if(!state_ || !command || !pass) return false;
+    for(const auto& item:state_->items) {
+        const auto& geometry=*item.geometry;
+        auto draw_camera=camera;
+        if(geometry.source.preserve_native_colour || (state_->keyed && vr::is_source_shadow_pass(item.key))) draw_camera.effects={};
+        const auto combined=vr::model_eye_camera(draw_camera,item.model);
+        if(!combined) return false;
+        const auto constants=sdl_scene_constants(*combined);
+        SDL_GPUBuffer* texels=geometry.texels.get();
+        const auto draw=[&](SceneTopology topology,SceneBlend blend,const Buffer& vertices,uint32_t count) {
+            auto* pipeline=pipelines.get(topology,blend,state_->depth_test,state_->depth_write);
+            if(!pipeline) return false;
+            SDL_BindGPUGraphicsPipeline(pass,pipeline);
+            SDL_GPUBufferBinding binding{vertices.get(),0};
+            SDL_BindGPUVertexBuffers(pass,0,&binding,1);
+            SDL_BindGPUVertexStorageBuffers(pass,0,&texels,1);
+            SDL_BindGPUFragmentStorageBuffers(pass,0,&texels,1);
+            SDL_PushGPUVertexUniformData(command,0,&constants,sizeof(constants));
+            SDL_PushGPUFragmentUniformData(command,0,&constants,sizeof(constants));
+            SDL_DrawGPUPrimitives(pass,count,1,0,0);
+            return true;
+        };
+        if(geometry.triangles && !draw(SceneTopology::triangles,geometry.photograph?SceneBlend::alpha:SceneBlend::opaque,
+            geometry.triangles,geometry.triangle_count)) return false;
+        if(geometry.lines && !draw(SceneTopology::lines,SceneBlend::opaque,geometry.lines,geometry.line_count)) return false;
+    }
+    return true;
+}
+}

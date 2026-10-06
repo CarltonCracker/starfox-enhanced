@@ -46,7 +46,9 @@ FetchContent_MakeAvailable(starfox_vulkan_headers)
 # Vendored shared sfvr C99 library (third_party/sfvr/VERSION): built for every
 # VR target (PCVR, Quest, Steam Frame) through starfox_vr_core.
 include("${CMAKE_CURRENT_LIST_DIR}/Sfvr.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/Scene.cmake")
+if(NOT TARGET starfox_scene)
+    include("${CMAKE_CURRENT_LIST_DIR}/Scene.cmake")
+endif()
 add_library(starfox_vr_core STATIC src/vr/openxr_runtime.cpp src/vr/openxr_session.cpp src/vr/openxr_swapchains.cpp src/vr/eye_camera.cpp src/vr/vulkan_device.cpp src/vr/vulkan_loader.cpp src/vr/stereo_renderer.cpp src/vr/vulkan_eye_targets.cpp)
 target_include_directories(starfox_vr_core PUBLIC include)
 target_sources(starfox_vr_core PRIVATE src/vr/vulkan_eye_commands.cpp)

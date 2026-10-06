@@ -961,6 +961,7 @@ if(STARFOX_BUILD_RUNTIME)
             target_include_directories(starfox_core BEFORE PRIVATE "${sdl3_SOURCE_DIR}/src/video/directx")
         endif()
     endif()
+    include(cmake/Modern.cmake)
     if(ANDROID)
         # SDLActivity loads libmain.so. SDL_main.h exports SDL_main from the
         # otherwise-identical portable runtime entry point.

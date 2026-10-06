@@ -5,7 +5,7 @@
 //
 // Usage: starfox_modern_scene_check ROM SYMBOLS LEVEL FRAMES WIDTH HEIGHT
 // Captures: STARFOX_BENCH_CAPTURE_DIR + STARFOX_BENCH_CAPTURE_FRAMES=a,b,...
-#include "starfox/modern/sdl_scene_packets.hpp"
+#include "starfox/modern/sdl_source_scene.hpp"
 #include "starfox/vr/eye_camera.hpp"
 #include "starfox/vr/game_frame_driver.hpp"
 #include "starfox/vr/source_models.hpp"
@@ -60,7 +60,10 @@ int main(int argc,char** argv) try {
         audio::render_mixed_tick(spc,msu,apu,writes,game.music_volume(),game.sfx_volume(),mixed);
         return spc.output_ports();
     },&history);
-    vr::SourceModels models(rom,symbols,true,false);
+    // compute (default): solids through the span compute route, as VR ships;
+    // raster: the native draw-packet route (compute_solids off).
+    const bool compute_route=!std::getenv("STARFOX_MODERN_ROUTE") || std::string(std::getenv("STARFOX_MODERN_ROUTE"))!="raster";
+    vr::SourceModels models(rom,symbols,true,compute_route);
 
     require(SDL_Init(SDL_INIT_VIDEO),"SDL_Init");
     auto* device=SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV|SDL_GPU_SHADERFORMAT_DXIL,false,nullptr);
@@ -81,10 +84,13 @@ int main(int argc,char** argv) try {
     auto* download=SDL_CreateGPUTransferBuffer(device,&download_info);require(download!=nullptr,"Create download buffer");
     modern::SdlScenePipelines pipelines;require(pipelines.initialize(device,colour_format,depth_format),pipelines.status());
     modern::SdlDrawPackets scene;
+    modern::SdlUploadBatch uploads;
+    modern::SdlSourceScene source_scene;
+    std::size_t compute_models=0,unsupported_models=0;
     const auto cameras=vr::sbs_eye_cameras(1.75F,float(width)/float(height),.064F,4.F,.05F);
     require(cameras.has_value(),"Invalid stereo cameras");
     const auto camera=(*cameras)[0]; // Same eye-0 camera as starfox_vr_scene_route_bench.
-    std::vector<double> frame_ms;std::size_t rejected=0,frames_drawn=0;
+    std::vector<double> frame_ms,record_ms,wait_ms;std::size_t rejected=0,frames_drawn=0;
     for(unsigned frame=0;frame<frames;++frame) {
         driver.advance(XrTime(frame)*50'000'000,{},true);
         const auto previous=history.previous(),current=history.current();
@@ -95,10 +101,15 @@ int main(int argc,char** argv) try {
             if((packets.handles[i]&0xffffU)!=0 && packets.handles[i]<0x20000U) packets.packets[i].model[14]-=.25F;
         const auto start=std::chrono::steady_clock::now();
         auto* command=SDL_AcquireGPUCommandBuffer(device);require(command!=nullptr,"Acquire command buffer");
-        if(!scene.initialize(device,command,packets.packets,packets.handles)) {
-            // The native route still rejects some explosion payloads (Phase 0 finding).
-            if(++rejected<=5) std::cout<<"rejected frame="<<frame<<": "<<scene.status()<<'\n';
+        const bool initialized=compute_route?source_scene.initialize(device,command,packets)
+            :(scene.initialize(device,uploads,packets.packets,packets.handles) && uploads.flush(device,command));
+        if(!initialized) {
+            if(++rejected<=5) std::cout<<"rejected frame="<<frame<<": "<<(compute_route?source_scene.status():scene.status())<<'\n';
             SDL_CancelGPUCommandBuffer(command);continue;
+        }
+        if(compute_route) {
+            require(source_scene.record_compute(command),"MODERN source compute: "+source_scene.status());
+            compute_models+=source_scene.compute_models();unsupported_models+=source_scene.unsupported_models();
         }
         SDL_GPUColorTargetInfo target{};target.texture=colour;target.load_op=SDL_GPU_LOADOP_CLEAR;
         target.store_op=SDL_GPU_STOREOP_STORE;target.clear_color={0,0,0,1};
@@ -106,7 +117,7 @@ int main(int argc,char** argv) try {
         depth_target.load_op=SDL_GPU_LOADOP_CLEAR;depth_target.store_op=SDL_GPU_STOREOP_DONT_CARE;
         depth_target.stencil_load_op=SDL_GPU_LOADOP_DONT_CARE;depth_target.stencil_store_op=SDL_GPU_STOREOP_DONT_CARE;
         auto* pass=SDL_BeginGPURenderPass(command,&target,1,&depth_target);require(pass!=nullptr,"Begin render pass");
-        const bool recorded=scene.record(command,pass,pipelines,camera);
+        const bool recorded=compute_route?source_scene.record(command,pass,pipelines,camera):scene.record(command,pass,pipelines,camera);
         SDL_EndGPURenderPass(pass);
         require(recorded,"Record MODERN scene: "+pipelines.status());
         const bool capture=capture_dir && std::find(capture_frames.begin(),capture_frames.end(),frame)!=capture_frames.end();
@@ -117,15 +128,19 @@ int main(int argc,char** argv) try {
             SDL_DownloadFromGPUTexture(copy,&region,&destination);
             SDL_EndGPUCopyPass(copy);
         }
+        const auto recorded_at=std::chrono::steady_clock::now();
         auto* fence=SDL_SubmitGPUCommandBufferAndAcquireFence(command);require(fence!=nullptr,"Submit");
         require(SDL_WaitForGPUFences(device,true,&fence,1),"Wait for fence");
         SDL_ReleaseGPUFence(device,fence);
-        frame_ms.push_back(std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-start).count());
+        const auto waited_at=std::chrono::steady_clock::now();
+        frame_ms.push_back(std::chrono::duration<double,std::milli>(waited_at-start).count());
+        record_ms.push_back(std::chrono::duration<double,std::milli>(recorded_at-start).count());
+        wait_ms.push_back(std::chrono::duration<double,std::milli>(waited_at-recorded_at).count());
         ++frames_drawn;
         if(capture) {
             const auto* pixels=static_cast<const unsigned char*>(SDL_MapGPUTransferBuffer(device,download,false));
             require(pixels!=nullptr,"Map download");
-            const std::string path=std::string(capture_dir)+"/"+level+"-"+std::to_string(frame)+"-sdl-"+SDL_GetGPUDeviceDriver(device)+".bmp";
+            const std::string path=std::string(capture_dir)+"/"+level+"-"+std::to_string(frame)+"-sdl-"+(compute_route?"compute-":"raster-")+SDL_GetGPUDeviceDriver(device)+".bmp";
             std::ofstream out(path,std::ios::binary);require(bool(out),"Cannot write "+path);
             const uint32_t row=width*3,padded=(row+3)&~3U;
             unsigned char header[54]{'B','M'};
@@ -142,9 +157,14 @@ int main(int argc,char** argv) try {
     }
     std::sort(frame_ms.begin(),frame_ms.end());
     double sum=0;for(auto v:frame_ms) sum+=v;
-    if(!frame_ms.empty()) std::cout<<"frames="<<frames_drawn<<" rejected="<<rejected<<" upload+draw+wait ms: mean="<<sum/double(frame_ms.size())
+    if(!frame_ms.empty()) std::cout<<"frames="<<frames_drawn<<" rejected="<<rejected<<" compute_models/frame="<<(frames_drawn?double(compute_models)/double(frames_drawn):0.)
+        <<" unsupported(warp/axis) total="<<unsupported_models<<" upload+draw+wait ms: mean="<<sum/double(frame_ms.size())
         <<" p50="<<frame_ms[frame_ms.size()/2]<<" p95="<<frame_ms[std::min(frame_ms.size()-1,frame_ms.size()*95/100)]<<'\n';
-    pipelines.release();scene.release();
+    for(auto* list:{&record_ms,&wait_ms}) std::sort(list->begin(),list->end());
+    const auto mean=[](const std::vector<double>& v){double t=0;for(auto x:v) t+=x;return v.empty()?0.:t/double(v.size());};
+    if(!record_ms.empty()) std::cout<<"  cpu record (uploads+passes) ms: mean="<<mean(record_ms)<<" p50="<<record_ms[record_ms.size()/2]
+        <<" | submit-to-fence ms: mean="<<mean(wait_ms)<<" p50="<<wait_ms[wait_ms.size()/2]<<'\n';
+    pipelines.release();scene.release();source_scene.release();
     SDL_ReleaseGPUTransferBuffer(device,download);SDL_ReleaseGPUTexture(device,depth);SDL_ReleaseGPUTexture(device,colour);
     SDL_DestroyGPUDevice(device);SDL_Quit();
     return 0;

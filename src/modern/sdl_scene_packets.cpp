@@ -3,6 +3,7 @@
 #include "starfox/vr/backdrop_texture.hpp"
 #include "starfox/vr/source_models.hpp"
 #include "modern/shaders/generated/scene_sdl.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
 #include <stdexcept>
@@ -12,27 +13,10 @@ namespace starfox::modern {
 namespace {
 void require(bool ok,const std::string& what) {if(!ok) throw std::runtime_error(what);}
 std::string sdl_error(const char* what) {return std::string(what)+": "+SDL_GetError();}
-// One GPU buffer filled through a transfer buffer and a copy pass.
-SDL_GPUBuffer* upload(SDL_GPUDevice* device,SDL_GPUCopyPass* copy,SDL_GPUBufferUsageFlags usage,
-    const void* bytes,uint32_t size) {
+SDL_GPUBuffer* create_buffer(SDL_GPUDevice* device,SDL_GPUBufferUsageFlags usage,uint32_t size) {
     SDL_GPUBufferCreateInfo info{};info.usage=usage;info.size=size;
     auto* buffer=SDL_CreateGPUBuffer(device,&info);
     require(buffer,sdl_error("Create scene buffer"));
-    SDL_GPUTransferBufferCreateInfo transfer_info{};
-    transfer_info.usage=SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;transfer_info.size=size;
-    auto* transfer=SDL_CreateGPUTransferBuffer(device,&transfer_info);
-    if(!transfer) {SDL_ReleaseGPUBuffer(device,buffer);throw std::runtime_error(sdl_error("Create scene transfer"));}
-    void* mapped=SDL_MapGPUTransferBuffer(device,transfer,false);
-    if(!mapped) {
-        SDL_ReleaseGPUTransferBuffer(device,transfer);SDL_ReleaseGPUBuffer(device,buffer);
-        throw std::runtime_error(sdl_error("Map scene transfer"));
-    }
-    std::memcpy(mapped,bytes,size);SDL_UnmapGPUTransferBuffer(device,transfer);
-    SDL_GPUTransferBufferLocation source{transfer,0};
-    SDL_GPUBufferRegion destination{buffer,0,size};
-    SDL_UploadToGPUBuffer(copy,&source,&destination,false);
-    // Release is deferred by SDL until the recorded copy has completed.
-    SDL_ReleaseGPUTransferBuffer(device,transfer);
     return buffer;
 }
 struct BufferDeleter {
@@ -41,6 +25,47 @@ struct BufferDeleter {
 };
 using Buffer=std::shared_ptr<SDL_GPUBuffer>;
 Buffer owned(SDL_GPUDevice* device,SDL_GPUBuffer* buffer) {return Buffer(buffer,BufferDeleter{device});}
+}
+SdlUploadBatch::~SdlUploadBatch() {release();}
+void SdlUploadBatch::release() noexcept {
+    if(device_ && transfer_) SDL_ReleaseGPUTransferBuffer(device_,transfer_);
+    device_=nullptr;transfer_=nullptr;capacity_=0;clear();
+}
+void SdlUploadBatch::add(SDL_GPUBuffer* buffer,uint32_t offset,const void* bytes,uint32_t size) {
+    if(!buffer || !size) return;
+    const auto at=uint32_t(staging_.size());
+    staging_.resize(staging_.size()+size);
+    std::memcpy(staging_.data()+at,bytes,size);
+    writes_.push_back({buffer,offset,size,at});
+}
+bool SdlUploadBatch::flush(SDL_GPUDevice* device,SDL_GPUCommandBuffer* command) {
+    if(writes_.empty()) return true;
+    try {
+        require(device && command,"Missing upload device/command");
+        if(device_!=device || capacity_<staging_.size()) {
+            if(device_ && transfer_) SDL_ReleaseGPUTransferBuffer(device_,transfer_);
+            transfer_=nullptr;device_=device;
+            // Grow geometrically so steady-state frames reuse one buffer.
+            capacity_=std::max<uint32_t>(uint32_t(staging_.size()),std::max<uint32_t>(capacity_*2,1U<<20));
+            SDL_GPUTransferBufferCreateInfo info{};info.usage=SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;info.size=capacity_;
+            transfer_=SDL_CreateGPUTransferBuffer(device,&info);
+            require(transfer_,sdl_error("Create upload batch"));
+        }
+        // Cycling hands back a fresh backing store while earlier frames still read the old one.
+        void* mapped=SDL_MapGPUTransferBuffer(device,transfer_,true);
+        require(mapped,sdl_error("Map upload batch"));
+        std::memcpy(mapped,staging_.data(),staging_.size());
+        SDL_UnmapGPUTransferBuffer(device,transfer_);
+        auto* copy=SDL_BeginGPUCopyPass(command);
+        require(copy,sdl_error("Begin upload batch"));
+        for(const auto& write:writes_) {
+            SDL_GPUTransferBufferLocation source{transfer_,write.staging};
+            SDL_GPUBufferRegion destination{write.buffer,write.offset,write.size};
+            SDL_UploadToGPUBuffer(copy,&source,&destination,false);
+        }
+        SDL_EndGPUCopyPass(copy);
+        clear();status_.clear();return true;
+    } catch(const std::exception& error) {status_=error.what();clear();return false;}
 }
 vr::SceneConstants sdl_scene_constants(const vr::EyeCamera& camera) noexcept {
     auto flipped=camera;
@@ -154,11 +179,10 @@ void SdlDrawPackets::release() noexcept {state_.reset();}
 std::size_t SdlDrawPackets::size() const noexcept {return state_?state_->items.size():0;}
 std::size_t SdlDrawPackets::reused_packets() const noexcept {return state_?state_->reused:0;}
 std::size_t SdlDrawPackets::rejected_packets() const noexcept {return state_?state_->rejected:0;}
-bool SdlDrawPackets::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* command,
+bool SdlDrawPackets::initialize(SDL_GPUDevice* device,SdlUploadBatch& uploads,
     std::span<const vr::DrawPacket> packets,std::span<const uint32_t> object_keys,bool depth_test,bool depth_write) {
-    SDL_GPUCopyPass* copy=nullptr;
     try {
-        require(device && command && packets.size()<=4096,"Invalid MODERN scene upload");
+        require(device && packets.size()<=4096,"Invalid MODERN scene upload");
         if(!object_keys.empty()) {
             require(object_keys.size()==packets.size(),"MODERN scene key count mismatch");
             std::unordered_set<uint32_t> unique;
@@ -178,10 +202,10 @@ bool SdlDrawPackets::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* comm
         if(compatible) for(const auto& item:state_->items)
             if(item.geometry->source.geometry.shared_texels)
                 shared_texels.emplace(item.geometry->source.geometry.shared_texels.get(),item.geometry->texels);
-        const auto copy_pass=[&] {
-            if(!copy) copy=SDL_BeginGPUCopyPass(command);
-            require(copy,sdl_error("Begin MODERN upload pass"));
-            return copy;
+        const auto upload=[&](SDL_GPUBufferUsageFlags usage,const void* bytes,uint32_t size) {
+            auto buffer=owned(device,create_buffer(device,usage,size));
+            uploads.add(buffer.get(),0,bytes,size);
+            return buffer;
         };
         const uint32_t transparent=0;
         for(std::size_t index=0;index<packets.size();++index) {
@@ -190,9 +214,13 @@ bool SdlDrawPackets::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* comm
             const auto vertices=mesh.vertex_view();
             const auto lines=mesh.line_view();
             if(vertices.empty() && lines.empty()) continue;
-            // Connected-grid packets need the grid compute stage; not ported yet.
-            if(!vertices.empty() && vertices.front().texture[3]==vr::gpu_connected_grid_flag) {++next->rejected;continue;}
             const uint32_t key=next->keyed?object_keys[index]:0;
+            // Connected-grid packets need the grid compute stage; not ported yet.
+            // Keep an undrawn item so item indices still match nonempty packets.
+            if(!vertices.empty() && vertices.front().texture[3]==vr::gpu_connected_grid_flag) {
+                auto empty=std::make_shared<State::Geometry>();empty->source=packet;
+                next->items.push_back({packet.model,std::move(empty),key});++next->rejected;continue;
+            }
             const State::Item* candidate=nullptr;
             if(next->keyed) {
                 if(const auto found=prior.find(key);found!=prior.end()) candidate=found->second;
@@ -208,33 +236,30 @@ bool SdlDrawPackets::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* comm
                 geometry->texels=shared_texels.at(mesh.shared_texels.get());
             else {
                 const auto bytes=words.empty()?std::as_bytes(std::span(&transparent,1)):std::as_bytes(words);
-                geometry->texels=owned(device,upload(device,copy_pass(),SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,
-                    bytes.data(),uint32_t(bytes.size())));
+                geometry->texels=upload(SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,bytes.data(),uint32_t(bytes.size()));
                 if(mesh.shared_texels) shared_texels.emplace(mesh.shared_texels.get(),geometry->texels);
             }
             if(!vertices.empty()) {
-                geometry->triangles=owned(device,upload(device,copy_pass(),SDL_GPU_BUFFERUSAGE_VERTEX,
-                    vertices.data(),uint32_t(vertices.size_bytes())));
+                geometry->triangles=upload(SDL_GPU_BUFFERUSAGE_VERTEX,vertices.data(),uint32_t(vertices.size_bytes()));
                 geometry->triangle_count=uint32_t(vertices.size());
             }
             if(!lines.empty()) {
-                geometry->lines=owned(device,upload(device,copy_pass(),SDL_GPU_BUFFERUSAGE_VERTEX,
-                    lines.data(),uint32_t(lines.size_bytes())));
+                geometry->lines=upload(SDL_GPU_BUFFERUSAGE_VERTEX,lines.data(),uint32_t(lines.size_bytes()));
                 geometry->line_count=uint32_t(lines.size());
             }
             next->items.push_back({packet.model,std::move(geometry),key});
         }
-        if(copy) {SDL_EndGPUCopyPass(copy);copy=nullptr;}
         state_=std::move(next);status_="MODERN scene uploaded";return true;
-    } catch(const std::exception& error) {
-        if(copy) SDL_EndGPUCopyPass(copy);
-        status_=error.what();return false;
-    }
+    } catch(const std::exception& error) {status_=error.what();return false;}
 }
 bool SdlDrawPackets::record(SDL_GPUCommandBuffer* command,SDL_GPURenderPass* pass,SdlScenePipelines& pipelines,
     const vr::EyeCamera& camera) const {
-    if(!state_ || !command || !pass) return false;
-    for(const auto& item:state_->items) {
+    return record_range(command,pass,pipelines,camera,0,size());
+}
+bool SdlDrawPackets::record_range(SDL_GPUCommandBuffer* command,SDL_GPURenderPass* pass,SdlScenePipelines& pipelines,
+    const vr::EyeCamera& camera,std::size_t first,std::size_t count) const {
+    if(!state_ || !command || !pass || first>state_->items.size() || count>state_->items.size()-first) return false;
+    for(const auto& item:std::span(state_->items).subspan(first,count)) {
         const auto& geometry=*item.geometry;
         auto draw_camera=camera;
         if(geometry.source.preserve_native_colour || (state_->keyed && vr::is_source_shadow_pass(item.key))) draw_camera.effects={};

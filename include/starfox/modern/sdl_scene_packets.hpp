@@ -19,7 +19,9 @@ public:
     SdlUploadBatch(const SdlUploadBatch&)=delete;
     SdlUploadBatch& operator=(const SdlUploadBatch&)=delete;
     // Bytes are copied immediately; the source may change afterwards.
-    void add(SDL_GPUBuffer*,uint32_t offset,const void* bytes,uint32_t size);
+    // `cycle` rewrites a whole buffer that earlier frames may still read:
+    // SDL hands back a fresh backing store instead of stalling.
+    void add(SDL_GPUBuffer*,uint32_t offset,const void* bytes,uint32_t size,bool cycle=false);
     // One copy pass on `command` (no pass may be open). No-op when empty.
     bool flush(SDL_GPUDevice*,SDL_GPUCommandBuffer*);
     void clear() noexcept {writes_.clear();staging_.clear();}
@@ -27,7 +29,7 @@ public:
     void release() noexcept;
     const std::string& status() const noexcept {return status_;}
 private:
-    struct Write {SDL_GPUBuffer* buffer{};uint32_t offset{},size{},staging{};};
+    struct Write {SDL_GPUBuffer* buffer{};uint32_t offset{},size{},staging{};bool cycle{};};
     std::vector<Write> writes_;
     std::vector<unsigned char> staging_;
     SDL_GPUDevice* device_{};SDL_GPUTransferBuffer* transfer_{};uint32_t capacity_{};

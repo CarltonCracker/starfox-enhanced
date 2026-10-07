@@ -11835,7 +11835,12 @@ int main(int argc, char** argv) {
                 ++profile_fractional_presentations;
             }
 #if defined(STARFOX_MODERN)
-            if(modern && starfox::modern::ModernRuntime::draws(game)) {
+            // Host overlays (EXIT GAME?, save slots, HUD/touch editors, key
+            // remapping, frame freeze) are drawn by the existing presentation
+            // path, so those frames fall back to it.
+            const bool host_overlay=exit_confirmation || state_slot_window || hud_editor.active
+                || touch_editor.active || remap_menu.active || frame_frozen;
+            if(modern && !host_overlay && starfox::modern::ModernRuntime::draws(game)) {
                 const bool final_test_frame=test_frames!=0 && presented_frames+1U>=test_frames;
                 // Same internal raster as the existing renderer: canvas x scale.
                 if(modern->present(window.renderer(),interpolation_alpha,

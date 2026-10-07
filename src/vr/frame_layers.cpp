@@ -20,17 +20,22 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
     const bool srgb=in.srgb;
     const bool enhanced_sky=in.enhanced_landscape && in.prepare_photograph;
     FrameLayers out;
-    auto packet=source_sprite_packet(*snapshot->ppu,snapshot->display_brightness,{},srgb,&snapshot->meters);
     const bool fixed_menu=snapshot->flow==simulation::GameFlowState::ex_pregame_menu;
-    packet.model=source_ui_layer_matrix(
+    // The PPU canvas placement shared by sprites and flat background layers.
+    const auto ppu_layer_model=source_ui_layer_matrix(
         float(snapshot->source_vanishing_point[0]),
         float(snapshot->source_vanishing_point[1]),fixed_menu).value();
-    auto meters=source_meter_packet(snapshot->meters,snapshot->ppu->cgram,snapshot->display_brightness,srgb);
-    // Meters use the inner 224x192 Super FX coordinates; OAM uses the
-    // surrounding 256x224 PPU coordinates.
-    meters.model=source_ui_layer_matrix(
-        float(snapshot->source_vanishing_point[0]),
-        float(snapshot->source_vanishing_point[1]),fixed_menu,true).value();
+    DrawPacket packet,meters;
+    if(!in.backgrounds_only) {
+        packet=source_sprite_packet(*snapshot->ppu,snapshot->display_brightness,{},srgb,&snapshot->meters);
+        meters=source_meter_packet(snapshot->meters,snapshot->ppu->cgram,snapshot->display_brightness,srgb);
+        // Meters use the inner 224x192 Super FX coordinates; OAM uses the
+        // surrounding 256x224 PPU coordinates.
+        meters.model=source_ui_layer_matrix(
+            float(snapshot->source_vanishing_point[0]),
+            float(snapshot->source_vanishing_point[1]),fixed_menu,true).value();
+    }
+    packet.model=ppu_layer_model;
     BackgroundTileOptions background_options;
     background_options.colour_subtract=snapshot->background_colour_subtract;
     background_options.brightness=snapshot->display_brightness;
@@ -82,7 +87,7 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
                 ?orbital_planet_sphere_packet(*snapshot->ppu,background_options,srgb,snapshot->background_orbital_thin,snapshot->background_orbital_entry,
                     snapshot->flow==simulation::GameFlowState::gameplay && in.ex_experience)
                 :space_horizon_sphere_packet(*snapshot->ppu,background_options,srgb);
-        else if(!snapshot->ppu->tunnel_scene && snapshot->background_landscape) {
+        else if(!snapshot->ppu->tunnel_scene && snapshot->background_landscape && !in.flat_landscape) {
             bg2=landscape_sphere_packet(*snapshot->ppu,background_options,
                 112.F,srgb,snapshot->background_landscape_unique_half,snapshot->landscape_atlas_origin,
                 snapshot->background_landscape_unique_right_half);
@@ -128,6 +133,7 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
             else next_backgrounds.push_back(std::move(bg3));
         }
     }
+    if(in.backgrounds_only) return out;
     DrawPacket bitmap;
     const bool replace_dialogue=replace_native_dialogue(*snapshot);
     if(snapshot->native_ex_bitmap) {
@@ -240,7 +246,7 @@ std::vector<Matrix4> frame_background_models(std::span<const DrawPacket> uploade
             model_updates.push_back(receiver?motion:background.model);
         }
     }
-    if(snapshot->background_landscape) {
+    if(snapshot->background_landscape && !in.flat_landscape) {
         const bool continuous=same_landscape_mapping(*before,*snapshot)
             && !timing::camera_transform_is_discontinuous(before->camera,snapshot->camera);
         const auto motion=landscape_camera_motion(*before,*snapshot,continuous?alpha:1.);

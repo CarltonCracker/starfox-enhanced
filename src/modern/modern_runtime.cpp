@@ -23,6 +23,7 @@ struct ModernRuntime::State {
         :history(game,rom,symbols),models(rom,symbols,true,true),dialogue_layout(rom,symbols) {
         inputs.rom=&rom;inputs.symbols=&symbols;inputs.dialogue_layout=&dialogue_layout;
         inputs.srgb=false;inputs.ex_experience=game.experience()==simulation::Experience::starfox_ex;
+        inputs.flat_landscape=true;
     }
     vr::GameSceneHistory history;
     vr::SourceModels models;
@@ -101,6 +102,8 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
         require(colour!=nullptr,"MODERN target has no GPU texture");
         const auto previous=s.history.previous(),current=s.history.current();
         require(previous && current && current->ppu,"MODERN scene history incomplete");
+        // The desktop's 3D ASTEROIDS setting (VR passes its own preference).
+        s.models.set_asteroid_models(s.history.game().asteroid_models());
         auto world=s.models.assemble_world_interpolated(*previous,*current,alpha,s.inputs.srgb,true);
         require(world.pending.empty(),"MODERN world assembly pending");
         // The renderer's own queued work must reach the GPU before ours.

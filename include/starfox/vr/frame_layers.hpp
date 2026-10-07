@@ -27,6 +27,14 @@ struct FrameLayerInputs {
     // Optional photographic sky (VR "enhanced sky"): both or neither.
     EnhancedLandscape* enhanced_landscape{};
     std::function<std::optional<DrawPacket>()> prepare_photograph;
+    // Build only backgrounds and the tunnel surround (no sprites/HUD), e.g.
+    // for display-rate rebuilds from an interpolated PPU state.
+    bool backgrounds_only{};
+    // Flat-screen landscapes: keep the native BG2 layer (with the cartridge's
+    // scroll and offset tables) instead of VR's landscape sphere and 3D
+    // ground receiver. The cartridge draws its ground band above the true 3D
+    // horizon; only the native layer reproduces that against 3D models.
+    bool flat_landscape{};
 };
 struct FrameLayers {
     std::vector<DrawPacket> backgrounds,tunnel_surround,sprites;

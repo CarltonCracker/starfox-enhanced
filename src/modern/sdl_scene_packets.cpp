@@ -31,12 +31,12 @@ void SdlUploadBatch::release() noexcept {
     if(device_ && transfer_) SDL_ReleaseGPUTransferBuffer(device_,transfer_);
     device_=nullptr;transfer_=nullptr;capacity_=0;clear();
 }
-void SdlUploadBatch::add(SDL_GPUBuffer* buffer,uint32_t offset,const void* bytes,uint32_t size) {
+void SdlUploadBatch::add(SDL_GPUBuffer* buffer,uint32_t offset,const void* bytes,uint32_t size,bool cycle) {
     if(!buffer || !size) return;
     const auto at=uint32_t(staging_.size());
     staging_.resize(staging_.size()+size);
     std::memcpy(staging_.data()+at,bytes,size);
-    writes_.push_back({buffer,offset,size,at});
+    writes_.push_back({buffer,offset,size,at,cycle});
 }
 bool SdlUploadBatch::flush(SDL_GPUDevice* device,SDL_GPUCommandBuffer* command) {
     if(writes_.empty()) return true;
@@ -61,7 +61,7 @@ bool SdlUploadBatch::flush(SDL_GPUDevice* device,SDL_GPUCommandBuffer* command) 
         for(const auto& write:writes_) {
             SDL_GPUTransferBufferLocation source{transfer_,write.staging};
             SDL_GPUBufferRegion destination{write.buffer,write.offset,write.size};
-            SDL_UploadToGPUBuffer(copy,&source,&destination,false);
+            SDL_UploadToGPUBuffer(copy,&source,&destination,write.cycle);
         }
         SDL_EndGPUCopyPass(copy);
         clear();status_.clear();return true;
@@ -247,18 +247,42 @@ bool SdlDrawPackets::initialize(SDL_GPUDevice* device,SdlUploadBatch& uploads,
             geometry->photograph=!vertices.empty()
                 && (vertices.front().texture[3]&vr::backdrop_texture_flag)==vr::backdrop_texture_flag;
             const auto words=mesh.texel_view();
-            if(mesh.shared_texels && shared_texels.contains(mesh.shared_texels.get()))
+            // Same mesh, changed payload (e.g. display-rate background
+            // scroll): rewrite the existing buffers instead of allocating new
+            // ones, which is slow on D3D12 at display rate.
+            const auto& prior_mesh=candidate?candidate->geometry->source.geometry:mesh;
+            const bool same_vertices=candidate && candidate->geometry->triangles
+                && prior_mesh.vertex_view().size()==vertices.size()
+                && (prior_mesh.vertex_view().data()==vertices.data()
+                    || std::equal(vertices.begin(),vertices.end(),prior_mesh.vertex_view().begin()));
+            const bool same_lines=candidate && candidate->geometry->lines
+                && prior_mesh.line_view().size()==lines.size()
+                && (prior_mesh.line_view().data()==lines.data()
+                    || std::equal(lines.begin(),lines.end(),prior_mesh.line_view().begin()));
+            const bool rewrite_texels=candidate && candidate->geometry->texels
+                && !mesh.shared_texels && !prior_mesh.shared_texels
+                && !words.empty() && prior_mesh.texel_view().size()==words.size();
+            if(rewrite_texels) {
+                geometry->texels=candidate->geometry->texels;
+                const auto bytes=std::as_bytes(words);
+                uploads.add(geometry->texels.get(),0,bytes.data(),uint32_t(bytes.size()),true);
+            }
+            else if(mesh.shared_texels && shared_texels.contains(mesh.shared_texels.get()))
                 geometry->texels=shared_texels.at(mesh.shared_texels.get());
             else {
                 const auto bytes=words.empty()?std::as_bytes(std::span(&transparent,1)):std::as_bytes(words);
                 geometry->texels=upload(SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ,bytes.data(),uint32_t(bytes.size()));
                 if(mesh.shared_texels) shared_texels.emplace(mesh.shared_texels.get(),geometry->texels);
             }
-            if(!vertices.empty()) {
+            if(same_vertices) {
+                geometry->triangles=candidate->geometry->triangles;geometry->triangle_count=candidate->geometry->triangle_count;
+            } else if(!vertices.empty()) {
                 geometry->triangles=upload(SDL_GPU_BUFFERUSAGE_VERTEX,vertices.data(),uint32_t(vertices.size_bytes()));
                 geometry->triangle_count=uint32_t(vertices.size());
             }
-            if(!lines.empty()) {
+            if(same_lines) {
+                geometry->lines=candidate->geometry->lines;geometry->line_count=candidate->geometry->line_count;
+            } else if(!lines.empty()) {
                 geometry->lines=upload(SDL_GPU_BUFFERUSAGE_VERTEX,lines.data(),uint32_t(lines.size_bytes()));
                 geometry->line_count=uint32_t(lines.size());
             }

@@ -1,12 +1,53 @@
 #include "starfox/modern/sdl_frame.hpp"
 #include "starfox/vr/game_model_pose.hpp"
 #include "starfox/vr/source_sprites.hpp"
+#include "starfox/timing/fixed_step.hpp"
 #include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <stdexcept>
 namespace starfox::modern {
 namespace {
 void require(bool ok,const std::string& what) {if(!ok) throw std::runtime_error(what);}
 constexpr uint32_t surrounding_stars_key=0x20000U;
+// make_sky_vertices (background_tiles.cpp): 64 x 32 cells, two triangles each.
+constexpr std::size_t sky_sphere_vertex_count=64*32*6;
+// Wrapped 16-bit source word lerp (the desktop's interpolate_source_word).
+int16_t interpolate_word(int16_t previous,int16_t current,double alpha) noexcept {
+    const auto difference=int16_t(uint16_t(current)-uint16_t(previous));
+    return int16_t(uint16_t(int32_t(previous)+int32_t(std::lround(double(difference)*alpha))));
+}
+}
+// The PPU background state between two ticks, or null when nothing moves or
+// the scene is discontinuous (new background, flow, mode or a camera cut).
+std::shared_ptr<const simulation::SnesPpuState> interpolated_background_ppu(const vr::GameSceneSnapshot& previous,
+    const vr::GameSceneSnapshot& current,double alpha) {
+    if(!previous.ppu || !current.ppu || !(alpha>0 && alpha<1)) return {};
+    const auto& a=*previous.ppu;const auto& b=*current.ppu;
+    if(previous.background_id!=current.background_id || previous.flow!=current.flow
+        || a.background_mode!=b.background_mode || a.tunnel_scene!=b.tunnel_scene
+        || timing::camera_transform_is_discontinuous(previous.camera,current.camera)) return {};
+    const bool moving=a.bg1_scroll_x!=b.bg1_scroll_x || a.bg1_scroll_y!=b.bg1_scroll_y
+        || a.bg2_scroll_x!=b.bg2_scroll_x || a.bg2_scroll_y!=b.bg2_scroll_y
+        || a.bg3_scroll_x!=b.bg3_scroll_x || a.bg3_scroll_y!=b.bg3_scroll_y
+        || a.bg2_horizontal_offsets!=b.bg2_horizontal_offsets || a.bg2_scanline_scroll_y!=b.bg2_scanline_scroll_y;
+    if(!moving) return {};
+    auto ppu=std::make_shared<simulation::SnesPpuState>(b);
+    ppu->bg1_scroll_x=interpolate_word(a.bg1_scroll_x,b.bg1_scroll_x,alpha);
+    ppu->bg1_scroll_y=interpolate_word(a.bg1_scroll_y,b.bg1_scroll_y,alpha);
+    ppu->bg2_scroll_x=interpolate_word(a.bg2_scroll_x,b.bg2_scroll_x,alpha);
+    // BG2's vertical phase wraps at 9 bits (CALCBGSCROLL).
+    ppu->bg2_scroll_y=int16_t(timing::interpolate_wrapped_scroll(uint16_t(a.bg2_scroll_y),uint16_t(b.bg2_scroll_y),alpha,0x1ffU));
+    ppu->bg3_scroll_x=interpolate_word(a.bg3_scroll_x,b.bg3_scroll_x,alpha);
+    ppu->bg3_scroll_y=interpolate_word(a.bg3_scroll_y,b.bg3_scroll_y,alpha);
+    for(std::size_t row=0;row<ppu->bg2_horizontal_offsets.size();++row) {
+        ppu->bg2_horizontal_offsets[row]=interpolate_word(a.bg2_horizontal_offsets[row],b.bg2_horizontal_offsets[row],alpha);
+        ppu->bg2_scanline_scroll_y[row]=interpolate_word(a.bg2_scanline_scroll_y[row],b.bg2_scanline_scroll_y[row],alpha);
+    }
+    return ppu;
+}
+namespace {
 }
 bool SdlFrameRenderer::initialize(SDL_GPUDevice* device,SDL_GPUTextureFormat colour,SDL_GPUTextureFormat depth) {
     release();
@@ -16,7 +57,7 @@ bool SdlFrameRenderer::initialize(SDL_GPUDevice* device,SDL_GPUTextureFormat col
 void SdlFrameRenderer::release() noexcept {
     for(auto* packets:{&stars_,&backgrounds_,&tunnel_,&sprites_,&circle_,&shutter_}) packets->release();
     world_.release();uploads_.release();pipelines_.release();
-    background_packets_.clear();layer_revision_.reset();circle_blend_.reset();
+    background_packets_.clear();layer_revision_.reset();circle_blend_.reset();background_interpolated_=false;
     circle_active_=circle_over_hud_=shutter_active_=false;device_=nullptr;
 }
 bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameSceneSnapshot& previous,
@@ -38,17 +79,55 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
         }
         require(stars_.initialize(device_,uploads_,stars,star_keys,false),stars_.status());
         // 2D layers change only with the source snapshot (20 Hz).
-        if(!layer_revision_ || *layer_revision_!=current.revision) {
+        // Sprites, HUD and the tunnel surround change with the source tick (20 Hz).
+        const bool new_tick=!layer_revision_ || *layer_revision_!=current.revision;
+        if(new_tick) {
             auto layers=vr::assemble_frame_layers(current,inputs);
             require(tunnel_.initialize(device_,uploads_,layers.tunnel_surround,{},false),tunnel_.status());
-            require(backgrounds_.initialize(device_,uploads_,layers.backgrounds,{},false),backgrounds_.status());
             require(sprites_.initialize(device_,uploads_,layers.sprites,{},false),sprites_.status());
-            background_packets_=std::move(layers.backgrounds);
             layer_revision_=current.revision;
         }
+        // Backgrounds follow the source's scroll registers and per-scanline
+        // offset tables (how the cartridge fakes roll and turns). Interpolate
+        // them at display rate, as the desktop renderer does, instead of
+        // stepping at 20 Hz.
+        const auto interpolated=interpolated_background_ppu(previous,current,alpha);
+        if(new_tick || interpolated || background_interpolated_) {
+            auto scene=current;
+            if(interpolated) scene.ppu=interpolated;
+            auto background_inputs=inputs;background_inputs.backgrounds_only=true;
+            auto layers=vr::assemble_frame_layers(scene,background_inputs);
+            require(backgrounds_.initialize(device_,uploads_,layers.backgrounds,{},false),backgrounds_.status());
+            background_packets_=std::move(layers.backgrounds);
+            background_interpolated_=bool(interpolated);
+        }
+        static const bool trace=std::getenv("STARFOX_TRACE_MODERN")!=nullptr;
+        if(trace) std::fprintf(stderr,"modern-frame tick=%llu alpha=%.3f background=%s vp=%d,%d bg2=%d,%d vscroll=%d grid=%d atlas=%u\n",
+            static_cast<unsigned long long>(current.revision),alpha,
+            interpolated?"interpolated":new_tick?"tick":"retained",
+            int(current.source_vanishing_point[0]),int(current.source_vanishing_point[1]),
+            current.ppu?int(current.ppu->bg2_scroll_x):0,current.ppu?int(current.ppu->bg2_scroll_y):0,
+            int(current.background_vertical_scroll),int(current.landscape_grid_height),unsigned(current.landscape_atlas_origin));
         // Display-rate background motion (landscape pitch, water height, ...).
-        require(backgrounds_.update_models(vr::frame_background_models(background_packets_,previous,current,alpha,inputs)),
-            "MODERN background motion update failed");
+        auto background_models=vr::frame_background_models(background_packets_,previous,current,alpha,inputs);
+        // VR's sky spheres (and the landscape ground receiver built on the
+        // same mesh) sample the source at 512 pixels per radian / unit
+        // tangent, half the SNES camera's focal length of 256, so a flat view
+        // showed mountains at half size over a mismatched ground. The shader
+        // derives that mapping from model-space positions, so widening the
+        // sphere 2x in X and Y (relative to Z) restores the SNES scale: exact
+        // vertically at the centre column, close to it horizontally.
+        std::size_t model_index=0;
+        for(const auto& packet:background_packets_) {
+            const auto vertices=packet.geometry.vertex_view();
+            if(vertices.empty() && packet.geometry.line_view().empty()) continue;
+            if(vertices.size()==sky_sphere_vertex_count && (vertices.front().texture[3]&8U)) {
+                auto& model=background_models.at(model_index);
+                for(unsigned row=0;row<4;++row) {model[0*4+row]*=2.F;model[1*4+row]*=2.F;}
+            }
+            ++model_index;
+        }
+        require(backgrounds_.update_models(background_models),"MODERN background motion update failed");
         auto circle=vr::source_circle_packet(previous.circle,current.circle,alpha,current.display_brightness,inputs.srgb);
         circle_active_=!circle.geometry.vertices.empty();
         if(circle_active_) {

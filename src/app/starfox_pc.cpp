@@ -1,4 +1,7 @@
 #include "starfox/audio/spc700_audio.hpp"
+#if defined(STARFOX_MODERN)
+#include "starfox/modern/modern_runtime.hpp"
+#endif
 #include "starfox/compat/bit_cast.hpp"
 #include "starfox/render/effects.hpp"
 #include "starfox/render/global_enhancements.hpp"
@@ -9639,6 +9642,15 @@ int main(int argc, char** argv) {
             std::chrono::milliseconds{250}};
         live_fps.reset(raster_timestamp, game.presentation_fps());
         starfox::app::MenuSettingsResetHold settings_reset_hold;
+#if defined(STARFOX_MODERN)
+        // MODERN (A/B switch STARFOX_MODERN=1): gameplay frames come from the
+        // shared VR scene code on SDL_GPU; every other frame, or any MODERN
+        // failure, falls back to the existing renderer for that frame.
+        std::unique_ptr<starfox::modern::ModernRuntime> modern;
+        if(const auto* flag=std::getenv("STARFOX_MODERN"); flag && std::string_view(flag)=="1")
+            modern=std::make_unique<starfox::modern::ModernRuntime>(game,rom,symbols);
+        bool modern_failure_reported=false;
+#endif
         while (running) {
             if(test_frames && std::getenv("STARFOX_TEST_REVIVAL")
                 && std::getenv("STARFOX_TEST_REVIVAL_FRAME")
@@ -10798,6 +10810,9 @@ int main(int argc, char** argv) {
                     }
                     const bool runtime_options_were_open=game.runtime_options_open();
                     const auto tick_result = game.tick(controls);
+#if defined(STARFOX_MODERN)
+                    if(modern) modern->capture_tick();
+#endif
 #if defined(__ANDROID__)
                     // Do not let the setup toggle re-enter the broken native
                     // GPU path on this device. All other Android GPUs retain
@@ -11819,6 +11834,28 @@ int main(int argc, char** argv) {
             if (interpolation_alpha > 0.0 && interpolation_alpha < 1.0) {
                 ++profile_fractional_presentations;
             }
+#if defined(STARFOX_MODERN)
+            if(modern && starfox::modern::ModernRuntime::draws(game)) {
+                const bool final_test_frame=test_frames!=0 && presented_frames+1U>=test_frames;
+                // Same internal raster as the existing renderer: canvas x scale.
+                if(modern->present(window.renderer(),interpolation_alpha,
+                    int(display_width*render_scale),int(snes_height*render_scale),
+                    final_test_frame && capture_path_text?capture_path_text:nullptr)) {
+                    if(!advance_frozen_frame) live_fps.record_frame(std::chrono::steady_clock::now());
+                    if(presented_frames==0) startup_trace->mark("first game/menu frame presented");
+                    ++presented_frames;
+                    if(test_frames!=0 && presented_frames>=test_frames) {
+                        if(modern->unsupported_models()) std::cerr<<"modern: unsupported warp/axis models in final frame="<<modern->unsupported_models()<<'\n';
+                        running=false;
+                    }
+                    continue;
+                }
+                if(!modern_failure_reported) {
+                    std::cerr<<"modern: falling back to the existing renderer: "<<modern->status()<<'\n';
+                    modern_failure_reported=true;
+                }
+            }
+#endif
             const auto interpolate_raster_word = [interpolation_alpha](
                 std::int16_t previous_value, std::int16_t current_value) {
                 return interpolate_source_word(

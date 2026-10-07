@@ -5,7 +5,8 @@
 //
 // Usage: starfox_modern_scene_check ROM SYMBOLS LEVEL FRAMES WIDTH HEIGHT
 // Captures: STARFOX_BENCH_CAPTURE_DIR + STARFOX_BENCH_CAPTURE_FRAMES=a,b,...
-#include "starfox/modern/sdl_source_scene.hpp"
+#include "starfox/modern/sdl_frame.hpp"
+#include "starfox/render/scaled_text_renderer.hpp"
 #include "starfox/vr/eye_camera.hpp"
 #include "starfox/vr/game_frame_driver.hpp"
 #include "starfox/vr/source_models.hpp"
@@ -86,7 +87,15 @@ int main(int argc,char** argv) try {
     modern::SdlDrawPackets scene;
     modern::SdlUploadBatch uploads;
     modern::SdlSourceScene source_scene;
+    // Frame mode (STARFOX_MODERN_CAMERA=source): MODERN's whole frame, every
+    // VR layer through the SNES camera.
+    modern::SdlFrameRenderer frame_renderer;
+    render::ScaledTextRenderer dialogue_layout(rom,symbols);
+    vr::FrameLayerInputs layer_inputs;
+    layer_inputs.rom=&rom;layer_inputs.symbols=&symbols;layer_inputs.dialogue_layout=&dialogue_layout;
+    layer_inputs.srgb=true;layer_inputs.ex_experience=game.experience()==simulation::Experience::starfox_ex;
     std::size_t compute_models=0,unsupported_models=0;
+    require(frame_renderer.initialize(device,colour_format,depth_format),frame_renderer.status());
     const auto cameras=vr::sbs_eye_cameras(1.75F,float(width)/float(height),.064F,4.F,.05F);
     require(cameras.has_value(),"Invalid stereo cameras");
     const bool source_camera=std::getenv("STARFOX_MODERN_CAMERA") && std::string(std::getenv("STARFOX_MODERN_CAMERA"))=="source";
@@ -95,7 +104,7 @@ int main(int argc,char** argv) try {
     for(unsigned frame=0;frame<frames;++frame) {
         driver.advance(XrTime(frame)*50'000'000,{},true);
         const auto previous=history.previous(),current=history.current();
-        if(current->flow!=simulation::GameFlowState::gameplay) continue;
+        if(!source_camera && current->flow!=simulation::GameFlowState::gameplay) continue;
         auto packets=models.assemble_world_interpolated(*previous,*current,.5,true,true);
         require(packets.pending.empty(),"Model assembly pending");
         // source camera: the SNES-faithful flat camera (vr::source_panel_camera),
@@ -104,26 +113,34 @@ int main(int argc,char** argv) try {
             if((packets.handles[i]&0xffffU)!=0 && packets.handles[i]<0x20000U) packets.packets[i].model[14]-=.25F;
         const auto start=std::chrono::steady_clock::now();
         auto* command=SDL_AcquireGPUCommandBuffer(device);require(command!=nullptr,"Acquire command buffer");
-        const bool initialized=compute_route?source_scene.initialize(device,command,packets)
+        const bool initialized=source_camera?frame_renderer.prepare(command,*previous,*current,.5,packets,layer_inputs)
+            :compute_route?source_scene.initialize(device,command,packets)
             :(scene.initialize(device,uploads,packets.packets,packets.handles) && uploads.flush(device,command));
         if(!initialized) {
-            if(++rejected<=5) std::cout<<"rejected frame="<<frame<<": "<<(compute_route?source_scene.status():scene.status())<<'\n';
+            if(++rejected<=5) std::cout<<"rejected frame="<<frame<<": "<<(source_camera?frame_renderer.status():compute_route?source_scene.status():scene.status())<<'\n';
             SDL_CancelGPUCommandBuffer(command);continue;
         }
-        if(compute_route) {
+        if(source_camera) {
+            compute_models+=frame_renderer.world().compute_models();unsupported_models+=frame_renderer.world().unsupported_models();
+        } else if(compute_route) {
             require(source_scene.record_compute(command),"MODERN source compute: "+source_scene.status());
             compute_models+=source_scene.compute_models();unsupported_models+=source_scene.unsupported_models();
         }
         SDL_GPUColorTargetInfo target{};target.texture=colour;target.load_op=SDL_GPU_LOADOP_CLEAR;
         target.store_op=SDL_GPU_STOREOP_STORE;target.clear_color={0,0,0,1};
+        if(source_camera) {
+            const auto clear=vr::frame_clear_colour(*current,true);
+            target.clear_color={clear[0],clear[1],clear[2],clear[3]};
+        }
         SDL_GPUDepthStencilTargetInfo depth_target{};depth_target.texture=depth;depth_target.clear_depth=1;
         depth_target.load_op=SDL_GPU_LOADOP_CLEAR;depth_target.store_op=SDL_GPU_STOREOP_DONT_CARE;
         depth_target.stencil_load_op=SDL_GPU_LOADOP_DONT_CARE;depth_target.stencil_store_op=SDL_GPU_STOREOP_DONT_CARE;
         auto* pass=SDL_BeginGPURenderPass(command,&target,1,&depth_target);require(pass!=nullptr,"Begin render pass");
         const auto camera=source_camera?vr::source_panel_camera(*current):eye_camera;
-        const bool recorded=compute_route?source_scene.record(command,pass,pipelines,camera):scene.record(command,pass,pipelines,camera);
+        const bool recorded=source_camera?frame_renderer.record(command,pass,camera)
+            :compute_route?source_scene.record(command,pass,pipelines,camera):scene.record(command,pass,pipelines,camera);
         SDL_EndGPURenderPass(pass);
-        require(recorded,"Record MODERN scene: "+pipelines.status());
+        require(recorded,"Record MODERN scene: "+(source_camera?frame_renderer.status():pipelines.status()));
         const bool capture=capture_dir && std::find(capture_frames.begin(),capture_frames.end(),frame)!=capture_frames.end();
         if(capture) {
             auto* copy=SDL_BeginGPUCopyPass(command);
@@ -168,7 +185,7 @@ int main(int argc,char** argv) try {
     const auto mean=[](const std::vector<double>& v){double t=0;for(auto x:v) t+=x;return v.empty()?0.:t/double(v.size());};
     if(!record_ms.empty()) std::cout<<"  cpu record (uploads+passes) ms: mean="<<mean(record_ms)<<" p50="<<record_ms[record_ms.size()/2]
         <<" | submit-to-fence ms: mean="<<mean(wait_ms)<<" p50="<<wait_ms[wait_ms.size()/2]<<'\n';
-    pipelines.release();scene.release();source_scene.release();
+    frame_renderer.release();pipelines.release();scene.release();source_scene.release();
     SDL_ReleaseGPUTransferBuffer(device,download);SDL_ReleaseGPUTexture(device,depth);SDL_ReleaseGPUTexture(device,colour);
     SDL_DestroyGPUDevice(device);SDL_Quit();
     return 0;

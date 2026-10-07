@@ -3,6 +3,7 @@
 #include "starfox/vr/scene_camera.hpp"
 #include <SDL3/SDL_gpu.h>
 #include <map>
+#include <optional>
 #include <memory>
 #include <span>
 #include <string>
@@ -34,7 +35,7 @@ private:
 };
 // SDL_GPU equivalent of vr::SceneTopology/SceneBlend (vulkan_scene_pipeline.hpp).
 enum class SceneTopology {triangles,lines};
-enum class SceneBlend {opaque,alpha};
+enum class SceneBlend {opaque,add,subtract,half_add,half_subtract,alpha};
 // Graphics pipelines for the shared scene shader, created lazily per state and
 // retained for one device and target format pair. Release before the device.
 class SdlScenePipelines {
@@ -65,8 +66,14 @@ public:
     SdlDrawPackets& operator=(const SdlDrawPackets&)=delete;
     // Queues new geometry on `uploads`; flush it on the command buffer before
     // the render pass that draws these packets.
+    // `blend` replaces the per-packet choice (opaque, or alpha for backdrop
+    // photographs) for every triangle draw, e.g. the circle wipe's add modes.
     bool initialize(SDL_GPUDevice*,SdlUploadBatch& uploads,std::span<const vr::DrawPacket>,
-        std::span<const uint32_t> object_keys={},bool depth_test=true,bool depth_write=true);
+        std::span<const uint32_t> object_keys={},bool depth_test=true,bool depth_write=true,
+        std::optional<SceneBlend> blend={});
+    // Replace nonempty packets' model matrices in submission order (VR's
+    // VulkanDrawPackets::update_models). Geometry stays resident.
+    bool update_models(std::span<const vr::Matrix4>) noexcept;
     // Inside a render pass whose targets match `pipelines`' formats.
     bool record(SDL_GPUCommandBuffer*,SDL_GPURenderPass*,SdlScenePipelines&,const vr::EyeCamera&) const;
     // Contiguous range of uploaded (nonempty) items, so resident compute

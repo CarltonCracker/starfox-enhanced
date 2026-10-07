@@ -114,7 +114,7 @@ bool SdlScenePipelines::initialize(SDL_GPUDevice* device,SDL_GPUTextureFormat co
 }
 SDL_GPUGraphicsPipeline* SdlScenePipelines::get(SceneTopology topology,SceneBlend blend,bool depth_test,bool depth_write) {
     if(!device_) return nullptr;
-    const unsigned key=unsigned(topology)|(unsigned(blend)<<1)|(unsigned(depth_test)<<2)|(unsigned(depth_test && depth_write)<<3);
+    const unsigned key=unsigned(topology)|(unsigned(depth_test)<<1)|(unsigned(depth_test && depth_write)<<2)|(unsigned(blend)<<3);
     if(const auto found=pipelines_.find(key);found!=pipelines_.end()) return found->second;
     using V=vr::SceneVertex;
     const SDL_GPUVertexAttribute attributes[]{
@@ -138,14 +138,20 @@ SDL_GPUGraphicsPipeline* SdlScenePipelines::get(SceneTopology topology,SceneBlen
     auto& state=target.blend_state;
     state.color_write_mask=SDL_GPU_COLORCOMPONENT_R|SDL_GPU_COLORCOMPONENT_G|SDL_GPU_COLORCOMPONENT_B|SDL_GPU_COLORCOMPONENT_A;
     state.enable_color_write_mask=true;
-    if(blend==SceneBlend::alpha) { // Matches vulkan_scene_pipeline.cpp SceneBlend::alpha.
+    if(blend!=SceneBlend::opaque) { // Same factors as vulkan_scene_pipeline.cpp.
+        const bool half=blend==SceneBlend::half_add || blend==SceneBlend::half_subtract;
+        const bool subtract=blend==SceneBlend::subtract || blend==SceneBlend::half_subtract;
         state.enable_blend=true;
         state.src_color_blendfactor=SDL_GPU_BLENDFACTOR_SRC_ALPHA;
-        state.dst_color_blendfactor=SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
-        state.color_blend_op=SDL_GPU_BLENDOP_ADD;
-        state.src_alpha_blendfactor=SDL_GPU_BLENDFACTOR_ONE;
-        state.dst_alpha_blendfactor=SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
-        state.alpha_blend_op=SDL_GPU_BLENDOP_ADD;
+        state.dst_color_blendfactor=half?SDL_GPU_BLENDFACTOR_SRC_ALPHA:SDL_GPU_BLENDFACTOR_ONE;
+        state.color_blend_op=subtract?SDL_GPU_BLENDOP_REVERSE_SUBTRACT:SDL_GPU_BLENDOP_ADD;
+        state.src_alpha_blendfactor=SDL_GPU_BLENDFACTOR_ZERO;
+        state.dst_alpha_blendfactor=SDL_GPU_BLENDFACTOR_ONE;state.alpha_blend_op=SDL_GPU_BLENDOP_ADD;
+        if(blend==SceneBlend::alpha) {
+            state.dst_color_blendfactor=SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+            state.src_alpha_blendfactor=SDL_GPU_BLENDFACTOR_ONE;
+            state.dst_alpha_blendfactor=SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+        }
     }
     SDL_GPUGraphicsPipelineCreateInfo info{};
     info.vertex_shader=vertex_;info.fragment_shader=fragment_;
@@ -171,6 +177,7 @@ struct SdlDrawPackets::State {
     SDL_GPUDevice* device{};
     std::vector<Item> items;
     bool keyed{},depth_test{true},depth_write{true};
+    std::optional<SceneBlend> blend;
     std::size_t reused{},rejected{};
 };
 SdlDrawPackets::SdlDrawPackets()=default;
@@ -179,8 +186,15 @@ void SdlDrawPackets::release() noexcept {state_.reset();}
 std::size_t SdlDrawPackets::size() const noexcept {return state_?state_->items.size():0;}
 std::size_t SdlDrawPackets::reused_packets() const noexcept {return state_?state_->reused:0;}
 std::size_t SdlDrawPackets::rejected_packets() const noexcept {return state_?state_->rejected:0;}
+bool SdlDrawPackets::update_models(std::span<const vr::Matrix4> models) noexcept {
+    if(!state_ || models.size()!=state_->items.size()) return false;
+    for(const auto& model:models) if(!vr::model_eye_camera(vr::EyeCamera{},model)) return false;
+    for(std::size_t i=0;i<models.size();++i) state_->items[i].model=models[i];
+    return true;
+}
 bool SdlDrawPackets::initialize(SDL_GPUDevice* device,SdlUploadBatch& uploads,
-    std::span<const vr::DrawPacket> packets,std::span<const uint32_t> object_keys,bool depth_test,bool depth_write) {
+    std::span<const vr::DrawPacket> packets,std::span<const uint32_t> object_keys,bool depth_test,bool depth_write,
+    std::optional<SceneBlend> blend) {
     try {
         require(device && packets.size()<=4096,"Invalid MODERN scene upload");
         if(!object_keys.empty()) {
@@ -195,6 +209,7 @@ bool SdlDrawPackets::initialize(SDL_GPUDevice* device,SdlUploadBatch& uploads,
         }
         auto next=std::make_unique<State>();
         next->device=device;next->keyed=!object_keys.empty();next->depth_test=depth_test;next->depth_write=depth_write;
+        next->blend=blend;
         const bool compatible=state_ && state_->device==device;
         std::unordered_map<uint32_t,const State::Item*> prior;
         if(compatible && next->keyed && state_->keyed) for(const auto& item:state_->items) prior.emplace(item.key,&item);
@@ -280,7 +295,7 @@ bool SdlDrawPackets::record_range(SDL_GPUCommandBuffer* command,SDL_GPURenderPas
             SDL_DrawGPUPrimitives(pass,count,1,0,0);
             return true;
         };
-        if(geometry.triangles && !draw(SceneTopology::triangles,geometry.photograph?SceneBlend::alpha:SceneBlend::opaque,
+        if(geometry.triangles && !draw(SceneTopology::triangles,state_->blend?*state_->blend:geometry.photograph?SceneBlend::alpha:SceneBlend::opaque,
             geometry.triangles,geometry.triangle_count)) return false;
         if(geometry.lines && !draw(SceneTopology::lines,SceneBlend::opaque,geometry.lines,geometry.line_count)) return false;
     }

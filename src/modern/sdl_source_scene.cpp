@@ -295,7 +295,8 @@ struct SdlSourceScene::State {
 SdlSourceScene::SdlSourceScene()=default;
 SdlSourceScene::~SdlSourceScene() {release();}
 void SdlSourceScene::release() noexcept {state_.reset();stages_.release();uploads_.release();}
-bool SdlSourceScene::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* command,const vr::SourceModelPackets& source) {
+bool SdlSourceScene::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* command,const vr::SourceModelPackets& source,
+    std::span<const uint16_t> moving) {
     try {
         require(device && command,"Missing MODERN scene device/command");
         require(source.pending.empty() && source.handles.size()==source.packets.size() && source.packets.size()<=4096,
@@ -347,11 +348,14 @@ bool SdlSourceScene::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* comm
             } else for(const auto& v:source.packets[index].geometry.vertex_view())
                 radius=std::max(radius,std::sqrt(double(v.position[0])*v.position[0]+double(v.position[1])*v.position[1]
                     +double(v.position[2])*v.position[2]));
-            // Large scenery (tunnel sections, hangars, buildings: over 2 m, i.e.
-            // 512 source units) or anything around the camera. A camera-only
-            // test flips between frames as sections pass and swaps winners.
+            // Large static scenery (tunnel sections, hangars, buildings: over
+            // 2 m, i.e. 512 source units) or anything around the camera. A
+            // camera-only test flips between frames as sections pass and swaps
+            // winners. Moving objects (ships) never paint over scenery.
+            const auto handle=uint16_t(source.handles[index]&0xffffU);
             next->enclosing[index]=(radius*scale>2. || radius*scale>distance)
-                && (source.handles[index]&0xffffU)!=0 && source.handles[index]<0x20000U;
+                && handle!=0 && source.handles[index]<0x20000U
+                && std::find(moving.begin(),moving.end(),handle)==moving.end();
         }
         if(!next->packets->initialize(device,uploads_,source.packets,source.handles)) {
             const auto reason=next->packets->status();

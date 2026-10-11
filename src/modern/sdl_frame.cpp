@@ -407,7 +407,16 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
         shutter_active_=!shutter.geometry.vertices.empty();
         if(shutter_active_) require(shutter_.initialize(device_,uploads_,std::span(&shutter,1),{},false),shutter_.status());
         require(uploads_.flush(device_,command),uploads_.status());
-        require(world_.initialize(device_,command,world),world_.status());
+        // Objects that moved in the world since the previous tick.
+        std::vector<uint16_t> moving;
+        for(const auto& object:current.objects) {
+            const auto before=std::find_if(previous.objects.begin(),previous.objects.end(),
+                [&](const auto& candidate){return candidate.handle==object.handle;});
+            if(before!=previous.objects.end() && (before->object.world_x!=object.object.world_x
+                || before->object.world_y!=object.object.world_y || before->object.world_z!=object.object.world_z))
+                moving.push_back(uint16_t(object.handle));
+        }
+        require(world_.initialize(device_,command,world,moving),world_.status());
         require(world_.record_compute(command),world_.status());
         status_="MODERN frame prepared";return true;
     } catch(const std::exception& error) {uploads_.clear();status_=error.what();return false;}

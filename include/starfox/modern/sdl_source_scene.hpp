@@ -3,6 +3,7 @@
 #include "starfox/vr/source_models.hpp"
 #include <array>
 #include <memory>
+#include <span>
 #include <string>
 #include <vector>
 namespace starfox::modern {
@@ -64,7 +65,11 @@ public:
     SdlSourceScene& operator=(const SdlSourceScene&)=delete;
     // Uploads on `command`; then call record_compute on the same command
     // before the render pass that calls record().
-    bool initialize(SDL_GPUDevice*,SDL_GPUCommandBuffer*,const vr::SourceModelPackets&);
+    // `moving`: source object handles whose world position changed since the
+    // previous tick (ships, shots). They always draw depth-tested, even when
+    // large, so a ship leaving a hangar stays behind its walls.
+    bool initialize(SDL_GPUDevice*,SDL_GPUCommandBuffer*,const vr::SourceModelPackets&,
+        std::span<const uint16_t> moving={});
     bool record_compute(SDL_GPUCommandBuffer*);
     bool record(SDL_GPUCommandBuffer*,SDL_GPURenderPass*,SdlScenePipelines&,const vr::EyeCamera&) const;
     // Compute models this frame that the SDL path cannot draw yet (warp/axis).

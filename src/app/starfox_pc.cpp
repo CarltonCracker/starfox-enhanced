@@ -5245,6 +5245,13 @@ public:
 #endif
         return (SDL_GetWindowFlags(window_) & SDL_WINDOW_FULLSCREEN) != 0U;
     }
+    // Alt+1..4: windowed at that multiple of the native 224-line canvas;
+    // Alt+0 returns to the automatic size.
+    void set_window_multiple(std::uint32_t multiple) noexcept {
+        window_multiple_=std::min(multiple,8U);
+        if ((SDL_GetWindowFlags(window_) & SDL_WINDOW_FULLSCREEN) == 0U && texture_width_ && texture_height_)
+            set_windowed_size(texture_width_, texture_height_);
+    }
     void toggle_fullscreen() {
 #if defined(STARFOX_DISPLAYXR)
         if(leia_requested_ || leia_.close_pending()) set_leia_requested(false);
@@ -6325,15 +6332,18 @@ private:
 
     void set_windowed_size(std::uint32_t width, std::uint32_t height) noexcept {
         // Fit follows the user's window, never resize the window to its canvas.
-        if (fit_screen_) return;
+        if (fit_screen_) {SDL_SetWindowAspectRatio(window_,0.F,0.F);return;}
         const auto raster_width = width / window_scale_;
         const auto raster_height = height / window_scale_;
-        const auto integer_scale = raster_width <= snes_width
+        const auto integer_scale = window_multiple_ ? window_multiple_ : raster_width <= snes_width
             ? 4U : (raster_width <= widescreen_16_9_width ? 3U : 2U);
-        SDL_SetWindowSize(window_,
-            static_cast<int>(starfox::render::presentation_width(
-                raster_width * integer_scale,raster_height * integer_scale)),
-            static_cast<int>(raster_height * integer_scale));
+        const auto window_width=starfox::render::presentation_width(
+            raster_width * integer_scale,raster_height * integer_scale);
+        // Dragging the window keeps the canvas aspect (no stretched frames).
+        SDL_SetWindowAspectRatio(window_,0.F,0.F);
+        SDL_SetWindowSize(window_,static_cast<int>(window_width),static_cast<int>(raster_height * integer_scale));
+        const float aspect=float(window_width)/float(raster_height * integer_scale);
+        SDL_SetWindowAspectRatio(window_,aspect,aspect);
     }
 
     void ensure_bloom_texture(std::uint32_t width,std::uint32_t height) {
@@ -6563,6 +6573,7 @@ private:
     }
 
     std::uint32_t window_scale_{1U};
+    std::uint32_t window_multiple_{};
     SDL_Window* window_{};
     const starfox::app::TouchLayoutConfig* touch_layout_config_{};
     bool touch_editor_active_{};
@@ -9845,6 +9856,15 @@ int main(int argc, char** argv) {
                     && (event.key.scancode == SDL_SCANCODE_RETURN
                         || event.key.scancode == SDL_SCANCODE_KP_ENTER)
                     && (event.key.mod & SDL_KMOD_ALT) != 0U;
+                if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat
+                    && (event.key.mod & SDL_KMOD_ALT) != 0U
+                    && (event.key.mod & (SDL_KMOD_CTRL | SDL_KMOD_SHIFT)) == 0U
+                    && event.key.scancode >= SDL_SCANCODE_1 && event.key.scancode <= SDL_SCANCODE_4) {
+                    window.set_window_multiple(1U + unsigned(event.key.scancode - SDL_SCANCODE_1));
+                } else if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat
+                    && (event.key.mod & SDL_KMOD_ALT) != 0U && event.key.scancode == SDL_SCANCODE_0) {
+                    window.set_window_multiple(0U);
+                }
                 if (fullscreen_key) {
                     window.toggle_fullscreen();
                     saved_pregame.fullscreen = window.fullscreen();

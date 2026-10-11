@@ -2,6 +2,7 @@
 #include "starfox/modern/sdl_source_scene.hpp"
 #include "starfox/modern/texture_dump.hpp"
 #include "starfox/vr/frame_layers.hpp"
+#include <map>
 #include <optional>
 namespace starfox::modern {
 // Background state between two ticks for display-rate rebuilds: the PPU
@@ -67,6 +68,7 @@ private:
     uint32_t texture_mapping_{};
     float source_pixel_{1};
     std::optional<float> level_horizon_;
+    std::map<int,unsigned> horizon_votes_;
     uint16_t level_background_{};
     SdlSourceScene world_;
     std::vector<vr::DrawPacket> background_packets_;

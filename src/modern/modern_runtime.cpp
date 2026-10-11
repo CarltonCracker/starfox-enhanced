@@ -182,7 +182,19 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
         SDL_GetRenderLogicalPresentation(renderer,&logical_w,&logical_h,&mode);
         SDL_SetRenderLogicalPresentation(renderer,0,0,SDL_LOGICAL_PRESENTATION_DISABLED);
         SDL_SetRenderTarget(renderer,nullptr);SDL_SetRenderViewport(renderer,nullptr);
-        require(SDL_RenderTexture(renderer,s.target,nullptr,nullptr),"Draw MODERN frame");
+        // Same presentation as the existing renderer: letterboxed (or integer
+        // scaled) at the frame's own aspect; only FIT SCREEN stretches.
+        SDL_FRect destination{0,0,0,0};
+        bool letterbox=mode!=SDL_LOGICAL_PRESENTATION_STRETCH;
+        int output_w=0,output_h=0;
+        if(letterbox && SDL_GetCurrentRenderOutputSize(renderer,&output_w,&output_h) && output_w>0 && output_h>0) {
+            double scale=std::min(double(output_w)/width,double(output_h)/height);
+            if(mode==SDL_LOGICAL_PRESENTATION_INTEGER_SCALE && scale>=1) scale=std::floor(scale);
+            destination.w=float(std::round(width*scale));destination.h=float(std::round(height*scale));
+            destination.x=float(std::floor((output_w-destination.w)/2));destination.y=float(std::floor((output_h-destination.h)/2));
+            SDL_SetRenderDrawColor(renderer,0,0,0,255);SDL_RenderClear(renderer);
+        } else letterbox=false;
+        require(SDL_RenderTexture(renderer,s.target,nullptr,letterbox?&destination:nullptr),"Draw MODERN frame");
         if(capture_path) {
             // Capture the GPU target that is blitted 1:1 to the window (never
             // a CPU buffer). SDL_RenderReadPixels returns nothing for hidden

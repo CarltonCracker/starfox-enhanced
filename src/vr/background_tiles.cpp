@@ -421,6 +421,33 @@ Matrix4 landscape_ground_model(double roll,double pitch,double height,double cam
     return landscape_orientation(roll,pitch,1.F/256.F,
         {float(-wrap(camera_x)),float(-std::max(height,1.)),float(wrap(camera_z))});
 }
+Matrix4 landscape_ground_view_model(const Matrix4& rotation,double height,double camera_x,double camera_z) noexcept {
+    const auto wrap=[](double value) {value=std::fmod(value,8192.);return value<0?value+8192.:value;};
+    const std::array<float,3> t{float(-wrap(camera_x)),float(-std::max(height,1.)),float(wrap(camera_z))};
+    constexpr float scale=1.F/256.F;
+    Matrix4 m{};
+    for(unsigned column=0;column<3;++column) for(unsigned row=0;row<3;++row) m[column*4+row]=rotation[column*4+row]*scale;
+    for(unsigned row=0;row<3;++row) m[12+row]=(rotation[row]*t[0]+rotation[4+row]*t[1]+rotation[8+row]*t[2])*scale;
+    m[15]=1;
+    return m;
+}
+Matrix4 landscape_dome_view_model(const Matrix4& rotation,double height) noexcept {
+    const auto normalize=[](std::array<float,3> v) {
+        const float length=std::sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
+        return length>1e-6F?std::array<float,3>{v[0]/length,v[1]/length,v[2]/length}:std::array<float,3>{0,0,0};
+    };
+    const auto up=normalize({rotation[4],rotation[5],rotation[6]});
+    // Camera forward (-Z) flattened onto the ground: the dome's heading.
+    auto forward=normalize({up[0]*up[2],up[1]*up[2],-1.F+up[2]*up[2]});
+    if(forward==std::array<float,3>{0,0,0}) forward=normalize({-rotation[8],-rotation[9],-rotation[10]});
+    const std::array<float,3> back{-forward[0],-forward[1],-forward[2]};
+    const std::array<float,3> right{up[1]*back[2]-up[2]*back[1],up[2]*back[0]-up[0]*back[2],up[0]*back[1]-up[1]*back[0]};
+    const float scale=float(std::max(height,1.))/256.F;
+    Matrix4 m{};
+    for(unsigned row=0;row<3;++row) {m[row]=right[row]*scale;m[4+row]=up[row]*scale;m[8+row]=back[row]*scale;}
+    m[15]=1;
+    return m;
+}
 DrawPacket landscape_texture_packet(LandscapeTexture kind,std::span<const uint32_t> rgba,
     unsigned width,unsigned height,float art_width,float rows_above,float tile,bool srgb) {
     if(!width || !height || rgba.size()!=std::size_t(width)*height || width>8192 || height>8192)

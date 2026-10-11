@@ -99,6 +99,13 @@ struct PhotographicBody {
 [[nodiscard]] DrawPacket landscape_ground_packet(const DrawPacket& world);
 [[nodiscard]] bool is_landscape_ground(const DrawPacket&) noexcept;
 [[nodiscard]] Matrix4 landscape_ground_model(double roll,double pitch,double height,double camera_x,double camera_z) noexcept;
+// The same placements from the source view rotation (model axes: X = source
+// X, Y up, Z = -source Z; the rotation objects are drawn with, yaw included),
+// so the ground, its dots and stripes stay fixed to the world the objects
+// stand in. The dome keeps the camera heading (its art column comes from the
+// BG2 scroll) and shares the ground's up vector, so both horizons agree.
+[[nodiscard]] Matrix4 landscape_ground_view_model(const Matrix4& rotation,double height,double camera_x,double camera_z) noexcept;
+[[nodiscard]] Matrix4 landscape_dome_view_model(const Matrix4& rotation,double height) noexcept;
 // Replacement artwork (RGBA words, r in the low byte) for a landscape.
 // Sky: replaces the art above the horizon, mapped like the BG2 strip: the
 // image's width spans `art_width` art columns (wrapping) and its height the

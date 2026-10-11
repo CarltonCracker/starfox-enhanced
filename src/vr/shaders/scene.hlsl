@@ -677,6 +677,12 @@ float4 landscape_world_sample(Fragment input) {
         // World-fixed ground plane: map from the camera-relative position.
         float3 world=d;
         d=unrolled_camera_offset(world);
+        // The plane may carry the camera's yaw (world-fixed ground): express
+        // the offset in the camera's heading frame (forward = -Z) so the haze
+        // rows and art columns stay screen-aligned as before.
+        float3 view_z=camera.view_rows[2].xyz;
+        float2 heading=normalize(-float2(view_z.x,view_z.z)+float2(0,-1e-6));
+        d=float3(dot(d.xz,float2(-heading.y,heading.x)),d.y,-dot(d.xz,heading));
         if(texels[tail+4]!=0) {
             // Classic scroll: the native gradient stays fixed on screen and
             // world-anchored stripes (half a dot cell each) alternate between
@@ -719,11 +725,13 @@ float4 landscape_world_sample(Fragment input) {
     uint dot_word=texels[tail+6+112];
     if((texels[s+7]&16384U)!=0 && (dot_word>>24)!=0 && colour.a!=0) {
         // Ground dots on the plane itself: the cartridge's 256-unit lattice
-        // (source X/Z = 127.5 mod 256), ~1.2 source pixels across, anti-
+        // (source X/Z 127.5 mod 256, matched against the native grid
+        // packet), screen-aligned squares ~1.2 source pixels across, anti-
         // aliased. Toward the horizon they shrink with the lattice (at most a
         // fifth of the row spacing) and fade below a pixel instead of sparkling.
         float pixel=max(1.,float((camera.effects.w>>8)&4095U)/16.);
-        float2 nearest=floor((source_plane-127.5)/256.+.5)*256.+127.5;
+        const float2 phase=float2(127.5,127.5);
+        float2 nearest=floor((source_plane-phase)/256.+.5)*256.+phase;
         float2 offset=nearest-source_plane;
         float det=plane_dx.x*plane_dy.y-plane_dx.y*plane_dy.x;
         if(abs(det)>1e-12) {
@@ -731,7 +739,8 @@ float4 landscape_world_sample(Fragment input) {
             float cell=256./max(max(length(plane_dx),length(plane_dy)),1e-6);
             float radius=min(.6*pixel,.2*cell);
             float fade=saturate(radius/.75);
-            float coverage=saturate(max(radius,.75)-length(screen)+.5)*fade*fade;
+            float half_side=max(radius,.75);
+            float coverage=saturate(half_side-abs(screen.x)+.5)*saturate(half_side-abs(screen.y)+.5)*fade*fade;
             float4 ink=float4(dot_word&255U,(dot_word>>8)&255U,(dot_word>>16)&255U,255U)/255.;
             if((input.texture.w&2U)!=0) ink.rgb=select(ink.rgb<=.04045,ink.rgb/12.92,pow((ink.rgb+.055)/1.055,2.4));
             colour.rgb=lerp(colour.rgb,ink.rgb,coverage);

@@ -353,7 +353,14 @@ bool SdlSourceScene::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* comm
             // camera-only test flips between frames as sections pass and swaps
             // winners. Moving objects (ships) never paint over scenery.
             const auto handle=uint16_t(source.handles[index]&0xffffU);
-            next->enclosing[index]=(radius*scale>2. || radius*scale>distance)
+            // Line-only objects (cables, wires) have no faces to order and
+            // must stay behind the walls they pass (Corneria's launch base).
+            bool lines_only;
+            if(const auto* request=requests[index])
+                lines_only=std::all_of(request->model.faces.primitives.begin(),request->model.faces.primitives.end(),
+                    [](auto primitive){return primitive==render::PackedPrimitive::line;});
+            else lines_only=source.packets[index].geometry.vertex_view().empty();
+            next->enclosing[index]=!lines_only && (radius*scale>2. || radius*scale>distance)
                 && handle!=0 && source.handles[index]<0x20000U
                 && std::find(moving.begin(),moving.end(),handle)==moving.end();
         }

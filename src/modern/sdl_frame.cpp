@@ -154,7 +154,9 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             && !current.ppu->tunnel_scene;
         // With dots on, the landscape ground draws them itself (anchored to
         // the 3D ground); the native lattice is dropped either way.
-        if(landscape_world && !current.grid_lines) {
+        // STARFOX_MODERN_NATIVE_DOTS=1 keeps the native lattice too (alignment check).
+        static const bool native_dots=std::getenv("STARFOX_MODERN_NATIVE_DOTS")!=nullptr;
+        if(landscape_world && !current.grid_lines && !native_dots) {
             const auto grid=std::find(world.handles.begin(),world.handles.end(),0x30000U);
             if(grid!=world.handles.end()) {
                 const auto index=std::size_t(grid-world.handles.begin());
@@ -203,19 +205,28 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             background_inputs.bg2_scroll_fraction=presentation.bg2_fraction;
             background_inputs.bg3_scroll_fraction=presentation.bg3_fraction;
             background_inputs.mode2_horizon=presentation.mode2_horizon;
-            // Level horizon: the art horizon with the cartridge's pitch shift
-            // (-tan(pitch) x 256 rows) removed, measured once per background.
-            // Later art shifts become the landscape's geometric pitch (below),
-            // including cinematic ones that leave the camera pitch at zero
-            // (Corneria's clear: re-measuring there put the clouds on the
-            // horizon and sank the mountains under the ground).
+            // Level horizon: the art row the cartridge puts on the true horizon,
+            // i.e. its art horizon with the pitch shift (-tan(pitch) x 256 rows)
+            // removed. Cinematics move the art without matching the camera
+            // (Corneria's launch exit and clear), so take the most common value
+            // over near-level ticks of this background rather than any one tick.
             if(inputs.landscape_world && scene.background_landscape && scene.ppu) {
                 const float art=vr::landscape_art_horizon(*scene.ppu,float(scene.source_vanishing_point[1])+16.F);
                 const double pitch=double(int16_t(scene.camera.pitch))*(2*3.14159265358979323846/65536.);
-                if(!level_horizon_ || level_background_!=scene.background_id) {
-                    level_horizon_=float(art+std::tan(pitch)*256.);level_background_=scene.background_id;
+                if(level_background_!=scene.background_id || !level_horizon_) {
+                    horizon_votes_.clear();level_background_=scene.background_id;
+                    level_horizon_=float(art+std::tan(pitch)*256.);
+                }
+                if(new_tick && std::abs(int(int16_t(scene.camera.pitch)))<=1024) {
+                    const int key=int(std::lround((art+std::tan(pitch)*256.)*4.));
+                    const auto votes=++horizon_votes_[key];
+                    if(votes>=horizon_votes_[int(std::lround(*level_horizon_*4.F))]) level_horizon_=float(key)/4.F;
                 }
                 background_inputs.landscape_horizon=level_horizon_;
+                static const bool trace_horizon=std::getenv("STARFOX_TRACE_MODERN")!=nullptr;
+                if(trace_horizon && new_tick) std::fprintf(stderr,"horizon-level tick=%llu level=%.2f art=%.2f implied=%.2f pitch=%d camy=%d shadow=%d vp=%d\n",
+                    static_cast<unsigned long long>(scene.revision),*level_horizon_,art,float(art+std::tan(pitch)*256.),
+                    int(int16_t(scene.camera.pitch)),int(scene.camera.y),int(scene.shadow_height),int(scene.source_vanishing_point[1]));
             }
             auto layers=vr::assemble_frame_layers(scene,background_inputs);
             require(backgrounds_.initialize(device_,uploads_,layers.backgrounds,{},false),backgrounds_.status());
@@ -273,7 +284,7 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
         }
         // Landscape placement at display rate: roll as geometry, camera height
         // above the ground, and the camera's world X/Z for the ground plane.
-        struct {double roll{},pitch{},height{1},x{},z{};} landscape;
+        struct {double roll{},pitch{},height{1},x{},z{};vr::Matrix4 rotation{};} landscape;
         {
             const bool continuous=!timing::camera_transform_is_discontinuous(previous.camera,current.camera);
             const double a=continuous?alpha:1.;
@@ -283,17 +294,13 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             double pitch=double(int16_t(previous.camera.pitch))+pitch_delta*a;
             pitch-=65536.*std::floor((pitch+32768.)/65536.);
             landscape.pitch=pitch_sign*pitch*(2*3.14159265358979323846/65536.);
-            // The pitch the cartridge actually presents: its display-rate art
-            // horizon against the level horizon (equal to the camera pitch in
-            // ordinary flight, where the art shift is -tan(pitch) x 256 rows).
-            if(level_horizon_ && current.ppu && current.background_landscape && level_background_==current.background_id) {
-                const auto& ppu=presentation.ppu?*presentation.ppu:*current.ppu;
-                const float vanishing=float(current.source_vanishing_point[1])+16.F;
-                float art=vr::landscape_art_horizon(ppu,vanishing);
-                if(presentation.mode2_horizon && ppu.background_mode==2 && ppu.bg2_vertical_offsets_enabled)
-                    art=vanishing+(*presentation.mode2_horizon)[0]+(*presentation.mode2_horizon)[1]*float(128+(ppu.bg2_scroll_x&7))/8.F;
-                landscape.pitch=pitch_sign*std::atan((double(*level_horizon_)-double(art))/256.);
-            }
+            // The source view rotation the objects are drawn with (yaw
+            // included), interpolated like the grid, in model axes.
+            const auto view=vr::landscape_scene_view(continuous?previous:current,current,a);
+            constexpr int sign[]{1,-1,-1};
+            landscape.rotation[15]=1;
+            for(unsigned column=0;column<3;++column) for(unsigned row=0;row<3;++row)
+                landscape.rotation[column*4+row]=float(view[column*3+row])*float(sign[column]*sign[row])/32768.F;
             landscape.height=std::lerp(double(previous.shadow_height)-previous.camera.y,
                 double(current.shadow_height)-current.camera.y,a);
             const auto blend=[&](int32_t before,int32_t now) {
@@ -314,7 +321,7 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
         for(const auto& packet:background_packets_) {
             if(packet.geometry.vertex_view().empty() && packet.geometry.line_view().empty()) continue;
             if(vr::is_landscape_world(packet)) {
-                background_models.at(model_index)=vr::landscape_world_model(landscape.roll,landscape.pitch,landscape.height);
+                background_models.at(model_index)=vr::landscape_dome_view_model(landscape.rotation,landscape.height);
                 // Sky replacement mapping for this frame: horizon row and
                 // centre column, 32x fixed point (camera.effects.z).
                 const auto texels=packet.geometry.texel_view();
@@ -325,7 +332,7 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
                     texture_dump_->landscape(current.background_id,*current.ppu,horizon,texels.subspan(272+16384+6,112));
             }
             if(vr::is_landscape_ground(packet))
-                background_models.at(model_index)=vr::landscape_ground_model(landscape.roll,landscape.pitch,landscape.height,landscape.x,landscape.z);
+                background_models.at(model_index)=vr::landscape_ground_view_model(landscape.rotation,landscape.height,landscape.x,landscape.z);
             if(vr::is_tunnel_corridor(packet)) {
                 const bool continuous=!timing::camera_transform_is_discontinuous(previous.camera,current.camera);
                 const auto blend=[&](int32_t before,int32_t now) {
@@ -364,8 +371,8 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             std::vector<vr::Matrix4> models;
             for(const auto& packet:texture_packets_)
                 models.push_back(vr::is_landscape_texture(packet,vr::LandscapeTexture::ground)
-                    ?vr::landscape_ground_model(landscape.roll,landscape.pitch,landscape.height,landscape.x,landscape.z)
-                    :vr::landscape_world_model(landscape.roll,landscape.pitch,landscape.height));
+                    ?vr::landscape_ground_view_model(landscape.rotation,landscape.height,landscape.x,landscape.z)
+                    :vr::landscape_dome_view_model(landscape.rotation,landscape.height));
             require(textures_.update_models(models),"MODERN landscape texture motion update failed");
         }
         // MHUD.MC (INIT_STRATS enables it only inside the cockpit): the desktop

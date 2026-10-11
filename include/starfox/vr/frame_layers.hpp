@@ -71,6 +71,12 @@ struct FrameLayerInputs {
     // magnify the planet band on a flat screen. Roll still applies as geometry
     // with space_roll_geometry.
     bool flat_space_horizon{};
+    // Flat views: native tunnel layers continue across a widescreen view the
+    // way the desktop renderer extends them (per-row offsets into the wrapped
+    // atlas) instead of a single-colour surround.
+    bool flat_tunnel_extension{};
+    // Mode 1: draw BG3 behind BG2 unless BG3 has priority (SNES layer order).
+    bool bg3_behind_bg2{};
     // With landscape_world: draw the ground dots on the 3D ground plane
     // (anchored, anti-aliased, out to the horizon) instead of the native
     // lattice; the renderer drops the grid packet.

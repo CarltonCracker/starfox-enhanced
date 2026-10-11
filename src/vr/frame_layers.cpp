@@ -78,9 +78,10 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
     // Space black is the transparent sky between authored planet pixels.
     background_options.transparent_black=snapshot->background_unique_top_rows!=0;
     // Mode-2 terrain is a world layer: extend logical coordinates.
-    if(snapshot->ppu->background_mode==2) {
+    if(snapshot->ppu->background_mode==2 || (in.flat_tunnel_extension && snapshot->ppu->tunnel_scene)) {
         background_options.expanded_horizontal=true;
         background_options.horizontal_bounds={-384,640};
+        background_options.clamp_tunnel_edges=in.flat_tunnel_extension;
     }
     auto& next_backgrounds=out.backgrounds;
     std::optional<DrawPacket> corridor;
@@ -88,7 +89,7 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
         corridor=tunnel_corridor_packet(*snapshot->ppu,snapshot->display_brightness,srgb);
         if(corridor->geometry.vertex_view().empty()) corridor.reset();
     }
-    if(snapshot->ppu->tunnel_scene && !corridor) {
+    if(snapshot->ppu->tunnel_scene && !corridor && !in.flat_tunnel_extension) {
         const auto border=[&](unsigned y,unsigned x) {
             const auto ink=render::tunnel_border_index(*snapshot->ppu,y,x);
             return source_backdrop_colour(snapshot->ppu->cgram[ink],snapshot->display_brightness,srgb);
@@ -160,6 +161,7 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
             next_backgrounds.push_back(std::move(*photograph));photograph.reset();
         }
         auto ground=landscape_ground_packet(bg2);
+        const auto bg2_index=next_backgrounds.size();
         next_backgrounds.push_back(std::move(bg2));
         if(!ground.geometry.vertex_view().empty()) next_backgrounds.push_back(std::move(ground));
         if(photograph) {
@@ -186,6 +188,10 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
             else bg3.model=packet.model;
             if(snapshot->background_water_surround)
                 next_backgrounds.insert(next_backgrounds.end()-1,std::move(bg3));
+            else if(in.bg3_behind_bg2 && !snapshot->ppu->bg3_high_priority && bg2_index<next_backgrounds.size())
+                // SNES Mode 1: BG3 shows only through BG2's transparent pixels
+                // unless its priority bit is set (EX 4-4's tunnel wall art).
+                next_backgrounds.insert(next_backgrounds.begin()+std::ptrdiff_t(bg2_index),std::move(bg3));
             else next_backgrounds.push_back(std::move(bg3));
         }
     }

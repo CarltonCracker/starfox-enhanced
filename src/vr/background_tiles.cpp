@@ -153,6 +153,17 @@ DrawPacket tunnel_corridor_packet(const simulation::SnesPpuState& source,unsigne
         ppu.bg2_scanline_scroll_y.fill(int16_t(page?280:24));
         return render::tunnel_border_index(ppu,unsigned(std::clamp(row,0,223)),unsigned(std::clamp(x,0,255)));
     };
+    // The corridor mirrors its zones about the centre column. Asymmetric
+    // tunnel art (a decorated wall on one side only: EX 4-4/4-5, Original
+    // 2-6) is not a corridor; keep the native layer for it.
+    {
+        unsigned samples=0,different=0;
+        for(unsigned page=0;page<2;++page) for(int row=0;row<224;row+=4) for(int k=4;k<124;k+=8) {
+            ++samples;
+            if(art(page,127-k,row)!=art(page,128+k,row)) ++different;
+        }
+        if(different*8>samples) return packet;
+    }
     std::vector<uint32_t> data(corridor_texels);
     unsigned fitted=0;
     for(unsigned page=0;page<2;++page) for(const bool ceiling:{true,false}) {
@@ -1112,7 +1123,7 @@ std::vector<uint32_t> background_tile_payload(const simulation::SnesPpuState& pp
         |(bg2 && options.expanded_horizontal && options.ex_city_planets?0x4000000U:0U)
         |(bg2?options.single_occurrence_top_rows<<8:0U);
     data[14]=bg2 && ppu.tunnel_scene && options.expanded_horizontal
-        ?unsigned(render::tunnel_wall_index(ppu))+1U:0U;
+        ?(unsigned(render::tunnel_wall_index(ppu))+1U)|(options.clamp_tunnel_edges?0x80000000U:0U):0U;
     data[10]=scanlines;
     data[11]=bg2 && ppu.background_mode==1 && ppu.bg2_scanline_scroll_enabled
         && !ppu.tunnel_scene && options.expanded_horizontal;

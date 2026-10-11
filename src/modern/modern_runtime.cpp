@@ -37,10 +37,13 @@ struct ModernRuntime::State {
         inputs.trigonometry=&trigonometry;
         inputs.srgb=false;inputs.ex_experience=game.experience()==simulation::Experience::starfox_ex;
         inputs.flat_landscape=true;
-        inputs.tunnel_corridor=true;
+        // STARFOX_MODERN_CORRIDOR=0 keeps the native tunnel layer (A/B).
+        inputs.tunnel_corridor=!(std::getenv("STARFOX_MODERN_CORRIDOR") && std::string_view(std::getenv("STARFOX_MODERN_CORRIDOR"))=="0");
         inputs.vector_reticle=true;
         inputs.space_roll_geometry=true;
         inputs.flat_space_horizon=true;
+        inputs.flat_tunnel_extension=true;
+        inputs.bg3_behind_bg2=true;
         inputs.landscape_ground_dots=!(std::getenv("STARFOX_MODERN_GROUND_DOTS") && std::string_view(std::getenv("STARFOX_MODERN_GROUND_DOTS"))=="0");
         // STARFOX_MODERN_LANDSCAPE=0 keeps the native BG2 planet layer.
         const auto* landscape=std::getenv("STARFOX_MODERN_LANDSCAPE");

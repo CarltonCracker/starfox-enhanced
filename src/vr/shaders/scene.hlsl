@@ -816,8 +816,13 @@ float4 tile_background_sample(Fragment input) {
     int original_y=logical.y;
     int original_x=logical.x;
     if((texels[start+15]&16U)!=0 && (original_y<0 || original_y>=224)) return 0;
-    if(texels[start+14]!=0 && (original_x<0 || original_x>=256))
-        return tile_colour(start,texels[start+14]-1U,input.texture.w);
+    if(texels[start+14]!=0 && (original_x<0 || original_x>=256)) {
+        // Flat views widen a tunnel like the desktop renderer: each row's
+        // native edge pixel repeats outward (bit 31). VR closes it with the
+        // side-wall colour instead.
+        if((texels[start+14]&0x80000000U)!=0) logical.x=clamp(logical.x,0,255);
+        else return tile_colour(start,texels[start+14]-1U,input.texture.w);
+    }
     int mosaic=int(texels[start+9]);
     if(mosaic>1) logical-=((logical%mosaic)+mosaic)%mosaic;
     int2 scroll=int2(texels[start+3],texels[start+4]);

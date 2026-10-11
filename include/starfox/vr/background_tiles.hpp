@@ -138,6 +138,9 @@ struct BackgroundTileOptions {
     unsigned brightness{15}; // source display brightness, 0..15
     unsigned colour_subtract{}; // BG2-only native HALFFADE, 0..31.
     bool expanded_horizontal{};
+    // Tunnels with expanded_horizontal: repeat each row's edge pixel outward
+    // (desktop renderer) instead of the closed side-wall colour (VR).
+    bool clamp_tunnel_edges{};
     bool transparent_black{}; // Test source palette before brightness fading.
     bool wrap_horizontal{true}; // False: expose only one authored tilemap occurrence.
     unsigned single_occurrence_top_rows{}; // 0..224: unique top band; 512: one complete atlas in both axes.

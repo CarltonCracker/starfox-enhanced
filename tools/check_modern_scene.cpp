@@ -132,7 +132,7 @@ int main(int argc,char** argv) try {
             const auto clear=vr::frame_clear_colour(*current,true);
             target.clear_color={clear[0],clear[1],clear[2],clear[3]};
         }
-        SDL_GPUDepthStencilTargetInfo depth_target{};depth_target.texture=depth;depth_target.clear_depth=1;
+        SDL_GPUDepthStencilTargetInfo depth_target{};depth_target.texture=depth;depth_target.clear_depth=source_camera?modern::SdlFrameRenderer::clear_depth():1.F;
         depth_target.load_op=SDL_GPU_LOADOP_CLEAR;depth_target.store_op=SDL_GPU_STOREOP_DONT_CARE;
         depth_target.stencil_load_op=SDL_GPU_LOADOP_DONT_CARE;depth_target.stencil_store_op=SDL_GPU_STOREOP_DONT_CARE;
         auto* pass=SDL_BeginGPURenderPass(command,&target,1,&depth_target);require(pass!=nullptr,"Begin render pass");

@@ -5,6 +5,8 @@
 #include "starfox/render/palette.hpp"
 #include "starfox/render/background_renderer.hpp"
 #include <stdexcept>
+#include <cstdio>
+#include <cstdlib>
 #include <cmath>
 #include <numbers>
 #include <mutex>
@@ -125,6 +127,329 @@ DrawPacket photographic_landscape_packet(std::shared_ptr<const std::vector<uint3
     }
     packet.geometry.shared_vertices=std::move(vertices);
     return packet;
+}
+namespace {
+constexpr uint32_t corridor_marker=2048U;
+constexpr float corridor_ceiling_height=60.F,corridor_floor_height=60.F;
+constexpr float corridor_ceiling_vp=112.5F,corridor_floor_vp=111.5F;
+constexpr uint32_t corridor_ring_start=2,corridor_ring_length=64,corridor_floor_start=184,corridor_floor_length=128;
+constexpr float corridor_far=8388608.F; // Far enough that the planes meet the horizon.
+constexpr std::size_t corridor_tables=272,corridor_zones=272+2*448,corridor_zone_count=3,corridor_texels=272+2*448+4*8;
+}
+DrawPacket tunnel_corridor_packet(const simulation::SnesPpuState& source,unsigned brightness,bool srgb) {
+    if(brightness>15) throw std::invalid_argument("Invalid corridor brightness");
+    DrawPacket packet;packet.model=tunnel_corridor_model(0,0);
+    if(!source.tunnel_scene || !source.bg2_scanline_scroll_enabled || !(source.main_screen&2)) return packet;
+    // Art probe: BG2 at native screen (x,row) on page 24 or 280. Each row,
+    // from the centre outward: a graded ceiling/floor colour, then one or two
+    // strip colours and the side-wall colour. The art draws those boundaries
+    // as 8-pixel tile staircases approximating lines through the vanishing
+    // point; fit each as a straight line (|column offset| / |row offset|).
+    // Per-row horizontal offsets follow the camera's X with perspective
+    // (128 = centred); probe the centred art and let the model carry X.
+    auto ppu=source;
+    ppu.bg2_horizontal_offsets.fill(128);
+    const auto art=[&](unsigned page,int x,int row) {
+        ppu.bg2_scanline_scroll_y.fill(int16_t(page?280:24));
+        return render::tunnel_border_index(ppu,unsigned(std::clamp(row,0,223)),unsigned(std::clamp(x,0,255)));
+    };
+    std::vector<uint32_t> data(corridor_texels);
+    unsigned fitted=0;
+    for(unsigned page=0;page<2;++page) for(const bool ceiling:{true,false}) {
+        const float vp=ceiling?corridor_ceiling_vp:corridor_floor_vp;
+        struct Transition {uint32_t colour;int column;};
+        std::vector<std::vector<Transition>> rows(224);
+        std::size_t canonical=0;
+        for(int row=ceiling?0:112;row<(ceiling?112:224);++row) {
+            data[corridor_tables+page*448+unsigned(row)*2]=art(page,128,row);
+            auto previous=art(page,128,row);
+            for(int column=127;column>=0;--column) {
+                const auto colour=art(page,column,row);
+                if(colour!=previous) rows[size_t(row)].push_back({colour,column+1});
+                previous=colour;
+            }
+            if(rows[size_t(row)].size()>rows[canonical].size()) canonical=size_t(row);
+        }
+        const auto& zones=rows[canonical];
+        const auto base=corridor_zones+(page*2+(ceiling?0U:1U))*8;
+        for(std::size_t zone=0;zone<std::min<std::size_t>(zones.size(),corridor_zone_count);++zone) {
+            double sum_xy=0,sum_xx=0;unsigned samples=0;
+            for(int row=ceiling?0:112;row<(ceiling?112:224);++row)
+                for(const auto& transition:rows[size_t(row)]) if(transition.colour==zones[zone].colour) {
+                    const double x=std::abs(double(row)+.5-vp),y=128.-transition.column;
+                    if(x>4) {sum_xy+=x*y;sum_xx+=x*x;++samples;}
+                    break;
+                }
+            if(samples<3) break;
+            data[base+zone*2]=starfox::bit_cast<uint32_t>(float(sum_xy/sum_xx));
+            data[base+zone*2+1]=zones[zone].colour;
+            data[base+6+0]=uint32_t(zone+1);
+        }
+        fitted+=data[base+6]!=0;
+    }
+    if(!fitted) return packet;
+    data[1]=starfox::bit_cast<uint32_t>(corridor_ceiling_height);
+    data[2]=starfox::bit_cast<uint32_t>(corridor_floor_height);
+    data[3]=corridor_ring_start;data[4]=corridor_ring_length;
+    data[5]=corridor_floor_start;data[6]=corridor_floor_length;
+    data[7]=corridor_marker;
+    data[10]=starfox::bit_cast<uint32_t>(corridor_ceiling_vp);
+    data[11]=starfox::bit_cast<uint32_t>(corridor_floor_vp);
+    data[13]=15-brightness;
+    const auto palette=render::decode_bgr555_palette(source.cgram);
+    for(unsigned i=0;i<256;++i) data[16+i]=uint32_t(palette[i].r)
+        |(uint32_t(palette[i].g)<<8)|(uint32_t(palette[i].b)<<16)|0xff000000U;
+    packet.geometry.texels=std::move(data);
+    // Wide ceiling and floor planes (uv.x = 0 ceiling, 1 floor) in model
+    // space, forward -Z, from one band period behind the eye to far away.
+    const float w=corridor_far,top=corridor_ceiling_height,bottom=-corridor_floor_height,near=256.F,far=-corridor_far;
+    const auto quad=[&](std::array<std::array<float,3>,4> corners,float face) {
+        for(unsigned corner:{0U,1U,2U,0U,2U,3U}) {
+            SceneVertex vertex{};
+            for(unsigned axis=0;axis<3;++axis) vertex.position[axis]=corners[corner][axis];
+            vertex.uv[0]=face;vertex.texture[3]=8|(srgb?2:0);
+            packet.geometry.vertices.push_back(vertex);
+        }
+    };
+    quad({{{-w,top,near},{w,top,near},{w,top,far},{-w,top,far}}},0);
+    quad({{{-w,bottom,near},{w,bottom,near},{w,bottom,far},{-w,bottom,far}}},1);
+    return packet;
+}
+DrawPacket landscape_world_packet(const simulation::SnesPpuState& ppu,
+    const BackgroundTileOptions& options,float vanishing_y,bool srgb,bool classic_ground_scroll,
+    std::optional<float> level_horizon) {
+    auto plain=options;plain.scroll_fraction.reset();plain.mode2_horizon.reset();
+    plain.expanded_horizontal=false;plain.scroll_override.reset();
+    auto packet=background_tile_packet(ppu,BackgroundLayer::bg2,plain,srgb);
+    if(packet.geometry.vertex_view().empty()) return packet;
+    auto& data=packet.geometry.texels;
+    data.resize(272+16384);
+    // Native mapping at the screen centre: art row = screen row + offset.
+    double offset=double(int16_t(ppu.bg2_scroll_y));
+    if(ppu.background_mode==2 && ppu.bg2_vertical_offsets_enabled) {
+        double count=0,sum_x=0,sum_y=0,sum_xx=0,sum_xy=0;int previous_raw=0,previous_unwrapped=0;
+        for(int i=0;i<32;++i) {
+            const auto address=std::size_t((0x2fa0U+unsigned(i))*2U)&0xffffU;
+            const unsigned value=ppu.vram[address]|(unsigned(ppu.vram[(address+1)&0xffffU])<<8U);
+            if(!(value&0x4000U)) continue;
+            const int raw=int(value&8191U);
+            int delta=(raw-previous_raw)&8191;if(delta>4095) delta-=8192;
+            const int unwrapped=count==0?raw:previous_unwrapped+delta;
+            previous_raw=raw;previous_unwrapped=unwrapped;
+            count+=1;sum_x+=i+1;sum_y+=unwrapped;sum_xx+=double(i+1)*(i+1);sum_xy+=double(i+1)*unwrapped;
+        }
+        if(count>0) {
+            const double denominator=count*sum_xx-sum_x*sum_x;
+            const double slope=count>1 && denominator!=0?(count*sum_xy-sum_x*sum_y)/denominator:0;
+            offset=(sum_y-slope*sum_x)/count+slope*(128.+(ppu.bg2_scroll_x&7))/8.;
+        }
+    }
+    // Display-rate presentation: the interpolated offset line and scroll fraction.
+    if(options.mode2_horizon && ppu.background_mode==2 && ppu.bg2_vertical_offsets_enabled)
+        offset=double((*options.mode2_horizon)[0])+double((*options.mode2_horizon)[1])*(128.+(ppu.bg2_scroll_x&7))/8.;
+    // The cartridge shifts the art by -tan(pitch) x 256 rows to fake camera
+    // pitch; the caller applies the real pitch as geometry and supplies the
+    // level (unpitched) horizon row.
+    const float horizon=level_horizon?*level_horizon:float(double(vanishing_y)+offset);
+    const float centre=float(128+int16_t(ppu.bg2_scroll_x))+(options.scroll_fraction?(*options.scroll_fraction)[0]:0.F);
+    data[3]=data[4]=data[9]=data[10]=data[11]=data[12]=data[14]=data[15]=0;
+    data[7]=4096U;
+    data.push_back(starfox::bit_cast<uint32_t>(horizon));
+    data.push_back(starfox::bit_cast<uint32_t>(centre));
+    // The native screen shows rows [horizon-vanishing_y, +224); hold its top
+    // and bottom rows beyond them.
+    data.push_back(starfox::bit_cast<uint32_t>(horizon-vanishing_y));
+    data.push_back(starfox::bit_cast<uint32_t>(horizon-vanishing_y+223.F));
+    data.push_back(classic_ground_scroll?1U:0U);
+    data.push_back(starfox::bit_cast<uint32_t>(256.F)); // Dot grid cell (source units).
+    // Smooth ground haze for classic scroll: the art's centre-column colour
+    // for the 112 rows below the horizon, with each stepped run replaced by a
+    // linear blend between run centres, so nothing on the ground is fixed to
+    // the screen except a soft fade (RGBA, red low byte).
+    {
+        const unsigned edge=ppu.bg2_tile_size_16?16U:8U;
+        const unsigned width=((ppu.bg2_screen_size&1U)?64U:32U)*edge,height=((ppu.bg2_screen_size&2U)?64U:32U)*edge;
+        const auto byte=[&](unsigned address) {return unsigned(ppu.vram[address&0xffffU]);};
+        const auto art=[&](int x,int y) {
+            const unsigned px=unsigned(x)&(width-1),py=unsigned(y)&(height-1);
+            const unsigned cx=px/edge,cy=py/edge;
+            const unsigned page=(cx>=32?1024U:0U)+(cy>=32?((ppu.bg2_screen_size&1U)?2048U:1024U):0U);
+            const unsigned address=(ppu.bg2_screen_base+page+(cy&31U)*32U+(cx&31U))*2U;
+            const unsigned tile=byte(address)|(byte(address+1)<<8);
+            unsigned tx=px&(edge-1),ty=py&(edge-1);
+            if(tile&16384U) tx=edge-1-tx;
+            if(tile&32768U) ty=edge-1-ty;
+            const unsigned number=((tile&1023U)+(tx>>3)+(ty>>3)*16U)&1023U;
+            const unsigned base=ppu.bg2_character_base*2U+number*32U+(ty&7U)*2U;
+            const unsigned mask=128U>>(tx&7U);
+            unsigned index=0;
+            for(unsigned pair=0;pair<2;++pair) {
+                if(byte(base+pair*16)&mask) index|=1U<<(pair*2);
+                if(byte(base+pair*16+1)&mask) index|=2U<<(pair*2);
+            }
+            return index?((tile>>10)&7U)*16U+index:0U;
+        };
+        const auto palette=render::decode_bgr555_palette(ppu.cgram);
+        std::array<std::array<float,3>,112> colours{};
+        for(int row=0;row<112;++row) {
+            const auto colour=palette[art(int(std::lround(centre)),int(std::floor(horizon))+row)];
+            colours[size_t(row)]={float(colour.r),float(colour.g),float(colour.b)};
+        }
+        // Run centres as keys, then linear interpolation between them.
+        std::vector<std::pair<float,std::array<float,3>>> keys;
+        for(int row=0;row<112;) {
+            int end=row;
+            while(end<112 && colours[size_t(end)]==colours[size_t(row)]) ++end;
+            keys.push_back({(row+end-1)*.5F,colours[size_t(row)]});
+            row=end;
+        }
+        for(int row=0;row<112;++row) {
+            std::array<float,3> value=keys.front().second;
+            if(row>=keys.back().first) value=keys.back().second;
+            else for(std::size_t k=0;k+1<keys.size();++k) if(row>=keys[k].first && row<=keys[k+1].first) {
+                const float t=(row-keys[k].first)/std::max(1e-3F,keys[k+1].first-keys[k].first);
+                for(unsigned c=0;c<3;++c) value[c]=keys[k].second[c]+(keys[k+1].second[c]-keys[k].second[c])*t;
+                break;
+            }
+            data.push_back(uint32_t(std::lround(value[0]))|(uint32_t(std::lround(value[1]))<<8)
+                |(uint32_t(std::lround(value[2]))<<16)|0xff000000U);
+        }
+    }
+    // Geometry: a dome (64 x 32) then the ground plane at Y = -1; drawn in
+    // that order without depth so the ground covers the dome's lower half.
+    auto& vertices=packet.geometry.vertices;vertices.clear();
+    constexpr float radius=200000.F,ground=100000.F;
+    constexpr unsigned columns=64,rows=32;
+    constexpr float pi=3.14159265358979F;
+    const auto emit=[&](float x,float y,float z) {
+        SceneVertex v{};v.position[0]=x;v.position[1]=y;v.position[2]=z;v.texture[3]=8|(srgb?2:0);vertices.push_back(v);
+    };
+    for(unsigned row=0;row<rows;++row) for(unsigned column=0;column<columns;++column)
+        for(unsigned corner:{0U,1U,2U,0U,2U,3U}) {
+            const float u=float(column+((corner==1 || corner==2)?1:0))/columns*2*pi;
+            const float v=(float(row+(corner>=2?1:0))/rows-.5F)*pi;
+            emit(radius*std::cos(v)*std::sin(u),radius*std::sin(v),-radius*std::cos(v)*std::cos(u));
+        }
+    for(unsigned corner:{0U,1U,2U,0U,2U,3U})
+        emit((corner==1 || corner==2)?ground:-ground,-1,corner>=2?ground:-ground);
+    return packet;
+}
+float landscape_art_horizon(const simulation::SnesPpuState& ppu,float vanishing_y) {
+    double offset=double(int16_t(ppu.bg2_scroll_y));
+    if(ppu.background_mode==2 && ppu.bg2_vertical_offsets_enabled) {
+        double count=0,sum_x=0,sum_y=0,sum_xx=0,sum_xy=0;int previous_raw=0,previous_unwrapped=0;
+        for(int i=0;i<32;++i) {
+            const auto address=std::size_t((0x2fa0U+unsigned(i))*2U)&0xffffU;
+            const unsigned value=ppu.vram[address]|(unsigned(ppu.vram[(address+1)&0xffffU])<<8U);
+            if(!(value&0x4000U)) continue;
+            const int raw=int(value&8191U);
+            int delta=(raw-previous_raw)&8191;if(delta>4095) delta-=8192;
+            const int unwrapped=count==0?raw:previous_unwrapped+delta;
+            previous_raw=raw;previous_unwrapped=unwrapped;
+            count+=1;sum_x+=i+1;sum_y+=unwrapped;sum_xx+=double(i+1)*(i+1);sum_xy+=double(i+1)*unwrapped;
+        }
+        if(count>0) {
+            const double denominator=count*sum_xx-sum_x*sum_x;
+            const double slope=count>1 && denominator!=0?(count*sum_xy-sum_x*sum_y)/denominator:0;
+            offset=(sum_y-slope*sum_x)/count+slope*(128.+(ppu.bg2_scroll_x&7))/8.;
+        }
+    }
+    return float(double(vanishing_y)+offset);
+}
+bool is_landscape_world(const DrawPacket& packet) noexcept {
+    const auto texels=packet.geometry.texel_view();
+    return texels.size()==272+16384+6+112 && texels[7]==4096U && !packet.geometry.vertex_view().empty();
+}
+DrawPacket landscape_ground_packet(const DrawPacket& world) {
+    DrawPacket packet;
+    if(!is_landscape_world(world)) return packet;
+    packet.model=world.model;
+    packet.geometry.texels.assign(world.geometry.texel_view().begin(),world.geometry.texel_view().end());
+    packet.geometry.texels[7]|=16384U;
+    const uint32_t flags=world.geometry.vertex_view().front().texture[3];
+    constexpr float extent=400000.F;
+    for(unsigned corner:{0U,1U,2U,0U,2U,3U}) {
+        SceneVertex v{};
+        v.position[0]=(corner==1 || corner==2)?extent:-extent;v.position[2]=corner>=2?extent:-extent;
+        v.texture[3]=flags;packet.geometry.vertices.push_back(v);
+    }
+    return packet;
+}
+bool is_landscape_ground(const DrawPacket& packet) noexcept {
+    const auto texels=packet.geometry.texel_view();
+    return texels.size()==272+16384+6+112 && texels[7]==(4096U|16384U) && !packet.geometry.vertex_view().empty();
+}
+namespace {
+// Rz(roll) * Rx(pitch) * uniform scale * translation, column-major.
+Matrix4 landscape_orientation(double roll,double pitch,float scale,std::array<float,3> translation) {
+    const float cr=float(std::cos(roll)),sr=float(std::sin(roll)),cp=float(std::cos(pitch)),sp=float(std::sin(pitch));
+    // Columns of Rz*Rx.
+    const std::array<std::array<float,3>,3> r{{{cr,-sr,0},{sr*cp,cr*cp,sp},{-sr*sp,-cr*sp,cp}}};
+    Matrix4 m{};
+    for(unsigned c=0;c<3;++c) for(unsigned row=0;row<3;++row) m[c*4+row]=r[c][row]*scale;
+    for(unsigned row=0;row<3;++row)
+        m[12+row]=(r[0][row]*translation[0]+r[1][row]*translation[1]+r[2][row]*translation[2])*scale;
+    m[15]=1;
+    return m;
+}
+}
+Matrix4 landscape_ground_model(double roll,double pitch,double height,double camera_x,double camera_z) noexcept {
+    // Model space is world-fixed within an 8192-unit period (a multiple of the
+    // 256-unit grid and of any power-of-two texture tile up to 8192): X runs
+    // with world X, Z against world Z (forward is -Z), ground at Y = 0.
+    const auto wrap=[](double value) {value=std::fmod(value,8192.);return value<0?value+8192.:value;};
+    return landscape_orientation(roll,pitch,1.F/256.F,
+        {float(-wrap(camera_x)),float(-std::max(height,1.)),float(wrap(camera_z))});
+}
+DrawPacket landscape_texture_packet(LandscapeTexture kind,std::span<const uint32_t> rgba,
+    unsigned width,unsigned height,float art_width,float rows_above,float tile,bool srgb) {
+    if(!width || !height || rgba.size()!=std::size_t(width)*height || width>8192 || height>8192)
+        throw std::invalid_argument("Invalid landscape texture");
+    DrawPacket packet;packet.model={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    auto& data=packet.geometry.texels;
+    data.resize(16+rgba.size());
+    data[0]=width;data[1]=height;data[2]=kind==LandscapeTexture::ground?1U:0U;
+    data[3]=starfox::bit_cast<uint32_t>(art_width);data[4]=starfox::bit_cast<uint32_t>(rows_above);
+    data[5]=starfox::bit_cast<uint32_t>(tile);data[7]=4096U|32768U;
+    std::copy(rgba.begin(),rgba.end(),data.begin()+16);
+    const auto emit=[&](float x,float y,float z) {
+        SceneVertex v{};v.position[0]=x;v.position[1]=y;v.position[2]=z;v.texture[3]=8|(srgb?2:0);
+        packet.geometry.vertices.push_back(v);
+    };
+    if(kind==LandscapeTexture::ground) {
+        constexpr float extent=400000.F;
+        for(unsigned corner:{0U,1U,2U,0U,2U,3U})
+            emit((corner==1 || corner==2)?extent:-extent,0,corner>=2?extent:-extent);
+    } else {
+        constexpr unsigned columns=64,rows=16;constexpr float pi=3.14159265358979F,radius=200000.F;
+        for(unsigned row=0;row<rows;++row) for(unsigned column=0;column<columns;++column)
+            for(unsigned corner:{0U,1U,2U,0U,2U,3U}) {
+                const float u=float(column+((corner==1 || corner==2)?1:0))/columns*2*pi;
+                const float v=float(row+(corner>=2?1:0))/rows*.5F*pi; // Upper hemisphere.
+                emit(radius*std::cos(v)*std::sin(u),radius*std::sin(v),-radius*std::cos(v)*std::cos(u));
+            }
+    }
+    return packet;
+}
+bool is_landscape_texture(const DrawPacket& packet,LandscapeTexture kind) noexcept {
+    const auto texels=packet.geometry.texel_view();
+    return texels.size()>16 && texels[7]==(4096U|32768U) && texels[2]==(kind==LandscapeTexture::ground?1U:0U);
+}
+Matrix4 landscape_world_model(double roll,double pitch,double height) noexcept {
+    return landscape_orientation(roll,pitch,float(std::max(height,1.))/256.F,{0,0,0});
+}
+bool is_tunnel_corridor(const DrawPacket& packet) noexcept {
+    const auto texels=packet.geometry.texel_view();
+    return texels.size()==corridor_texels && texels[7]==corridor_marker && !packet.geometry.vertex_view().empty()
+        && (packet.geometry.vertex_view().front().texture[3]&8U)!=0;
+}
+Matrix4 tunnel_corridor_model(double camera_z,double camera_x) noexcept {
+    // Model Z is minus world Z within one 256-unit band period; the eye sits
+    // at model Z = -(camera Z mod 256). Source units to scene metres: 1/256.
+    double phase=std::fmod(camera_z,256.);if(phase<0) phase+=256.;
+    constexpr float scale=1.F/256.F;
+    // The corridor is centred on world X = 0 (the art's centred offsets).
+    return {scale,0,0,0,0,scale,0,0,0,0,scale,0,float(-camera_x)*scale,0,float(phase)*scale,1};
 }
 DrawPacket tunnel_surround_packet(const std::array<float,4>& colour) {
     return tunnel_surround_packet(colour,colour,colour);
@@ -694,7 +1019,18 @@ std::vector<uint32_t> background_tile_payload(const simulation::SnesPpuState& pp
     const bool bg2=layer==BackgroundLayer::bg2;
     unsigned scanlines=bg2?unsigned(ppu.bg2_horizontal_offsets_enabled)
         +2U*unsigned(ppu.bg2_scanline_scroll_enabled):0;
-    std::vector<uint32_t> data(272+16384+(scanlines?448:0));
+    const bool presentation=options.scroll_fraction || options.mode2_horizon;
+    const std::size_t tail=272+16384+(scanlines?448:0);
+    std::vector<uint32_t> data(tail+(presentation?5:0));
+    if(presentation) {
+        const auto fraction=options.scroll_fraction.value_or(std::array<float,2>{});
+        data[tail]=starfox::bit_cast<uint32_t>(fraction[0]);data[tail+1]=starfox::bit_cast<uint32_t>(fraction[1]);
+        if(options.mode2_horizon) {
+            data[tail+2]=starfox::bit_cast<uint32_t>((*options.mode2_horizon)[0]);
+            data[tail+3]=starfox::bit_cast<uint32_t>((*options.mode2_horizon)[1]);
+            data[tail+4]=1;
+        }
+    }
     unsigned mosaic_bit=0;
     switch(layer) {
     case BackgroundLayer::bg1:
@@ -715,7 +1051,8 @@ std::vector<uint32_t> background_tile_payload(const simulation::SnesPpuState& pp
         data[3]=uint32_t(int32_t((*options.scroll_override)[0]));
         data[4]=uint32_t(int32_t((*options.scroll_override)[1]));
     }
-    data[7]=options.priority|(bg2 && options.expanded_horizontal && options.ex_face_planets?256U:0U);
+    data[7]=options.priority|(bg2 && options.expanded_horizontal && options.ex_face_planets?256U:0U)
+        |(presentation?1024U:0U);
     data[9]=(ppu.mosaic&mosaic_bit)?(ppu.mosaic>>4)+1:0;
     data[13]=15-options.brightness;
     data[15]=unsigned(options.transparent_black)|(options.wrap_horizontal?0U:2U)

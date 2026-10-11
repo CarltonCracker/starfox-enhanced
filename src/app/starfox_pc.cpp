@@ -11842,10 +11842,20 @@ int main(int argc, char** argv) {
                 || touch_editor.active || remap_menu.active || frame_frozen;
             if(modern && !host_overlay && starfox::modern::ModernRuntime::draws(game)) {
                 const bool final_test_frame=test_frames!=0 && presented_frames+1U>=test_frames;
+                // STARFOX_CAPTURE_DIR sequences use the same frame naming as
+                // the existing renderer's captures.
+                std::string modern_capture;
+                if(final_test_frame && capture_path_text) modern_capture=capture_path_text;
+                else if(!capture_directory.empty() && presented_frames>=capture_start
+                    && (presented_frames-capture_start)%capture_interval==0U) {
+                    auto name=std::to_string(presented_frames);
+                    if(name.size()<6U) name.insert(0U,6U-name.size(),'0');
+                    modern_capture=(capture_directory/(name+".bmp")).string();
+                }
                 // Same internal raster as the existing renderer: canvas x scale.
                 if(modern->present(window.renderer(),interpolation_alpha,
                     int(display_width*render_scale),int(snes_height*render_scale),
-                    final_test_frame && capture_path_text?capture_path_text:nullptr)) {
+                    modern_capture.empty()?nullptr:modern_capture.c_str())) {
                     if(!advance_frozen_frame) live_fps.record_frame(std::chrono::steady_clock::now());
                     if(presented_frames==0) startup_trace->mark("first game/menu frame presented");
                     ++presented_frames;

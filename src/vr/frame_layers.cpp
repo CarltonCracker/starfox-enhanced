@@ -8,6 +8,7 @@
 #include "starfox/vr/scene_interpolation.hpp"
 #include "starfox/vr/source_sprites.hpp"
 #include "starfox/render/background_renderer.hpp"
+#include "starfox/render/hud_layout.hpp"
 #include "starfox/render/scaled_text_renderer.hpp"
 #include "starfox/timing/fixed_step.hpp"
 #include <algorithm>
@@ -27,8 +28,36 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
         float(snapshot->source_vanishing_point[1]),fixed_menu).value();
     DrawPacket packet,meters;
     if(!in.backgrounds_only) {
-        packet=source_sprite_packet(*snapshot->ppu,snapshot->display_brightness,{},srgb,&snapshot->meters);
+        // Edge HUD: the desktop's band classification, expressed as layout
+        // offsets (lives/shield left, bombs/boost/boss right; comms stays).
+        std::optional<render::HudLayout> edge_layout;
+        if(in.hud_edge_shift && !fixed_menu) {
+            edge_layout.emplace();
+            const auto shift=int16_t(in.hud_edge_shift);
+            (*edge_layout)[render::HudElement::lives].x=int16_t(-shift);
+            (*edge_layout)[render::HudElement::shield].x=int16_t(-shift);
+            (*edge_layout)[render::HudElement::bombs_boost].x=shift;
+            (*edge_layout)[render::HudElement::boss_health].x=shift;
+        }
+        const bool vector_reticle=in.vector_reticle && !source_vector_reticle_packet(*snapshot->ppu,*snapshot->ppu,1.,
+            snapshot->display_brightness,srgb).geometry.vertex_view().empty();
+        packet=source_sprite_packet(*snapshot->ppu,snapshot->display_brightness,{},srgb,&snapshot->meters,
+            edge_layout?&*edge_layout:nullptr,vector_reticle?SourceSpritePass::all_but_reticle:SourceSpritePass::all);
         meters=source_meter_packet(snapshot->meters,snapshot->ppu->cgram,snapshot->display_brightness,srgb);
+        if(edge_layout) {
+            // Meter rectangles (six vertices each, inner 224-wide coordinates)
+            // follow the same sides; shifting after the builder keeps its
+            // 0..256 clip from cutting the moved bars.
+            auto& vertices=meters.geometry.vertices;
+            for(std::size_t first=0;first+6<=vertices.size();first+=6) {
+                float left=vertices[first].position[0],right=left;
+                for(std::size_t i=first;i<first+6;++i) {
+                    left=std::min(left,vertices[i].position[0]);right=std::max(right,vertices[i].position[0]);
+                }
+                const float shift=(left+right)*.5F<112.F?-float(in.hud_edge_shift):float(in.hud_edge_shift);
+                for(std::size_t i=first;i<first+6;++i) vertices[i].position[0]+=shift;
+            }
+        }
         // Meters use the inner 224x192 Super FX coordinates; OAM uses the
         // surrounding 256x224 PPU coordinates.
         meters.model=source_ui_layer_matrix(
@@ -54,7 +83,12 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
         background_options.horizontal_bounds={-384,640};
     }
     auto& next_backgrounds=out.backgrounds;
-    if(snapshot->ppu->tunnel_scene) {
+    std::optional<DrawPacket> corridor;
+    if(in.tunnel_corridor && snapshot->ppu->tunnel_scene && snapshot->ppu->background_mode>=1 && snapshot->ppu->background_mode<=2) {
+        corridor=tunnel_corridor_packet(*snapshot->ppu,snapshot->display_brightness,srgb);
+        if(corridor->geometry.vertex_view().empty()) corridor.reset();
+    }
+    if(snapshot->ppu->tunnel_scene && !corridor) {
         const auto border=[&](unsigned y,unsigned x) {
             const auto ink=render::tunnel_border_index(*snapshot->ppu,y,x);
             return source_backdrop_colour(snapshot->ppu->cgram[ink],snapshot->display_brightness,srgb);
@@ -73,7 +107,11 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
     if(!snapshot->ppu->tunnel_scene && snapshot->background_unique_space)
         next_backgrounds.push_back(intro_star_sphere_packet(*snapshot->ppu,snapshot->display_brightness,srgb,false,true));
     if(snapshot->ppu->background_mode>=1 && snapshot->ppu->background_mode<=2) {
-        auto bg2=background_tile_packet(*snapshot->ppu,BackgroundLayer::bg2,background_options,srgb);
+        auto plain_options=background_options;
+        plain_options.scroll_fraction=in.bg2_scroll_fraction;
+        // (A 3D corridor replaces the native tunnel layer below.)
+        if(snapshot->ppu->background_mode==2) plain_options.mode2_horizon=in.mode2_horizon;
+        auto bg2=background_tile_packet(*snapshot->ppu,BackgroundLayer::bg2,plain_options,srgb);
         if(intro_sky)
             bg2=intro_planet_packet(*snapshot->ppu,snapshot->display_brightness,srgb);
         else if(!snapshot->ppu->tunnel_scene && snapshot->background_unique_space)
@@ -87,6 +125,9 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
                 ?orbital_planet_sphere_packet(*snapshot->ppu,background_options,srgb,snapshot->background_orbital_thin,snapshot->background_orbital_entry,
                     snapshot->flow==simulation::GameFlowState::gameplay && in.ex_experience)
                 :space_horizon_sphere_packet(*snapshot->ppu,background_options,srgb);
+        else if(!snapshot->ppu->tunnel_scene && snapshot->background_landscape && in.landscape_world)
+            bg2=landscape_world_packet(*snapshot->ppu,plain_options,float(snapshot->source_vanishing_point[1])+16.F,srgb,
+                in.classic_ground_scroll,in.landscape_horizon);
         else if(!snapshot->ppu->tunnel_scene && snapshot->background_landscape && !in.flat_landscape) {
             bg2=landscape_sphere_packet(*snapshot->ppu,background_options,
                 112.F,srgb,snapshot->background_landscape_unique_half,snapshot->landscape_atlas_origin,
@@ -98,6 +139,7 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
             bg2=water_surface_packet(*snapshot->ppu,background_options,
                 std::clamp(std::abs(float(snapshot->camera.y-snapshot->shadow_height))/256.F,.01F,8.F),srgb);
         else bg2.model=packet.model;
+        if(corridor) bg2=std::move(*corridor);
         auto photograph=enhanced_sky?in.prepare_photograph():std::optional<DrawPacket>{};
         if(photograph) in.enhanced_landscape->retain_native_ground(bg2,*snapshot->ppu);
         if(!photograph && snapshot->flow==simulation::GameFlowState::game_over)
@@ -106,7 +148,9 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
         if(photograph && snapshot->flow==simulation::GameFlowState::game_over) {
             next_backgrounds.push_back(std::move(*photograph));photograph.reset();
         }
+        auto ground=landscape_ground_packet(bg2);
         next_backgrounds.push_back(std::move(bg2));
+        if(!ground.geometry.vertex_view().empty()) next_backgrounds.push_back(std::move(ground));
         if(photograph) {
             next_backgrounds.push_back(std::move(*photograph));
             const auto& bodies=in.enhanced_landscape->bodies();
@@ -124,7 +168,8 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
         }
         if(snapshot->ppu->background_mode==1) {
             background_options.scroll_override.reset();
-            auto bg3=background_tile_packet(*snapshot->ppu,BackgroundLayer::bg3,background_options,srgb);
+            auto plain_options=background_options;plain_options.scroll_fraction=in.bg3_scroll_fraction;
+            auto bg3=background_tile_packet(*snapshot->ppu,BackgroundLayer::bg3,plain_options,srgb);
             if(snapshot->background_water_surround)
                 bg3=water_surround_packet(*snapshot->ppu,background_options,srgb);
             else bg3.model=packet.model;

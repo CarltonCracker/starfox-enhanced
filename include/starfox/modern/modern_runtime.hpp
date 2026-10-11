@@ -39,4 +39,10 @@ private:
 // point) widened to `aspect`, with square source pixels: 224 rows fill the
 // height and the 256-pixel canvas stays centred.
 vr::EyeCamera flat_scene_camera(const vr::GameSceneSnapshot&,float aspect) noexcept;
+// Widescreen HUD: the top/bottom HUD groups move out to the edges of the
+// view, but never wider than max_hud_aspect (16:9), so on 21:9 and 32:9
+// they stay within comfortable reach of the centre; 4:3 keeps the native
+// layout. Returns vr::FrameLayerInputs::hud_edge_shift in source pixels.
+inline constexpr float max_hud_aspect=16.F/9.F;
+int hud_edge_shift(float aspect) noexcept;
 }

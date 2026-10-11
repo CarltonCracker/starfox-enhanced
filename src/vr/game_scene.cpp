@@ -73,6 +73,12 @@ GameSceneHistory::GameSceneHistory(const simulation::GameSimulation& game,
         for(const auto address:symbols.find(model_names[i])) if((address>>16U)==0x70U) {model_addresses_[i]=address;break;}
         if(i<4 && !model_addresses_[i]) throw std::runtime_error(std::string("Missing scene model symbol: ")+model_names[i]);
     }
+    constexpr std::array cockpit_hud_names{"HUDROT","M_HUDCOLOUR","M_HUDFLAGS"};
+    for(size_t i=0;i<cockpit_hud_names.size();++i)
+        for(const auto address:symbols.find(cockpit_hud_names[i])) {
+            const auto bank=address>>16U;
+            if(i==0?(bank==0 || bank==0x7eU):bank==0x70U) {cockpit_hud_addresses_[i]=address;break;}
+        }
     const auto& tables=symbols.find("DEPTHTABLES");
     if(tables.empty()) throw std::runtime_error("Missing scene depth tables");
     depth_tables_=tables.front();
@@ -208,6 +214,9 @@ void GameSceneHistory::capture() {
     next->model_scale=game_.model_scale_multiplier();
     next->colour_table_override=game_.model_colour_table_override();
     next->meters=game_.peek_meter_state();
+    if(cockpit_hud_addresses_[0]) next->cockpit_hud_roll=game_.map().peek_ram_word(cockpit_hud_addresses_[0]).value_or(0);
+    if(cockpit_hud_addresses_[1]) next->cockpit_hud_colour=game_.map().peek_ram_byte(cockpit_hud_addresses_[1]).value_or(0);
+    if(cockpit_hud_addresses_[2]) next->cockpit_hud_flags=game_.map().peek_ram_byte(cockpit_hud_addresses_[2]).value_or(0);
     auto presentation_ppu=std::make_shared<simulation::SnesPpuState>(game_.map().ppu_state());
     // The authored final room switches to a Mode-1/2 abstract/vortex sky while
     // INATUNNEL can remain set. Its background is not corridor geometry: only

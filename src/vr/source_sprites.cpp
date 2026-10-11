@@ -8,6 +8,7 @@
 #include "starfox/render/sprite_renderer.hpp"
 #include "starfox/render/hud_layout.hpp"
 #include "starfox/simulation/game_simulation.hpp"
+#include "starfox/simulation/math.hpp"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -325,6 +326,172 @@ DrawPacket source_ui_text_packet(const assets::RomImage& rom,const assets::Symbo
     }
     return packet;
 }
+namespace {
+struct ReticleObject {int x{},y{};uint8_t attributes{};uint16_t tile{};};
+// The four reticle objects (x, y, attributes) when they use the retail art.
+std::optional<std::array<ReticleObject,4>> reticle_objects(const simulation::SnesPpuState& ppu) {
+    if(!(ppu.main_screen&16)) return {};
+    std::array<ReticleObject,4> found{};std::size_t count=0;
+    for(unsigned object=0;object<128;++object) {
+        const auto low=object*4;
+        const uint16_t tile=uint16_t(ppu.oam[low+2])|uint16_t((ppu.oam[low+3]&1U)<<8);
+        if((tile&0x7fU)!=0x61U) continue;
+        if(ppu.oam[low]==248 && ppu.oam[low+1]==248) continue;
+        if(count==4) return {};
+        const auto high=ppu.oam[512+object/4]>>((object%4)*2);
+        if(high&2) return {}; // Large objects are not the retail 8x8 quarters.
+        int x=ppu.oam[low]+((high&1)<<8);if(x>=256) x-=512;
+        found[count++]={x,int(ppu.oam[low+1]),ppu.oam[low+3],tile};
+        // Retail quarter art, rows top to bottom (bit 7 = left pixel).
+        constexpr std::array<uint8_t,8> retail{0x3f,0x3f,0xff,0xf0,0xe8,0xe4,0xe2,0xe1};
+        const unsigned select=ppu.object_select;
+        unsigned table=(select&7U)*0x2000U;
+        if(tile&256U) table+=(((select>>3)&3U)+1U)*0x1000U;
+        std::array<uint8_t,8> stored{};
+        for(unsigned row=0;row<8;++row) {
+            const auto address=(table*2U+(tile&255U)*32U+row*2U)&0xffffU;
+            stored[row]=ppu.vram[address]|ppu.vram[(address+1)&0xffffU]
+                |ppu.vram[(address+16)&0xffffU]|ppu.vram[(address+17)&0xffffU];
+        }
+        const auto reverse=[](uint8_t v) {uint8_t r=0;for(unsigned b=0;b<8;++b) if(v&(1U<<b)) r|=uint8_t(128U>>b);return r;};
+        bool matched=false;
+        for(unsigned flips=0;flips<4 && !matched;++flips) {
+            matched=true;
+            for(unsigned row=0;row<8 && matched;++row) {
+                auto value=stored[(flips&2)?7-row:row];
+                if(flips&1) value=reverse(value);
+                matched=value==retail[row];
+            }
+            // Fold the stored art's own orientation into the object flips.
+            if(matched) found[count-1].attributes^=uint8_t(((flips&1)?64U:0U)|((flips&2)?128U:0U));
+        }
+        if(!matched) return {};
+    }
+    if(count!=4) return {};
+    return found;
+}
+}
+DrawPacket source_vector_reticle_packet(const simulation::SnesPpuState& previous,
+    const simulation::SnesPpuState& current,double alpha,unsigned brightness,bool srgb) {
+    if(brightness>15) throw std::invalid_argument("Invalid reticle brightness");
+    DrawPacket packet;packet.model={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    const auto now=reticle_objects(current);
+    if(!now) return packet;
+    // Rigid group motion between ticks (the cartridge rebuilds it at 20 Hz).
+    double dx=0,dy=0;
+    if(const auto before=reticle_objects(previous); before && alpha>=0 && alpha<1) {
+        const auto origin=[](const std::array<ReticleObject,4>& objects) {
+            int x=objects[0].x,y=objects[0].y;
+            for(const auto& object:objects) {x=std::min(x,object.x);y=std::min(y,object.y);}
+            return std::array<int,2>{x,y};
+        };
+        const auto a=origin(*before),b=origin(*now);
+        if(std::abs(b[0]-a[0])<64 && std::abs(b[1]-a[1])<64) {
+            dx=(a[0]-b[0])*(1.-alpha);dy=(a[1]-b[1])*(1.-alpha);
+        }
+    }
+    for(const auto& object:*now) {
+        // Ink: the art is single-colour; use its first opaque pixel's index.
+        const uint32_t ink=128U+((object.attributes>>1)&7U)*16U+[&] {
+            const unsigned select=current.object_select;
+            unsigned table=(select&7U)*0x2000U;
+            if(object.tile&256U) table+=(((select>>3)&3U)+1U)*0x1000U;
+            const unsigned address=(table*2U+(object.tile&255U)*32U+2U*2U)&0xffffU;
+            for(unsigned bit=0;bit<8;++bit) {
+                unsigned index=0;
+                for(unsigned pair=0;pair<2;++pair) {
+                    if(current.vram[(address+pair*16)&0xffffU]&(128U>>bit)) index|=1U<<(pair*2);
+                    if(current.vram[(address+pair*16+1)&0xffffU]&(128U>>bit)) index|=2U<<(pair*2);
+                }
+                if(index) return index;
+            }
+            return 1U;
+        }();
+        const bool flip_x=(object.attributes&64)!=0,flip_y=(object.attributes&128)!=0;
+        const auto emit=[&](double x,double y) {
+            SceneVertex v{};
+            v.position[0]=float(object.x+dx+(flip_x?8.-x:x));
+            v.position[1]=float(object.y+dy+(flip_y?8.-y:y));
+            v.texture[1]=ink;v.texture[3]=32|(srgb?2:0);packet.geometry.vertices.push_back(v);
+        };
+        const auto triangle=[&](std::array<double,2> a,std::array<double,2> b,std::array<double,2> c) {
+            emit(a[0],a[1]);emit(b[0],b[1]);emit(c[0],c[1]);
+        };
+        const auto rectangle=[&](double x0,double y0,double x1,double y1) {
+            triangle({x0,y0},{x1,y0},{x1,y1});triangle({x0,y0},{x1,y1},{x0,y1});
+        };
+        // Bracket (tile-local pixel edges): top arm, side arm, rounded outer
+        // corner (radius 2 about 2,2) and the inner corner's fillet.
+        rectangle(2,0,8,3);rectangle(0,2,3,8);
+        constexpr double pi=3.14159265358979323846;
+        for(unsigned step=0;step<8;++step) {
+            const double a0=pi+step*(pi/2)/8,a1=pi+(step+1)*(pi/2)/8;
+            triangle({2,2},{2+2*std::cos(a0),2+2*std::sin(a0)},{2+2*std::cos(a1),2+2*std::sin(a1)});
+        }
+        triangle({3,3},{4,3},{3,4});
+        // One-pixel diagonal from pixel (4,4) to pixel (7,7).
+        // Band |y-x| <= 0.707 (one pixel wide across the line) between the
+        // first pixel's corner (x+y=8) and the last pixel's corner (x+y=16).
+        const double h=.3535533905932738;
+        triangle({4-h,4+h},{4+h,4-h},{8+h,8-h});
+        triangle({4-h,4+h},{8+h,8-h},{8-h,8+h});
+    }
+    auto& data=packet.geometry.texels;data.resize(272);data[13]=15-brightness;
+    const auto palette=render::decode_bgr555_palette(current.cgram);
+    for(unsigned i=0;i<256;++i) data[16+i]=palette[i].r|(uint32_t(palette[i].g)<<8)|(uint32_t(palette[i].b)<<16)|0xff000000U;
+    return packet;
+}
+DrawPacket source_cockpit_hud_packet(const simulation::TrigTables& trigonometry,double rotation,
+    uint8_t colour,uint8_t damage_flags,const std::array<uint16_t,256>& cgram,unsigned brightness,bool srgb) {
+    if(brightness>15 || !std::isfinite(rotation)) throw std::invalid_argument("Invalid cockpit HUD options");
+    DrawPacket packet;packet.model={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    rotation=std::fmod(rotation,256.);if(rotation<0) rotation+=256.;
+    const auto angle=uint8_t(rotation);const double fraction=rotation-angle;
+    const double sine=std::lerp(double(trigonometry.sin8(angle)),double(trigonometry.sin8(uint8_t(angle+1U))),fraction);
+    const double cosine=std::lerp(double(trigonometry.cos8(angle)),double(trigonometry.cos8(uint8_t(angle+1U))),fraction);
+    // MROTPNTY: (value * trig) / 512 about the fixed 112,96 viewport centre.
+    const auto rotate=[&](double x,double y) {
+        return std::array<double,2>{112.+(x*cosine+y*sine)/512.,96.+(y*cosine-x*sine)/512.};
+    };
+    const uint8_t normal=uint8_t(112U+(colour&15U)),damaged=114U;
+    const auto paint=[&](std::array<double,2> a,std::array<double,2> b,uint8_t ink) {
+        // The desktop plots each Bresenham point as a full source pixel:
+        // sweep a unit square from a to b (convex hull of both squares).
+        std::array<std::array<double,2>,8> points{};
+        for(unsigned i=0;i<4;++i) {
+            const double dx=(i==1 || i==2)?1:0,dy=i>=2?1:0;
+            points[i]={a[0]+dx,a[1]+dy};points[i+4]={b[0]+dx,b[1]+dy};
+        }
+        std::sort(points.begin(),points.end());
+        const auto cross=[](const auto& o,const auto& p,const auto& q) {
+            return (p[0]-o[0])*(q[1]-o[1])-(p[1]-o[1])*(q[0]-o[0]);
+        };
+        std::vector<std::array<double,2>> hull;
+        for(int pass=0;pass<2;++pass) {
+            const auto start=hull.size();
+            for(std::size_t n=0;n<points.size();++n) {
+                const auto& point=points[pass?points.size()-1-n:n];
+                while(hull.size()>=start+2 && cross(hull[hull.size()-2],hull.back(),point)<=0) hull.pop_back();
+                hull.push_back(point);
+            }
+            hull.pop_back();
+        }
+        for(std::size_t i=1;i+1<hull.size();++i) for(const auto& corner:{hull[0],hull[i],hull[i+1]}) {
+            SceneVertex v{};v.position[0]=float(corner[0]);v.position[1]=float(corner[1]);
+            v.texture[1]=ink;v.texture[3]=32|(srgb?2:0);packet.geometry.vertices.push_back(v);
+        }
+    };
+    const auto positive=(damage_flags&2U)?damaged:normal,negative=(damage_flags&1U)?damaged:normal;
+    // Exact MHUD.MC geometry: the vertical pair plus mirrored wing triangles.
+    for(const auto& [x1,y1,x2,y2]:std::array<std::array<double,4>,4>{{{0,200,0,265},{250,0,315,-32},{315,-32,315,32},{250,0,315,32}}}) {
+        paint(rotate(x1,y1),rotate(x2,y2),positive);
+        paint(rotate(-x1,-y1),rotate(-x2,-y2),negative);
+    }
+    auto& data=packet.geometry.texels;data.resize(272);data[13]=15-brightness;
+    const auto palette=render::decode_bgr555_palette(cgram);
+    for(unsigned i=0;i<256;++i) data[16+i]=palette[i].r|(uint32_t(palette[i].g)<<8)|(uint32_t(palette[i].b)<<16)|0xff000000U;
+    return packet;
+}
 DrawPacket source_meter_packet(const simulation::MeterState& meters,
     const std::array<uint16_t,256>& cgram,unsigned brightness,bool srgb,
     unsigned viewport_width,bool anchor_to_edges,const render::HudLayout* layout) {
@@ -386,6 +553,7 @@ DrawPacket source_sprite_packet(const simulation::SnesPpuState& ppu,unsigned bri
             else if(y_byte>=128 && x<128) element=render::HudElement::comms;
         }
         if((pass==SourceSpritePass::hud && !element) || (pass==SourceSpritePass::world && element)) continue;
+        if(pass==SourceSpritePass::all_but_reticle && reticle) continue;
         const auto offset=layout && element?(*layout)[*element]:render::HudOffset{};
         const int size=int(sizes[selection][(high>>1)&1]);
         const int left=std::max(x,0),right=std::min(x+size,256);

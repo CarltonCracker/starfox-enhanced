@@ -22,6 +22,44 @@ ConstantBuffer<Camera> camera : register(b0,space3);
 float4x4 view_matrix() {
     return float4x4(camera.view_rows[0],camera.view_rows[1],camera.view_rows[2],float4(0,0,0,1));
 }
+// MODERN draws with reversed infinite depth (clip z = near, compare GREATER):
+// normalized depth is near/distance, so relative biases stay uniform at every
+// distance. VR's projection writes -z into clip z and keeps LESS.
+bool reversed_depth() {return camera.projection[2][2]==0;}
+// Source line faces painted over their own polygons, and the stack level of
+// coplanar overlay faces (SourceSpanModel face word bits 4 and 8-10), set by
+// vertex_textured_main for resident source models.
+static bool source_line_overlay=false;
+static uint source_overlay_level=0;
+uint overlay_level(uint face_word) {return (face_word&16U)!=0?max(1U,(face_word>>8)&7U):0U;}
+// Two-colour source dither. VR keeps the checkerboard; MODERN defines
+// STARFOX_SCENE_RESOLVE_DITHER and shows the pair's linear-light average,
+// which is what the desktop's anti-aliasing resolves the checker to (a
+// 1-pixel checker scaled to the window in gamma space reads dark instead).
+float3 dither_linear(float3 c) {return select(c<=.04045,c/12.92,pow((c+.055)/1.055,2.4));}
+float3 dither_encoded(float3 c) {return select(c<=.0031308,c*12.92,1.055*pow(c,1./2.4)-.055);}
+// Smooth 2D filtering (camera.effects.w bit 0, MODERN): blend four source
+// texels in linear light; transparent texels count as zero coverage, and a
+// pixel draws only where coverage reaches one half, so sprite outlines become
+// smooth contours instead of soft halos. Returns alpha 0 where discarded.
+bool filter_2d() {return (camera.effects.w&1U)!=0;}
+float4 bilinear_resolve(float4 a,float4 b,float4 c,float4 d,float2 f,bool gamma_encoded) {
+    float4 w=float4((1-f.x)*(1-f.y),f.x*(1-f.y),(1-f.x)*f.y,f.x*f.y)*float4(a.a!=0,b.a!=0,c.a!=0,d.a!=0);
+    float coverage=w.x+w.y+w.z+w.w;
+    if(coverage<.5) return 0;
+    float3 rgb=gamma_encoded
+        ?(w.x*dither_linear(a.rgb)+w.y*dither_linear(b.rgb)+w.z*dither_linear(c.rgb)+w.w*dither_linear(d.rgb))/coverage
+        :(w.x*a.rgb+w.y*b.rgb+w.z*c.rgb+w.w*d.rgb)/coverage;
+    return float4(gamma_encoded?dither_encoded(rgb):rgb,1);
+}
+float4 dither_colour(float4 even,float4 odd,bool odd_cell,bool gamma_encoded) {
+#ifdef STARFOX_SCENE_RESOLVE_DITHER
+    if(!gamma_encoded) return (even+odd)*.5;
+    return float4(dither_encoded((dither_linear(even.rgb)+dither_linear(odd.rgb))*.5),(even.a+odd.a)*.5);
+#else
+    return odd_cell?odd:even;
+#endif
+}
 struct Vertex {
     [[vk::location(0)]] float3 position : SCENE_INPUT(0,POSITION);
     [[vk::location(1)]] float4 color : SCENE_INPUT(1,COLOR0);
@@ -77,7 +115,14 @@ Fragment vertex_main(Vertex input) {
     // Source coplanar texture decals must survive the backing polygon's depth
     // (including tiny interpolation rounding differences), but remain occluded
     // by genuinely nearer geometry. One part per million of normalized depth.
-    if((input.texture.w&32768)!=0) output.position.z-=output.position.w*0.000001;
+    // Reversed depth uses relative biases instead; source lines sit above
+    // decals, both below one draw-order step (SdlFrameRenderer).
+    // Relative steps stay below SdlFrameRenderer's per-object draw-order step.
+    if(reversed_depth()) {
+        if(source_line_overlay) output.position.z*=1.000015;
+        else if(source_overlay_level!=0) output.position.z*=1.+3e-6*float(min(source_overlay_level,4U));
+        else if((input.texture.w&32768)!=0) output.position.z*=1.000003;
+    } else if((input.texture.w&32768)!=0) output.position.z-=output.position.w*0.000001;
     output.color=input.color;
     output.odd_color=input.odd_color;
     output.dither_scale=input.dither_scale;
@@ -117,7 +162,7 @@ float4 fragment_solid_raw(Fragment input) {
         if(((camera.effects.w>>24)&3U)==2) return (input.color+input.odd_color)*.5;
 #endif
         uint2 pixel=uint2(input.position.xy)/input.dither_scale;
-        if(((pixel.x^pixel.y)&1)!=0) return input.odd_color;
+        return dither_colour(input.color,input.odd_color,((pixel.x^pixel.y)&1)!=0,true);
     }
     return input.color;
 }
@@ -141,6 +186,12 @@ StructuredBuffer<uint> texels : register(t0,space2);
 uint tile_vram_byte(uint start,uint address) {
     address&=65535;
     return (texels[start+272+(address>>2)]>>((address&3)*8))&255;
+}
+// Control 7 bit 1024: a presentation tail follows the scanline tables:
+// fractional scroll X/Y (float source pixels), then an optional display-rate
+// Mode 2 horizon (intercept, slope per 8-pixel column, valid flag).
+uint tile_presentation_tail(uint start) {
+    return start+272+16384+(texels[start+10]!=0?448:0);
 }
 // Control 12 selects the cartridge BG2 Mode 2 vertical-offset table.
 float3 tile_horizon(uint start) {
@@ -357,6 +408,8 @@ Fragment vertex_textured_main(Vertex input) {
                 // Native two-point faces use decoded material colours, never
                 // texture artwork, even if a warp descriptor selects one.
                 bool source_line=(texels[texels[start+8]+face*4+3]&2U)!=0;
+                source_line_overlay=source_line;
+                source_overlay_level=overlay_level(texels[texels[start+8]+face*4+3]);
                 if(texels[material+21]!=0 && !source_line)
                     indexed_texture=uint4(material,texels[start+19],texels[start+14],
                         8388608U|((texels[start+15]&2U)!=0?2U:0U)
@@ -373,8 +426,12 @@ Fragment vertex_textured_main(Vertex input) {
                 input.dither_scale=texels[material+6]!=0?1U:0U;
             }
             input.texture=indexed_texture;
-        } else input.texture=uint4(texels[start+3]+(valid?slot:0)*4,texels[start+7],texels[start+14],
-            65536U | ((texels[start+15]&3U)<<20));
+        } else {
+            // Authored coplanar solid overlays (SourceSpanModel bit 16).
+            if(valid) source_overlay_level=overlay_level(texels[texels[start+8]+resident_face*4+3]);
+            input.texture=uint4(texels[start+3]+(valid?slot:0)*4,texels[start+7],texels[start+14],
+                65536U | ((texels[start+15]&3U)<<20) | (source_overlay_level!=0?32768U:0U));
+        }
     }
     [branch] if((input.texture.w&128)!=0) {
         uint start=input.texture.x;
@@ -464,6 +521,10 @@ Fragment vertex_textured_main(Vertex input) {
             output.surface_position.y*=length(mul(view_matrix(),float4(0,1,0,0)).xyz);
         if(texels[input.texture.x+12]==2)
             output.horizon=tile_horizon(input.texture.x);
+        if(texels[input.texture.x+12]!=0 && (texels[input.texture.x+7]&1024U)!=0) {
+            uint tail=tile_presentation_tail(input.texture.x);
+            if(texels[tail+4]!=0) output.horizon=float3(asfloat(texels[tail+2]),asfloat(texels[tail+3]),1);
+        }
         if(texels[input.texture.x+14]!=0 || ((texels[input.texture.x+15]>>8)&65535U)!=0) {
             uint darkest=0xffffffff;
             for(uint i=0;i<256;++i) {
@@ -529,8 +590,152 @@ bool game_over_front_window(Fragment input) {
     float2 hit=eye.xy+ray.xy*distance;
     return distance>0 && abs(hit.x)<1. && abs(hit.y)<.875;
 }
+// vr::tunnel_corridor_packet: camera-attached ceiling/floor planes coloured per depth row
+// from the cartridge's two chequered tunnel pages (header in background_tiles.cpp).
+float4 tunnel_corridor_sample(Fragment input) {
+    uint s=input.texture.x;
+    float3 p=input.surface_position;
+    float3 eye=mul(view_matrix(),float4(p,1)).xyz*256.;
+    float distance=max(-eye.z,1.);
+    uint face=uint(input.uv.x+.5);
+    bool ceiling=face==0;
+    float height=asfloat(texels[s+(ceiling?1:2)]);
+    float vanishing=asfloat(texels[s+(ceiling?10:11)]);
+    float row=ceiling?vanishing-height*256./distance:vanishing+height*256./distance;
+    uint index=uint(clamp(floor(row),0.,223.));
+    float start=float(texels[s+(ceiling?3:5)]),length=float(texels[s+(ceiling?4:6)]);
+    float phase=-p.z-start;phase-=256.*floor(phase/256.);
+    uint page=phase<length?0U:1U;
+    // Lateral zones (strips, side wall): |x| / height against each fitted
+    // boundary slope for this page and half; the centre is graded per row.
+    uint zones=s+272+896+(page*2+(ceiling?0U:1U))*8;
+    uint colour=texels[s+272+page*448+index*2];
+    float lateral=abs(p.x)/height;
+    for(uint zone=0;zone<texels[zones+6];++zone)
+        if(lateral>asfloat(texels[zones+zone*2])) colour=texels[zones+zone*2+1];
+    return tile_colour(s,colour,input.texture.w);
+}
+// One BG art texel at atlas coordinates (no scroll, offsets or EX regions).
+float4 tile_art_texel(uint start,int2 source,uint flags) {
+    uint screen_size=texels[start+2],bpp=texels[start+5];
+    uint edge=texels[start+8]!=0?16:8;
+    uint2 tile_position=uint2(source)&uint2(((screen_size&1)!=0?64:32)*edge-1,((screen_size&2)!=0?64:32)*edge-1);
+    uint2 cell=tile_position/edge;
+    uint page=(cell.x>=32?1024:0)+(cell.y>=32?((screen_size&1)!=0?2048:1024):0);
+    uint address=(texels[start+1]+page+(cell.y&31)*32+(cell.x&31))*2;
+    uint tile=tile_vram_byte(start,address)|(tile_vram_byte(start,address+1)<<8);
+    uint2 pixel=tile_position&(edge-1);
+    if((tile&16384)!=0) pixel.x=edge-1-pixel.x;
+    if((tile&32768)!=0) pixel.y=edge-1-pixel.y;
+    uint number=((tile&1023)+(pixel.x>>3)+(pixel.y>>3)*16)&1023;
+    uint base=texels[start]*2+number*(bpp*8)+(pixel.y&7)*2;
+    uint mask=128U>>(pixel.x&7),index=0;
+    for(uint pair=0;pair<bpp/2;++pair) {
+        if((tile_vram_byte(start,base+pair*16)&mask)!=0) index|=1U<<(pair*2);
+        if((tile_vram_byte(start,base+pair*16+1)&mask)!=0) index|=2U<<(pair*2);
+    }
+    if(index==0) return 0;
+    if(bpp!=8) index+=((tile>>10)&7)*(1U<<bpp);
+    return tile_colour(start,(index+texels[start+6])&255,flags);
+}
+// vr::landscape_world_packet: sky dome and ground plane coloured by view
+// direction from the planet's BG2 art with the native screen's planar
+// projection (focal 256) in the rolled camera frame, so art rows stay
+// straight lines at any aspect: art = (centre column, horizon row) +
+// (x, -y) / depth x 256. Rows clamp to the art's native screen span.
+// Camera-relative, un-rolled position of a model-space point whose model
+// matrix is rotation x uniform scale x translation (landscape ground):
+// p + A^-1 t with A = R s, A^-1 = A^T / s^2.
+float3 unrolled_camera_offset(float3 p) {
+    float3x3 a=float3x3(camera.view_rows[0].xyz,camera.view_rows[1].xyz,camera.view_rows[2].xyz);
+    float3 t=float3(camera.view_rows[0].w,camera.view_rows[1].w,camera.view_rows[2].w);
+    float3 column=float3(a[0][0],a[1][0],a[2][0]);
+    return p+mul(t,a)/dot(column,column);
+}
+float4 landscape_world_sample(Fragment input) {
+    uint s=input.texture.x;
+    uint tail=s+272+16384;
+    float3 d=input.surface_position;
+    bool alternate=false;
+    if((texels[s+7]&16384U)!=0) {
+        // World-fixed ground plane: map from the camera-relative position.
+        float3 world=d;
+        d=unrolled_camera_offset(world);
+        if(texels[tail+4]!=0) {
+            // Classic scroll: the native gradient stays fixed on screen and
+            // world-anchored stripes (half a dot cell each) alternate between
+            // it and a darker shade, so the ground streams with the dots.
+            float period=asfloat(texels[tail+5]);
+            float phase=-world.z;phase-=period*floor(phase/period);
+            alternate=phase>=period*.5;
+        }
+    }
+    float depth=max(-d.z,length(d)*.02);
+    float2 art=float2(asfloat(texels[tail+1])+d.x/depth*256.,
+        clamp(asfloat(texels[tail])-d.y/depth*256.,asfloat(texels[tail+2]),asfloat(texels[tail+3])));
+    float4 colour;
+    if(filter_2d()) {
+        float2 position=art-.5;float2 base=floor(position);
+        colour=bilinear_resolve(tile_art_texel(s,int2(base),input.texture.w),tile_art_texel(s,int2(base)+int2(1,0),input.texture.w),
+            tile_art_texel(s,int2(base)+int2(0,1),input.texture.w),tile_art_texel(s,int2(base)+int2(1,1),input.texture.w),
+            position-base,(input.texture.w&2U)==0);
+    } else colour=tile_art_texel(s,int2(floor(art)),input.texture.w);
+    if((texels[s+7]&16384U)!=0 && texels[tail+4]!=0) {
+        // Classic scroll: the smooth haze (tail+6, 112 rows below the
+        // horizon) replaces the stepped art, so only the stripes have edges.
+        float row=clamp(-d.y/depth*256.,0.,111.);
+        uint low=uint(floor(row)),high=min(low+1U,111U);
+        float4 a=float4(texels[tail+6+low]&255U,(texels[tail+6+low]>>8)&255U,(texels[tail+6+low]>>16)&255U,255U)/255.;
+        float4 b=float4(texels[tail+6+high]&255U,(texels[tail+6+high]>>8)&255U,(texels[tail+6+high]>>16)&255U,255U)/255.;
+        colour=lerp(a,b,row-float(low));
+        colour.rgb*=float(15U-texels[s+13])/15.;
+        if((input.texture.w&2U)!=0) colour.rgb=dither_linear(colour.rgb);
+    }
+    if(alternate && colour.a!=0) {
+        // 80% in linear light (gamma-encoded unless the target is sRGB).
+        colour.rgb=(input.texture.w&2U)!=0?colour.rgb*.8:dither_encoded(dither_linear(colour.rgb)*.8);
+    }
+    return colour;
+}
+// vr::landscape_texture_packet: replacement sky/ground artwork.
+float4 landscape_image_texel(uint s,int2 pixel) {
+    uint width=texels[s],height=texels[s+1];
+    pixel.x=int(uint(pixel.x)%width);pixel.y=texels[s+2]!=0?int(uint(pixel.y)%height):clamp(pixel.y,0,int(height)-1);
+    uint packed=texels[s+16+uint(pixel.y)*width+uint(pixel.x)];
+    return float4(packed&255U,(packed>>8)&255U,(packed>>16)&255U,packed>>24)/255.;
+}
+float4 landscape_texture_sample(Fragment input) {
+    uint s=input.texture.x;
+    float2 image;
+    if(texels[s+2]!=0) {
+        // Ground: tile the world-fixed plane.
+        image=float2(input.surface_position.x,-input.surface_position.z)/asfloat(texels[s+5])*float2(texels[s],texels[s+1]);
+    } else {
+        // Sky: the native art mapping (horizon row and centre column per draw,
+        // camera.effects.z = 16.16 x 32 fixed point), above the horizon only.
+        float3 d=input.surface_position;
+        float depth=max(-d.z,length(d)*.02);
+        float horizon=float(camera.effects.z&65535U)/32.,centre=float(camera.effects.z>>16)/32.;
+        float rows=asfloat(texels[s+4]);
+        float2 art=float2(centre+d.x/depth*256.,horizon-d.y/depth*256.);
+        if(art.y>=horizon) return 0;
+        image=float2(art.x/asfloat(texels[s+3])*float(texels[s]),
+            clamp((art.y-(horizon-rows))/rows,0.,1.)*float(texels[s+1]));
+    }
+    float4 colour;
+    if(filter_2d()) {
+        float2 position=image-.5;float2 base=floor(position);float2 f=position-base;
+        colour=lerp(lerp(landscape_image_texel(s,int2(base)),landscape_image_texel(s,int2(base)+int2(1,0)),f.x),
+            lerp(landscape_image_texel(s,int2(base)+int2(0,1)),landscape_image_texel(s,int2(base)+int2(1,1)),f.x),f.y);
+    } else colour=landscape_image_texel(s,int2(floor(image)));
+    if((input.texture.w&2U)!=0) colour.rgb=dither_linear(colour.rgb);
+    return colour.a<.5?0:float4(colour.rgb,1);
+}
 float4 tile_background_sample(Fragment input) {
     uint start=input.texture.x;
+    if((texels[start+7]&32768U)!=0 && (texels[start+7]&4096U)!=0) return landscape_texture_sample(input);
+    if((texels[start+7]&4096U)!=0) return landscape_world_sample(input);
+    if((texels[start+7]&2048U)!=0) return tunnel_corridor_sample(input);
     uint screen_size=texels[start+2],bpp=texels[start+5];
     uint edge=texels[start+8]!=0?16:8;
     int2 logical=int2(floor(input.uv));
@@ -570,11 +775,34 @@ float4 tile_background_sample(Fragment input) {
         scroll.x=int(texels[start+272+16384+logical.y]);
     if((scanlines&2)!=0)
         scroll.y=int(texels[start+272+16384+224+clamp(logical.y,0,223)]);
+    // Presentation tail: sample between source pixels so display-rate scroll
+    // and a rolling Mode 2 horizon move smoothly at high render scales.
+    bool fractional=(texels[start+7]&1024U)!=0 && mosaic<=1 && all(logical==int2(floor(input.uv)));
+    float2 fraction=0;
+    if(fractional) {
+        uint tail=tile_presentation_tail(start);
+        fraction=float2(asfloat(texels[tail]),asfloat(texels[tail+1]));
+        if((scanlines&1)!=0) fraction.x=0;
+        if((scanlines&2)!=0) fraction.y=0;
+    }
+    float vertical=0;
+    bool fractional_vertical=false;
     if(texels[start+12]!=0) {
         int coordinate=logical.x+(int(texels[start+3])&7);
         scroll.y=tile_vertical_offset(start,coordinate,scroll.y,input.horizon);
+        if(fractional && input.horizon.z!=0) {
+            float column=(input.uv.x+fraction.x+float(int(texels[start+3])&7))/8;
+            vertical=input.horizon.x+input.horizon.y*column;
+            vertical-=8192*floor(vertical/8192);
+            fractional_vertical=true;
+        }
     }
     int2 source=logical+scroll;
+    if(fractional) {
+        source.x=int(floor(input.uv.x+fraction.x))+scroll.x;
+        source.y=fractional_vertical?int(floor(input.uv.y+vertical))
+            :int(floor(input.uv.y+(texels[start+12]!=0?0:fraction.y)))+scroll.y;
+    }
     if((texels[start+7]&512U)!=0) {
         if(game_over_front_window(input)) return 0;
         uint seed=(uint(source.x)>>5)*0x9e3779b9U^(uint(source.y)>>5)*0x85ebca6bU;
@@ -696,7 +924,19 @@ float orbital_noise(float3 p) {
 float4 tile_background(Fragment input) {
     uint flags=texels[input.texture.x+15];
     if((flags&0x80000000U)==0) {
-        float4 colour=tile_background_sample(input);
+        float4 colour;
+        // Flat uv-addressed layers; sphere/receiver mappings and the 3D
+        // corridor derive their own coordinates.
+        bool flat=(flags&(0x40000000U|0x10000000U|32U))==0 && (texels[input.texture.x+7]&(2048U|4096U))==0;
+        if(filter_2d() && flat) {
+            float2 position=input.uv-.5;float2 base=floor(position);
+            Fragment sample=input;
+            sample.uv=base+.5;float4 a=tile_background_sample(sample);
+            sample.uv=base+float2(1.5,.5);float4 b=tile_background_sample(sample);
+            sample.uv=base+float2(.5,1.5);float4 c=tile_background_sample(sample);
+            sample.uv=base+1.5;float4 d=tile_background_sample(sample);
+            colour=bilinear_resolve(a,b,c,d,position-base,(input.texture.w&2U)==0);
+        } else colour=tile_background_sample(input);
         if(colour.a==0) discard;
         return colour;
     }
@@ -746,11 +986,10 @@ float4 tile_background(Fragment input) {
 }
 // Sprites share one palette/VRAM payload. Vertex texture.y packs OBSEL and
 // the 9-bit character number; texture.z packs attributes and square size.
-float4 object_sprite(Fragment input) {
+float4 object_sprite_texel(Fragment input,int2 pixel) {
     uint start=input.texture.x;
-    int2 pixel=int2(floor(input.uv));
     uint size=input.texture.z>>8,attributes=input.texture.z&255;
-    if(any(pixel<0) || any(pixel>=int(size))) discard;
+    if(any(pixel<0) || any(pixel>=int(size))) return 0;
     if((attributes&64)!=0) pixel.x=int(size)-1-pixel.x;
     if((attributes&128)!=0) pixel.y=int(size)-1-pixel.y;
     uint select=input.texture.y&255,number=input.texture.y>>8;
@@ -763,8 +1002,19 @@ float4 object_sprite(Fragment input) {
         if((tile_vram_byte(start,address+pair*16)&mask)!=0) index|=1U<<(pair*2);
         if((tile_vram_byte(start,address+pair*16+1)&mask)!=0) index|=2U<<(pair*2);
     }
-    if(index==0) discard;
+    if(index==0) return 0;
     return tile_colour(start,128+((attributes>>1)&7)*16+index,input.texture.w);
+}
+float4 object_sprite(Fragment input) {
+    float4 colour;
+    if(filter_2d()) {
+        float2 position=input.uv-.5;int2 base=int2(floor(position));
+        colour=bilinear_resolve(object_sprite_texel(input,base),object_sprite_texel(input,base+int2(1,0)),
+            object_sprite_texel(input,base+int2(0,1)),object_sprite_texel(input,base+int2(1,1)),
+            position-float2(base),(input.texture.w&2U)==0);
+    } else colour=object_sprite_texel(input,int2(floor(input.uv)));
+    if(colour.a==0) discard;
+    return colour;
 }
 float4 backdrop_pixel(uint level,int2 coordinate) {
     uint record=4+3*level;
@@ -867,6 +1117,17 @@ float4 backdrop_colour(Fragment input) {
         colour.rgb=select(colour.rgb<=.04045,colour.rgb/12.92,pow((colour.rgb+.055)/1.055,2.4));
     return colour;
 }
+float4 resident_texel(Fragment input,uint material,uint2 masks,int2 pixel) {
+    uint2 coordinate=uint2(pixel)&masks;
+    uint address=texels[material+8]+coordinate.y*(masks.x+1U)+coordinate.x;
+    uint index=(texels[input.texture.y+(address>>2)]>>((address&3U)*8U))&255U;
+    if(index==0) return 0;
+    uint packed=texels[input.texture.z+((index+texels[material+11])&255U)];
+    float4 colour=float4(packed&255U,(packed>>8)&255U,(packed>>16)&255U,255U)/255.;
+    if((input.texture.w&2U)!=0)
+        colour.rgb=select(colour.rgb<=.04045,colour.rgb/12.92,pow((colour.rgb+.055)/1.055,2.4));
+    return colour;
+}
 float4 fragment_textured_raw(Fragment input) {
     if(input.visible==0) discard;
     if((input.texture.w&8193U)==8193U) return backdrop_colour(input);
@@ -876,14 +1137,14 @@ float4 fragment_textured_raw(Fragment input) {
         uint material=input.texture.x;
         uint2 masks=uint2(texels[material+9],texels[material+10]);
         if((input.texture.w&4U)!=0 && (any(input.uv<0) || any(input.uv>=float2(masks+1U)))) discard;
-        uint2 coordinate=uint2(int2(floor(input.uv)))&masks;
-        uint address=texels[material+8]+coordinate.y*(masks.x+1U)+coordinate.x;
-        uint index=(texels[input.texture.y+(address>>2)]>>((address&3U)*8U))&255U;
-        if(index==0) discard;
-        uint packed=texels[input.texture.z+((index+texels[material+11])&255U)];
-        float4 colour=float4(packed&255U,(packed>>8)&255U,(packed>>16)&255U,255U)/255.;
-        if((input.texture.w&2U)!=0)
-            colour.rgb=select(colour.rgb<=.04045,colour.rgb/12.92,pow((colour.rgb+.055)/1.055,2.4));
+        float4 colour;
+        if(filter_2d()) {
+            float2 position=input.uv-.5;int2 base=int2(floor(position));
+            float4 corner[4];
+            for(uint i=0;i<4;++i) corner[i]=resident_texel(input,material,masks,base+int2(i&1U,i>>1));
+            colour=bilinear_resolve(corner[0],corner[1],corner[2],corner[3],position-float2(base),(input.texture.w&2U)==0);
+        } else colour=resident_texel(input,material,masks,int2(floor(input.uv)));
+        if(colour.a==0) discard;
         return colour;
     }
     if((input.texture.w&65536U)!=0) {
@@ -921,16 +1182,19 @@ float4 fragment_textured_raw(Fragment input) {
             }
             if((input.texture.w&1048576U)!=0) {
                 uint scale=max(1U,texels[command+22]);
-                uint index=texels[command+6]!=0 && (((uint(pixel.x)/scale)^(uint(pixel.y)/scale))&1U)!=0
-                    ?texels[command+5]:texels[command+4];
-                uint packed=texels[input.texture.z+(index&255U)];
-                float4 colour=float4(packed&255U,(packed>>8)&255U,(packed>>16)&255U,packed>>24)/255.;
+                bool odd_cell=(((uint(pixel.x)/scale)^(uint(pixel.y)/scale))&1U)!=0;
+                uint even_packed=texels[input.texture.z+(texels[command+4]&255U)];
+                uint odd_packed=texels[input.texture.z+(texels[command+5]&255U)];
+                float4 colour=float4(even_packed&255U,(even_packed>>8)&255U,(even_packed>>16)&255U,even_packed>>24)/255.;
+                if(texels[command+6]!=0) colour=dither_colour(colour,
+                    float4(odd_packed&255U,(odd_packed>>8)&255U,(odd_packed>>16)&255U,odd_packed>>24)/255.,odd_cell,true);
                 if((input.texture.w&2097152U)!=0)
                     colour.rgb=select(colour.rgb<=.04045,colour.rgb/12.92,pow((colour.rgb+.055)/1.055,2.4));
                 return colour;
             }
             uint scale=max(1U,input.dither_scale);
-            if(input.dither_scale!=0 && (((uint(pixel.x)/scale)^(uint(pixel.y)/scale))&1U)!=0) return input.odd_color;
+            if(input.dither_scale!=0)
+                return dither_colour(input.color,input.odd_color,(((uint(pixel.x)/scale)^(uint(pixel.y)/scale))&1U)!=0,true);
             return input.color;
         }
         discard;

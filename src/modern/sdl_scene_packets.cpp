@@ -81,8 +81,22 @@ void SdlScenePipelines::release() noexcept {
     }
     pipelines_.clear();vertex_=fragment_=nullptr;device_=nullptr;
 }
-bool SdlScenePipelines::initialize(SDL_GPUDevice* device,SDL_GPUTextureFormat colour,SDL_GPUTextureFormat depth) {
-    release();
+void SdlScenePipelines::set_line_brush(unsigned pixels,unsigned target_width,unsigned target_height) noexcept {
+    brush_pixels_=std::clamp(pixels,1U,64U);
+    // Clip-space offset per target pixel; SDL_GPU clip space is Y-up, so a
+    // pixel down the target is negative Y.
+    brush_=brush_pixels_>1 && target_width && target_height
+        ?std::array<float,4>{float(brush_pixels_),2.F/float(target_width),-2.F/float(target_height),1.F}
+        :std::array<float,4>{};
+    if(!brush_[3]) brush_pixels_=1;
+}
+void SdlScenePipelines::push_line_brush(SDL_GPUCommandBuffer* command,SceneTopology topology) const noexcept {
+    const std::array<float,4> off{};
+    const auto& data=topology==SceneTopology::lines?brush_:off;
+    SDL_PushGPUVertexUniformData(command,1,data.data(),sizeof(data));
+}
+bool SdlScenePipelines::initialize(SDL_GPUDevice* device,SDL_GPUTextureFormat colour,SDL_GPUTextureFormat depth,bool reversed_depth) {
+    release();reversed_depth_=reversed_depth;
     try {
         require(device!=nullptr,"Missing SDL GPU device");
         const auto formats=SDL_GetGPUShaderFormats(device);
@@ -101,7 +115,7 @@ bool SdlScenePipelines::initialize(SDL_GPUDevice* device,SDL_GPUTextureFormat co
                 info.format=SDL_GPU_SHADERFORMAT_SPIRV;
             }
             info.entrypoint=vertex?shader::vertex_entry:shader::fragment_entry;
-            info.stage=stage;info.num_storage_buffers=1;info.num_uniform_buffers=1;
+            info.stage=stage;info.num_storage_buffers=1;info.num_uniform_buffers=vertex?2:1;
             auto* created=SDL_CreateGPUShader(device,&info);
             require(created,sdl_error(vertex?"Create MODERN vertex shader":"Create MODERN fragment shader"));
             return created;
@@ -114,7 +128,9 @@ bool SdlScenePipelines::initialize(SDL_GPUDevice* device,SDL_GPUTextureFormat co
 }
 SDL_GPUGraphicsPipeline* SdlScenePipelines::get(SceneTopology topology,SceneBlend blend,bool depth_test,bool depth_write) {
     if(!device_) return nullptr;
-    const unsigned key=unsigned(topology)|(unsigned(depth_test)<<1)|(unsigned(depth_test && depth_write)<<2)|(unsigned(blend)<<3);
+    const bool painter=painter_ && depth_test;
+    const unsigned key=unsigned(topology)|(unsigned(depth_test)<<1)|(unsigned(depth_test && depth_write)<<2)|(unsigned(blend)<<3)
+        |(unsigned(painter)<<7);
     if(const auto found=pipelines_.find(key);found!=pipelines_.end()) return found->second;
     using V=vr::SceneVertex;
     const SDL_GPUVertexAttribute attributes[]{
@@ -161,7 +177,8 @@ SDL_GPUGraphicsPipeline* SdlScenePipelines::get(SceneTopology topology,SceneBlen
     info.rasterizer_state.fill_mode=SDL_GPU_FILLMODE_FILL;info.rasterizer_state.cull_mode=SDL_GPU_CULLMODE_NONE;
     info.rasterizer_state.enable_depth_clip=true; // Vulkan default: clip, never clamp.
     info.multisample_state.sample_count=SDL_GPU_SAMPLECOUNT_1;
-    info.depth_stencil_state.compare_op=SDL_GPU_COMPAREOP_LESS;
+    info.depth_stencil_state.compare_op=painter?SDL_GPU_COMPAREOP_ALWAYS
+        :reversed_depth_?SDL_GPU_COMPAREOP_GREATER:SDL_GPU_COMPAREOP_LESS;
     info.depth_stencil_state.enable_depth_test=depth_test;
     info.depth_stencil_state.enable_depth_write=depth_test && depth_write;
     info.target_info.color_target_descriptions=&target;info.target_info.num_color_targets=1;
@@ -301,7 +318,7 @@ bool SdlDrawPackets::record_range(SDL_GPUCommandBuffer* command,SDL_GPURenderPas
     for(const auto& item:std::span(state_->items).subspan(first,count)) {
         const auto& geometry=*item.geometry;
         auto draw_camera=camera;
-        if(geometry.source.preserve_native_colour || (state_->keyed && vr::is_source_shadow_pass(item.key))) draw_camera.effects={};
+        if(geometry.source.preserve_native_colour || (state_->keyed && vr::is_source_shadow_pass(item.key))) draw_camera.effects={0,0,0,camera.effects[3]};
         const auto combined=vr::model_eye_camera(draw_camera,item.model);
         if(!combined) return false;
         const auto constants=sdl_scene_constants(*combined);
@@ -316,7 +333,8 @@ bool SdlDrawPackets::record_range(SDL_GPUCommandBuffer* command,SDL_GPURenderPas
             SDL_BindGPUFragmentStorageBuffers(pass,0,&texels,1);
             SDL_PushGPUVertexUniformData(command,0,&constants,sizeof(constants));
             SDL_PushGPUFragmentUniformData(command,0,&constants,sizeof(constants));
-            SDL_DrawGPUPrimitives(pass,count,1,0,0);
+            pipelines.push_line_brush(command,topology);
+            SDL_DrawGPUPrimitives(pass,count,topology==SceneTopology::lines?pipelines.line_instances():1,0,0);
             return true;
         };
         if(geometry.triangles && !draw(SceneTopology::triangles,state_->blend?*state_->blend:geometry.photograph?SceneBlend::alpha:SceneBlend::opaque,

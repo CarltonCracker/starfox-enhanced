@@ -12,6 +12,7 @@
 #else
 #define STARFOX_SDL_SCENE_VERTEX
 #endif
+#define STARFOX_SCENE_RESOLVE_DITHER
 #include "../../vr/shaders/scene.hlsl"
 
 // SDL_GPU's D3D12 backend names every vertex attribute TEXCOORD<location>.
@@ -43,4 +44,19 @@ Vertex sdl_vertex(SdlVertex input) {
     output.uv=input.uv;output.texture=input.texture;output.billboard=input.billboard;
     return output;
 }
-Fragment sdl_vertex_textured_main(SdlVertex input) {return vertex_textured_main(sdl_vertex(input));}
+#if !defined(STARFOX_SDL_FRAGMENT)
+// Vertex uniform slot 1 (SdlScenePipelines::push_line_brush): x = brush
+// pixels, yz = clip offset per target pixel, w = enabled (line draws only).
+cbuffer SdlLineBrush : register(b1, space1) { float4 line_brush; };
+Fragment sdl_vertex_textured_main(SdlVertex input,uint instance : SV_InstanceID) {
+    Fragment output=vertex_textured_main(sdl_vertex(input));
+    // Thick source lines: instance i < N shifts i pixels right, later ones
+    // shift down, sweeping the desktop's N x N square brush along the line.
+    if(line_brush.w!=0 && instance!=0) {
+        uint pixels=uint(line_brush.x);
+        float2 shift=instance<pixels?float2(instance,0):float2(0,instance-pixels+1);
+        output.position.xy+=shift*line_brush.yz*output.position.w;
+    }
+    return output;
+}
+#endif

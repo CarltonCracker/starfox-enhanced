@@ -3,13 +3,25 @@
 #include "starfox/vr/frame_layers.hpp"
 #include <optional>
 namespace starfox::modern {
-// PPU background registers/scanline tables between two ticks (null when
-// static or discontinuous), for display-rate background rebuilds.
-std::shared_ptr<const simulation::SnesPpuState> interpolated_background_ppu(const vr::GameSceneSnapshot& previous,
+// Background state between two ticks for display-rate rebuilds: the PPU
+// with integer scroll registers/scanline tables (null when static or
+// discontinuous), the fractional scroll remainders, and the Mode 2 horizon
+// line fitted to each tick's VRAM offset table and interpolated.
+struct BackgroundPresentation {
+    std::shared_ptr<const simulation::SnesPpuState> ppu;
+    std::optional<std::array<float,2>> bg2_fraction,bg3_fraction,mode2_horizon;
+};
+BackgroundPresentation interpolated_background(const vr::GameSceneSnapshot& previous,
     const vr::GameSceneSnapshot& current,double alpha);
+// Least-squares line through the valid entries of the BG2 Mode 2 vertical
+// offset table (VRAM 0x2fa0): {intercept, slope per column}, column 1 = x 0..7.
+std::optional<std::array<double,2>> mode2_horizon_fit(const simulation::SnesPpuState&);
+// A standard infinite perspective (VR's: clip z = -z - near) rewritten for
+// reversed depth (clip z = near); other projections are returned unchanged.
+vr::EyeCamera reversed_depth_camera(vr::EyeCamera) noexcept;
 // MODERN's whole frame, drawn from the shared VR scene code in VR's layer
 // order: surrounding stars, backgrounds, tunnel surround, world (compute
-// route), circle wipe, sprites/HUD/dialogue, shutter. Only the camera and
+// route), first-person MHUD lines, circle wipe, sprites/HUD/dialogue, shutter. Only the camera and
 // the target differ from the headset path.
 class SdlFrameRenderer {
 public:
@@ -20,8 +32,24 @@ public:
     // while their scroll registers or scanline tables move.
     bool prepare(SDL_GPUCommandBuffer*,const vr::GameSceneSnapshot& previous,const vr::GameSceneSnapshot& current,
         double alpha,vr::SourceModelPackets world,const vr::FrameLayerInputs&);
-    // Inside a render pass on targets of the initialized formats.
+    // Inside a render pass on targets of the initialized formats, with the
+    // depth target cleared to clear_depth(). The frame draws with reversed
+    // depth (reversed_depth_camera) for uniform precision at every distance:
+    // coplanar source surfaces resolve by draw order, not depth rounding.
     bool record(SDL_GPUCommandBuffer*,SDL_GPURenderPass*,const vr::EyeCamera&);
+    static constexpr float clear_depth() noexcept {return 0.F;}
+    // Smooth (bilinear) filtering of sprites, HUD, flat backgrounds and model
+    // textures; on by default (STARFOX_MODERN_FILTER=0 turns it off).
+    void set_filter_2d(bool enabled) noexcept {filter_2d_=enabled;}
+    // Keep the cartridge's ground dots over the 3D landscape ground (default).
+    void set_ground_dots(bool enabled) noexcept {ground_dots_=enabled;}
+    // Replacement landscape artwork: <directory>/bg_XXXX_sky.png and
+    // bg_XXXX_ground.png (XXXX = background id, hex), loaded once per level.
+    void set_texture_directory(std::string directory) {texture_directory_=std::move(directory);}
+    // Target size and pixels per source pixel for source line thickness.
+    void set_target(unsigned width,unsigned height,unsigned source_pixel) noexcept {
+        pipelines_.set_line_brush(source_pixel,width,height);
+    }
     const SdlSourceScene& world() const noexcept {return world_;}
     void release() noexcept;
     const std::string& status() const noexcept {return status_;}
@@ -29,12 +57,19 @@ private:
     SDL_GPUDevice* device_{};
     SdlScenePipelines pipelines_;
     SdlUploadBatch uploads_;
-    SdlDrawPackets stars_,backgrounds_,tunnel_,sprites_,circle_,shutter_;
+    SdlDrawPackets stars_,backgrounds_,tunnel_,cockpit_,sprites_,reticle_,circle_,shutter_,textures_;
+    std::vector<vr::DrawPacket> texture_packets_;
+    std::optional<uint16_t> texture_background_;
+    std::string texture_directory_;
+    uint32_t texture_mapping_{};
+    bool ground_dots_{true};
+    std::optional<float> level_horizon_;
+    uint16_t level_background_{};
     SdlSourceScene world_;
     std::vector<vr::DrawPacket> background_packets_;
     std::optional<uint64_t> layer_revision_;
     std::optional<SceneBlend> circle_blend_;
-    bool circle_active_{},circle_over_hud_{},shutter_active_{},background_interpolated_{};
+    bool circle_active_{},circle_over_hud_{},shutter_active_{},background_interpolated_{},cockpit_active_{},reticle_active_{},filter_2d_{true};
     std::string status_{"MODERN frame not initialized"};
 };
 }

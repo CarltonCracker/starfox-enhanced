@@ -5,6 +5,7 @@
 #include <cstring>
 #include "starfox/vr/decal_surface.hpp"
 #include <cmath>
+#include <array>
 namespace starfox::vr {
 bool layout_source_axis_inputs(const SourceAxisInputs& input,uint64_t prefix_bytes,
     uint64_t storage_alignment,uint64_t uniform_alignment,uint64_t max_storage_range,
@@ -546,6 +547,85 @@ bool prepare_source_span_model(const assets::Shape& shape,const render::RenderPo
                         return decal_surface_contains(solid,overlay);
                     })) pending.faces.polygons[i][3]|=16U;
                 }
+        }
+        if(solid_decals_enabled().load() && !pending.fragmented) {
+            // Coplanar solid overlays. Group faces by plane first so the
+            // containment test only runs on candidate pairs.
+            struct Plane {std::array<double,3> normal{};double distance{};uint32_t pose{};std::size_t face{};DecalSurface points;};
+            std::vector<Plane> planes;
+            for(std::size_t i=0;i<pending.faces.polygons.size();++i) {
+                if(pending.faces.primitives[i]!=render::PackedPrimitive::polygon || pending.faces.materials[i].textured) continue;
+                auto points=surface(i);
+                if(points.size()<3) continue;
+                std::array<double,3> normal{};
+                for(std::size_t k=0;k<points.size();++k) {
+                    const auto& a=points[k].position;const auto& b=points[(k+1)%points.size()].position;
+                    normal[0]+=(double(a[1])-b[1])*(double(a[2])+b[2]);
+                    normal[1]+=(double(a[2])-b[2])*(double(a[0])+b[0]);
+                    normal[2]+=(double(a[0])-b[0])*(double(a[1])+b[1]);
+                }
+                const double length=std::sqrt(normal[0]*normal[0]+normal[1]*normal[1]+normal[2]*normal[2]);
+                if(!(length>0) || !std::isfinite(length)) continue;
+                for(auto& c:normal) c/=length;
+                const auto& p0=points.front().position;
+                const double distance=normal[0]*p0[0]+normal[1]*p0[1]+normal[2]*p0[2];
+                planes.push_back({normal,distance,points.front().pose,i,std::move(points)});
+            }
+            std::sort(planes.begin(),planes.end(),[](const Plane& a,const Plane& b) {return a.distance<b.distance;});
+            // Strict 2D overlap of two coplanar convex faces (shared edges do
+            // not count), in the plane's dominant projection.
+            const auto overlapping=[](const Plane& a,const Plane& b) {
+                const auto& n=a.normal;
+                const unsigned drop=std::abs(n[0])>=std::abs(n[1]) && std::abs(n[0])>=std::abs(n[2])?0U
+                    :std::abs(n[1])>=std::abs(n[2])?1U:2U;
+                const unsigned u=drop==0?1U:0U,v=drop==2?1U:2U;
+                double extent=0;
+                for(const auto* points:{&a.points,&b.points}) for(const auto& point:*points)
+                    extent=std::max({extent,std::abs(double(point.position[u])),std::abs(double(point.position[v]))});
+                const double epsilon=1e-4*(1.+extent);
+                for(const auto* polygon:{&a.points,&b.points}) for(std::size_t i=0;i<polygon->size();++i) {
+                    const auto& p0=(*polygon)[i].position;const auto& p1=(*polygon)[(i+1)%polygon->size()].position;
+                    const double ax=-(double(p1[v])-p0[v]),ay=double(p1[u])-p0[u];
+                    if(ax==0 && ay==0) continue;
+                    const auto range=[&](const DecalSurface& points) {
+                        double low=1e300,high=-1e300;
+                        for(const auto& point:points) {
+                            const double d=ax*point.position[u]+ay*point.position[v];
+                            low=std::min(low,d);high=std::max(high,d);
+                        }
+                        return std::array<double,2>{low,high};
+                    };
+                    const auto ra=range(a.points),rb=range(b.points);
+                    const double scale=std::sqrt(ax*ax+ay*ay)*epsilon;
+                    if(ra[1]<=rb[0]+scale || rb[1]<=ra[0]+scale) return false;
+                }
+                return true;
+            };
+            // (overlay, base) pairs: a face inside another is its overlay;
+            // otherwise overlapping faces keep the later authored face on top
+            // (the cartridge's painter order within one plane).
+            std::vector<std::pair<std::size_t,std::size_t>> layers;
+            for(std::size_t a=0;a<planes.size();++a)
+                for(std::size_t b=a+1;b<planes.size()
+                    && planes[b].distance-planes[a].distance<=1e-3*(1.+std::abs(planes[a].distance));++b) {
+                    const auto& first=planes[a];const auto& second=planes[b];
+                    if(first.pose!=second.pose || first.normal[0]*second.normal[0]+first.normal[1]*second.normal[1]
+                        +first.normal[2]*second.normal[2]<.9999) continue;
+                    const bool second_inside=decal_surface_contains(first.points,second.points);
+                    const bool first_inside=decal_surface_contains(second.points,first.points);
+                    const auto later=std::max(first.face,second.face),earlier=std::min(first.face,second.face);
+                    if(second_inside && !first_inside) layers.push_back({second.face,first.face});
+                    else if(first_inside && !second_inside) layers.push_back({first.face,second.face});
+                    else if((first_inside && second_inside) || overlapping(first,second)) layers.push_back({later,earlier});
+                }
+            // Stack level (blades over a disc over a wall): longest chain of
+            // bases below each overlay, capped at 4. Bits 8-10 of the face
+            // word; bit 4 marks any overlay. Compute stages read bits 0-3 only.
+            std::vector<unsigned> level(pending.faces.polygons.size(),0U);
+            for(std::size_t pass=0;pass<4;++pass)
+                for(const auto& [overlay,base]:layers) level[overlay]=std::max(level[overlay],std::min(level[base]+1U,4U));
+            for(std::size_t face=0;face<level.size();++face)
+                if(level[face]) pending.faces.polygons[face][3]|=16U|(level[face]<<8);
         }
         for(std::size_t i=0;!colour_warp && i<pending.faces.polygons.size();++i)
             if((pending.faces.primitives[i]!=render::PackedPrimitive::polygon

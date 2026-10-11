@@ -1,7 +1,11 @@
 #include "starfox/modern/modern_runtime.hpp"
+#include "starfox/vr/decal_surface.hpp"
 #include "starfox/vr/source_models.hpp"
 #include <SDL3/SDL.h>
+#include <algorithm>
+#include <cmath>
 #include <stdexcept>
+#include <string_view>
 namespace starfox::modern {
 namespace {
 void require(bool ok,const std::string& what) {if(!ok) throw std::runtime_error(what+(SDL_GetError()[0]?std::string(": ")+SDL_GetError():""));}
@@ -18,16 +22,39 @@ vr::EyeCamera flat_scene_camera(const vr::GameSceneSnapshot& scene,float aspect)
     camera.projection[8]=(128.F-(float(scene.source_vanishing_point[0])+16.F))/half_width;
     return camera;
 }
+int hud_edge_shift(float aspect) noexcept {
+    if(!(aspect>0)) return 0;
+    // flat_scene_camera shows 224 rows and 224 x aspect source columns.
+    const float hud_width=std::min(224.F*aspect,224.F*max_hud_aspect);
+    return std::max(0,int(std::floor((hud_width-256.F)/2.F)));
+}
 struct ModernRuntime::State {
     State(const simulation::GameSimulation& game,const assets::RomImage& rom,const assets::SymbolMap& symbols)
-        :history(game,rom,symbols),models(rom,symbols,true,true),dialogue_layout(rom,symbols) {
+        :history(game,rom,symbols),models(rom,symbols,true,true),dialogue_layout(rom,symbols),
+        trigonometry(simulation::TrigTables::load(rom,symbols)) {
         inputs.rom=&rom;inputs.symbols=&symbols;inputs.dialogue_layout=&dialogue_layout;
+        inputs.trigonometry=&trigonometry;
         inputs.srgb=false;inputs.ex_experience=game.experience()==simulation::Experience::starfox_ex;
         inputs.flat_landscape=true;
+        inputs.tunnel_corridor=true;
+        inputs.vector_reticle=true;
+        // STARFOX_MODERN_LANDSCAPE=0 keeps the native BG2 planet layer.
+        const auto* landscape=std::getenv("STARFOX_MODERN_LANDSCAPE");
+        inputs.landscape_world=!(landscape && std::string_view(landscape)=="0");
+        // Classic ground bands stream with the world by default (testing);
+        // STARFOX_MODERN_CLASSIC_SCROLL=0 keeps them fixed like the original.
+        const auto* scroll=std::getenv("STARFOX_MODERN_CLASSIC_SCROLL");
+        inputs.classic_ground_scroll=!(scroll && std::string_view(scroll)=="0");
+        // Texture overlays inset into a backing face (signs, markings) are
+        // painter-ordered on the cartridge; mark them as decals so they keep
+        // drawing over their backing face instead of z-fighting with it.
+        vr::set_inset_decals(true);
+        vr::set_solid_decals(true);
     }
     vr::GameSceneHistory history;
     vr::SourceModels models;
     render::ScaledTextRenderer dialogue_layout;
+    simulation::TrigTables trigonometry;
     vr::FrameLayerInputs inputs;
     SdlFrameRenderer frame;
     SDL_GPUDevice* device{};
@@ -73,6 +100,9 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
             s.depth_format=SDL_GPUTextureSupportsFormat(device,SDL_GPU_TEXTUREFORMAT_D32_FLOAT,SDL_GPU_TEXTURETYPE_2D,
                 SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)?SDL_GPU_TEXTUREFORMAT_D32_FLOAT:SDL_GPU_TEXTUREFORMAT_D16_UNORM;
             require(s.frame.initialize(device,target_format,s.depth_format),s.frame.status());
+            if(const auto* filter=std::getenv("STARFOX_MODERN_FILTER"); filter && std::string_view(filter)=="0") s.frame.set_filter_2d(false);
+            if(const auto* dots=std::getenv("STARFOX_MODERN_GROUND_DOTS"); dots && std::string_view(dots)=="0") s.frame.set_ground_dots(false);
+            if(const char* base=SDL_GetBasePath()) s.frame.set_texture_directory(std::string(base)+"textures/");
         }
         int width=requested_width,height=requested_height;
         // Default: the window's output, not whatever intermediate target is bound.
@@ -110,17 +140,20 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
         SDL_FlushRenderer(renderer);
         auto* command=SDL_AcquireGPUCommandBuffer(device);
         require(command!=nullptr,"Acquire MODERN command buffer");
+        s.inputs.hud_edge_shift=hud_edge_shift(float(width)/float(height));
         if(!s.frame.prepare(command,*previous,*current,alpha,std::move(world),s.inputs)) {
             SDL_CancelGPUCommandBuffer(command);throw std::runtime_error(s.frame.status());
         }
         const auto clear=vr::frame_clear_colour(*current,s.inputs.srgb);
         SDL_GPUColorTargetInfo target{};target.texture=colour;target.load_op=SDL_GPU_LOADOP_CLEAR;
         target.store_op=SDL_GPU_STOREOP_STORE;target.clear_color={clear[0],clear[1],clear[2],1};
-        SDL_GPUDepthStencilTargetInfo depth_target{};depth_target.texture=s.depth;depth_target.clear_depth=1;
+        SDL_GPUDepthStencilTargetInfo depth_target{};depth_target.texture=s.depth;depth_target.clear_depth=SdlFrameRenderer::clear_depth();
         depth_target.load_op=SDL_GPU_LOADOP_CLEAR;depth_target.store_op=SDL_GPU_STOREOP_DONT_CARE;
         depth_target.stencil_load_op=SDL_GPU_LOADOP_DONT_CARE;depth_target.stencil_store_op=SDL_GPU_STOREOP_DONT_CARE;
         auto* pass=SDL_BeginGPURenderPass(command,&target,1,&depth_target);
         if(!pass) {SDL_CancelGPUCommandBuffer(command);throw std::runtime_error("Begin MODERN render pass");}
+        // flat_scene_camera fills the height with the 224 source rows.
+        s.frame.set_target(unsigned(width),unsigned(height),unsigned(std::max(1L,std::lround(height/224.))));
         const bool recorded=s.frame.record(command,pass,flat_scene_camera(*current,float(width)/float(height)));
         SDL_EndGPURenderPass(pass);
         require(SDL_SubmitGPUCommandBuffer(command),"Submit MODERN frame");

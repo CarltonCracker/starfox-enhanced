@@ -23,6 +23,14 @@ inline std::atomic<bool>& inset_decals_enabled() noexcept {
     return enabled;
 }
 inline void set_inset_decals(bool enabled) noexcept {inset_decals_enabled().store(enabled);}
+// MODERN addition: solid faces inside another solid face of the same model
+// (painted later by the cartridge, e.g. the 1-3 hatch's opening and markings)
+// are decals too. Off elsewhere until tested in a headset.
+inline std::atomic<bool>& solid_decals_enabled() noexcept {
+    static std::atomic<bool> enabled{false};
+    return enabled;
+}
+inline void set_solid_decals(bool enabled) noexcept {solid_decals_enabled().store(enabled);}
 
 // Authored painter-order overlays can repeat a face (character eyes), or be
 // inset into it (BU_7's sign). With the inset rule on, the exact-match rule is

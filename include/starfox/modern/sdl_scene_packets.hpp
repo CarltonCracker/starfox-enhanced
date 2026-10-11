@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "starfox/vr/draw_packet.hpp"
 #include "starfox/vr/scene_camera.hpp"
 #include <SDL3/SDL_gpu.h>
@@ -46,14 +47,31 @@ public:
     ~SdlScenePipelines();
     SdlScenePipelines(const SdlScenePipelines&)=delete;
     SdlScenePipelines& operator=(const SdlScenePipelines&)=delete;
-    bool initialize(SDL_GPUDevice*,SDL_GPUTextureFormat colour,SDL_GPUTextureFormat depth);
+    // reversed_depth: clear depth to 0 and pass GREATER (reversed infinite
+    // projection, see scene.hlsl reversed_depth); otherwise clear 1, LESS.
+    bool initialize(SDL_GPUDevice*,SDL_GPUTextureFormat colour,SDL_GPUTextureFormat depth,bool reversed_depth=false);
     SDL_GPUGraphicsPipeline* get(SceneTopology,SceneBlend,bool depth_test,bool depth_write);
+    // Source lines are one source pixel thick (the desktop paints each line
+    // point as a scale x scale square). Line draws repeat as instances, each
+    // shifted one target pixel along X or Y; 1 pixel or less draws hairlines.
+    void set_line_brush(unsigned pixels,unsigned target_width,unsigned target_height) noexcept;
+    uint32_t line_instances() const noexcept {return brush_pixels_>1?2*brush_pixels_-1:1;}
+    // Vertex uniform slot 1 for the next draws: the brush for line topology,
+    // disabled otherwise. Push with every draw's camera constants.
+    void push_line_brush(SDL_GPUCommandBuffer*,SceneTopology) const noexcept;
+    // Painter mode for the next get() calls: depth-tested pipelines pass
+    // every fragment (compare ALWAYS) and still write depth, so later draws
+    // cover earlier ones exactly as the cartridge's painter does.
+    void set_painter(bool enabled) noexcept {painter_=enabled;}
     void release() noexcept;
     const std::string& status() const noexcept {return status_;}
 private:
     SDL_GPUDevice* device_{};
     SDL_GPUShader* vertex_{};SDL_GPUShader* fragment_{};
     SDL_GPUTextureFormat colour_{},depth_{};
+    bool reversed_depth_{},painter_{};
+    unsigned brush_pixels_{1};
+    std::array<float,4> brush_{};
     std::map<unsigned,SDL_GPUGraphicsPipeline*> pipelines_;
     std::string status_{"Scene pipelines not initialized"};
 };

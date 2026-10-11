@@ -265,6 +265,7 @@ bool SdlSourceModel::record_graphics(SDL_GPUCommandBuffer* command,SDL_GPURender
         SDL_BindGPUFragmentStorageBuffers(pass,0,&arena,1);
         SDL_PushGPUVertexUniformData(command,0,&constants,sizeof(constants));
         SDL_PushGPUFragmentUniformData(command,0,&constants,sizeof(constants));
+        pipelines.push_line_brush(command,pipeline==lines?SceneTopology::lines:SceneTopology::triangles);
     };
     if(!s.has_lines) {
         bind(triangles,s.triangles);
@@ -274,7 +275,7 @@ bool SdlSourceModel::record_graphics(SDL_GPUCommandBuffer* command,SDL_GPURender
     const uint32_t per_slot=(s.corner_capacity-2)*3;
     for(uint32_t slot=0;slot<s.counts[0];++slot) {
         bind(triangles,s.triangles);SDL_DrawGPUPrimitives(pass,per_slot,1,slot*per_slot,0);
-        bind(lines,s.lines);SDL_DrawGPUPrimitives(pass,2,1,slot*2,0);
+        bind(lines,s.lines);SDL_DrawGPUPrimitives(pass,2,pipelines.line_instances(),slot*2,0);
     }
     return true;
 }
@@ -287,6 +288,9 @@ struct SdlSourceScene::State {
     std::vector<vr::DrawPacket> source_packets;
     std::vector<uint32_t> handles;
     std::unique_ptr<SdlDrawPackets> packets;
+    // Per source packet: the object surrounds the camera (tunnel sections,
+    // hangars). Those draw first as a painter, in native order.
+    std::vector<bool> enclosing;
 };
 SdlSourceScene::SdlSourceScene()=default;
 SdlSourceScene::~SdlSourceScene() {release();}
@@ -330,6 +334,25 @@ bool SdlSourceScene::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* comm
             }
         }
         next->draws.push_back({first,legacy-first,{}});
+        // Painter objects: bounding radius (model space x placement scale).
+        next->enclosing.assign(source.packets.size(),false);
+        for(std::size_t index=0;index<source.packets.size();++index) {
+            const auto& model=source.packets[index].model;
+            const double scale=std::sqrt(double(model[0])*model[0]+double(model[1])*model[1]+double(model[2])*model[2]);
+            const double distance=std::sqrt(double(model[12])*model[12]+double(model[13])*model[13]+double(model[14])*model[14]);
+            double radius=0;
+            if(const auto* request=requests[index]) {
+                for(const auto& v:request->model.projection.continuous_vertices)
+                    radius=std::max(radius,std::sqrt(double(v.x)*v.x+double(v.y)*v.y+double(v.z)*v.z)/double(request->units));
+            } else for(const auto& v:source.packets[index].geometry.vertex_view())
+                radius=std::max(radius,std::sqrt(double(v.position[0])*v.position[0]+double(v.position[1])*v.position[1]
+                    +double(v.position[2])*v.position[2]));
+            // Large scenery (tunnel sections, hangars, buildings: over 2 m, i.e.
+            // 512 source units) or anything around the camera. A camera-only
+            // test flips between frames as sections pass and swaps winners.
+            next->enclosing[index]=(radius*scale>2. || radius*scale>distance)
+                && (source.handles[index]&0xffffU)!=0 && source.handles[index]<0x20000U;
+        }
         if(!next->packets->initialize(device,uploads_,source.packets,source.handles)) {
             const auto reason=next->packets->status();
             if(state_) state_->packets=std::move(next->packets); // Keep retained geometry for the next attempt.
@@ -360,14 +383,36 @@ bool SdlSourceScene::record_compute(SDL_GPUCommandBuffer* command) {
 bool SdlSourceScene::record(SDL_GPUCommandBuffer* command,SDL_GPURenderPass* pass,SdlScenePipelines& pipelines,
     const vr::EyeCamera& camera) const {
     if(!state_) return false;
-    for(const auto& draw:state_->draws) {
-        if(!state_->packets->record_range(command,pass,pipelines,camera,draw.legacy_first,draw.legacy_count)) return false;
-        if(!draw.model) continue;
-        auto draw_camera=camera;
-        if(state_->source_packets[draw.packet_index].preserve_native_colour
-            || vr::is_source_shadow_pass(state_->handles[draw.packet_index])) draw_camera.effects={};
-        const auto combined=vr::model_eye_camera(draw_camera,draw.placement);
-        if(!combined || !draw.model->record_graphics(command,pass,pipelines,*combined)) return false;
+    // Pass 0: enclosing objects as a painter in native order (the cartridge
+    // overwrites nested tunnel sections regardless of depth). Pass 1: every
+    // other object, depth-tested against them.
+    struct Restore {SdlScenePipelines& p;~Restore() {p.set_painter(false);}} restore{pipelines};
+    for(const bool painter:{true,false}) {
+        pipelines.set_painter(painter);
+        std::size_t legacy_packet=0;
+        for(const auto& draw:state_->draws) {
+            // Legacy items in this range belong to the packets before draw.packet_index.
+            for(std::size_t item=0;item<draw.legacy_count;++item) {
+                while(legacy_packet<state_->source_packets.size()) {
+                    const auto& mesh=state_->source_packets[legacy_packet].geometry;
+                    const bool compute=std::any_of(state_->draws.begin(),state_->draws.end(),
+                        [&](const auto& d) {return d.model && d.packet_index==legacy_packet;});
+                    if(!compute && (!mesh.vertex_view().empty() || !mesh.line_view().empty())) break;
+                    ++legacy_packet;
+                }
+                const bool enclosing=legacy_packet<state_->enclosing.size() && state_->enclosing[legacy_packet];
+                if(enclosing==painter && !state_->packets->record_range(command,pass,pipelines,camera,draw.legacy_first+item,1))
+                    return false;
+                ++legacy_packet;
+            }
+            if(!draw.model) continue;
+            if(state_->enclosing[draw.packet_index]!=painter) continue;
+            auto draw_camera=camera;
+            if(state_->source_packets[draw.packet_index].preserve_native_colour
+                || vr::is_source_shadow_pass(state_->handles[draw.packet_index])) draw_camera.effects={0,0,0,camera.effects[3]};
+            const auto combined=vr::model_eye_camera(draw_camera,draw.placement);
+            if(!combined || !draw.model->record_graphics(command,pass,pipelines,*combined)) return false;
+        }
     }
     return true;
 }

@@ -100,6 +100,7 @@ static PackedFaces pack_faces_impl(const assets::Shape& shape,const PackedBsp& b
             +" for model "+shape.name+" (address "+std::to_string(shape.header.address)+")");
     PackedFaces result;const auto shading=source_shading(pose);
     std::unordered_map<const assets::TextureImage*,std::uint32_t> textures;
+    std::unordered_map<std::uint32_t,std::uint32_t> override_offsets;
     for(const auto& face:bsp.faces) {
         auto primitive=face.sprite?PackedPrimitive::sprite:face.vertex_indices.size()==2?PackedPrimitive::line
             :face.vertex_indices.size()>=3?PackedPrimitive::polygon:PackedPrimitive::empty;
@@ -136,6 +137,30 @@ static PackedFaces pack_faces_impl(const assets::Shape& shape,const PackedBsp& b
             }
             command.textured=1;command.texture_offset=found->second;command.u_mask=texture.u_mask;command.v_mask=texture.v_mask;
             command.colour_base=settings.colour_index_base;command.reserved0=std::uint32_t(pose.texture_scroll_x);command.reserved1=std::uint32_t(pose.texture_scroll_y);
+            // Replacement artwork: RGBA words after the source bytes. u holds
+            // one plus its word offset, v its width | height << 16 (both unused
+            // by textured model materials otherwise).
+            if(settings.texture_overrides) {
+                const auto image=settings.texture_overrides->find(texture_override_key(texture));
+                if(image!=settings.texture_overrides->end() && image->second.width && image->second.height
+                    && image->second.width<65536U && image->second.height<65536U
+                    && image->second.rgba.size()==std::size_t(image->second.width)*image->second.height) {
+                    auto placed=override_offsets.find(image->first);
+                    if(placed==override_offsets.end()) {
+                        const auto bytes=image->second.rgba.size()*4U;
+                        result.texels.resize((result.texels.size()+3U)&~std::size_t(3),0);
+                        if(bytes>16U*1024*1024 || result.texels.size()>16U*1024*1024-bytes)
+                            throw std::runtime_error("GPU model replacement texture budget exceeded");
+                        placed=override_offsets.emplace(image->first,std::uint32_t(result.texels.size()/4U)).first;
+                        const auto start=result.texels.size();
+                        result.texels.resize(start+bytes);
+                        for(std::size_t i=0;i<image->second.rgba.size();++i)
+                            for(unsigned b=0;b<4;++b) result.texels[start+i*4U+b]=std::uint8_t(image->second.rgba[i]>>(b*8U));
+                    }
+                    command.u=std::int32_t(placed->second+1U);
+                    command.v=std::int32_t(image->second.width|(image->second.height<<16U));
+                }
+            }
             command.tag=std::uint32_t(primitive==PackedPrimitive::sprite?PixelLayer::two_d:primitive==PackedPrimitive::line?PixelLayer::three_d:PixelLayer::textured_geometry);
         }
         const auto first=std::uint32_t(result.corners.size());

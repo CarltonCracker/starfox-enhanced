@@ -1138,6 +1138,31 @@ float4 fragment_textured_raw(Fragment input) {
         uint2 masks=uint2(texels[material+9],texels[material+10]);
         if((input.texture.w&4U)!=0 && (any(input.uv<0) || any(input.uv>=float2(masks+1U)))) discard;
         float4 colour;
+        if(texels[material+12]!=0) {
+            // Replacement artwork (render::TextureOverrides): RGBA words in the
+            // texel store, stretched over the source texture's wrap period.
+            uint image=input.texture.y+texels[material+12]-1U;
+            uint2 size=uint2(texels[material+13]&65535U,texels[material+13]>>16);
+            float2 position=input.uv/float2(masks+1U)*float2(size);
+            if(filter_2d()) {
+                position-=.5;int2 base=int2(floor(position));float2 f=position-float2(base);
+                float4 corner[4];
+                for(uint i=0;i<4;++i) {
+                    uint2 at=uint2((base+int2(i&1U,i>>1))%int2(size)+int2(size))%size;
+                    uint packed=texels[image+at.y*size.x+at.x];
+                    corner[i]=float4(packed&255U,(packed>>8)&255U,(packed>>16)&255U,packed>>24)/255.;
+                    if((input.texture.w&2U)!=0) corner[i].rgb=select(corner[i].rgb<=.04045,corner[i].rgb/12.92,pow((corner[i].rgb+.055)/1.055,2.4));
+                }
+                colour=lerp(lerp(corner[0],corner[1],f.x),lerp(corner[2],corner[3],f.x),f.y);
+            } else {
+                uint2 at=uint2(int2(floor(position))%int2(size)+int2(size))%size;
+                uint packed=texels[image+at.y*size.x+at.x];
+                colour=float4(packed&255U,(packed>>8)&255U,(packed>>16)&255U,packed>>24)/255.;
+                if((input.texture.w&2U)!=0) colour.rgb=select(colour.rgb<=.04045,colour.rgb/12.92,pow((colour.rgb+.055)/1.055,2.4));
+            }
+            if(colour.a<.5) discard;
+            return float4(colour.rgb,1);
+        }
         if(filter_2d()) {
             float2 position=input.uv-.5;int2 base=int2(floor(position));
             float4 corner[4];

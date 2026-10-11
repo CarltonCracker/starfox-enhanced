@@ -4,6 +4,7 @@
 #include "starfox/assets/rom.hpp"
 #include "starfox/render/framebuffer.hpp"
 #include "starfox/render/face_material.hpp"
+#include "starfox/render/texture_overrides.hpp"
 #include "starfox/simulation/math.hpp"
 
 #include <cstdint>
@@ -118,6 +119,9 @@ struct RenderSettings {
     // stays scale-independent and stable across source-frame boundaries.
     std::uint32_t render_scale{1U};
     std::uint8_t wireframe_thickness{1U};
+    // Optional replacement artwork for model textures (GPU face packing
+    // only; the indexed software raster always uses the source texels).
+    const TextureOverrides* texture_overrides{};
 };
 
 // Presentation metadata for a host-rendered Super FX surface. The indexed

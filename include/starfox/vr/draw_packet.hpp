@@ -37,5 +37,6 @@ inline bool same_draw_geometry(std::span<const DrawPacket> a,std::span<const Dra
 // projection or eye-dependent colour/visibility is baked into the packet.
 bool build_draw_packet(const assets::Shape&,const render::RenderPose&,
     std::span<const render::Rgba8> palette,uint8_t palette_base,uint32_t dither_scale,
-    bool srgb_target,float units_per_metre,DrawPacket&,std::string& error);
+    bool srgb_target,float units_per_metre,DrawPacket&,std::string& error,
+    const render::TextureOverrides* texture_overrides=nullptr);
 }

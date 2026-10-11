@@ -294,6 +294,8 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
                 const float horizon=std::bit_cast<float>(texels[272+16384]),centre=std::bit_cast<float>(texels[272+16384+1]);
                 texture_mapping_=uint32_t(std::clamp(horizon*32.F,0.F,65535.F))
                     |(uint32_t(std::clamp(std::fmod(centre,1024.F)+1024.F,0.F,2047.F)*32.F)<<16);
+                if(texture_dump_ && texels.size()>=272+16384+6+112)
+                    texture_dump_->landscape(current.background_id,*current.ppu,horizon,texels.subspan(272+16384+6,112));
             }
             if(vr::is_landscape_ground(packet))
                 background_models.at(model_index)=vr::landscape_ground_model(landscape.roll,landscape.pitch,landscape.height,landscape.x,landscape.z);

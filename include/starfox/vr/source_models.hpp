@@ -5,6 +5,8 @@
 #include "starfox/render/asteroid_models.hpp"
 #include "starfox/vr/scene_interpolation.hpp"
 #include "starfox/vr/source_span_model.hpp"
+#include "starfox/render/texture_overrides.hpp"
+#include <functional>
 #include <unordered_map>
 #include <memory>
 
@@ -68,6 +70,12 @@ public:
     SourceModelPackets assemble_world_interpolated(const GameSceneSnapshot& previous,
         const GameSceneSnapshot& current,double alpha,bool srgb_target=false,bool surround_stars=false,bool cpu_pilot_rig=false);
     void set_asteroid_models(render::AsteroidModels mode) noexcept {asteroid_models_=mode;}
+    // Replacement artwork for model textures (compute route), owned by the caller.
+    void set_texture_overrides(const render::TextureOverrides* overrides) noexcept {texture_overrides_=overrides;}
+    // Called for each texture of every shape drawn, with the 16 live model
+    // palette colours (BGR555, index 0 transparent) the texture's indices use.
+    using TextureObserver=std::function<void(const assets::TextureImage&,const std::array<uint16_t,16>&)>;
+    void set_texture_observer(TextureObserver observer) {texture_observer_=std::move(observer);}
 private:
     struct GeometryKey {
         const assets::Shape* shape{};
@@ -91,6 +99,8 @@ private:
     bool compute_solids_{};
     bool compute_shadows_{true};
     render::AsteroidModels asteroid_models_{};
+    const render::TextureOverrides* texture_overrides_{};
+    TextureObserver texture_observer_;
     DrawPacket connected_grid_pose(const GameSceneSnapshot&,const timing::RenderTransform&,
         const simulation::MatrixQ15&,bool,bool gpu=false) const;
     DrawPacket grid_pose(const GameSceneSnapshot&,const timing::RenderTransform&,

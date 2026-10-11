@@ -591,6 +591,7 @@ SourceModelPackets SourceModels::assemble_poses(const GameSceneSnapshot& scene,s
             // geometry is built, so every VR path draws them as solids.
             const assets::Shape* drawn=&lod->second;
             if(!shadow) if(const auto* model=render::substitute_asteroid_model(lod->second,pose,asteroid_models_)) drawn=model;
+            if(texture_observer_ && !shadow) for(const auto& texture:drawn->textures) texture_observer_(texture,scene.model_palette);
             const uint32_t pass_key=uint32_t(item.handle)|(shadow?source_shadow_pass:0U);
             if(compute_solids_ && !(cpu_pilot_rig && !shadow && (item.handle==scene.player
                 || (interpolation_.flash_player && object.strategy_address==interpolation_.flash_player))) && (!shadow || compute_shadows_) && !pose.simple_scaled_sprite
@@ -598,7 +599,7 @@ SourceModelPackets SourceModels::assemble_poses(const GameSceneSnapshot& scene,s
                 && pose.effect_clip_right<=pose.effect_clip_left) {
                 SourceSpanModel prepared;
                 auto continuous_pose=pose;continuous_pose.continuous_geometry=true;
-                render::RenderSettings settings;settings.colour_index_base=112;
+                render::RenderSettings settings;settings.colour_index_base=112;settings.texture_overrides=texture_overrides_;
                 const bool warp_requested=pose.colour_warp && !pose.force_colour;
                 bool ordinary=!warp_requested && !pose.wireframe_mode && !pose.wobble_mode && !pose.wave_mode && !pose.cel_mode;
                 auto base_pose=continuous_pose;base_pose.colour_warp=warp_requested;
@@ -682,7 +683,7 @@ SourceModelPackets SourceModels::assemble_poses(const GameSceneSnapshot& scene,s
                     packet.geometry=cached->second.geometry;cached->second.used=cache_epoch_;reused=true;
                 }
             }
-            if(!reused && !build_draw_packet(*drawn,pose,palette,112,1,srgb,units,packet,error)) {
+            if(!reused && !build_draw_packet(*drawn,pose,palette,112,1,srgb,units,packet,error,texture_overrides_)) {
                 defer("shape "+std::to_string(shape)+" LOD "+std::to_string(selected)+": "+error);continue;
             }
             if(!reused && interpolation_.crosshair && object.strategy_address==interpolation_.crosshair) {

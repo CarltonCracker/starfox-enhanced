@@ -215,6 +215,42 @@ DrawPacket tunnel_corridor_packet(const simulation::SnesPpuState& source,unsigne
     quad({{{-w,bottom,near},{w,bottom,near},{w,bottom,far},{-w,bottom,far}}},1);
     return packet;
 }
+std::array<unsigned,2> bg2_art_size(const simulation::SnesPpuState& ppu) noexcept {
+    const unsigned edge=ppu.bg2_tile_size_16?16U:8U;
+    return {((ppu.bg2_screen_size&1U)?64U:32U)*edge,((ppu.bg2_screen_size&2U)?64U:32U)*edge};
+}
+unsigned bg2_art_index(const simulation::SnesPpuState& ppu,int x,int y) noexcept {
+    const unsigned edge=ppu.bg2_tile_size_16?16U:8U;
+    const auto [width,height]=bg2_art_size(ppu);
+    const auto byte=[&](unsigned address) {return unsigned(ppu.vram[address&0xffffU]);};
+    const unsigned px=unsigned(x)&(width-1),py=unsigned(y)&(height-1);
+    const unsigned cx=px/edge,cy=py/edge;
+    const unsigned page=(cx>=32?1024U:0U)+(cy>=32?((ppu.bg2_screen_size&1U)?2048U:1024U):0U);
+    const unsigned address=(ppu.bg2_screen_base+page+(cy&31U)*32U+(cx&31U))*2U;
+    const unsigned tile=byte(address)|(byte(address+1)<<8);
+    unsigned tx=px&(edge-1),ty=py&(edge-1);
+    if(tile&16384U) tx=edge-1-tx;
+    if(tile&32768U) ty=edge-1-ty;
+    const unsigned number=((tile&1023U)+(tx>>3)+(ty>>3)*16U)&1023U;
+    const unsigned base=ppu.bg2_character_base*2U+number*32U+(ty&7U)*2U;
+    const unsigned mask=128U>>(tx&7U);
+    unsigned index=0;
+    for(unsigned pair=0;pair<2;++pair) {
+        if(byte(base+pair*16)&mask) index|=1U<<(pair*2);
+        if(byte(base+pair*16+1)&mask) index|=2U<<(pair*2);
+    }
+    return index?((tile>>10)&7U)*16U+index:0U;
+}
+std::vector<uint32_t> bg2_art_image(const simulation::SnesPpuState& ppu,int x,int y,unsigned width,unsigned height) {
+    const auto palette=render::decode_bgr555_palette(ppu.cgram);
+    std::vector<uint32_t> image(std::size_t(width)*height);
+    for(unsigned row=0;row<height;++row) for(unsigned column=0;column<width;++column) {
+        const unsigned index=bg2_art_index(ppu,x+int(column),y+int(row));
+        const auto c=palette[index];
+        image[std::size_t(row)*width+column]=index?uint32_t(c.r)|(uint32_t(c.g)<<8)|(uint32_t(c.b)<<16)|0xff000000U:0U;
+    }
+    return image;
+}
 DrawPacket landscape_world_packet(const simulation::SnesPpuState& ppu,
     const BackgroundTileOptions& options,float vanishing_y,bool srgb,bool classic_ground_scroll,
     std::optional<float> level_horizon) {
@@ -267,28 +303,7 @@ DrawPacket landscape_world_packet(const simulation::SnesPpuState& ppu,
     // linear blend between run centres, so nothing on the ground is fixed to
     // the screen except a soft fade (RGBA, red low byte).
     {
-        const unsigned edge=ppu.bg2_tile_size_16?16U:8U;
-        const unsigned width=((ppu.bg2_screen_size&1U)?64U:32U)*edge,height=((ppu.bg2_screen_size&2U)?64U:32U)*edge;
-        const auto byte=[&](unsigned address) {return unsigned(ppu.vram[address&0xffffU]);};
-        const auto art=[&](int x,int y) {
-            const unsigned px=unsigned(x)&(width-1),py=unsigned(y)&(height-1);
-            const unsigned cx=px/edge,cy=py/edge;
-            const unsigned page=(cx>=32?1024U:0U)+(cy>=32?((ppu.bg2_screen_size&1U)?2048U:1024U):0U);
-            const unsigned address=(ppu.bg2_screen_base+page+(cy&31U)*32U+(cx&31U))*2U;
-            const unsigned tile=byte(address)|(byte(address+1)<<8);
-            unsigned tx=px&(edge-1),ty=py&(edge-1);
-            if(tile&16384U) tx=edge-1-tx;
-            if(tile&32768U) ty=edge-1-ty;
-            const unsigned number=((tile&1023U)+(tx>>3)+(ty>>3)*16U)&1023U;
-            const unsigned base=ppu.bg2_character_base*2U+number*32U+(ty&7U)*2U;
-            const unsigned mask=128U>>(tx&7U);
-            unsigned index=0;
-            for(unsigned pair=0;pair<2;++pair) {
-                if(byte(base+pair*16)&mask) index|=1U<<(pair*2);
-                if(byte(base+pair*16+1)&mask) index|=2U<<(pair*2);
-            }
-            return index?((tile>>10)&7U)*16U+index:0U;
-        };
+        const auto art=[&](int x,int y) {return bg2_art_index(ppu,x,y);};
         const auto palette=render::decode_bgr555_palette(ppu.cgram);
         std::array<std::array<float,3>,112> colours{};
         for(int row=0;row<112;++row) {

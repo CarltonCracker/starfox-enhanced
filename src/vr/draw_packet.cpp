@@ -7,7 +7,7 @@
 namespace starfox::vr {
 bool build_draw_packet(const assets::Shape& shape,const render::RenderPose& pose,
     std::span<const render::Rgba8> palette,uint8_t base,uint32_t dither_scale,
-    bool srgb,float units,DrawPacket& output,std::string& error) {
+    bool srgb,float units,DrawPacket& output,std::string& error,const render::TextureOverrides* texture_overrides) {
     if(!std::isfinite(pose.scale) || pose.scale<=0 || pose.scale>std::numeric_limits<float>::max()
         || (pose.use_source_lighting_state && !std::isfinite(pose.source_depth))) {
         error="Invalid source model scale or lighting depth";return false;
@@ -25,6 +25,27 @@ bool build_draw_packet(const assets::Shape& shape,const render::RenderPose& pose
         if(texture && pose.z>=128 && pose.simple_sprite_world_size>0) {
             const auto width=uint32_t(texture->u_mask)+1,height=uint32_t(texture->v_mask)+1;
             if(texture->texels.size()!=width*height) {error="Invalid whole-object sprite texture";return false;}
+            // Replacement artwork (power-of-two sizes; the shader wraps with
+            // masks): direct RGBA words, no palette. Hit-flash palette
+            // overrides keep the source sprite.
+            const render::TextureOverrideImage* image=nullptr;
+            if(texture_overrides && !pose.palette_override) {
+                const auto found=texture_overrides->find(render::texture_override_key(*texture));
+                if(found!=texture_overrides->end() && std::has_single_bit(found->second.width) && std::has_single_bit(found->second.height)
+                    && found->second.width<=4096 && found->second.height<=4096) image=&found->second;
+            }
+            if(image) {
+                next.geometry.texels=image->rgba;
+                const float corners[4][2]{{-1,1},{1,1},{1,-1},{-1,-1}};
+                for(unsigned corner:{0U,1U,2U,0U,2U,3U}) {
+                    SceneVertex v{};v.texture[1]=image->width-1;v.texture[2]=image->height-1;v.texture[3]=5U|134217728U|(srgb?2U:0U);
+                    v.billboard[0]=corners[corner][0];v.billboard[1]=corners[corner][1];
+                    v.group_a[0]=float(pose.simple_sprite_world_size);v.group_a[1]=float(pose.z);
+                    v.uv[0]=corners[corner][0]>0?float(image->width):0;v.uv[1]=corners[corner][1]<0?float(image->height):0;
+                    next.geometry.vertices.push_back(v);
+                }
+                output=std::move(next);error.clear();return true;
+            }
             {
                 next.geometry.texels.resize(256);
                 for(unsigned texel=1;texel<256;++texel) {

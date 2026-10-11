@@ -1,5 +1,6 @@
 #pragma once
 #include "starfox/modern/sdl_source_scene.hpp"
+#include "starfox/modern/texture_dump.hpp"
 #include "starfox/vr/frame_layers.hpp"
 #include <optional>
 namespace starfox::modern {
@@ -46,6 +47,8 @@ public:
     // Replacement landscape artwork: <directory>/bg_XXXX_sky.png and
     // bg_XXXX_ground.png (XXXX = background id, hex), loaded once per level.
     void set_texture_directory(std::string directory) {texture_directory_=std::move(directory);}
+    // Writes each planet background's art once (owned by the caller; null = off).
+    void set_texture_dump(TextureDump* dump) noexcept {texture_dump_=dump;}
     // Target size and pixels per source pixel for source line thickness.
     void set_target(unsigned width,unsigned height,unsigned source_pixel) noexcept {
         pipelines_.set_line_brush(source_pixel,width,height);
@@ -61,6 +64,7 @@ private:
     std::vector<vr::DrawPacket> texture_packets_;
     std::optional<uint16_t> texture_background_;
     std::string texture_directory_;
+    TextureDump* texture_dump_{};
     uint32_t texture_mapping_{};
     bool ground_dots_{true};
     std::optional<float> level_horizon_;

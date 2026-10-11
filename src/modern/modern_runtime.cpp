@@ -4,6 +4,7 @@
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <stdexcept>
 #include <string_view>
 namespace starfox::modern {
@@ -50,12 +51,28 @@ struct ModernRuntime::State {
         // drawing over their backing face instead of z-fighting with it.
         vr::set_inset_decals(true);
         vr::set_solid_decals(true);
+        // Replacement model textures (<exe>/textures/tex_*.png) and, with
+        // STARFOX_MODERN_DUMP_TEXTURES=1, a dump of the source artwork in the
+        // same layout (<exe>/texture_dump/).
+        if(const char* base=SDL_GetBasePath()) {
+            overrides=load_texture_overrides(std::string(base)+"textures/");
+            if(!overrides.empty()) models.set_texture_overrides(&overrides);
+            if(const auto* dump_flag=std::getenv("STARFOX_MODERN_DUMP_TEXTURES"); dump_flag && std::string_view(dump_flag)=="1") {
+                dump=std::make_unique<TextureDump>(std::string(base)+"texture_dump/");
+                std::fprintf(stderr,"MODERN texture dump: %s\n",dump->directory().c_str());
+                models.set_texture_observer([this](const assets::TextureImage& texture,const std::array<uint16_t,16>& palette) {
+                    dump->model_texture(texture,palette);
+                });
+            }
+        }
     }
     vr::GameSceneHistory history;
     vr::SourceModels models;
     render::ScaledTextRenderer dialogue_layout;
     simulation::TrigTables trigonometry;
     vr::FrameLayerInputs inputs;
+    render::TextureOverrides overrides;
+    std::unique_ptr<TextureDump> dump;
     SdlFrameRenderer frame;
     SDL_GPUDevice* device{};
     SDL_Renderer* renderer{};
@@ -103,6 +120,7 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
             if(const auto* filter=std::getenv("STARFOX_MODERN_FILTER"); filter && std::string_view(filter)=="0") s.frame.set_filter_2d(false);
             if(const auto* dots=std::getenv("STARFOX_MODERN_GROUND_DOTS"); dots && std::string_view(dots)=="0") s.frame.set_ground_dots(false);
             if(const char* base=SDL_GetBasePath()) s.frame.set_texture_directory(std::string(base)+"textures/");
+            s.frame.set_texture_dump(s.dump.get());
         }
         int width=requested_width,height=requested_height;
         // Default: the window's output, not whatever intermediate target is bound.

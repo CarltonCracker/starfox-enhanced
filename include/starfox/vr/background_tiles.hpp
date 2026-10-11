@@ -76,6 +76,11 @@ struct PhotographicBody {
 // scroll. Roll and camera height are applied per frame with
 // landscape_world_model, so the horizon rotates as geometry instead of
 // 8-pixel offset columns. Model units are camera heights (ground at Y=-1).
+// BG2 art (the whole tile map, wrapping): size in pixels, palette index of
+// one pixel (0 transparent), and an RGBA rectangle (red low byte) for dumps.
+[[nodiscard]] std::array<unsigned,2> bg2_art_size(const simulation::SnesPpuState&) noexcept;
+[[nodiscard]] unsigned bg2_art_index(const simulation::SnesPpuState&,int x,int y) noexcept;
+[[nodiscard]] std::vector<uint32_t> bg2_art_image(const simulation::SnesPpuState&,int x,int y,unsigned width,unsigned height);
 [[nodiscard]] DrawPacket landscape_world_packet(const simulation::SnesPpuState&,
     const BackgroundTileOptions&,float vanishing_y=112,bool srgb=false,bool classic_ground_scroll=false,
     std::optional<float> level_horizon={});

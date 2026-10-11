@@ -204,12 +204,15 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             background_inputs.bg3_scroll_fraction=presentation.bg3_fraction;
             background_inputs.mode2_horizon=presentation.mode2_horizon;
             // Level horizon: the art horizon with the cartridge's pitch shift
-            // (-tan(pitch) x 256 rows) removed; measured directly whenever
-            // the camera is level and held per background.
+            // (-tan(pitch) x 256 rows) removed, measured once per background.
+            // Later art shifts become the landscape's geometric pitch (below),
+            // including cinematic ones that leave the camera pitch at zero
+            // (Corneria's clear: re-measuring there put the clouds on the
+            // horizon and sank the mountains under the ground).
             if(inputs.landscape_world && scene.background_landscape && scene.ppu) {
                 const float art=vr::landscape_art_horizon(*scene.ppu,float(scene.source_vanishing_point[1])+16.F);
                 const double pitch=double(int16_t(scene.camera.pitch))*(2*3.14159265358979323846/65536.);
-                if(scene.camera.pitch==0 || !level_horizon_ || level_background_!=scene.background_id) {
+                if(!level_horizon_ || level_background_!=scene.background_id) {
                     level_horizon_=float(art+std::tan(pitch)*256.);level_background_=scene.background_id;
                 }
                 background_inputs.landscape_horizon=level_horizon_;
@@ -280,6 +283,17 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             double pitch=double(int16_t(previous.camera.pitch))+pitch_delta*a;
             pitch-=65536.*std::floor((pitch+32768.)/65536.);
             landscape.pitch=pitch_sign*pitch*(2*3.14159265358979323846/65536.);
+            // The pitch the cartridge actually presents: its display-rate art
+            // horizon against the level horizon (equal to the camera pitch in
+            // ordinary flight, where the art shift is -tan(pitch) x 256 rows).
+            if(level_horizon_ && current.ppu && current.background_landscape && level_background_==current.background_id) {
+                const auto& ppu=presentation.ppu?*presentation.ppu:*current.ppu;
+                const float vanishing=float(current.source_vanishing_point[1])+16.F;
+                float art=vr::landscape_art_horizon(ppu,vanishing);
+                if(presentation.mode2_horizon && ppu.background_mode==2 && ppu.bg2_vertical_offsets_enabled)
+                    art=vanishing+(*presentation.mode2_horizon)[0]+(*presentation.mode2_horizon)[1]*float(128+(ppu.bg2_scroll_x&7))/8.F;
+                landscape.pitch=pitch_sign*std::atan((double(*level_horizon_)-double(art))/256.);
+            }
             landscape.height=std::lerp(double(previous.shadow_height)-previous.camera.y,
                 double(current.shadow_height)-current.camera.y,a);
             const auto blend=[&](int32_t before,int32_t now) {

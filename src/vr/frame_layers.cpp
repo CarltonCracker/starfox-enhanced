@@ -126,6 +126,10 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
                 space_options.scroll_fraction,space_options.mode2_horizon);
             if(snapshot->background_ex_face_planets && !bg2.geometry.texels.empty()) bg2.geometry.texels[7]|=256U;
         }
+        else if(!snapshot->ppu->tunnel_scene && snapshot->background_space_horizon && in.flat_space_horizon) {
+            bg2=background_tile_packet(*snapshot->ppu,BackgroundLayer::bg2,space_options,srgb);
+            bg2.model=packet.model;
+        }
         else if(!snapshot->ppu->tunnel_scene && snapshot->background_space_horizon)
             bg2=snapshot->background_orbital_planet
                 ?orbital_planet_sphere_packet(*snapshot->ppu,background_options,srgb,snapshot->background_orbital_thin,snapshot->background_orbital_entry,
@@ -258,7 +262,7 @@ uint32_t landscape_dot_colour(const GameSceneSnapshot& scene) noexcept {
     return uint32_t(c.r)|(uint32_t(c.g)<<8)|(uint32_t(c.b)<<16)|0xff000000U;
 }
 bool space_background_roll(const GameSceneSnapshot& scene) noexcept {
-    return scene.ppu && !scene.ppu->tunnel_scene && !scene.background_orbital_planet
+    return scene.ppu && !scene.ppu->tunnel_scene
         && (scene.background_star_sphere || scene.background_space_horizon || scene.background_unique_space);
 }
 std::vector<Matrix4> frame_background_models(std::span<const DrawPacket> uploaded_backgrounds,
@@ -273,7 +277,7 @@ std::vector<Matrix4> frame_background_models(std::span<const DrawPacket> uploade
     if(!snapshot->ppu) return model_updates;
     // Each block below recomputes the full list from base models, so a later
     // matching block replaces an earlier one, exactly as the PCVR loop does.
-    if(snapshot->background_orbital_planet && !snapshot->ppu->tunnel_scene && before->ppu) {
+    if(snapshot->background_orbital_planet && !snapshot->ppu->tunnel_scene && before->ppu && !in.flat_space_horizon) {
         const bool continuous=before->background_orbital_planet && before->flow==snapshot->flow
             && before->background_id==snapshot->background_id
             && !timing::camera_transform_is_discontinuous(before->camera,snapshot->camera);

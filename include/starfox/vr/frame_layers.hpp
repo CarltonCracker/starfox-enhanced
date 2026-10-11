@@ -65,6 +65,12 @@ struct FrameLayerInputs {
     // the renderer applies the real camera roll as geometry instead
     // (space_background_roll).
     bool space_roll_geometry{};
+    // Flat (SNES-camera) views: draw space horizons and orbital planets as the
+    // native BG2 layer (widescreen-extended) instead of VR's sphere mapping,
+    // whose 512 texel/radian pitch and below-horizon remap misplace and
+    // magnify the planet band on a flat screen. Roll still applies as geometry
+    // with space_roll_geometry.
+    bool flat_space_horizon{};
     // With landscape_world: draw the ground dots on the 3D ground plane
     // (anchored, anti-aliased, out to the horizon) instead of the native
     // lattice; the renderer drops the grid packet.

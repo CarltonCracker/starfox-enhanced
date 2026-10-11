@@ -40,6 +40,7 @@ struct ModernRuntime::State {
         inputs.tunnel_corridor=true;
         inputs.vector_reticle=true;
         inputs.space_roll_geometry=true;
+        inputs.flat_space_horizon=true;
         inputs.landscape_ground_dots=!(std::getenv("STARFOX_MODERN_GROUND_DOTS") && std::string_view(std::getenv("STARFOX_MODERN_GROUND_DOTS"))=="0");
         // STARFOX_MODERN_LANDSCAPE=0 keeps the native BG2 planet layer.
         const auto* landscape=std::getenv("STARFOX_MODERN_LANDSCAPE");

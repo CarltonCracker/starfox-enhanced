@@ -124,11 +124,12 @@ bool SdlFrameRenderer::initialize(SDL_GPUDevice* device,SDL_GPUTextureFormat col
     device_=device;status_="MODERN frame ready";return true;
 }
 void SdlFrameRenderer::release() noexcept {
-    for(auto* packets:{&stars_,&backgrounds_,&tunnel_,&cockpit_,&sprites_,&reticle_,&circle_,&shutter_,&textures_}) packets->release();
+    for(auto* packets:{&stars_,&backgrounds_,&tunnel_,&cockpit_,&sprites_,&reticle_,&circle_,&shutter_,&textures_,&colour_math_}) packets->release();
     texture_packets_.clear();texture_background_.reset();
     world_.release();uploads_.release();pipelines_.release();
     background_packets_.clear();layer_revision_.reset();circle_blend_.reset();background_interpolated_=false;
     circle_active_=circle_over_hud_=shutter_active_=cockpit_active_=reticle_active_=false;device_=nullptr;
+    colour_math_active_=colour_math_over_hud_=false;colour_math_blend_.reset();
 }
 bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameSceneSnapshot& previous,
     const vr::GameSceneSnapshot& current,double alpha,vr::SourceModelPackets world,const vr::FrameLayerInputs& inputs) {
@@ -234,7 +235,7 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             background_interpolated_=interpolated;
         }
         static const bool trace=std::getenv("STARFOX_TRACE_MODERN")!=nullptr;
-        if(trace) std::fprintf(stderr,"modern-frame tick=%llu alpha=%.3f background=%s vp=%d,%d bg2=%d,%d vscroll=%d grid=%d atlas=%u hudrot=%04x mode=%u flags=%s%s%s%s%s%s roll=%d\n",
+        if(trace) std::fprintf(stderr,"modern-frame tick=%llu alpha=%.3f background=%s vp=%d,%d bg2=%d,%d vscroll=%d grid=%d atlas=%u hudrot=%04x mode=%u flags=%s%s%s%s%s%s roll=%d math=%d:%02x:%u,%u,%u%s%s bright=%u\n",
             static_cast<unsigned long long>(current.revision),alpha,
             presentation.ppu?"interpolated":new_tick?"tick":"retained",
             int(current.source_vanishing_point[0]),int(current.source_vanishing_point[1]),
@@ -244,7 +245,9 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             current.background_star_sphere?"star_sphere ":"",current.background_space_horizon?"space_horizon ":"",
             current.background_unique_space?"unique_space ":"",current.background_landscape?"landscape ":"",
             current.ppu && current.ppu->tunnel_scene?"tunnel ":"",current.background_orbital_planet?"orbital ":"",
-            int(int16_t(current.camera.roll)));
+            int(int16_t(current.camera.roll)),int(current.colour_math.active),unsigned(current.colour_math.affected_layers),
+            unsigned(current.colour_math.red),unsigned(current.colour_math.green),unsigned(current.colour_math.blue),
+            current.colour_math.subtract?" sub":"",current.colour_math.half?" half":"",unsigned(current.display_brightness));
         if(trace && new_tick && current.ppu && current.background_landscape) {
             const auto fit=mode2_horizon_fit(*current.ppu);
             std::fprintf(stderr,"landscape world=%d vofs=%d hofs=%d flow=%d bg=%04x mode=%u shadow=%d dots=%d camera=%d,%d,%d pyr=%u,%u,%u scroll=%d,%d horizon=%.2f,%.4f grid=%d origin=%u\n",
@@ -410,6 +413,17 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
                 float(current.source_vanishing_point[1])+16.F).value();
             require(circle_.initialize(device_,uploads_,std::span(&circle,1),{},false,false,circle_blend_),circle_.status());
         }
+        // Fixed-colour math (the turquoise/red damage flash and scripted
+        // full-screen flashes): the whole frame below OBJ unless OBJ is included.
+        auto colour_math=vr::source_colour_math_packet(current.colour_math,inputs.srgb);
+        colour_math_active_=!colour_math.geometry.vertices.empty();
+        if(colour_math_active_) {
+            const auto& effect=current.colour_math;
+            colour_math_over_hud_=(effect.affected_layers&0x10U)!=0;
+            colour_math_blend_=effect.subtract?(effect.half?SceneBlend::half_subtract:SceneBlend::subtract)
+                :(effect.half?SceneBlend::half_add:SceneBlend::add);
+            require(colour_math_.initialize(device_,uploads_,std::span(&colour_math,1),{},false,false,colour_math_blend_),colour_math_.status());
+        }
         auto shutter=vr::source_shutter_packet(previous.wipe,current.wipe,alpha);
         shutter_active_=!shutter.geometry.vertices.empty();
         if(shutter_active_) require(shutter_.initialize(device_,uploads_,std::span(&shutter,1),{},false),shutter_.status());
@@ -451,9 +465,14 @@ bool SdlFrameRenderer::record(SDL_GPUCommandBuffer* command,SDL_GPURenderPass* p
     if(!world_.record(command,pass,pipelines_,camera)) return fail("world");
     if(cockpit_active_ && !cockpit_.record(command,pass,pipelines_,camera)) return fail("cockpit HUD");
     if(circle_active_ && !circle_over_hud_ && !circle_.record(command,pass,pipelines_,camera)) return fail("circle");
+    const vr::Matrix4 ndc{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    if(colour_math_active_ && !colour_math_over_hud_ && !colour_math_.record(command,pass,pipelines_,vr::EyeCamera{ndc,ndc}))
+        return fail("colour math");
     if(!sprites_.record(command,pass,pipelines_,camera)) return fail("sprite");
     if(reticle_active_ && !reticle_.record(command,pass,pipelines_,camera)) return fail("reticle");
     if(circle_active_ && circle_over_hud_ && !circle_.record(command,pass,pipelines_,camera)) return fail("circle");
+    if(colour_math_active_ && colour_math_over_hud_ && !colour_math_.record(command,pass,pipelines_,vr::EyeCamera{ndc,ndc}))
+        return fail("colour math");
     if(shutter_active_) {
         // Head-locked normalized-device shutter: identity view and projection.
         const vr::Matrix4 identity{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};

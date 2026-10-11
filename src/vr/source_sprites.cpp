@@ -157,6 +157,23 @@ DrawPacket source_portrait_packet(const assets::RomImage& rom,const assets::Symb
     }
     return packet;
 }
+DrawPacket source_colour_math_packet(const simulation::ColourMathEffectState& effect,bool srgb) {
+    DrawPacket packet;
+    if(!effect.active || effect.affected_layers==0U) return packet;
+    const auto channel=[srgb](std::uint8_t value) {
+        const double v=double(((value&31U)<<3U)|((value&31U)>>2U))/255.;
+        return float(srgb?(v<=.04045?v/12.92:std::pow((v+.055)/1.055,2.4)):v);
+    };
+    const float colour[4]{channel(effect.red),channel(effect.green),channel(effect.blue),1};
+    const float corners[4][2]{{-1,-1},{1,-1},{1,1},{-1,1}};
+    for(unsigned corner:{0U,1U,2U,0U,2U,3U}) {
+        SceneVertex vertex{};
+        vertex.position[0]=corners[corner][0];vertex.position[1]=corners[corner][1];
+        for(unsigned c=0;c<4;++c) vertex.color[c]=vertex.odd_color[c]=colour[c];
+        packet.geometry.vertices.push_back(vertex);
+    }
+    return packet;
+}
 DrawPacket source_shutter_packet(const simulation::WindowWipeState& previous,
     const simulation::WindowWipeState& current,double alpha) {
     if(!std::isfinite(alpha)) throw std::invalid_argument("Invalid shutter interpolation");

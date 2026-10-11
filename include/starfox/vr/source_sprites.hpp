@@ -3,7 +3,7 @@
 #include "starfox/simulation/snes_ppu.hpp"
 #include <optional>
 #include <string_view>
-namespace starfox::simulation { class TrigTables; struct MeterState; struct CircleEffectState; struct WindowWipeState; struct DialogueState; }
+namespace starfox::simulation { class TrigTables; struct MeterState; struct CircleEffectState; struct WindowWipeState; struct DialogueState; struct ColourMathEffectState; }
 namespace starfox::render { struct HudLayout; class ScaledTextRenderer; }
 namespace starfox::vr {
 struct FrameMenu;
@@ -29,6 +29,10 @@ enum class SourceSpritePass {all,world,hud,all_but_reticle};
     unsigned brightness=15,bool srgb=false);
 // Head-locked normalized-device shutter. Render last, without depth, using
 // identity view/projection so each eye's entire viewport is covered.
+// Full-screen fixed colour for ColourMathEffectState, in normalized device
+// coordinates (draw with an identity camera and the effect's add/subtract,
+// optionally halved, blend). Empty when the effect is off.
+[[nodiscard]] DrawPacket source_colour_math_packet(const simulation::ColourMathEffectState&,bool srgb=false);
 [[nodiscard]] DrawPacket source_shutter_packet(const simulation::WindowWipeState& previous,
     const simulation::WindowWipeState& current,double alpha);
 [[nodiscard]] DrawPacket source_unicode_ui_text_packet(const assets::RomImage&,const assets::SymbolMap&,

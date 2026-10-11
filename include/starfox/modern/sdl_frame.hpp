@@ -60,7 +60,7 @@ private:
     SDL_GPUDevice* device_{};
     SdlScenePipelines pipelines_;
     SdlUploadBatch uploads_;
-    SdlDrawPackets stars_,backgrounds_,tunnel_,cockpit_,sprites_,reticle_,circle_,shutter_,textures_;
+    SdlDrawPackets stars_,backgrounds_,tunnel_,cockpit_,sprites_,reticle_,circle_,shutter_,textures_,colour_math_;
     std::vector<vr::DrawPacket> texture_packets_;
     std::optional<uint16_t> texture_background_;
     std::string texture_directory_;
@@ -74,6 +74,8 @@ private:
     std::vector<vr::DrawPacket> background_packets_;
     std::optional<uint64_t> layer_revision_;
     std::optional<SceneBlend> circle_blend_;
+    bool colour_math_active_{},colour_math_over_hud_{};
+    std::optional<SceneBlend> colour_math_blend_;
     bool circle_active_{},circle_over_hud_{},shutter_active_{},background_interpolated_{},cockpit_active_{},reticle_active_{},filter_2d_{true};
     std::string status_{"MODERN frame not initialized"};
 };

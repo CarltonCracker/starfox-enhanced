@@ -74,6 +74,8 @@ struct GameSceneSnapshot {
     simulation::DialogueState dialogue;
     bool paused{};
     simulation::CircleEffectState circle;
+    // TRANS.ASM fixed-colour math (damage flash, scripted full-screen flashes).
+    simulation::ColourMathEffectState colour_math;
     simulation::WindowWipeState wipe;
     bool native_ex_bitmap{};
     bool ex_title_logo_screen{};

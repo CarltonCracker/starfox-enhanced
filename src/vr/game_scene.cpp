@@ -397,6 +397,7 @@ void GameSceneHistory::capture() {
         for(const auto id:ex_star_backgrounds_) if(id && id==next->background_id)
             next->background_star_sphere=true;
     next->circle=game_.circle_effect_state();
+    next->colour_math=game_.colour_math_effect_state();
     next->ex_title_logo_screen=next->meters.extended
         && next->flow==simulation::GameFlowState::title
         && ex_title_intro_background_!=0

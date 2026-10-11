@@ -60,6 +60,11 @@ struct FrameLayerInputs {
     bool landscape_world{};
     // With landscape_world: stream the classic ground's bands with the world.
     bool classic_ground_scroll{};
+    // Space star/horizon spheres: drop the Mode 2 column slope (the
+    // cartridge's roll shear) and keep only its height at the screen centre;
+    // the renderer applies the real camera roll as geometry instead
+    // (space_background_roll).
+    bool space_roll_geometry{};
     // The level's unpitched horizon art row (the renderer applies camera
     // pitch as geometry); empty = this tick's pitched art horizon.
     std::optional<float> landscape_horizon;
@@ -74,6 +79,9 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot&,const FrameLayerInput
 std::array<float,4> frame_clear_colour(const GameSceneSnapshot&,bool srgb);
 // Display-rate background transforms between two snapshots, in the order the
 // PCVR application applies them. One matrix per nonempty background packet.
+// Space backgrounds (star sphere, space horizon, unique planet) whose roll
+// the renderer applies as geometry when FrameLayerInputs::space_roll_geometry.
+[[nodiscard]] bool space_background_roll(const GameSceneSnapshot&) noexcept;
 std::vector<Matrix4> frame_background_models(std::span<const DrawPacket> backgrounds,
     const GameSceneSnapshot& previous,const GameSceneSnapshot& current,double alpha,const FrameLayerInputs&);
 }

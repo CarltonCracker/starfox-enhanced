@@ -161,7 +161,8 @@ struct BackgroundTileOptions {
 // Original intro DEMO atlas: its upper 256 rows contain stars only.
 [[nodiscard]] DrawPacket intro_star_sphere_packet(const simulation::SnesPpuState&,
     unsigned brightness=15,bool srgb=false,bool full_atlas=false,bool upper_left_only=false,
-    bool retain_source_scroll=false);
+    bool retain_source_scroll=false,std::optional<std::array<float,2>> scroll_fraction={},
+    std::optional<std::array<float,2>> mode2_horizon={});
 [[nodiscard]] DrawPacket game_over_star_sphere_packet(const simulation::SnesPpuState&,
     unsigned brightness=15,unsigned colour_subtract=0,bool srgb=false);
 // Cut out only exterior black ink; enclosed black facial details stay opaque.

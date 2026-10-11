@@ -111,20 +111,26 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
         plain_options.scroll_fraction=in.bg2_scroll_fraction;
         // (A 3D corridor replaces the native tunnel layer below.)
         if(snapshot->ppu->background_mode==2) plain_options.mode2_horizon=in.mode2_horizon;
+        auto space_options=plain_options;
+        if(in.space_roll_geometry && space_background_roll(*snapshot) && space_options.mode2_horizon) {
+            const auto [intercept,slope]=*space_options.mode2_horizon;
+            space_options.mode2_horizon=std::array<float,2>{intercept+slope*float(128+(snapshot->ppu->bg2_scroll_x&7))/8.F,0.F};
+        }
         auto bg2=background_tile_packet(*snapshot->ppu,BackgroundLayer::bg2,plain_options,srgb);
         if(intro_sky)
             bg2=intro_planet_packet(*snapshot->ppu,snapshot->display_brightness,srgb);
         else if(!snapshot->ppu->tunnel_scene && snapshot->background_unique_space)
             bg2=unique_planet_packet(*snapshot->ppu,background_options,snapshot->background_planet_rect,srgb);
         else if(!snapshot->ppu->tunnel_scene && snapshot->background_star_sphere) {
-            bg2=intro_star_sphere_packet(*snapshot->ppu,snapshot->display_brightness,srgb,true,false,snapshot->background_retain_sky_scroll);
+            bg2=intro_star_sphere_packet(*snapshot->ppu,snapshot->display_brightness,srgb,true,false,snapshot->background_retain_sky_scroll,
+                space_options.scroll_fraction,space_options.mode2_horizon);
             if(snapshot->background_ex_face_planets && !bg2.geometry.texels.empty()) bg2.geometry.texels[7]|=256U;
         }
         else if(!snapshot->ppu->tunnel_scene && snapshot->background_space_horizon)
             bg2=snapshot->background_orbital_planet
                 ?orbital_planet_sphere_packet(*snapshot->ppu,background_options,srgb,snapshot->background_orbital_thin,snapshot->background_orbital_entry,
                     snapshot->flow==simulation::GameFlowState::gameplay && in.ex_experience)
-                :space_horizon_sphere_packet(*snapshot->ppu,background_options,srgb);
+                :space_horizon_sphere_packet(*snapshot->ppu,space_options,srgb);
         else if(!snapshot->ppu->tunnel_scene && snapshot->background_landscape && in.landscape_world)
             bg2=landscape_world_packet(*snapshot->ppu,plain_options,float(snapshot->source_vanishing_point[1])+16.F,srgb,
                 in.classic_ground_scroll,in.landscape_horizon);
@@ -243,6 +249,10 @@ std::array<float,4> frame_clear_colour(const GameSceneSnapshot& scene,bool srgb)
             || snapshot->background_star_sphere || snapshot->background_space_horizon
         ?source_background_border_colour(snapshot->ppu->cgram,snapshot->display_brightness,srgb)
         :source_backdrop_colour(snapshot->ppu->cgram[0],snapshot->display_brightness,srgb);
+}
+bool space_background_roll(const GameSceneSnapshot& scene) noexcept {
+    return scene.ppu && !scene.ppu->tunnel_scene && !scene.background_orbital_planet
+        && (scene.background_star_sphere || scene.background_space_horizon || scene.background_unique_space);
 }
 std::vector<Matrix4> frame_background_models(std::span<const DrawPacket> uploaded_backgrounds,
     const GameSceneSnapshot& previous,const GameSceneSnapshot& current,double alpha,const FrameLayerInputs& in) {

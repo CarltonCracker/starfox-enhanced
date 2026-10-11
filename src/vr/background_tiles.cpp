@@ -543,8 +543,11 @@ std::array<float,4> source_menu_background_colour(const simulation::SnesPpuState
     decoder.draw_bg2(ppu,ppu.bg2_scroll_x,ppu.bg2_scroll_y,corner);
     return source_backdrop_colour(ppu.cgram[corner.get(0,0)],brightness,srgb);
 }
-DrawPacket intro_star_sphere_packet(const simulation::SnesPpuState& ppu,unsigned brightness,bool srgb,bool full_atlas,bool upper_left_only,bool retain_source_scroll) {
+DrawPacket intro_star_sphere_packet(const simulation::SnesPpuState& ppu,unsigned brightness,bool srgb,bool full_atlas,bool upper_left_only,bool retain_source_scroll,
+    std::optional<std::array<float,2>> scroll_fraction,std::optional<std::array<float,2>> mode2_horizon) {
     BackgroundTileOptions options;options.brightness=brightness;options.transparent_black=true;
+    // Flat presentation: display-rate scroll and Mode 2 tilt (roll).
+    if(retain_source_scroll) {options.scroll_fraction=scroll_fraction;options.mode2_horizon=mode2_horizon;}
     auto packet=background_tile_packet(ppu,BackgroundLayer::bg2,options,srgb);
     if(packet.geometry.vertices.empty()) return packet;
     packet.geometry.vertices.clear();

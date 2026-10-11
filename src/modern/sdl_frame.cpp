@@ -218,13 +218,17 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             background_interpolated_=interpolated;
         }
         static const bool trace=std::getenv("STARFOX_TRACE_MODERN")!=nullptr;
-        if(trace) std::fprintf(stderr,"modern-frame tick=%llu alpha=%.3f background=%s vp=%d,%d bg2=%d,%d vscroll=%d grid=%d atlas=%u hudrot=%04x\n",
+        if(trace) std::fprintf(stderr,"modern-frame tick=%llu alpha=%.3f background=%s vp=%d,%d bg2=%d,%d vscroll=%d grid=%d atlas=%u hudrot=%04x mode=%u flags=%s%s%s%s%s%s roll=%d\n",
             static_cast<unsigned long long>(current.revision),alpha,
             presentation.ppu?"interpolated":new_tick?"tick":"retained",
             int(current.source_vanishing_point[0]),int(current.source_vanishing_point[1]),
             current.ppu?int(current.ppu->bg2_scroll_x):0,current.ppu?int(current.ppu->bg2_scroll_y):0,
             int(current.background_vertical_scroll),int(current.landscape_grid_height),unsigned(current.landscape_atlas_origin),
-            unsigned(current.cockpit_hud_roll));
+            unsigned(current.cockpit_hud_roll),current.ppu?unsigned(current.ppu->background_mode):0U,
+            current.background_star_sphere?"star_sphere ":"",current.background_space_horizon?"space_horizon ":"",
+            current.background_unique_space?"unique_space ":"",current.background_landscape?"landscape ":"",
+            current.ppu && current.ppu->tunnel_scene?"tunnel ":"",current.background_orbital_planet?"orbital ":"",
+            int(int16_t(current.camera.roll)));
         if(trace && new_tick && current.ppu && current.background_landscape) {
             const auto fit=mode2_horizon_fit(*current.ppu);
             std::fprintf(stderr,"landscape world=%d vofs=%d hofs=%d flow=%d bg=%04x mode=%u shadow=%d dots=%d camera=%d,%d,%d pyr=%u,%u,%u scroll=%d,%d horizon=%.2f,%.4f grid=%d origin=%u\n",
@@ -281,6 +285,13 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
             };
             landscape.x=continuous?blend(previous.camera.x,current.camera.x):double(current.camera.x);
             landscape.z=continuous?blend(previous.camera.z,current.camera.z):double(current.camera.z);
+        }
+        // Space backgrounds: the real camera roll as geometry around the view
+        // axis (the vanishing point), like the planet landscape, instead of
+        // the cartridge's 20 Hz Mode 2 column shear.
+        if(inputs.space_roll_geometry && vr::space_background_roll(current)) {
+            const auto roll=vr::landscape_world_model(landscape.roll,0,256.);
+            for(auto& model:background_models) model=vr::multiply_matrix(roll,model);
         }
         // The 3D tunnel corridor follows the display-rate camera Z.
         model_index=0;

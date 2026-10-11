@@ -65,6 +65,10 @@ struct FrameLayerInputs {
     // the renderer applies the real camera roll as geometry instead
     // (space_background_roll).
     bool space_roll_geometry{};
+    // With landscape_world: draw the ground dots on the 3D ground plane
+    // (anchored, anti-aliased, out to the horizon) instead of the native
+    // lattice; the renderer drops the grid packet.
+    bool landscape_ground_dots{};
     // The level's unpitched horizon art row (the renderer applies camera
     // pitch as geometry); empty = this tick's pitched art horizon.
     std::optional<float> landscape_horizon;
@@ -82,6 +86,8 @@ std::array<float,4> frame_clear_colour(const GameSceneSnapshot&,bool srgb);
 // Space backgrounds (star sphere, space horizon, unique planet) whose roll
 // the renderer applies as geometry when FrameLayerInputs::space_roll_geometry.
 [[nodiscard]] bool space_background_roll(const GameSceneSnapshot&) noexcept;
+// The ground dots' colour (model palette 14 with the display fade), RGBA.
+[[nodiscard]] uint32_t landscape_dot_colour(const GameSceneSnapshot&) noexcept;
 std::vector<Matrix4> frame_background_models(std::span<const DrawPacket> backgrounds,
     const GameSceneSnapshot& previous,const GameSceneSnapshot& current,double alpha,const FrameLayerInputs&);
 }

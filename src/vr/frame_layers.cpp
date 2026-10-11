@@ -133,7 +133,8 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
                 :space_horizon_sphere_packet(*snapshot->ppu,space_options,srgb);
         else if(!snapshot->ppu->tunnel_scene && snapshot->background_landscape && in.landscape_world)
             bg2=landscape_world_packet(*snapshot->ppu,plain_options,float(snapshot->source_vanishing_point[1])+16.F,srgb,
-                in.classic_ground_scroll,in.landscape_horizon);
+                in.classic_ground_scroll,in.landscape_horizon,in.landscape_ground_dots && snapshot->dots_mode>0 && !snapshot->grid_lines
+                    ?std::optional<uint32_t>(landscape_dot_colour(*snapshot)):std::nullopt);
         else if(!snapshot->ppu->tunnel_scene && snapshot->background_landscape && !in.flat_landscape) {
             bg2=landscape_sphere_packet(*snapshot->ppu,background_options,
                 112.F,srgb,snapshot->background_landscape_unique_half,snapshot->landscape_atlas_origin,
@@ -249,6 +250,12 @@ std::array<float,4> frame_clear_colour(const GameSceneSnapshot& scene,bool srgb)
             || snapshot->background_star_sphere || snapshot->background_space_horizon
         ?source_background_border_colour(snapshot->ppu->cgram,snapshot->display_brightness,srgb)
         :source_backdrop_colour(snapshot->ppu->cgram[0],snapshot->display_brightness,srgb);
+}
+uint32_t landscape_dot_colour(const GameSceneSnapshot& scene) noexcept {
+    // The native grid material: model palette colour 14, with the display fade.
+    std::array<uint16_t,256> words{};words[0]=scene.model_palette[14];
+    const auto c=render::apply_snes_brightness(render::decode_bgr555_palette(words),scene.display_brightness)[0];
+    return uint32_t(c.r)|(uint32_t(c.g)<<8)|(uint32_t(c.b)<<16)|0xff000000U;
 }
 bool space_background_roll(const GameSceneSnapshot& scene) noexcept {
     return scene.ppu && !scene.ppu->tunnel_scene && !scene.background_orbital_planet

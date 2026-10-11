@@ -152,7 +152,9 @@ bool SdlFrameRenderer::prepare(SDL_GPUCommandBuffer* command,const vr::GameScene
         // ground; keep them over the 3D landscape ground unless switched off.
         const bool landscape_world=inputs.landscape_world && current.background_landscape && current.ppu
             && !current.ppu->tunnel_scene;
-        if(landscape_world && !ground_dots_ && !current.grid_lines) {
+        // With dots on, the landscape ground draws them itself (anchored to
+        // the 3D ground); the native lattice is dropped either way.
+        if(landscape_world && !current.grid_lines) {
             const auto grid=std::find(world.handles.begin(),world.handles.end(),0x30000U);
             if(grid!=world.handles.end()) {
                 const auto index=std::size_t(grid-world.handles.begin());
@@ -406,6 +408,8 @@ vr::EyeCamera reversed_depth_camera(vr::EyeCamera camera) noexcept {
 bool SdlFrameRenderer::record(SDL_GPUCommandBuffer* command,SDL_GPURenderPass* pass,const vr::EyeCamera& source_camera) {
     auto camera=reversed_depth_camera(source_camera);
     if(filter_2d_) camera.effects[3]|=1U;
+    // Output pixels per source pixel, 4.4 fixed point (bits 8-19): ground dots.
+    camera.effects[3]|=uint32_t(std::clamp(source_pixel_*16.F,16.F,4095.F))<<8;
     const auto fail=[&](const char* layer) {status_=std::string("MODERN ")+layer+" recording failed: "+pipelines_.status();return false;};
     if(!stars_.record(command,pass,pipelines_,camera)) return fail("star");
     if(!backgrounds_.record(command,pass,pipelines_,camera)) return fail("background");

@@ -40,6 +40,7 @@ struct ModernRuntime::State {
         inputs.tunnel_corridor=true;
         inputs.vector_reticle=true;
         inputs.space_roll_geometry=true;
+        inputs.landscape_ground_dots=!(std::getenv("STARFOX_MODERN_GROUND_DOTS") && std::string_view(std::getenv("STARFOX_MODERN_GROUND_DOTS"))=="0");
         // STARFOX_MODERN_LANDSCAPE=0 keeps the native BG2 planet layer.
         const auto* landscape=std::getenv("STARFOX_MODERN_LANDSCAPE");
         inputs.landscape_world=!(landscape && std::string_view(landscape)=="0");
@@ -119,7 +120,6 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
                 SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET)?SDL_GPU_TEXTUREFORMAT_D32_FLOAT:SDL_GPU_TEXTUREFORMAT_D16_UNORM;
             require(s.frame.initialize(device,target_format,s.depth_format),s.frame.status());
             if(const auto* filter=std::getenv("STARFOX_MODERN_FILTER"); filter && std::string_view(filter)=="0") s.frame.set_filter_2d(false);
-            if(const auto* dots=std::getenv("STARFOX_MODERN_GROUND_DOTS"); dots && std::string_view(dots)=="0") s.frame.set_ground_dots(false);
             if(const char* base=SDL_GetBasePath()) s.frame.set_texture_directory(std::string(base)+"textures/");
             s.frame.set_texture_dump(s.dump.get());
         }

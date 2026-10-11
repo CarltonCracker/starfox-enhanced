@@ -253,7 +253,7 @@ std::vector<uint32_t> bg2_art_image(const simulation::SnesPpuState& ppu,int x,in
 }
 DrawPacket landscape_world_packet(const simulation::SnesPpuState& ppu,
     const BackgroundTileOptions& options,float vanishing_y,bool srgb,bool classic_ground_scroll,
-    std::optional<float> level_horizon) {
+    std::optional<float> level_horizon,std::optional<uint32_t> ground_dot_colour) {
     auto plain=options;plain.scroll_fraction.reset();plain.mode2_horizon.reset();
     plain.expanded_horizontal=false;plain.scroll_override.reset();
     auto packet=background_tile_packet(ppu,BackgroundLayer::bg2,plain,srgb);
@@ -330,6 +330,9 @@ DrawPacket landscape_world_packet(const simulation::SnesPpuState& ppu,
                 |(uint32_t(std::lround(value[2]))<<16)|0xff000000U);
         }
     }
+    // Ground dots drawn on the 3D ground plane itself (RGBA, alpha 0 = none):
+    // the cartridge's 256-unit lattice, anchored to the world.
+    data.push_back(ground_dot_colour.value_or(0U));
     // Geometry: a dome (64 x 32) then the ground plane at Y = -1; drawn in
     // that order without depth so the ground covers the dome's lower half.
     auto& vertices=packet.geometry.vertices;vertices.clear();
@@ -371,9 +374,11 @@ float landscape_art_horizon(const simulation::SnesPpuState& ppu,float vanishing_
     }
     return float(double(vanishing_y)+offset);
 }
+// Tile payload, horizon/centre/rows/classic/cell, 112 haze rows, dot colour.
+constexpr std::size_t landscape_world_texels=272+16384+6+112+1;
 bool is_landscape_world(const DrawPacket& packet) noexcept {
     const auto texels=packet.geometry.texel_view();
-    return texels.size()==272+16384+6+112 && texels[7]==4096U && !packet.geometry.vertex_view().empty();
+    return texels.size()==landscape_world_texels && texels[7]==4096U && !packet.geometry.vertex_view().empty();
 }
 DrawPacket landscape_ground_packet(const DrawPacket& world) {
     DrawPacket packet;
@@ -392,7 +397,7 @@ DrawPacket landscape_ground_packet(const DrawPacket& world) {
 }
 bool is_landscape_ground(const DrawPacket& packet) noexcept {
     const auto texels=packet.geometry.texel_view();
-    return texels.size()==272+16384+6+112 && texels[7]==(4096U|16384U) && !packet.geometry.vertex_view().empty();
+    return texels.size()==landscape_world_texels && texels[7]==(4096U|16384U) && !packet.geometry.vertex_view().empty();
 }
 namespace {
 // Rz(roll) * Rx(pitch) * uniform scale * translation, column-major.

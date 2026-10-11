@@ -83,7 +83,7 @@ struct PhotographicBody {
 [[nodiscard]] std::vector<uint32_t> bg2_art_image(const simulation::SnesPpuState&,int x,int y,unsigned width,unsigned height);
 [[nodiscard]] DrawPacket landscape_world_packet(const simulation::SnesPpuState&,
     const BackgroundTileOptions&,float vanishing_y=112,bool srgb=false,bool classic_ground_scroll=false,
-    std::optional<float> level_horizon={});
+    std::optional<float> level_horizon={},std::optional<uint32_t> ground_dot_colour={});
 // Art row of the true horizon this tick (vanishing row + Mode 2 offset line
 // at the centre column, or BG2 vertical scroll), including the cartridge's
 // pitch shift.

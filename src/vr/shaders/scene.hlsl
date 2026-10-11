@@ -652,11 +652,27 @@ float3 unrolled_camera_offset(float3 p) {
     float3 column=float3(a[0][0],a[1][0],a[2][0]);
     return p+mul(t,a)/dot(column,column);
 }
+// Integral of a square wave that is 1 over the upper half of each period.
+float square_wave_integral(float x,float period) {
+    float cycles=floor(x/period);
+    return cycles*period*.5+max(0.,x-cycles*period-period*.5);
+}
+// Average of that square wave over one pixel's footprint: stripes that get
+// thinner than a pixel near the horizon blend to grey instead of flickering.
+float square_wave_box(float x,float period,float footprint) {
+    footprint=max(footprint,1e-3);
+    return saturate((square_wave_integral(x+footprint*.5,period)-square_wave_integral(x-footprint*.5,period))/footprint);
+}
+// Screen derivatives of the ground plane's source X/Z, set by the fragment
+// entry (derivatives do not exist in the vertex stage, which also samples).
+static float2 plane_dx=0,plane_dy=0;
 float4 landscape_world_sample(Fragment input) {
     uint s=input.texture.x;
     uint tail=s+272+16384;
     float3 d=input.surface_position;
-    bool alternate=false;
+    // Source X/Z on the world-fixed ground plane.
+    float2 source_plane=float2(d.x,-d.z);
+    float alternate=0;
     if((texels[s+7]&16384U)!=0) {
         // World-fixed ground plane: map from the camera-relative position.
         float3 world=d;
@@ -666,8 +682,7 @@ float4 landscape_world_sample(Fragment input) {
             // world-anchored stripes (half a dot cell each) alternate between
             // it and a darker shade, so the ground streams with the dots.
             float period=asfloat(texels[tail+5]);
-            float phase=-world.z;phase-=period*floor(phase/period);
-            alternate=phase>=period*.5;
+            alternate=square_wave_box(source_plane.y,period,abs(plane_dx.y)+abs(plane_dy.y));
         }
     }
     float depth=max(-d.z,length(d)*.02);
@@ -680,7 +695,12 @@ float4 landscape_world_sample(Fragment input) {
             tile_art_texel(s,int2(base)+int2(0,1),input.texture.w),tile_art_texel(s,int2(base)+int2(1,1),input.texture.w),
             position-base,(input.texture.w&2U)==0);
     } else colour=tile_art_texel(s,int2(floor(art)),input.texture.w);
-    if((texels[s+7]&16384U)!=0 && texels[tail+4]!=0) {
+    // The dome below the horizon (only visible past the ground plane's far
+    // edge) uses the same haze and the stripes' average shade, so that edge
+    // does not crawl against the stepped art when the view rolls.
+    bool dome_ground=(texels[s+7]&16384U)==0 && d.y<0;
+    if(dome_ground && texels[tail+4]!=0) alternate=.5;
+    if(((texels[s+7]&16384U)!=0 || dome_ground) && texels[tail+4]!=0) {
         // Classic scroll: the smooth haze (tail+6, 112 rows below the
         // horizon) replaces the stepped art, so only the stripes have edges.
         float row=clamp(-d.y/depth*256.,0.,111.);
@@ -691,9 +711,31 @@ float4 landscape_world_sample(Fragment input) {
         colour.rgb*=float(15U-texels[s+13])/15.;
         if((input.texture.w&2U)!=0) colour.rgb=dither_linear(colour.rgb);
     }
-    if(alternate && colour.a!=0) {
+    if(alternate>0 && colour.a!=0) {
         // 80% in linear light (gamma-encoded unless the target is sRGB).
-        colour.rgb=(input.texture.w&2U)!=0?colour.rgb*.8:dither_encoded(dither_linear(colour.rgb)*.8);
+        float shade=1.-.2*alternate;
+        colour.rgb=(input.texture.w&2U)!=0?colour.rgb*shade:dither_encoded(dither_linear(colour.rgb)*shade);
+    }
+    uint dot_word=texels[tail+6+112];
+    if((texels[s+7]&16384U)!=0 && (dot_word>>24)!=0 && colour.a!=0) {
+        // Ground dots on the plane itself: the cartridge's 256-unit lattice
+        // (source X/Z = 127.5 mod 256), ~1.2 source pixels across, anti-
+        // aliased. Toward the horizon they shrink with the lattice (at most a
+        // fifth of the row spacing) and fade below a pixel instead of sparkling.
+        float pixel=max(1.,float((camera.effects.w>>8)&4095U)/16.);
+        float2 nearest=floor((source_plane-127.5)/256.+.5)*256.+127.5;
+        float2 offset=nearest-source_plane;
+        float det=plane_dx.x*plane_dy.y-plane_dx.y*plane_dy.x;
+        if(abs(det)>1e-12) {
+            float2 screen=float2(offset.x*plane_dy.y-offset.y*plane_dy.x,plane_dx.x*offset.y-plane_dx.y*offset.x)/det;
+            float cell=256./max(max(length(plane_dx),length(plane_dy)),1e-6);
+            float radius=min(.6*pixel,.2*cell);
+            float fade=saturate(radius/.75);
+            float coverage=saturate(max(radius,.75)-length(screen)+.5)*fade*fade;
+            float4 ink=float4(dot_word&255U,(dot_word>>8)&255U,(dot_word>>16)&255U,255U)/255.;
+            if((input.texture.w&2U)!=0) ink.rgb=select(ink.rgb<=.04045,ink.rgb/12.92,pow((ink.rgb+.055)/1.055,2.4));
+            colour.rgb=lerp(colour.rgb,ink.rgb,coverage);
+        }
     }
     return colour;
 }
@@ -1129,6 +1171,8 @@ float4 resident_texel(Fragment input,uint material,uint2 masks,int2 pixel) {
     return colour;
 }
 float4 fragment_textured_raw(Fragment input) {
+    plane_dx=ddx(float2(input.surface_position.x,-input.surface_position.z));
+    plane_dy=ddy(float2(input.surface_position.x,-input.surface_position.z));
     if(input.visible==0) discard;
     if((input.texture.w&8193U)==8193U) return backdrop_colour(input);
     if((input.texture.w&8388608U)!=0) {

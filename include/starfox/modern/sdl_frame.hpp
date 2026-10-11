@@ -42,8 +42,6 @@ public:
     // Smooth (bilinear) filtering of sprites, HUD, flat backgrounds and model
     // textures; on by default (STARFOX_MODERN_FILTER=0 turns it off).
     void set_filter_2d(bool enabled) noexcept {filter_2d_=enabled;}
-    // Keep the cartridge's ground dots over the 3D landscape ground (default).
-    void set_ground_dots(bool enabled) noexcept {ground_dots_=enabled;}
     // Replacement landscape artwork: <directory>/bg_XXXX_sky.png and
     // bg_XXXX_ground.png (XXXX = background id, hex), loaded once per level.
     void set_texture_directory(std::string directory) {texture_directory_=std::move(directory);}
@@ -52,6 +50,7 @@ public:
     // Target size and pixels per source pixel for source line thickness.
     void set_target(unsigned width,unsigned height,unsigned source_pixel) noexcept {
         pipelines_.set_line_brush(source_pixel,width,height);
+        source_pixel_=float(height)/224.F;
     }
     const SdlSourceScene& world() const noexcept {return world_;}
     void release() noexcept;
@@ -66,7 +65,7 @@ private:
     std::string texture_directory_;
     TextureDump* texture_dump_{};
     uint32_t texture_mapping_{};
-    bool ground_dots_{true};
+    float source_pixel_{1};
     std::optional<float> level_horizon_;
     uint16_t level_background_{};
     SdlSourceScene world_;

@@ -2,7 +2,7 @@
 #include "starfox/render/global_enhancements.hpp"
 #include "starfox/render/software_renderer.hpp"
 #include "starfox/render/scene_motion_history.hpp"
-#include <bit>
+#include "starfox/compat/bit_cast.hpp"
 #include <deque>
 #include <unordered_set>
 #include <unordered_map>
@@ -175,7 +175,7 @@ public:
             }
             if(((settings>>2)&3) && (e.weapon || e.explosion) && lights<6) {
                 emitted(e.position,e.explosion?600.f:260.f,float((settings>>2)&3)/3.f,1,e.explosion?1.f:0.f,{},
-                    {1,std::bit_cast<std::int64_t>(e.id),0,0});++lights;
+                    {1,starfox::bit_cast<std::int64_t>(e.id),0,0});++lights;
             }
             if((((settings>>4)&3) || ((extras>>2)&3)) && e.player && !e.explosion && time>player_time_) {
                 std::array<double,3> velocity{};
@@ -195,7 +195,7 @@ public:
         for(const auto& n:rings_) {
             const float age=float(time-n.born);
             emitted(n.position,40+age*900,(1-age/.8f)*float(settings&3)/3.f,0,age,{0,0,0,0},
-                {0,std::bit_cast<std::int64_t>(n.identity),0,0});
+                {0,starfox::bit_cast<std::int64_t>(n.identity),0,0});
         }
         for(const auto& particle:particles_) {
             const auto& n=particle.motion;const float age=float(time-n.born);
@@ -204,16 +204,16 @@ public:
             position[1]+=.5*gravity*age*age;
             emitted(position,particle.debris?4.f:2.5f,1-age/.7f,particle.debris?7.f:6.f,age,
                 particle.debris?std::array<float,4>{.24f,.18f,.13f,0}:std::array<float,4>{1.f,.65f,.18f,0},
-                {particle.debris?7:6,std::bit_cast<std::int64_t>(n.identity),0,0});
+                {particle.debris?7:6,starfox::bit_cast<std::int64_t>(n.identity),0,0});
         }
         for(const auto& n:trail_) {
             const float age=float(time-n.born);
             auto position=n.position;for(unsigned axis=0;axis<3;++axis) position[axis]+=n.velocity[axis]*age;
             if((settings>>4)&3) emitted(position,6+age*12,(1-age/.4f)*float((settings>>4)&3)/9.f,2,age,{.15f,.55f,1.f,0},
-                {2,std::bit_cast<std::int64_t>(n.identity),0,0});
+                {2,starfox::bit_cast<std::int64_t>(n.identity),0,0});
             if(((extras>>2)&3) && age>.035f)
                 emitted(position,10+age*25,(1-age/.4f)*float((extras>>2)&3)/3.f,8,age,{},
-                    {8,std::bit_cast<std::int64_t>(n.identity),0,0});
+                    {8,starfox::bit_cast<std::int64_t>(n.identity),0,0});
         }
         const unsigned quality=(settings>>6)&3;
         if(weather && quality) {

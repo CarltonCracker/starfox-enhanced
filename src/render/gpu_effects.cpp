@@ -10,7 +10,7 @@
 #include "effects_compute_shader.hpp"
 #include <cstring>
 #include <stdexcept>
-#include <bit>
+#include "starfox/compat/bit_cast.hpp"
 #endif
 namespace starfox::render {
 #if defined(STARFOX_GPU_EFFECTS)
@@ -245,7 +245,7 @@ struct GpuEffects::Impl {
         const bool enabled[]{false,p.hdr!=0,p.chromatic!=0,p.smoothing!=0,
             p.model_effect!=0 || p.world_effect!=0 || settings.extra_effects!=std::array<std::uint8_t,3>{} || decorative_material(static_cast<Effect>(settings.material)) || spatial_manipulation(static_cast<Effect>(settings.manipulation)),p.aa!=0};
         for(const auto stage:std::array<unsigned,13>{14,6,1,2,31,41,3,4,35,34,33,5,15}) {
-            if(stage==33) {p.pad0=int(settings.global_enhancements&0x03ffffffU);p.pad1=std::bit_cast<std::int32_t>(float(settings.presentation_seconds));}
+            if(stage==33) {p.pad0=int(settings.global_enhancements&0x03ffffffU);p.pad1=starfox::bit_cast<std::int32_t>(float(settings.presentation_seconds));}
             p.pad2=stage==31?0:(settings.overlay_filter?1:0);
             if(stage==5 && (p.bloom_model || p.bloom_world)) {
                 if(glow_presentation) {
@@ -323,13 +323,13 @@ struct GpuEffects::Impl {
             if(stage==4 && ((spatial_manipulation(static_cast<Effect>(settings.manipulation)) && settings.manipulation_intensity) || settings.extra_effects[0])) {
                 const auto model=p.model_effect,world=p.world_effect,intensity=p.model_intensity;
                 p.model_effect=spatial_manipulation(static_cast<Effect>(settings.manipulation))?settings.manipulation:0;p.world_effect=settings.extra_effects[0];p.model_intensity=settings.manipulation_intensity;
-                p.world_intensity=100;p.pad1=std::bit_cast<std::int32_t>(float(settings.presentation_seconds));
+                p.world_intensity=100;p.pad1=starfox::bit_cast<std::int32_t>(float(settings.presentation_seconds));
                 dispatch_style();
                 p.model_effect=model;p.world_effect=world;p.model_intensity=intensity;
             }
             if(stage==4 && (settings.extra_effects[1] || settings.extra_effects[2])) {
                 const auto saved=p;p.model_effect=settings.extra_effects[1];p.world_effect=settings.extra_effects[2];p.model_intensity=p.world_intensity=100;
-                p.pad1=std::bit_cast<std::int32_t>(float(settings.presentation_seconds));dispatch_style();p=saved;
+                p.pad1=starfox::bit_cast<std::int32_t>(float(settings.presentation_seconds));dispatch_style();p=saved;
             }
         }
         context->CSSetShader(nullptr,nullptr,0);

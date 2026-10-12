@@ -350,13 +350,6 @@ if(WIN32 AND (STARFOX_BUILD_RUNTIME OR STARFOX_BUILD_VR OR STARFOX_BUILD_TOOLS))
     endif()
     if(STARFOX_FXC)
         file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
-        add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/shadow_dxr_shadow_shader.hpp"
-            COMMAND "${STARFOX_DXC}" -T cs_6_5 -E main -O3
-                -D STARFOX_DXR_SHADOW_ONLY=1 -D STARFOX_DXR_NATIVE_MATERIALS=1
-                -Fh "${CMAKE_CURRENT_BINARY_DIR}/generated/shadow_dxr_shadow_shader.hpp"
-                -Vn shadow_dxr_shadow_shader "${CMAKE_CURRENT_SOURCE_DIR}/src/render/shaders/shadow_dxr.hlsl"
-            DEPENDS src/render/shaders/liquid_optics.hlsli src/render/shaders/shadow_dxr.hlsl src/render/shaders/calibrated_colour.hlsli src/vr/shaders/scene_colour.hlsli src/render/shaders/environment_material.hlsli src/render/shaders/backdrop_sample.hlsli include/starfox/render/ex_face_planet_regions.inc include/starfox/render/ex_city_moons.inc include/starfox/render/lava_surface.inc include/starfox/render/water_transmission.inc include/starfox/render/water_caustics.inc VERBATIM)
-        target_sources(starfox_core PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated/shadow_dxr_shadow_shader.hpp")
         add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/fsr1_d3d11_shader.hpp"
             COMMAND "${STARFOX_FXC}" /nologo /T cs_5_0 /E main /O3 /D STARFOX_FSR1_D3D11=1
                 /Fh "${CMAKE_CURRENT_BINARY_DIR}/generated/fsr1_d3d11_shader.hpp" /Vn fsr1_d3d11_shader
@@ -400,6 +393,16 @@ if(WIN32 AND NOT WINDOWS_STORE AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND STARFOX_BUILD
         set(STARFOX_DXR_ENABLED TRUE)
         set(STARFOX_DXR_OPTICAL_DEPENDENCIES src/render/shaders/liquid_optics.hlsli)
         file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
+        # DXR is a desktop x64 feature and needs DXC, not the SM5 FXC compiler.
+        # Register this only after discovery; UWP/x86 must not get an empty
+        # compiler command simply because their Windows SDK supplies FXC.
+        add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/shadow_dxr_shadow_shader.hpp"
+            COMMAND "${STARFOX_DXC}" -T cs_6_5 -E main -O3
+                -D STARFOX_DXR_SHADOW_ONLY=1 -D STARFOX_DXR_NATIVE_MATERIALS=1
+                -Fh "${CMAKE_CURRENT_BINARY_DIR}/generated/shadow_dxr_shadow_shader.hpp"
+                -Vn shadow_dxr_shadow_shader "${CMAKE_CURRENT_SOURCE_DIR}/src/render/shaders/shadow_dxr.hlsl"
+            DEPENDS ${STARFOX_DXR_OPTICAL_DEPENDENCIES} src/render/shaders/shadow_dxr.hlsl src/render/shaders/calibrated_colour.hlsli src/vr/shaders/scene_colour.hlsli src/render/shaders/environment_material.hlsli src/render/shaders/backdrop_sample.hlsli include/starfox/render/ex_face_planet_regions.inc include/starfox/render/ex_city_moons.inc include/starfox/render/lava_surface.inc include/starfox/render/water_transmission.inc include/starfox/render/water_caustics.inc VERBATIM)
+        target_sources(starfox_core PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated/shadow_dxr_shadow_shader.hpp")
         add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/shadow_dxr_shader.hpp"
             COMMAND "${STARFOX_DXC}" -T cs_6_5 -E main -O3 -D STARFOX_DXR_REFLECTION_ONLY=1
                 -Fh "${CMAKE_CURRENT_BINARY_DIR}/generated/shadow_dxr_shader.hpp"

@@ -64,7 +64,7 @@
 #endif
 #include <windows.h>
 #include <psapi.h>
-#include <bit>
+#include "starfox/compat/bit_cast.hpp"
 #endif
 namespace {
 auto load_vr_backdrop(unsigned resource,std::string_view path) {
@@ -1283,7 +1283,7 @@ int starfox::vr::run_application(int argc,char** argv,const ApplicationHost& hos
                         // Optional Windows 7+ query; no PSAPI DLL dependency or
                         // new resource cap. Resolve once, sample once per second.
                         using QueryMemory=BOOL(WINAPI*)(HANDLE,PPROCESS_MEMORY_COUNTERS,DWORD);
-                        static const auto query=std::bit_cast<QueryMemory>(
+                        static const auto query=starfox::bit_cast<QueryMemory>(
                             GetProcAddress(GetModuleHandleW(L"kernel32.dll"),"K32GetProcessMemoryInfo"));
                         PROCESS_MEMORY_COUNTERS_EX memory{};memory.cb=sizeof(memory);
                         if(query && query(GetCurrentProcess(),reinterpret_cast<PPROCESS_MEMORY_COUNTERS>(&memory),sizeof(memory)))

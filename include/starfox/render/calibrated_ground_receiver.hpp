@@ -1,5 +1,6 @@
 #pragma once
 #include "starfox/render/calibrated_ground.hpp"
+#include "starfox/compat/bit_cast.hpp"
 #include "starfox/render/dxr_shadows.hpp"
 #include "starfox/vr/eye_camera.hpp"
 
@@ -23,7 +24,7 @@ inline std::optional<CalibratedGroundRayReceiver> calibrated_ground_ray_receiver
     if(!view) throw std::invalid_argument("Invalid native ground model/eye");
     const auto& m=view->view;const auto words=packet.geometry.texel_view();
     const auto offset=std::size_t(packet.geometry.vertex_view().front().texture[0])+calibrated_ground_offset;
-    const float height=std::bit_cast<float>(words[offset-1]);
+    const float height=starfox::bit_cast<float>(words[offset-1]);
     if(!std::isfinite(height) || height>=0 || height< -8)
         throw std::invalid_argument("Invalid native reflective ground height");
     // Source/ray space uses +Y down/+Z forward; scene space uses +Y up/-Z.
@@ -36,13 +37,13 @@ inline std::optional<CalibratedGroundRayReceiver> calibrated_ground_ray_receiver
         throw std::invalid_argument("Degenerate native reflective ground plane");
     result.plane.normal=normal*(1/std::sqrt(squared));
     auto& surface=result.transport;surface.material=material==9?3:material-5;surface.reflection_strength=strength;
-    surface.mirror_models=mirror_models;surface.time=std::bit_cast<float>(words[offset+11]);
-    surface.brightness=std::bit_cast<float>(words[offset+12]);
+    surface.mirror_models=mirror_models;surface.time=starfox::bit_cast<float>(words[offset+11]);
+    surface.brightness=starfox::bit_cast<float>(words[offset+12]);
     if(material==5) {
         surface.caustics=caustics;
         surface.source_colour.emplace();
         for(unsigned c=0;c<3;++c) (*surface.source_colour)[c]=
-            (std::bit_cast<float>(words[offset+c])+std::bit_cast<float>(words[offset+3+c]))*.5F;
+            (starfox::bit_cast<float>(words[offset+c])+starfox::bit_cast<float>(words[offset+3+c]))*.5F;
     }
     float linear[9];
     for(unsigned row=0;row<3;++row) for(unsigned col=0;col<3;++col)
@@ -59,7 +60,7 @@ inline std::optional<CalibratedGroundRayReceiver> calibrated_ground_ray_receiver
     for(unsigned i=0;i<9;++i) surface.world_to_view[i]=cofactor[i]/determinant;
     // Recover source-world coordinates from this exact calibrated eye/model;
     // both eyes and in-flight retries retain the same origin/wave clock.
-    const float origin[]{std::bit_cast<float>(words[offset+9]),0,std::bit_cast<float>(words[offset+10])};
+    const float origin[]{starfox::bit_cast<float>(words[offset+9]),0,starfox::bit_cast<float>(words[offset+10])};
     for(unsigned axis=0;axis<3;++axis) {
         float value=origin[axis];
         for(unsigned row=0;row<3;++row) value-=surface.world_to_view[row*3+axis]*256*sign[row]*m[12+row];

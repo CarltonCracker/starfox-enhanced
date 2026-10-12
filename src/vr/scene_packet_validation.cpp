@@ -3,7 +3,7 @@
 #include "starfox/vr/source_span_layout.hpp"
 #include "starfox/render/calibrated_ground.hpp"
 #include <algorithm>
-#include <bit>
+#include "starfox/compat/bit_cast.hpp"
 #include <cmath>
 #include <optional>
 #include <stdexcept>
@@ -155,7 +155,7 @@ void ScenePacketValidator::add(const DrawPacket& packet) {
                         const auto value=static_cast<int32_t>(texture_words[start+word]);
                         if(value< -32768 || value>32767) throw std::runtime_error("Invalid GPU dust matrix");
                     } else {
-                        const float value=std::bit_cast<float>(texture_words[start+word]);
+                        const float value=starfox::bit_cast<float>(texture_words[start+word]);
                         if(!std::isfinite(value) || (word<3?std::abs(value)>65536.F:(value<0 || value>1)))
                             throw std::runtime_error("Invalid GPU dust camera/colour");
                     }
@@ -184,7 +184,7 @@ void ScenePacketValidator::add(const DrawPacket& packet) {
                 const auto receiver=size_t(v.texture[0])+272+16384;
                 if((v.texture[3]&~(268435456U|10U|(calibrated_ground_?render::calibrated_ground_flag:0U))) || receiver>=texture_words.size())
                     throw std::runtime_error("Invalid GPU landscape receiver payload");
-                const auto height=std::bit_cast<float>(texture_words[receiver]);
+                const auto height=starfox::bit_cast<float>(texture_words[receiver]);
                 if(!std::isfinite(height) || height>=0 || height< -8.F)
                     throw std::runtime_error("Invalid GPU landscape receiver height");
             }
@@ -198,11 +198,11 @@ void ScenePacketValidator::add(const DrawPacket& packet) {
                     || (texture_words[start+15]&0x80000000U) || texture_words[start+10]
                     || offset>texture_words.size() || texture_words.size()-offset!=render::calibrated_ground_words)
                     throw std::runtime_error("Invalid/unsupported calibrated ground payload");
-                const auto plane_height=std::bit_cast<float>(texture_words[offset-1]);
+                const auto plane_height=starfox::bit_cast<float>(texture_words[offset-1]);
                 if(!std::isfinite(plane_height) || plane_height>=0 || plane_height< -8.F)
                     throw std::runtime_error("Invalid calibrated ground receiver height");
                 for(unsigned word=0;word<8;++word) {
-                    const auto value=std::bit_cast<float>(texture_words[offset+word]);
+                    const auto value=starfox::bit_cast<float>(texture_words[offset+word]);
                     if(!std::isfinite(value) || (word<6?(value<0 || value>1):word==6?
                             (value<0 || value>223):(value<=0 || value>4096)))
                         throw std::runtime_error("Invalid calibrated ground gradient");
@@ -211,7 +211,7 @@ void ScenePacketValidator::add(const DrawPacket& packet) {
                 if((material!=0 && (material<5 || material>9)) || texture_words[offset+13]>3)
                     throw std::runtime_error("Invalid calibrated ground material/motion");
                 for(unsigned word=9;word<13;++word) {
-                    const auto value=std::bit_cast<float>(texture_words[offset+word]);
+                    const auto value=starfox::bit_cast<float>(texture_words[offset+word]);
                     if(!std::isfinite(value) || (word<11?std::abs(value)>65536:
                             word==11?value<0:(value<0 || value>1)))
                         throw std::runtime_error("Invalid calibrated ground surface metadata");

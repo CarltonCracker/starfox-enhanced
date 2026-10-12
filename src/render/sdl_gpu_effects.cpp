@@ -824,19 +824,19 @@ struct SdlGpuEffects::Impl {
             auto manipulation=p;
             manipulation.model=spatial_manipulation(static_cast<Effect>(s.manipulation))?s.manipulation:0;manipulation.world=s.extra_effects[0];
             manipulation.model_intensity=s.manipulation_intensity;
-            manipulation.world_intensity=100;manipulation.pad1=std::bit_cast<std::int32_t>(float(s.presentation_seconds));
+            manipulation.world_intensity=100;manipulation.pad1=starfox::bit_cast<std::int32_t>(float(s.presentation_seconds));
             dispatch(manipulation,4,work[current],work[1-current]);advance();
         }
         if(s.extra_effects[1] || s.extra_effects[2]) {
             auto fx=p;fx.model=s.extra_effects[1];fx.world=s.extra_effects[2];fx.model_intensity=fx.world_intensity=100;
-            fx.pad1=std::bit_cast<std::int32_t>(float(s.presentation_seconds));
+            fx.pad1=starfox::bit_cast<std::int32_t>(float(s.presentation_seconds));
             dispatch(fx,4,work[current],work[1-current]);advance();
         }
         if(s.depth_fx.active()) run(35);
         if(s.scene_fx.active()) run(34);
         if(s.global_enhancements) {
             auto global=p;global.pad0=int(s.global_enhancements&0x03ffffffU);
-            global.pad1=std::bit_cast<std::int32_t>(float(s.presentation_seconds));
+            global.pad1=starfox::bit_cast<std::int32_t>(float(s.presentation_seconds));
             dispatch(global,33,work[current],work[1-current]);advance();
         }
         const auto apply_model_exposure=[&]() {
@@ -901,7 +901,7 @@ struct SdlGpuEffects::Impl {
             const bool reset=!exposure.valid || exposure.key!=s.exposure || exposure.epoch!=s.scene_epoch
                 || s.presentation_seconds<exposure.time || s.presentation_seconds-exposure.time>1.;
             auto meter=p;
-            meter.pad0=std::bit_cast<Sint32>(reset || s.exposure_paused?0.f:float(s.presentation_seconds-exposure.time));
+            meter.pad0=starfox::bit_cast<Sint32>(reset || s.exposure_paused?0.f:float(s.presentation_seconds-exposure.time));
             meter.pad1=int(s.exposure);meter.chromatic=reset?1:0;
             dispatch(meter,36,work[current],nullptr,nullptr,nullptr,exposure_histogram);
             dispatch(meter,37,work[current],nullptr,exposure_histogram,exposure.textures[exposure.index],exposure.textures[1-exposure.index]);
@@ -913,7 +913,7 @@ struct SdlGpuEffects::Impl {
             const bool reset=!phosphor.valid || phosphor.key!=s.phosphor || phosphor.epoch!=s.scene_epoch
                 || s.presentation_seconds<phosphor.time || s.presentation_seconds-phosphor.time>1.;
             auto temporal=p;
-            temporal.pad0=std::bit_cast<Sint32>(reset?0.f:float(std::exp2(-(s.presentation_seconds-phosphor.time)/(.03*s.phosphor))));
+            temporal.pad0=starfox::bit_cast<Sint32>(reset?0.f:float(std::exp2(-(s.presentation_seconds-phosphor.time)/(.03*s.phosphor))));
             temporal.pad1=100;temporal.chromatic=1U|2U|8U|(reset?4U:0U);
             dispatch(temporal,32,work[current],work[1-current],phosphor.textures[phosphor.index],nullptr,phosphor.textures[1-phosphor.index]);
             advance();phosphor.index=1-phosphor.index;

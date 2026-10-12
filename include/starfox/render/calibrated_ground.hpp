@@ -1,7 +1,7 @@
 #pragma once
 #include "starfox/vr/draw_packet.hpp"
 #include <array>
-#include <bit>
+#include "starfox/compat/bit_cast.hpp"
 #include <cmath>
 #include <optional>
 #include <stdexcept>
@@ -59,10 +59,10 @@ inline bool apply_calibrated_ground(vr::DrawPacket& packet,const CalibratedGroun
         cached_source=packet.geometry.shared_vertices;cached_flagged=std::move(flagged);
     }
     packet.geometry.vertices.clear();packet.geometry.shared_vertices=cached_flagged;
-    for(float value:gradient.far) words.push_back(std::bit_cast<std::uint32_t>(value));
-    for(float value:gradient.near) words.push_back(std::bit_cast<std::uint32_t>(value));
-    words.push_back(std::bit_cast<std::uint32_t>(gradient.horizon));
-    words.push_back(std::bit_cast<std::uint32_t>(gradient.span));
+    for(float value:gradient.far) words.push_back(starfox::bit_cast<std::uint32_t>(value));
+    for(float value:gradient.near) words.push_back(starfox::bit_cast<std::uint32_t>(value));
+    words.push_back(starfox::bit_cast<std::uint32_t>(gradient.horizon));
+    words.push_back(starfox::bit_cast<std::uint32_t>(gradient.span));
     words.push_back(gradient.material);
     // The static gradient never samples world coordinates; static red sand
     // samples its origin but not time. Canonicalize unused values BEFORE the
@@ -70,9 +70,9 @@ inline bool apply_calibrated_ground(vr::DrawPacket& packet,const CalibratedGroun
     // Preserve active clocks/coordinates for liquids and animated receivers.
     const bool stationary=!gradient.motion && (gradient.material==0 || gradient.material==8);
     for(float value:gradient.origin)
-        words.push_back(std::bit_cast<std::uint32_t>(stationary && gradient.material==0?0.F:value));
-    words.push_back(std::bit_cast<std::uint32_t>(stationary?0.F:gradient.seconds));
-    words.push_back(std::bit_cast<std::uint32_t>(gradient.brightness));
+        words.push_back(starfox::bit_cast<std::uint32_t>(stationary && gradient.material==0?0.F:value));
+    words.push_back(starfox::bit_cast<std::uint32_t>(stationary?0.F:gradient.seconds));
+    words.push_back(starfox::bit_cast<std::uint32_t>(gradient.brightness));
     words.push_back(gradient.motion);
     return true;
 }
@@ -104,7 +104,7 @@ inline std::optional<CalibratedGroundMotionSource> calibrated_ground_motion_sour
         || (w.size()!=calibrated_ground_offset && w.size()!=calibrated_ground_offset+calibrated_ground_words)
         || !(w[15]&0x10000000U) || (w[15]&0x80000000U)) return {};
     CalibratedGroundMotionSource result;
-    result.height=std::bit_cast<float>(w[calibrated_ground_offset-1]);
+    result.height=starfox::bit_cast<float>(w[calibrated_ground_offset-1]);
     result.enhanced=w.size()!=calibrated_ground_offset;
     if(!std::isfinite(result.height) || result.height>=0 || result.height< -8) return {};
     constexpr unsigned floor=0x10000000U;
@@ -121,14 +121,14 @@ inline std::optional<CalibratedGroundMotionSource> calibrated_ground_motion_sour
         result.material=w[at+8];result.motion=w[at+13];
         if((result.material!=0 && (result.material<5 || result.material>9)) || result.motion>3) return {};
         for(unsigned i=0;i<2;++i) {
-            result.origin[i]=std::bit_cast<float>(w[at+9+i]);
+            result.origin[i]=starfox::bit_cast<float>(w[at+9+i]);
             if(!std::isfinite(result.origin[i]) || std::abs(result.origin[i])>65536) return {};
         }
         for(unsigned i=0;i<8;++i) {
-            const float value=std::bit_cast<float>(w[at+i]);
+            const float value=starfox::bit_cast<float>(w[at+i]);
             if(!std::isfinite(value) || value<0 || (i<6?value>1:i==6?value>223:value==0 || value>4096)) return {};
         }
-        const float seconds=std::bit_cast<float>(w[at+11]),brightness=std::bit_cast<float>(w[at+12]);
+        const float seconds=starfox::bit_cast<float>(w[at+11]),brightness=starfox::bit_cast<float>(w[at+12]);
         if(!std::isfinite(seconds) || seconds<0 || !std::isfinite(brightness) || brightness<0 || brightness>1) return {};
     }
     return result;

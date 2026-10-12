@@ -1,5 +1,6 @@
 #pragma once
 #include "starfox/render/calibrated_game_motion.hpp"
+#include "starfox/compat/bit_cast.hpp"
 
 namespace starfox::render {
 struct CalibratedReflectionLiquidClock {unsigned material;float seconds;};
@@ -13,7 +14,7 @@ inline std::optional<CalibratedReflectionLiquidClock> calibrated_reflection_liqu
             || draw.after_rays || draw.packet.preserve_native_colour || draw.blend!=vr::SceneBlend::opaque) return {};
         const auto words=draw.packet.geometry.texel_view();
         const auto at=std::size_t(draw.packet.geometry.vertex_view().front().texture[0])+calibrated_ground_offset;
-        const float seconds=std::bit_cast<float>(words[at+11]);
+        const float seconds=starfox::bit_cast<float>(words[at+11]);
         if(!std::isfinite(seconds) || seconds<0) return {};
         result=CalibratedReflectionLiquidClock{material,seconds};
     }

@@ -100,6 +100,8 @@ tools/build_ps5.sh
    revisions into `build/console-sdk/`. It builds the payload SDK, the release
    RADV archive, `ps5-native-tool`, and `libc.prx`, which is checked against
    PS5_Vulkan's recorded SHA-256.
+   The zlib fetch retries fixed-version official endpoints but always requires
+   the pinned SHA-256; upstream independently verifies that archive again.
 3. The game is configured with `cmake/toolchains/ps5-radv.cmake` and built in
    `build/ps5/`.
 4. The result is copied to `dist/StarFoxEnhanced-ps5/`: the `PPSA99764/` title

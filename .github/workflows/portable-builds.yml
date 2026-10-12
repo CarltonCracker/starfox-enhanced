@@ -26,6 +26,11 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+      - name: Check release shader registration
+        shell: pwsh
+        run: |
+          cmake "-DSOURCE_DIR=$PWD" -P tests/test_release_shader_gating.cmake
+          if ($LASTEXITCODE -ne 0) { throw 'Experimental shader release gating failed' }
       - name: Configure and build
         shell: pwsh
         run: |

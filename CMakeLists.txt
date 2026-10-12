@@ -45,6 +45,8 @@ option(STARFOX_BUILD_RUNTIME "Build the SDL3 native PC runtime" ON)
 option(STARFOX_BUILD_VR "Build the OpenXR VR integration and runtime diagnostic" OFF)
 option(STARFOX_ENABLE_DISPLAYXR "Include optional Leia SR integration components in desktop Windows" ON)
 option(STARFOX_ENABLE_LEIASR "Include optional direct SR Platform adapter loader in desktop Windows" ON)
+option(STARFOX_ENABLE_EXPERIMENTAL_REFLECTION_INDEX
+    "Compile opt-in resident reflection validation shaders (requires SPIR-V-enabled DXC)" OFF)
 option(STARFOX_BUILD_STEAM_FRAME
     "Build the native Linux ARM64 Steam Frame OpenXR player" OFF)
 option(STARFOX_BUILD_TOOLS "Build host-side trace and asset tools"
@@ -1659,6 +1661,9 @@ if(STARFOX_BUILD_TESTS)
     add_test(NAME starfox_reflection_shader_dependency_tests
         COMMAND "${CMAKE_COMMAND}" "-DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_reflection_shader_dependencies.cmake")
+    add_test(NAME starfox_release_shader_gating_tests
+        COMMAND "${CMAKE_COMMAND}" "-DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_release_shader_gating.cmake")
     # This host ABI must compile without optional OpenXR/VR include paths.
     add_executable(starfox_calibrated_dlss_api_tests tests/calibrated_dlss_api_tests.cpp)
     target_include_directories(starfox_calibrated_dlss_api_tests PRIVATE include)

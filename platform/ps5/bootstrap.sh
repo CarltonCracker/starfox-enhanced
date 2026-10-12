@@ -8,6 +8,7 @@
 set -euo pipefail
 
 deps=${1:-build/console-sdk}
+bootstrap_directory=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 # PS5_Vulkan pins the Mesa and SDK fork revisions in tools/build-radv.sh and
 # tools/setup-native-dependencies.sh; these two follow those pins.
 vulkan_revision=3f3ee69607013b345d2baa6d6a37c86745649a08
@@ -45,6 +46,7 @@ grep -q "^mesa_revision=$mesa_revision$" "$deps/PS5_Vulkan/tools/build-radv.sh" 
 grep -q "^sdk_revision=$sdk_revision$" "$deps/PS5_Vulkan/tools/setup-native-dependencies.sh" ||
     { echo "PS5_Vulkan pins another SDK revision" >&2; exit 2; }
 
+bash "$bootstrap_directory/fetch-zlib.sh" "$deps/PS5_Vulkan"
 cd "$deps/PS5_Vulkan"
 bash tools/setup-native-dependencies.sh
 bash tools/build-radv.sh release

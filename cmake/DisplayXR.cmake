@@ -74,7 +74,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     "src/vr/shaders/scene.hlsl" "src/vr/shaders/scene_geometry.hlsli" "src/vr/shaders/scene_colour.hlsli" "src/vr/shaders/connected_grid.hlsli"
     "include/starfox/render/ex_face_planet_regions.inc")
 target_link_libraries(starfox_displayxr PRIVATE SDL3::SDL3 starfox_core starfox_sfvr)
-if(STARFOX_DXC)
+if(STARFOX_DXC AND STARFOX_ENABLE_EXPERIMENTAL_REFLECTION_INDEX)
     # Resident index/mapping/support/optical companions, opt-in staging only.
     # Continuum exclusion is NOT root uniqueness or old-colour acceptance.
     foreach(source_stage IN ITEMS tiles reduce query mapping domains frames optical optical_stream optical_schedule jets jets_stream roots_clear witness folds guide colour compose publish publish_diagnostics admission_clear)
@@ -209,7 +209,7 @@ if(STARFOX_BUILD_TOOLS AND STARFOX_DXR_ENABLED)
     add_executable(starfox_reflection_source_owner_check tools/check_reflection_source_owner.cpp)
     target_link_libraries(starfox_reflection_source_owner_check PRIVATE starfox_displayxr SDL3::SDL3)
     target_include_directories(starfox_reflection_source_owner_check PRIVATE "${sdl3_SOURCE_DIR}/src/video/khronos")
-    if(STARFOX_DXC)
+    if(STARFOX_DXC AND STARFOX_ENABLE_EXPERIMENTAL_REFLECTION_INDEX)
         target_include_directories(starfox_reflection_source_owner_check PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
         target_compile_definitions(starfox_reflection_source_owner_check PRIVATE STARFOX_SOURCE_SCHEDULE_CHECK_AVAILABLE=1)
     endif()

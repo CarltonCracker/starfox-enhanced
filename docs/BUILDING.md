@@ -53,6 +53,13 @@ A development map can be selected explicitly:
 Explicit external ROM/symbol pairs can still be passed to a development build
 for source-to-port comparisons.
 
+The resident source-reflection index is experimental validation code, not a
+released visual setting. Normal builds leave it out. Developers running those
+diagnostics must explicitly configure
+`-DSTARFOX_ENABLE_EXPERIMENTAL_REFLECTION_INDEX=ON` and provide a DXC build with
+SPIR-V code generation (the Windows SDK's DXIL-only DXC is insufficient).
+This does not disable the normal ray tracing, reflections or Leia integration.
+
 ## Regenerating upstream assets
 
 The required Original revision is pinned in `config/upstream.json` and tracked

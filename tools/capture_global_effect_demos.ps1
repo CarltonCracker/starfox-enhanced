@@ -178,7 +178,7 @@ try {
         }
         $video=Join-Path $taskOutput ($slug+'.mp4')
         $filter="[0:v]scale=640:480:flags=neighbor,pad=640:530:0:50:color=0x14202c,drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='$($spec.left)':fontsize=22:fontcolor=white:x=20:y=14[left];"+
-            "[1:v]scale=640:480:flags=neighbor,pad=640:530:0:50:color=0x14202c,drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='$effect - HIGH':fontsize=22:fontcolor=white:x=20:y=14[right];[left][right]hstack=inputs=2[out]"
+            "[1:v]scale=640:480:flags=neighbor,pad=640:530:0:50:color=0x14202c,drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='$effect - HIGH':fontsize=22:fontcolor=white:x=20:y=14[right];[left][right]hstack=inputs=2,setsar=1[out]"
         & $taskFfmpeg -hide_banner -loglevel error -nostdin -f concat -safe 0 -i $baseline.concat `
             -f concat -safe 0 -i $enabled.concat -filter_complex $filter -map '[out]' `
             -frames:v $taskVideoFrames -r 30 -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -movflags +faststart $video

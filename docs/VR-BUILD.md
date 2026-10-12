@@ -1,5 +1,32 @@
 # VR development status
 
+## MODERN renderer in PCVR (experimental, October 11)
+
+`STARFOX_MODERN=1 starfox_pcvr` (or `--modern` on the runtime check) draws
+the frame the flat MODERN renderer plans. That plan is `vr::ModernFrame` in
+`starfox_scene`, which `modern::SdlFrameRenderer` uses as well. The default
+VR renderer is unchanged.
+
+- Depth is reversed (cleared to 0, tests compare GREATER) and objects get a
+  per-list-position draw-order bias. Large static scenery is painted in native
+  order before the depth-tested pass (`vr::painter_scenery`). Inset and
+  coplanar overlays are decals.
+- Planets get a 3D sky dome and a world-fixed ground plane with the ground
+  dots. The Armada's chequered tunnels become a 3D corridor. Headsets map both
+  differently from flat views (`vr::set_headset_mapping`): the sky by
+  direction (cylindrical, seamless all round) and corridor rows by distance
+  along the corridor, so they hold up when you look sideways or behind.
+- It also draws the vector crosshair, smooth 2D filtering, the fixed-colour
+  damage and scripted flashes, and replacement landscape art from
+  `textures/`.
+- `=0` turns a part off: `STARFOX_MODERN_LANDSCAPE`, `_CORRIDOR`,
+  `_GROUND_DOTS`, `_CLASSIC_SCROLL`, `_FILTER`. ENHANCED SKY is ignored while
+  MODERN is on.
+
+Without a headset, `STARFOX_MODERN_HEADSET_PREVIEW=yaw,pitch[,fov]` on the
+desktop MODERN renderer plans the frame exactly as PCVR does. It draws from
+the seat with that head direction, through the same shader.
+
 ## Release 0.0.8 delayed-crash investigation (October 4)
 
 The tester's roughly one-minute VR exit is tracked in

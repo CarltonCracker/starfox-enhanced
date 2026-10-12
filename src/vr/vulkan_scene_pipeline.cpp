@@ -17,13 +17,17 @@ void check(VkResult value,const char* operation) {
     if(value!=VK_SUCCESS) throw std::runtime_error(std::string(operation)+": "+std::to_string(value));
 }
 }
+namespace {bool reversed_depth{};}
+void set_scene_reversed_depth(bool enabled) noexcept {reversed_depth=enabled;}
+bool scene_reversed_depth() noexcept {return reversed_depth;}
 VulkanScenePipeline::~VulkanScenePipeline() {close();}
 void VulkanScenePipeline::close() noexcept {
     if(pipeline_) destroy_pipeline_(device_,pipeline_,nullptr);
     if(layout_) destroy_layout_(device_,layout_,nullptr);
     pipeline_={};layout_={};device_={};
 }
-bool VulkanScenePipeline::initialize(VkDevice device,PFN_vkGetDeviceProcAddr get,VkRenderPass pass,bool depth_test,SceneTopology topology,VkDescriptorSetLayout textures,SceneBlend mode,VulkanPipelineCache* cache,bool depth_write) {
+bool VulkanScenePipeline::initialize(VkDevice device,PFN_vkGetDeviceProcAddr get,VkRenderPass pass,bool depth_test,SceneTopology topology,VkDescriptorSetLayout textures,SceneBlend mode,VulkanPipelineCache* cache,bool depth_write,bool painter) {
+    painter=painter && depth_test;
     close();
     std::array<VkShaderModule,2> modules{};
     PFN_vkDestroyShaderModule destroy_shader{};
@@ -96,7 +100,7 @@ bool VulkanScenePipeline::initialize(VkDevice device,PFN_vkGetDeviceProcAddr get
         samples.rasterizationSamples=VK_SAMPLE_COUNT_1_BIT;
         VkPipelineDepthStencilStateCreateInfo depth{VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO};
         depth.depthTestEnable=depth_test;depth.depthWriteEnable=depth_test && depth_write;
-        depth.depthCompareOp=VK_COMPARE_OP_LESS;
+        depth.depthCompareOp=painter?VK_COMPARE_OP_ALWAYS:scene_reversed_depth()?VK_COMPARE_OP_GREATER:VK_COMPARE_OP_LESS;
         VkPipelineColorBlendAttachmentState attachment{};attachment.colorWriteMask=0xf;
         if(mode!=SceneBlend::opaque) {
             attachment.blendEnable=VK_TRUE;

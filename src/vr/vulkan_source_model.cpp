@@ -92,20 +92,22 @@ bool VulkanSourceModel::prepare_graphics(VkRenderPass pass,float units,const Sce
     if(!graphics_textures_.initialize_external(device_,get_,buffer(),storage_.size())) {
         status_=graphics_textures_.status();return false;
     }
+    const auto ensure=[&](VulkanScenePipeline& pipeline,bool& ready,SceneTopology topology,bool painter) {
+        if(!ready && !pipeline.initialize(device_,get_,pass,true,topology,graphics_textures_.layout(),SceneBlend::opaque,
+            pipelines.cache,true,painter)) {status_=pipeline.status();return false;}
+        ready=true;return true;
+    };
     if(axis_) {
         if(!line_vertices_.initialize(device_,get_,memory_,vertices)) {status_=line_vertices_.status();return false;}
-        if(!pipelines.lines_ready && !pipelines.lines.initialize(device_,get_,pass,true,SceneTopology::lines,graphics_textures_.layout(),SceneBlend::opaque,pipelines.cache)) {
-            status_=pipelines.lines.status();return false;
-        }
-        pipelines.lines_ready=true;status_="Resident axis endpoint graphics ready";return true;
+        if(!ensure(pipelines.lines,pipelines.lines_ready,SceneTopology::lines,false)
+            || (pipelines.painter && !ensure(pipelines.painter_lines,pipelines.painter_lines_ready,SceneTopology::lines,true))) return false;
+        status_="Resident axis endpoint graphics ready";return true;
     }
     if(!graphics_vertices_.initialize(device_,get_,memory_,vertices)) {
         status_=graphics_vertices_.status();return false;
     }
-    if(!pipelines.triangles_ready && !pipelines.triangles.initialize(device_,get_,pass,true,SceneTopology::triangles,graphics_textures_.layout(),SceneBlend::opaque,pipelines.cache)) {
-        status_=pipelines.triangles.status();return false;
-    }
-    pipelines.triangles_ready=true;
+    if(!ensure(pipelines.triangles,pipelines.triangles_ready,SceneTopology::triangles,false)
+        || (pipelines.painter && !ensure(pipelines.painter_triangles,pipelines.painter_triangles_ready,SceneTopology::triangles,true))) return false;
     if(has_lines_) {
         std::vector<SceneVertex> lines;lines.reserve(size_t(counts_[0])*2);
         for(uint32_t slot=0;slot<counts_[0];++slot) for(uint32_t corner=0;corner<2;++corner) {
@@ -113,29 +115,29 @@ bool VulkanSourceModel::prepare_graphics(VkRenderPass pass,float units,const Sce
             vertex.texture[3]|=16777216U;lines.push_back(vertex);
         }
         if(!line_vertices_.initialize(device_,get_,memory_,lines)) {status_=line_vertices_.status();return false;}
-        if(!pipelines.lines_ready && !pipelines.lines.initialize(device_,get_,pass,true,SceneTopology::lines,graphics_textures_.layout(),SceneBlend::opaque,pipelines.cache)) {
-            status_=pipelines.lines.status();return false;
-        }
-        pipelines.lines_ready=true;
+        if(!ensure(pipelines.lines,pipelines.lines_ready,SceneTopology::lines,false)
+            || (pipelines.painter && !ensure(pipelines.painter_lines,pipelines.painter_lines_ready,SceneTopology::lines,true))) return false;
     }
     status_="Resident source model graphics ready";return true;
 }
-bool VulkanSourceModel::record_graphics(VkCommandBuffer command,VkExtent2D extent,const EyeCamera& camera) const {
-    if(!graphics_pipelines_) return false;
-    if(axis_) return buffer() && graphics_pipelines_->lines.record(command,extent,line_vertices_.buffer(),
+bool VulkanSourceModel::record_graphics(VkCommandBuffer command,VkExtent2D extent,const EyeCamera& camera,bool painter) const {
+    if(!graphics_pipelines_ || (painter && !graphics_pipelines_->painter)) return false;
+    const auto& triangles=painter?graphics_pipelines_->painter_triangles:graphics_pipelines_->triangles;
+    const auto& lines=painter?graphics_pipelines_->painter_lines:graphics_pipelines_->lines;
+    if(axis_) return buffer() && lines.record(command,extent,line_vertices_.buffer(),
         line_vertices_.count(),camera,graphics_textures_.descriptor());
     if(has_lines_) {
         if(!buffer()) return false;
         const uint32_t per_slot=(corner_capacity_-2)*3;
         for(uint32_t slot=0;slot<counts_[0];++slot) {
-            if(!graphics_pipelines_->triangles.record_range(command,extent,graphics_vertices_.buffer(),graphics_vertices_.count(),
+            if(!triangles.record_range(command,extent,graphics_vertices_.buffer(),graphics_vertices_.count(),
                 slot*per_slot,per_slot,camera,graphics_textures_.descriptor())) return false;
-            if(!graphics_pipelines_->lines.record_range(command,extent,line_vertices_.buffer(),line_vertices_.count(),
+            if(!lines.record_range(command,extent,line_vertices_.buffer(),line_vertices_.count(),
                 slot*2,2,camera,graphics_textures_.descriptor())) return false;
         }
         return true;
     }
-    return buffer() && graphics_pipelines_->triangles.record(command,extent,graphics_vertices_.buffer(),
+    return buffer() && triangles.record(command,extent,graphics_vertices_.buffer(),
         graphics_vertices_.count(),camera,graphics_textures_.descriptor());
 }
 bool VulkanSourceModel::update(const SourceSpanModel& model,const SourceWarpInputs* warp,const SourceAxisInputs* axis) {

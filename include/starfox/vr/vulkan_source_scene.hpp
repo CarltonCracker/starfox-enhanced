@@ -2,6 +2,7 @@
 #include "starfox/vr/source_models.hpp"
 #include "starfox/vr/vulkan_draw_packets.hpp"
 #include <memory>
+#include <span>
 namespace starfox::vr {
 class VulkanPipelineCache;
 // Combined ordered legacy/compute scene. Caller completes both eyes before
@@ -17,8 +18,15 @@ public:
     struct LegacyRaySource {VulkanDrawPackets::RaySource geometry;uint64_t generation{};};
     VulkanSourceScene();
     ~VulkanSourceScene();
+    // MODERN (set before the first initialize): scenery the cartridge paints
+    // over regardless of depth (vr::painter_scenery) draws first in native
+    // order with the depth test always passing, then everything else
+    // depth-tested. `moving` (source handles that moved since the previous
+    // tick) never paint.
+    void set_modern(bool enabled) noexcept {modern_=enabled;}
     bool initialize(VkDevice,PFN_vkGetDeviceProcAddr,const VkPhysicalDeviceMemoryProperties&,
-        const VkPhysicalDeviceLimits&,VkRenderPass,const SourceModelPackets&,VulkanPipelineCache* cache=nullptr);
+        const VkPhysicalDeviceLimits&,VkRenderPass,const SourceModelPackets&,VulkanPipelineCache* cache=nullptr,
+        std::span<const uint16_t> moving={});
     bool record_compute(VkCommandBuffer) const;
     // Set only after a complete replacement shadow pass is ready for this eye.
     // Failure/fallback paths leave this false so native shadows remain visible.
@@ -36,5 +44,6 @@ private:
     std::unique_ptr<State> state_;
     std::string status_;
     uint64_t generation_{};
+    bool modern_{};
 };
 }

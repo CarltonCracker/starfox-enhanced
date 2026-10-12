@@ -11,6 +11,10 @@ struct SourceGraphicsPipelines {
     VkDevice device{};VkRenderPass pass{};
     VulkanScenePipeline triangles,lines;
     bool triangles_ready{},lines_ready{};
+    // MODERN: painter variants (depth test always passes) as well.
+    bool painter{};
+    VulkanScenePipeline painter_triangles,painter_lines;
+    bool painter_triangles_ready{},painter_lines_ready{};
 };
 // Per-model compute resources. Pipelines are shared/borrowed and must remain
 // initialized while recording compute work. Caller owns submission/fences:
@@ -44,7 +48,8 @@ public:
     bool prepare_graphics(VkRenderPass,float units,const SceneVertex& material,
         std::shared_ptr<SourceGraphicsPipelines> shared={});
     // Call inside the eye render pass, after record() and its barriers.
-    bool record_graphics(VkCommandBuffer,VkExtent2D,const EyeCamera&) const;
+    // painter: the shared painter pipelines (SourceGraphicsPipelines::painter).
+    bool record_graphics(VkCommandBuffer,VkExtent2D,const EyeCamera&,bool painter=false) const;
     void close() noexcept;
     VkBuffer buffer() const noexcept {return storage_.buffer();}
     // Borrow resident projection/corner inputs for downstream ray expansion.

@@ -6,6 +6,12 @@
 #include <cstdint>
 namespace starfox::vr {
 class VulkanPipelineCache;
+// MODERN on a headset: reversed infinite depth (depth cleared to 0, tests
+// compare GREATER, cameras from reversed_depth_camera) for uniform precision
+// at every distance, so the draw-order bias resolves coplanar source faces.
+// Process-wide: set once before creating pipelines or recording eyes.
+void set_scene_reversed_depth(bool) noexcept;
+[[nodiscard]] bool scene_reversed_depth() noexcept;
 // Flat-color triangle/line pass. Input positions are right-handed world coordinates
 // in the same units as EyeCamera. Caller owns vertex buffers and GPU lifetime.
 class VulkanScenePipeline {
@@ -16,7 +22,10 @@ public:
     VulkanScenePipeline& operator=(const VulkanScenePipeline&)=delete;
     bool initialize(VkDevice,PFN_vkGetDeviceProcAddr,VkRenderPass,bool depth_test=false,
         SceneTopology topology=SceneTopology::triangles,VkDescriptorSetLayout textures=VK_NULL_HANDLE,
-        SceneBlend blend=SceneBlend::opaque,VulkanPipelineCache* cache=nullptr,bool depth_write=true);
+        SceneBlend blend=SceneBlend::opaque,VulkanPipelineCache* cache=nullptr,bool depth_write=true,
+        // Depth-tested pipelines only: always pass the test (still writing
+        // depth), for scenery the cartridge draws as a painter.
+        bool painter=false);
     void close() noexcept;
     bool record(VkCommandBuffer,VkExtent2D,VkBuffer,uint32_t vertices,const EyeCamera&,VkDescriptorSet textures=VK_NULL_HANDLE) const;
     // Draw a primitive-aligned subrange without uploading another buffer.

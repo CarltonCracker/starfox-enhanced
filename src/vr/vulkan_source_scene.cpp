@@ -2,6 +2,7 @@
 #include "starfox/vr/vulkan_source_model.hpp"
 #include "starfox/vr/vulkan_draw_packets.hpp"
 #include "starfox/vr/vulkan_pipeline_cache.hpp"
+#include "starfox/vr/modern_frame.hpp"
 #include <stdexcept>
 #include <unordered_map>
 #include <algorithm>
@@ -20,6 +21,9 @@ struct VulkanSourceScene::State {
     std::vector<DrawPacket> source_packets;
     std::vector<uint32_t> handles;
     std::vector<uint32_t> legacy_keys;
+    // MODERN: source packet of each legacy item, and painter scenery per packet.
+    std::vector<size_t> legacy_packets;
+    std::vector<bool> painter;
     std::vector<bool> warp_modes;
     std::vector<bool> axis_modes;
     bool reused{};
@@ -30,7 +34,7 @@ void VulkanSourceScene::close() noexcept {state_.reset();++generation_;}
 bool VulkanSourceScene::reused_resources() const noexcept {return state_ && state_->reused;}
 bool VulkanSourceScene::initialize(VkDevice device,PFN_vkGetDeviceProcAddr get,
     const VkPhysicalDeviceMemoryProperties& memory,const VkPhysicalDeviceLimits& limits,
-    VkRenderPass pass,const SourceModelPackets& source,VulkanPipelineCache* cache) {
+    VkRenderPass pass,const SourceModelPackets& source,VulkanPipelineCache* cache,std::span<const uint16_t> moving) {
     ++generation_; // Even failed updates may touch retained producer resources.
     try {
         // initialize is called only after both eye submissions have completed.
@@ -84,6 +88,7 @@ bool VulkanSourceScene::initialize(VkDevice device,PFN_vkGetDeviceProcAddr get,
                 draw.placement=source.packets[draw.packet_index].model;
             }
             if(!state_->packets->update_models(transforms)) throw std::runtime_error("Retained source transforms failed");
+            if(modern_) state_->painter=painter_scenery(source,moving);
             state_->reused=true;status_="Source scene updated with retained GPU resources";return true;
         }
         auto next=std::make_unique<State>();
@@ -95,12 +100,14 @@ bool VulkanSourceScene::initialize(VkDevice device,PFN_vkGetDeviceProcAddr get,
         }
         next->graphics=state_ && state_->device==device && state_->get==get && state_->pass==pass
             ?state_->graphics:std::make_shared<SourceGraphicsPipelines>();
+        next->graphics->painter=modern_;
         next->source_packets=source.packets;next->handles=source.handles;
         for(const auto* request:requests) next->warp_modes.push_back(bool(request && request->warp));
         for(const auto* request:requests) next->axis_modes.push_back(bool(request && request->axis));
         next->packets=state_ && state_->device==device && state_->get==get && state_->pass==pass
             ?state_->packets:std::make_shared<VulkanDrawPackets>();
         next->packets->set_pipeline_cache(cache);
+        next->packets->set_painter_pipelines(modern_);
         next->graphics->cache=cache;
         std::array<const VulkanSpanPipeline*,5> pipelines{};
         std::array<const VulkanSpanPipeline*,3> warp_pipelines{};
@@ -178,7 +185,7 @@ bool VulkanSourceScene::initialize(VkDevice device,PFN_vkGetDeviceProcAddr get,
             } else {
                 const auto& mesh=source.packets[index].geometry;
                 if(!mesh.vertex_view().empty() || !mesh.line_view().empty()) {
-                    ++legacy;next->legacy_keys.push_back(source.handles[index]);
+                    ++legacy;next->legacy_keys.push_back(source.handles[index]);next->legacy_packets.push_back(index);
                 }
             }
         }
@@ -187,6 +194,7 @@ bool VulkanSourceScene::initialize(VkDevice device,PFN_vkGetDeviceProcAddr get,
         if(!next->packets->initialize(device,get,memory,pass,source.packets,source.handles))
             throw std::runtime_error(next->packets->status());
         if(legacy!=next->packets->size()) throw std::runtime_error("Ordered source item count mismatch");
+        if(modern_) next->painter=painter_scenery(source,moving);
         next->ray_draws.reserve(source.compute_models.size());
         for(size_t i=0;i<next->draws.size();++i) if(next->draws[i].model)
             next->ray_draws.emplace(next->handles[next->draws[i].packet_index],i);
@@ -221,6 +229,26 @@ bool VulkanSourceScene::record(VkCommandBuffer command,VkExtent2D extent,const E
     if(!state_) return false;
     for(const auto& draw:state_->draws)
         if(draw.model && !model_eye_camera(camera,draw.placement)) return false;
+    if(modern_) {
+        if(state_->painter.size()!=state_->source_packets.size() || !state_->graphics->painter) return false;
+        // Pass 0: painter scenery in native order (the cartridge overwrites
+        // nested tunnel sections regardless of depth). Pass 1: every other
+        // object, depth-tested against them.
+        for(const bool painter:{true,false}) for(const auto& draw:state_->draws) {
+            for(size_t i=draw.legacy_first;i<draw.legacy_first+draw.legacy_count;++i) {
+                if(replacement_shadows_ready && is_source_shadow_pass(state_->legacy_keys[i])) continue;
+                if(state_->painter[state_->legacy_packets[i]]!=painter) continue;
+                if(!state_->packets->record_range(command,extent,camera,i,1,painter)) return false;
+            }
+            if(!draw.model || state_->painter[draw.packet_index]!=painter) continue;
+            if(replacement_shadows_ready && is_source_shadow_pass(state_->handles[draw.packet_index])) continue;
+            auto draw_camera=camera;
+            if(state_->source_packets[draw.packet_index].preserve_native_colour
+                || is_source_shadow_pass(state_->handles[draw.packet_index])) draw_camera.effects={0,0,0,camera.effects[3]};
+            if(!draw.model->record_graphics(command,extent,*model_eye_camera(draw_camera,draw.placement),painter)) return false;
+        }
+        return true;
+    }
     for(const auto& draw:state_->draws) {
         if(replacement_shadows_ready) {
             for(size_t i=draw.legacy_first;i<draw.legacy_first+draw.legacy_count;++i)

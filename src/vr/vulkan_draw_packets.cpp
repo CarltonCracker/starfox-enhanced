@@ -19,8 +19,8 @@ namespace starfox::vr {
 struct VulkanDrawPackets::State {
     struct Geometry {DrawPacket source;std::shared_ptr<VulkanSceneBuffer> triangles,lines;std::shared_ptr<VulkanConnectedGrid> grid;std::shared_ptr<VulkanSceneTextures> textures;bool ray_positions{};};
     struct Item {Matrix4 model;std::shared_ptr<Geometry> geometry;uint32_t key{};};
-    struct Pipelines {VulkanSceneTextures layout;VulkanScenePipeline triangles,lines,photographs;
-        bool triangles_ready{},lines_ready{},photographs_ready{};};
+    struct Pipelines {VulkanSceneTextures layout;VulkanScenePipeline triangles,lines,photographs,painter_triangles,painter_lines;
+        bool triangles_ready{},lines_ready{},photographs_ready{},painter_triangles_ready{},painter_lines_ready{};};
     VkDevice device{};PFN_vkGetDeviceProcAddr get{};VkRenderPass pass{};
     std::vector<Item> items;
     std::unordered_map<uint32_t,size_t> ray_items;
@@ -187,6 +187,17 @@ bool VulkanDrawPackets::initialize(VkDevice device,PFN_vkGetDeviceProcAddr get,
                     throw std::runtime_error(pipelines.lines.status());
                 pipelines.lines_ready=true;
             }
+            if(!painter_ || !depth_test || photograph) continue;
+            if(item.geometry->triangles && !pipelines.painter_triangles_ready) {
+                if(!pipelines.painter_triangles.initialize(device,get,pass,true,SceneTopology::triangles,layout,
+                    SceneBlend::opaque,cache_,depth_write,true)) throw std::runtime_error(pipelines.painter_triangles.status());
+                pipelines.painter_triangles_ready=true;
+            }
+            if(item.geometry->lines && !pipelines.painter_lines_ready) {
+                if(!pipelines.painter_lines.initialize(device,get,pass,true,SceneTopology::lines,layout,
+                    SceneBlend::opaque,cache_,depth_write,true)) throw std::runtime_error(pipelines.painter_lines.status());
+                pipelines.painter_lines_ready=true;
+            }
         }
         if(next->keyed) {
             next->ray_items.reserve(next->items.size());
@@ -208,21 +219,25 @@ bool VulkanDrawPackets::readback_connected_grid(std::size_t item,std::span<uint3
         && state_->items[item].geometry->grid->readback(words);
 }
 bool VulkanDrawPackets::record_range(VkCommandBuffer commands,VkExtent2D extent,const EyeCamera& camera,
-    std::size_t first,std::size_t count) const {
+    std::size_t first,std::size_t count,bool painter) const {
     if(!state_ || !commands || !extent.width || !extent.height) return false;
+    if(painter && (!painter_ || !state_->depth_test)) return false;
     if(first>state_->items.size() || count>state_->items.size()-first) return false;
     const auto items=std::span(state_->items).subspan(first,count);
     for(const auto& item:items) if(!model_eye_camera(camera,item.model) || (item.geometry->grid && !item.geometry->grid->prepared())) return false;
     for(const auto& item:items) {
         const auto& geometry=*item.geometry;
         auto draw_camera=camera;
-        if(geometry.source.preserve_native_colour || (state_->keyed && is_source_shadow_pass(item.key))) draw_camera.effects={};
+        // Style effects stay off; the renderer-wide word (MODERN filtering) stays.
+        if(geometry.source.preserve_native_colour || (state_->keyed && is_source_shadow_pass(item.key))) draw_camera.effects={0,0,0,camera.effects[3]};
         const auto vertices=geometry.source.geometry.vertex_view();
         const bool photograph=!vertices.empty() && (vertices.front().texture[3]&backdrop_texture_flag)==backdrop_texture_flag;
-        const auto& triangles=photograph?state_->pipelines->photographs:state_->pipelines->triangles;
+        const auto& pipelines=*state_->pipelines;
+        const auto& triangles=photograph?pipelines.photographs:painter?pipelines.painter_triangles:pipelines.triangles;
+        const auto& lines=painter?pipelines.painter_lines:pipelines.lines;
         if(geometry.triangles && !triangles.record_model(commands,extent,geometry.triangles->buffer(),
             geometry.triangles->count(),draw_camera,item.model,geometry.textures->descriptor())) return false;
-        if(geometry.lines && !state_->pipelines->lines.record_model(commands,extent,geometry.lines->buffer(),
+        if(geometry.lines && !lines.record_model(commands,extent,geometry.lines->buffer(),
             geometry.lines->count(),draw_camera,item.model,geometry.textures->descriptor())) return false;
     }
     return true;

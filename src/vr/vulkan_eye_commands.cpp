@@ -1,4 +1,5 @@
 #include "starfox/vr/vulkan_eye_commands.hpp"
+#include "starfox/vr/vulkan_scene_pipeline.hpp"
 #include <cmath>
 #include <stdexcept>
 #include <array>
@@ -94,7 +95,7 @@ bool VulkanEyeCommands::submit(const VulkanEyeTargets& targets,unsigned eye,unsi
     }
     return submit_work(targets.extent(eye),[&](VkCommandBuffer command,VkExtent2D extent) {
         if(before_render) before_render(command,extent);
-        std::array<VkClearValue,2> clear{};clear[0].color=color;clear[1].depthStencil={1.0F,0};
+        std::array<VkClearValue,2> clear{};clear[0].color=color;clear[1].depthStencil={scene_reversed_depth()?0.F:1.0F,0};
         VkRenderPassBeginInfo pass{VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
         pass.renderPass=targets.render_pass();pass.framebuffer=targets.framebuffer(eye,image);
         pass.renderArea.extent=extent;pass.clearValueCount=targets.has_depth()?2:1;pass.pClearValues=clear.data();

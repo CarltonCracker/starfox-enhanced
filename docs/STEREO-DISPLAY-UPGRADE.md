@@ -580,8 +580,9 @@ K/M/K preview (96 evaluations / 24 held reuses) also pass. Its known mono
 swapchain refcount-1 shutdown warning remains.
 
 No accepted timing result exists for this hash: three batches were rejected
-after observing unrelated compilation. The captured gcc sources are in
-UrbanRecompBuild. The collector now records PID/parent/build/source metadata
+after observing unrelated compilation. The captured gcc sources are in an
+unrelated project's build directory. The collector now records
+PID/parent/build/source metadata
 without raw command lines; lowercase `-c` is not misclassified as uppercase
 `-C`. Full details are in `RENDERER-PERFORMANCE-OCT1.md`. The candidate stays
 OFF, release/settings/ReShade are unchanged, and no FPS gain is claimed.

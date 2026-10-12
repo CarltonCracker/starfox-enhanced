@@ -1,5 +1,5531 @@
 # Current acceptance index
 
+Current close-out snapshot (October 12):
+
+Latest checkpoint: source-only rendering run 38260696566 succeeds at commit
+`f0a07f61b0b3b84a2607bfbd38bb4587c1e53660`. Its complete native diagnostic
+configures, compiles and links with all 72 unchanged shader payloads. The
+downloaded executable and runtime libraries match the actual build receipt;
+this is build acceptance, not a GPU runtime pass or production adoption.
+The automatic follow-up completes its between-case GPU handoff. R448 exits 1
+naturally after 64.59 seconds, without a resource/observer stop: all moving
+sharp and eight-lobe water phases finish, then the moving lava cohort fails
+the unchanged positive curved-model reuse gate. Its complete source proof
+receipts locate refusal at the old-footprint witness stage; the separate
+legacy inverse trace is diagnostic only, not the source admission oracle.
+This is neither a full GPU pass nor production adoption. The fresh 89-case
+game suite now has all 89 terminal passes and no failures; Attack Carrier,
+Fortuna composition, both EX session checks and the editor/FPS chord cases
+pass naturally. The complete EX sweep also passes all 40 stages and nine
+native flows, retaining 30 source seconds plus suspend/resume and exact
+VM/SPC/PCM/raster/slider/mono parity per entry. The EX death route also passes.
+The EX Continue-Yes route also exits 0 naturally, with no resource, monitor or
+input-drift stop. Continue-No also exits 0 naturally, with its original guards
+and no resource, monitor or input-drift stop. The final EX model, native-model,
+effects, menu composition and landscape checks also exit 0 naturally. All 89
+ordered results match the held inventory, with no reused prior results, input
+drift or resource/monitor stop. The controller retires naturally, and the
+authenticated R458 full native GPU follow-up launches under PID 9064, birth
+2026-10-12T18:11:56.2618672Z. R458 subsequently exits 1 naturally at its
+unchanged completion deadline; R463 proceeds after its actual retirement and
+passes the complete actual native Vulkan producer oracle. Full-level/boss
+and physical performance are not inferred from the sweep.
+No running test or
+unrelated job is stopped, and no remaining case is removed. Validation scratch
+is about 691 MiB, within the one-GiB allowance. Earlier checkpoints retain
+their original failures and narrower acceptance boundaries.
+
+R451 isolates a proposed arithmetic correction OUTSIDE the frozen source:
+exact TwoSum/TwoProduct residuals choose directed endpoints only within the
+bounded normal range [2^-38, 2^38], retaining the original outward fallback
+elsewhere. CPU exact-integer controls pass 1,401,296 endpoint checks. Source-only
+run 38271654400 compiles the exact unit for DXIL and SPIR-V; actual native
+Direct3D12 and Vulkan executions both exit 0 and retain identical held-round
+outputs. Independent exact-integer verification passes all 132,096 endpoints
+per backend (including conservative fallback and nonfinite refusal cases).
+These are arithmetic unit checks, NOT lava/source/colour or player acceptance.
+R453 stages the recipe inside the one interval header in a controlled full
+native candidate; no root shader, game-test input, HEAD or real index changes.
+Source-only run 38272754668, commit
+`e925839e9db50d34a7343549700434065f6d1cab`, is deliberately cancelled BEFORE
+any qualification claim, to replace a floating zero comparison in the range
+classifier with exact IEEE bit classification. The native arithmetic recipe's
+already-tested normal domain is unchanged; the corrected CPU recipe again
+passes all 1,401,296 exact-integer controls. Its complete follow-up run
+38273565172, commit `c6f30975547d22db9b2ac04fc4a7e01d93fa14ec`, builds all
+1,571 held sources with the same complete native fixture, 72 payloads and
+original guards. Tiny nonzero representations cannot enter the checked path
+by being mistaken for floating zero. No
+source/visibility/angular tolerance, work bound or acceptance gate is relaxed;
+the candidate must still pass the actual complete owner before any adoption.
+
+R453 subsequently RESOURCE-STOPS during full native shader generation, not a
+GPU execution or a compiler syntax failure. Its owned compiler tree reaches
+2,167,541,760 bytes while DXC compiles `reflection_source_optical.hlsl`; the
+original two-GiB cap is retained, and no full executable is produced. The
+actual failure artifact and terminal receipt remain preserved. R457 adds ONLY
+the already-existing shared-scalar boundary to the two checked endpoint
+helpers; their bodies, all 1,571 sources, 72 payloads, fixture work and guards
+are retained. Source-only run 38277675156, commit
+`5abc39ae35e3333e450c2b1d07cfde32e1bee207`, completes successfully. The full
+native diagnostic configures, compiles and links with actual exit 0; its
+original two-GiB compiler cap remains intact (observed peak 1,783,767,040 bytes).
+The downloaded executable and all three runtime libraries independently match
+the actual build receipt. Its authenticated follow-up launches only after the
+complete frozen host suite passes; compilation is not runtime acceptance,
+and it does not replace the previous failure or replay tests.
+An independent read of the actual final PE also verifies every one of its
+72 distinct shader arrays: all 39,593,880 bytes match the build receipt inside
+aligned read-only data extents. The small receipt is
+`build/validation/active/native-r457-linked-payloads.json`. This checks final
+linked packaging, not GPU execution, shader numerical acceptance or adoption.
+
+R458's actual full GPU run exits 1 after 259.52 seconds, with no resource or
+observer stop and source identities verified after retirement. Unlike R448,
+moving lava/model-28 completes its independent incident/recomposition checks;
+the later mirror-ground/model-81 eight-lobe case fails the unchanged completion
+deadline. Its recorded optical/root GPU work totals roughly 10 seconds per
+eye. The failure and complete logs remain preserved; this is not full native
+owner acceptance or production adoption.
+
+R465 stages one bounded work-sharing correction outside the root: each of the
+four endpoint products now computes its unchanged exact residual once for
+both directed bounds, instead of repeating the same calculation for each
+bound. All safe-domain/fallback rules, product-residual formulas, optical gates,
+root work bounds, case coverage and deadlines remain unchanged. The byte-identical
+CPU oracle passes all 1,401,296 controls against the new recipe. Source-only
+run 38290547809, commit `4b18f9d2b6efebcc02b185c32e5e6e340f4e776e`, is building
+the same full native target and all 72 payloads. Its authenticated follow-up
+will run the original complete GPU fixture, not replay the completed host suite.
+The new optimization has not yet passed a native GPU run or been adopted.
+
+R456 separately stages a complete ordered-curved Vulkan producer OUTSIDE the
+root. Actual native model/water/lava transport emits its distinct 64-byte path
+records and current primary base/response, preserving legacy record modes and
+pipeline retirement. The native Vulkan C++ owner passes GCC 13.2 O3 syntax
+checking. Source-only run 38276609350, commit
+`f6c18443af036a05a731ec1ccfb99c5b2cbdb358`, compiles and independently validates
+all six original GLSL variants; every downloaded payload matches its receipt.
+This is compilation/validation, NOT native ray-query execution, accepted
+history reuse, production adoption, a main update or a release.
+
+R462 now builds and links the complete native Vulkan producer diagnostic
+locally with the actual R456 six SPIR-V payloads. It reuses the existing
+calibrated GPU geometry producer and the unchanged complete binary64 curved
+MODEL/FULL-water/lava oracle: all four component formats, both eyes,
+sharp/eight-lobe paths, phases, caustics and canonical prefix checks remain.
+The signature adapter submits to `VulkanHardwareRt`, not the Windows DXR
+bridge. Actual GCC exit is 0, and source pins are checked before and after.
+R460's observer path-spelling error and R461's missing VR link dependencies
+remain unaccepted earlier attempts. No private assets or player executable is
+copied. R463 is queued behind the actual complete 89-case host suite and the
+existing native follow-up; it retains the original memory limits. Its actual
+native Vulkan GPU execution subsequently exits 0 after 186.52 seconds, with
+all four component formats, the complete unchanged binary64 oracle and source
+pins verified after execution. This closes native producer execution, not
+Linux application/history-reuse acceptance, practical FPS or production adoption.
+
+R464 independently rechecks the existing consolidated New-3DS handoff against
+the actual compiled ARM commit `e98788bef9dbfbca46cfbe0506b02a356b6a3388`.
+All 277 current native/host-dependency source members match their commit blobs,
+including newly authored files that a regular worktree diff can incorrectly
+report as missing. The six ZIP members, native executable/icon identities and
+all five content checksums pass without extracting or copying private assets,
+rebuilding the binary or changing the real Git index. The same verified package
+remains available; this does not establish physical console FPS. The separate
+complete 89-case suite has now passed without replacing a remaining case with
+prior results.
+
+The read-only integration-scope check separately pins the six rendering
+variants to their actual compiled candidates and verifies that none occurs in
+the 277-member compiled ARM closure. Its receipt is
+`build/validation/active/render-integration-scope.json`; the real branch/index
+and every root source file remain unchanged. Rendering adoption is still gated
+on the actual native checks, but these isolated changes alone do not require
+another ARM binary or duplicate New-3DS package.
+
+At 15:03 UTC, three consecutive close-out observations still find insufficient
+physical headroom (latest 4.419 GiB; the unchanged launch requirement is 6 GiB).
+Both queued controllers retain their actual PID/birth/image identities and
+have empty error logs; no GPU run has launched and the game total remains
+59/89. Further local qualification requires RAM to become available. The goal
+is blocked on that external condition, not complete; passing results and the
+live queues are preserved rather than restarted or overwritten.
+
+At 15:08 UTC the owner frees RAM, and fresh observation finds about 9.6 GiB
+available. The goal is active again. The same authenticated controller resumes
+the Original Continue-Yes route under its existing checker/source pins; no
+test is replayed or guard changed. The already-verified GPU diagnostic remains
+queued for the next between-case handoff, without a second download or build.
+
+The complete current root 50-case cartridge regression now passes. R423 retains
+the original registrations, source/checker identities, full work bounds and
+CTest deadlines; no older result substitutes for a remaining case. This closes
+the earlier 21/23-case-prefix gap, not console FPS or hardware acceptance.
+The expanded standalone 89-case qualification remains separate and incomplete.
+Its fresh configure succeeds, but companion compilation resource-stops at the
+original global memory floor; the R430/R434/R435 operation logs are retained.
+No other project's job is stopped and no memory guard is weakened.
+R441 subsequently completes all three native build operations, but its final
+dependency audit rejects a header named through the `C:/sfe-work` junction.
+That observer failure remains recorded. R443 authenticates the junction before
+and after operations and resolves consumed alias headers to the physical paths
+held before compilation. Fresh configuration, companion generation and the
+complete build pass with 123 optimized compiler recipes and 808 consumed
+dependencies. All 89 exact registrations pass inspection. R443 records 49
+terminal passes; its next Original game-session owner and controller disappear
+without a recorded exit. That case is NOT inferred to pass from a stale live
+file. Reinspection also finds the pinned Python executable changed from
+`31073DAD...` to `D41BAD46...` (the current interpreter reports 3.12.14).
+R444's continuation preflight correctly refuses this input drift. R445 now
+refreshes the same build directory against the current interpreter, followed
+by the complete original 89-case inventory rather than relabeling the old
+prefix as current. Original guards, workloads and registrations are retained;
+no old case log or outcome is overwritten and no extra build tree is made.
+R445 completes configure, companion generation and the full build with actual
+exit 0 for every operation and no resource stop. Its complete 89-case suite
+starts under the newly held inputs. A between-case handoff after the first 49
+fresh results leaves no CTest/checker live while the R442 GPU qualification
+runs, then retains all forty remaining game cases and their original limits.
+The controller is launched hidden with its actual PID/birth/image recorded;
+neither an observer timeout nor a queued case is treated as terminal success.
+All 49 R445 prefix cases subsequently pass, then the controller parks between
+cases. The remote rendering build fails on an uncaptured local `check` callable
+in the new noncapturing queue-boundary callback. This is a compiler error, not
+a GPU result or resource stop. The idle R445 controller is authenticated by
+held handle/birth/image and retired with no CTest/checker child killed and no
+unrelated job stopped. That passing prefix remains preserved, not promoted to
+all-89 acceptance. The guard is made self-contained with its same exception;
+the complete renderer unit passes O3/source-index syntax checking locally.
+R447 refreshes the same lean host directory against the corrected snapshot;
+all three operations and all 89 exact registrations pass again. Its full
+runtime suite now starts, yielding only BETWEEN cases when the corrected
+native GPU artifact is actually ready, never discarding a remaining case.
+
+Rendering source-only run 38246169319, commit
+`5664c0e222b422c654a2535637e405678c139cd6`, successfully configures, builds and
+links the full `starfox_displayxr_gpu_presenter_check` target with both original
+fixture macros, O3 and all 72 byte-exact payloads. It does not build a player or
+publish a release. Seven previously mismatched shader-command variants are
+aligned with the qualified 42-program profiles. The subsequent large-literal
+packing failure is fixed with a bounded parser: all 50 reflection arrays match
+an independent byte reader and all nine controls pass, with 181,252,096 bytes
+observed process-private peak. Shader arithmetic and full fixture work remain.
+
+The exact linked diagnostic is downloaded and hash-checked. Its full moving
+GPU run begins and completes the initial sharp source-owner phase, then stops
+at the original global RAM/commit floor after 28.12 seconds (3,211,436,032
+observed private bytes, below its eight-GiB private cap). This is not a complete
+GPU pass; the rough moving phase, broader optical/lens checks and production
+adoption remain open. Both source and terminal evidence are preserved in the
+single C: validation scratch set, still within the one-GiB storage allowance.
+
+After RAM recovery, R438 runs the same complete native executable/workload.
+It exits 1 after 112.33 seconds WITHOUT a resource or observation stop. The
+sharp moving phases pass, but the rough eight-lobe water phase loses its D3D12
+device; Windows records NVIDIA errors at the same instant. This is an actual
+runtime failure, not a memory deferral or accepted late-cleanup frame.
+
+The scheduling correction keeps all 64-record batches, every lobe and the
+original completion polls, but submits ordered segments after 32 complete
+batches instead of one very long command. Partial publication stays hidden,
+the accepted bank is unchanged until final presentation, and failure cleanup
+fences preceding segments. There is no CPU optical feedback or per-segment
+wait. Timestamp controls pass all 73,728 records/1,152 batches per eye and all
+23,040 timestamp slots, including missing/gapped/incorrect command-boundary
+rejection and no premature reads. These are mock controls, not a native pass.
+Source-only run 38255131091, commit
+`21d0a444f4e054754b4159f5f5212dde86916693`, is rebuilding the same full target.
+No main update, release, shader arithmetic change or quality reduction occurs.
+
+That run later records actual build exit 1 at the callback compile error,
+without a resource stop (1,946,427,392 compiler-private peak bytes). Its small
+failure artifact is preserved; no GPU test launches from it. The corrected
+one-source delta and updated 1,571-file manifest are isolated in commit
+`f0a07f61b0b3b84a2607bfbd38bb4587c1e53660` and source-only run 38260696566.
+All payload and compiler identity controls already pass there; its full native
+build is in progress. R448 is prepared for that exact commit/run/manifest and
+retains every original shader, record, lobe, completion poll and resource guard.
+It has not launched or passed. Root HEAD/index, main and releases stay unchanged.
+
+R447's first 49 fresh runtime cases pass with no input drift, monitor failure
+or resource stop. The complete Original session is now live; none of the forty
+longer cases is replaced by this prefix. A bounded local follow-up observes
+only run 38260696566, verifies the selected diagnostic and its actual receipts,
+and requests the between-case GPU lane only after a successful full native
+build. It preserves download ambiguity/failure instead of repeating an intake,
+never cancels CI, and uses R448's original source/ABI/ownership/memory gates for
+the actual full GPU run. The observer's readonly-variable issue is corrected
+before download/GPU work; the old idle observer is explicitly retired and its
+receipt retained. The replacement's actual handle/birth/image is verified live.
+No GPU result, all-89 total, performance gain or full-goal acceptance is inferred.
+The full Original serial session subsequently passes as case 50 of 89; its
+parallel session starts under the same exact checker and frozen source inputs.
+Both regression and CI-follow-up owners remain authenticated live. CI is still
+building, so GPU launch has not yet occurred. Scratch remains about 540 MiB of
+the one-GiB allowance; no additional snapshot, private asset copy or unrelated
+job termination occurs.
+
+The owner confirms RAM has been freed. PID 38752, the only Python process
+explicitly authorized for termination, is already absent on inspection; no
+replacement Python instance or unrelated compiler job is terminated.
+
+A concise asset-free New-3DS handoff is packaged as
+`build/validation/active/StarFoxEnhanced-New3DS-candidate-2026-10-12.zip`.
+Its executable and SMDH are unchanged from the successful R412 ARM artifact;
+only the tester instructions and validation summary are consolidated. All ZIP
+members are reopened and hashed. No cartridge, firmware, settings or saves are
+included. It remains experimental, not a new binary build or a promise of
+stable New-console FPS. The owner requests today's close-out without new
+features or repeated minor hardware tests.
+
+Earlier October 12 checkpoints follow; their failures and scope limits remain
+historical evidence, not the latest passing totals.
+
+R416 recovers the original 26-argument root configure recipe and all 24 targets
+from retained tool-source records, without restoring the deleted D: tree. CMake
+projects all 50 current registrations with the original order, arguments and
+deadlines; the old and current Original symbol files are byte-identical. Actual
+root configuration and companion generation pass in the existing C: host build.
+Compilation then resource-stops, not compiler-fails. R417 verifies that exact
+configuration and resumes only the remaining compilation with one worker and
+the unchanged limits. It exits 0, with 866 actual compiler dependencies and
+6,204 held inputs; every declared target and registration is present. Generated
+CMakeCache.txt/CMakeFiles were retired for the project switch, not saves,
+settings, cartridge files or the working player. The earlier stop remains in
+`root-host-r416-operations.json`; the completed incremental qualification build
+is separately recorded in `root-host-build-r417.json`.
+
+Twenty-one fresh root cases pass, including the complete Original serial game
+session (CTest 471.54 seconds, unchanged checker/source work). The runner then
+defers the next case before launch because virtual headroom is below 6 GiB.
+No running case fails or is killed in this run. `continue-root-host-r418.ps1`
+authenticates the same build, all original inputs/observer sources, recipes,
+checker hashes, passing logs and actual owner retirement before continuing
+the remaining 29. Its read-only preflight passes those integrity checks but
+still declines launch at the same headroom requirement. No R418 case has run.
+This is not all-50 acceptance, and the separate expanded 89-case scope remains
+required. Older R414/earlier results are not substituted into this prefix.
+
+R419 identifies and restores a missing rendering target: the full moving-owner
+fixture is `tests/displayxr_runtime_tests.cpp` with
+`--source-motion-owner-only`, not the smaller source-ownership checker linked
+in R411. Its real GPU-presenter compiler recipe retains the trace macro, current
+42-program lookup first, existing trace header second, O3 and the original
+compiler memory limits. Actual compilation passes with 730 consumed dependencies
+held in the 8,446-input closure, no drift or resource stop, and 1,082,511,360
+peak compiler-private bytes. Object SHA256 is
+`F0EE1F95CFAD8482F9F344EC43A04EC831AD45604F04572C6AD037EB15A6E25D`.
+This is an object build, not a full native link or GPU result. Read-only screening
+of the full eight-archive link finds missing member/dependency records from the
+deleted history and newer current headers; those archives are not assumed to
+be current merely because their library files remain. Timestamps are a rebuild
+screen, not byte-level proof. The first audit's absolute-member path handling
+is corrected in `moving-link-audit-r419-r2.json`, with the earlier audit retained.
+The full moving-fixture link/closure, full native GPU execution and production
+adoption remain open; the smaller checker cannot replace that qualification.
+
+R414 refreshes the same host build after registering the draw-transform test:
+24 incremental operations complete with exit 0 and no resource stop, and 813
+actual compiler/registration inputs are frozen. The expanded graph contains
+89 cases. Forty-nine fresh cases pass (all 48 asset-free checks and Original
+HUD); the full Original serial session is stopped after 64.16 seconds by the
+reconstructed runner's 6 GiB live floor. Its owned CTest tree is terminal. The
+40 unpassed cases are not assigned a passing result, and earlier runs are not
+combined with this fresh run. No player binary, private asset or build tree is
+duplicated. Receipts are `host-r414-build.json`,
+`host-r414-regression-results.json` and `host-r414-live-case.json`.
+
+R415 recovers only bounded observer source definitions from this chat's retained
+tool records, not raw transcripts, reasoning or historical result files. Five
+recovered files have reverse comparisons; only C: path/log bindings and quoted
+paths containing spaces differ where required. The original policy distinguishes
+6 GiB physical/virtual per-case launch headroom from 1/1.5 GiB live global floors,
+with a separate 1 GiB owned-private cap. On a global floor drop it yields only
+the handle/birth/image-bound test child, never CTest or another project's job;
+CTest's deadline keeps running. The prior reconstructed runner incorrectly
+kept enforcing launch headroom throughout gameplay.
+
+Fresh controls pass eight identity/pause/resume checks with all 200 native work
+steps; CTest enforces its unchanged two-second deadline while the child is
+paused (exit 8 at 2.118 seconds). Three synthetic-memory policy controls retain
+600 native work steps and prove recovery accounting, cap propagation and wrong
+child refusal. These are controller tests, not application or real low-RAM
+acceptance. The initial truncated-source control compile and the first unquoted
+space-containing CTest path failure remain recorded, not relabeled as success.
+The corrected 89-case runner preflight authenticates current build/observer
+inputs but declines launch because available virtual memory is below the
+original 6 GiB threshold. No R415 game case or GPU workload is launched. Full
+original 50-case configuration/admission recovery, full current regression,
+rendering native execution/production adoption and console FPS remain open.
+Evidence is in the small `build/validation/active/observer/` source/control
+receipts and `run-host-regression.ps1`; the deleted D: history is not recreated.
+
+R412 refreshes the existing lean host build to the current palette sources,
+without a new build tree or private asset copies. All actual compiler inputs
+hold unchanged across the incremental build (exit 0, no resource stop).
+Forty-eight fresh registered cases pass: all 47 asset-free tests and Original
+HUD. Case 49, the full Original serial gameplay session, is stopped after
+224.50 seconds by the unchanged 6 GiB live free-RAM floor. This is not a passing
+session or a game assertion/timeout; 40 of that run's 88 cases remain unpassed.
+Its CTest/checker process tree is terminal, and no automatic retry is launched.
+Older results belong to their earlier input graph and are not combined with
+this refresh. Receipts are `host-r412-build.json`,
+`host-r412-regression-results.json` and `host-r412-live-case.json` under the
+single `build/validation/active` scratch set.
+
+A separate R412 native optimization caches only adjacent equal draw transforms
+within one fixed frame/eye scope. The presenter resets after each eye's backdrop
+write; every draw, material, clip and source face remains. A strict current-source
+host test passes 1,176 assertions: exact baseline matrices for all mono/stereo
+draws, changed spaces/models, changed slider/convergence, signed-zero keys,
+scope resets and failed calculation/upload repair. Its repeated-model fixture
+retains 256 draws across two eyes while reducing matrix calculations/uploads
+from 256 to two. This is command-count evidence, not hardware FPS acceptance.
+The new regression is registered separately; the previous 88-case run is not
+relabeled as the expanded 89-case suite.
+
+Source-only commit `e98788bef9dbfbca46cfbe0506b02a356b6a3388` is pushed only to
+`codex/3ds-draw-transforms-r412-20261012`; ARM workflow run 38206689640 completes
+successfully, including all 48 asset-free host cases and ARM/shader/stack checks.
+Its isolated index preserves root HEAD/index and
+verifies 270 unchanged current compiler/native source inputs against the R410
+parent. The allowlist also retains the already-reviewed current ground-ramp
+helpers and the stronger BG2-plane and declared-convergence fixture corrections.
+Every correctness/ARM/shader/stack check remains; only the parent's unrelated,
+already-recorded paired palette timing experiment is not repeated. No main,
+tag or release is changed. Only the roughly 1.1 MB test artifact and small compiler
+settings are downloaded, not the 44 MB diagnostics bundle. The five-member
+asset-free ZIP is SHA256
+`406e3ca195c1edeadde6a476e80347ec21aaea479a4da0e0b40e53fbbd4e607c`;
+the installed 2,654,548-byte image is SHA256
+`6a6591157494d3199a08ee778a26ca54c5818bc709af4973d48a081ae1a73782`.
+Installation replaces only the existing native image and preserves private BIN
+and save files; no additional private asset copies are made.
+
+The new image completes Preview ON/OFF/ON, Preview-OFF ordinary Start, source
+intro/Controls, the Training choice, outdoor Training and live steering/roll in
+the reused New-model Vulkan Azahar 2126.2 setup. Accurate GPU timings/math and
+invalid-memory exceptions remain enabled, both eyes are rendered, and async
+presentation/shader compilation and duplicate-frame skipping remain off.
+Reviewed samples retain white ground details and visible ring/tower bases,
+including a tilted view. Select+Start retires the guest to the application list;
+the same process (PID 53152, birth 2026-10-12T05:15:41.4779320Z) then exits 0
+through normal window close at 05:24:05.9481419Z, without a kill or restart.
+An observation timeout is followed on the same live PID/birth/image and actual
+process handle, not treated as a game failure. Evidence is in
+`3ds-r412-ci-result.json`, `3ds-r412-ci.log`, `r412-install.json`, reviewed
+`r412-*.png` captures and `emulator-exit-r412.json` under the existing scratch set.
+The emulator still logs unimplemented New-model CPU configuration; neither its
+displayed rates nor these samples establish console FPS, audible NDSP quality,
+all-stage fidelity or full cartridge regression. No incremental tester request
+is made. Full current regression, rendering native execution/production adoption,
+whole-game performance and rendering-effects completion remain pending.
+
+R411 removes the reflection-history compiler blockage without changing shader
+bytes or rendering arithmetic. The scene generator now supports a selective
+include: all 100 payloads remain byte-identical, and actual preprocessing checks
+both normal/history-only modes for Windows and non-Windows. Six partition
+regressions pass. A GCC-only qualification layout moves the 42 current native
+arrays and eight existing history/curved arrays into separately compiled C data.
+Independent compiled C++ checks verify every fixed-size unsigned-byte array,
+its four-byte alignment and all 22,311,532 linked bytes. History's external
+declarations use distinct C++ namespaces, avoiding a language-linkage/ODR
+conflict with the scene package's ordinary inline declarations. The first
+same-entity link's source/object/recipe/hash receipt is preserved, but its
+derived executable is superseded and retired before any GPU execution.
+
+The namespace-safe history object compiles at the unchanged `-O3`/diagnostics,
+GCC GC policy and 6 GiB physical/2 GiB commit floors, with the same 2 GiB private
+cap: exit 0, no resource stop, observed peak 442,400,768 bytes, object SHA256
+`a82e638e8f0278d8fd4b7001b01be78b8e8716da4f7c20787a74d28400d506d4`.
+The include/namespace substitutions have an exact inverse to the prior frozen
+history source; no shader or CPU rendering work is reduced. All four fresh
+native objects and the two exact data objects link using the existing native
+recipe with only output/input-object redirection. Final checker SHA256 is
+`4962634265d1bbdb2887e6ce7571567b130e701db74432d0379476afd4f243ec`.
+An independent read of its PE symbols/read-only section verifies all 50 actual
+shader arrays against their expected binary hashes. The earlier partition-only
+and 42-array-only attempts remain recorded as live-RAM resource stops, not
+successful compiles. No GPU workload has been launched: original full host
+admission recovery and native execution/production/FPS qualification remain
+pending. This build layout is qualification-only, not adopted by the player or
+advertised as an effects-completion result. The 3DS R410 image is unchanged;
+whole-game performance and complete current-source regression remain open.
+Evidence is under `build/validation/active/scene-partition-r411.json`,
+`render-external/`, `gpu_calibrated_reflection_history.r411-namespaces-compile.json`,
+`native-owner-r411-safe-link.json` and `native-owner-r411-safe-payloads.json`.
+Four superseded/one-use diagnostic executables are retired after matching
+their recorded hashes; sources, data objects, receipts and the final safe
+checker are retained, so they are rebuildable. No game build or user data is
+removed. Scratch is about 450 MiB, below the 1 GiB budget. Root HEAD/index, main, releases,
+private assets, settings and saves are unchanged.
+
+Storage reset: the owner deleted newer `D:/SFE-validation` candidates and
+receipts and requests C: only. The exact R398 run was canceled after its inputs
+were removed; its observed 41/50 results are not a complete accepted run.
+Historical D: links below may no longer exist and must not be treated as current
+verification. Source-only 3DS candidate `4c8768b9f173c8e1bd9eab20772edfbf51598549`
+and its successful CI run 38181897308 remain recoverable from Git/GitHub.
+Use the bounded storage policy in AGENTS.md; do not rebuild historical copies.
+
+The next New-family upload candidate expands only RGBA 8x8 Morton tiles,
+retaining the compact traversal for RGB HUD and one-byte ownership planes.
+Exact source bytes, padding/repeat rules and changed-tile flush ranges remain.
+Fresh strict host checks pass 107,115,993 assertions and warm allocation checks.
+R406's source-only ARM run 38194492309 completed successfully, including 47
+asset-free host tests and shader/stack inspection, but its changing-frame RGB
+fixture regressed roughly 10%; that binary is not adopted for testing. Its
+timing baseline also called the candidate's traversal helper, so R407 freezes
+the original traversal in its own reference function. The corrected local
+16-pair changing-image fixtures preserve all full/dirty bytes and flush ranges;
+median throughput ratios versus that byte baseline are 2.87--3.13x RGBA and
+1.34x RGB. These are host component timings, not ARM or whole-game FPS proof.
+Source-only commit `fc699b65bf72d3d0a02744b3cac52c92e8460ad9` passes
+GitHub run 38195209076 on `codex/3ds-rgba-tile-upload-r407-20261011`, including
+47 asset-free host tests, the full ARM build and shader/stack checks. Its exact
+asset-free ZIP is SHA256
+`e73e26a8a8ab4357396fe91ebb6bb3f41991cafa000b81441b9b5030db790f90`.
+The installed ARM image is SHA256
+`6e6019438b804ca84b164700c2b9ecf19adb379f5a255c07791659c3970edb5a`.
+It completes Preview ON/OFF/ON, ordinary Preview-OFF Start, source intro,
+Controls, Training with live steering and both eyes/lower HUD, Select+Start
+guest retirement and normal host close in accuracy-enabled Azahar 2126.2.
+The original process exits 0 without a forced stop or restart. Its first
+observation window expired while it was still running; a second observation
+retains the same PID, birth time and real process handle until normal exit.
+Settings/save/private BIN files were preserved. Presentation remains slow in
+the emulator; neither this run nor the component benchmarks establish console
+FPS. The bounded timing CSV fills its 512 windows before Training, so its
+preview timings are not mislabelled as a Training benchmark. No main/tag or
+release is changed. The R403 section below is historical, not the installed
+candidate. A fresh lean host-core build is restoring local regression coverage
+without SDL/OpenXR or private asset copies after the D: deletion.
+That build now completes locally and all 47 asset-free cases pass. The
+expanded optional local registration includes 41 Original/EX cartridge cases,
+with existing ROM/symbol paths, full 36,000-phase complete-flow bounds and
+unchanged route/composition deadlines. Fifty cases pass, including the complete
+Original serial session and independent joined-audio session. The next
+capabilities case is resource-stopped by the 6 GiB live free-RAM floor, not an
+assertion or timeout. One verified continuation preserves the successful
+checker hashes and corrected registration; it also hits that same RAM floor.
+Both attempts are stopped; 38 cases remain pending. Other projects are left
+running. The original and continuation results remain separately recorded in
+`build/validation/active/host-regression-results.json` and
+`build/validation/active/host-regression-resume-results.json`.
+This is newly registered functional coverage, not a recreation or re-pinning
+of the deleted D: 50-case protocol/observer receipts. Pending tests remain
+pending; it does not yet admit a GPU workload or establish port completion.
+
+Rendering recovery independently verifies all 42 R383 shader artifacts against
+their exact Git source pins, compiler/flags/resource receipts and binary bytes.
+Fourteen source differences (including a 504-query shader schedule versus the
+current 64-query native owner) prevent treating them as current-root binaries.
+Source-only current-root CI 38198745990 instead compiles all 36 actual source
+closure files: 40 shader jobs pass, while both DXIL jet jobs exceed the original
+2 GiB compiler-private-memory guard. The interval header did not honor the
+shared-scalar flag when the general inline flag was present. Its correction
+changes only the three scalar call boundaries; preprocessing retains every
+arithmetic line and guard. The complete follow-up runs at commit
+`9be4af8c9f6a11a6ca6c4690a004742a0f547ddf`, CI 38199185971, on temporary branch
+`codex/current-root-shaders-r408-20261011`; all 42 jobs now pass, without a
+compiler resource stop. The complete downloaded set verifies against all 36
+current-root source pins, full flags/compiler/guard receipts and binary bytes:
+there are zero root-source mismatches. Forty-two aligned headers are generated
+under the existing C: scratch set, replacing only the deleted-D include path
+for future native checks, not modifying the dangling release junction. The
+first local native-checker compile is initially deferred before launch because
+free RAM is below the existing 6 GiB floor. When RAM improves, the fresh
+`check_reflection_source_owner.cpp` object compiles successfully with the exact
+current shader headers, unchanged source, exit 0 and 868,511,744 peak compiler
+private bytes. Its object SHA256 is
+`287a1b8fec76aed3aead861ff2f953d66641b6a48ba9a888f388479f7416ba60`.
+The next fresh `gpu_calibrated_scene.cpp` attempt is stopped by the live
+6 GiB floor, with no successful object; both receipts remain separate. All
+remaining local compilation/runtime work stays behind that floor. A low-heap
+continuation changes only GCC garbage-collection thresholds, retains `-O3`
+and the 2 GiB compiler-private cap, and adds a 2 GiB free-commit floor; it has
+now completed `gpu_calibrated_scene.cpp` with exit 0, no resource stop and
+1,660,076,032 peak compiler-private bytes. Its object SHA256 is
+`fbeaec4cdf0e53ae274b2d7381bbf13a5334a8f2b7fa2ee8d88b820c13b766a2`.
+The reflection-history unit still exceeds the unchanged 2 GiB compiler-private
+cap (observed 2,433,167,360 bytes), so that attempt exits -1 and is not accepted.
+The fresh ray-composite unit also completes with exit 0, no resource stop and
+1,515,110,400 peak compiler-private bytes. Its object SHA256 is
+`dbdebcc1398e3c5d3e132626926c9386b123a7074f4034b7aa1a78d9c5f76350`.
+At this R409 point, three of the four required native units had successful fresh
+objects; R411 above subsequently completes the history compile and exact native
+link. Full original host admission recovery and native GPU checks remain
+pending. Scratch at R409 was about 302 MiB, below the
+1 GiB limit. This is not native GPU acceptance or
+an effects-completion claim. Root HEAD/index, main and releases are untouched;
+no source snapshot, private asset copy or additional worktree is created.
+
+The next 3DS candidate caches the exact 256 source palette colours during
+BG2 atlas updates instead of repeating per-channel clamp/brightness arithmetic
+for every texel. Tile-ink-zero transparency, opaque RGB black, painter order,
+geometry, cadence and borrowed-frame publication are unchanged. The added
+scalar source-painter sweep covers all 512 brightness/subtraction pairs.
+Source-only commit `1388b3795d7ee0963f47eaf59a61c80b09c24eaa` on
+`codex/3ds-palette-atlas-r410-20261011` completes CI 38201411906 successfully, including
+47 asset-free host cases, the ARM build/stack checks and 16 alternating-order
+host atlas comparisons against R407's frozen implementation. Its real warmed
+atlas benchmark retains the same observation digest and reports a 1.07687x
+median component ratio (about 7.7%); this is not ARM or whole-game FPS proof.
+The benchmark link recipe in that CI run also writes CMake's candidate linker
+dependency sidecar. It does not modify candidate executables/archives, whose
+hashes are checked before/after, or affect the later ARM build. The local helper
+now redirects that baseline-only sidecar to its own path for future runs; this
+metadata correction has not been rerun or mislabelled as part of R410's receipt.
+The exact asset-free ZIP is SHA256
+`534ce83d392f1f7ad35db99a937d0fa7375127700904a087c406ae6300acd13f`;
+the installed 2,654,384-byte image is SHA256
+`785131f59951094eb507c4257d89f74d141c79afa846fc223622747bb2392042`.
+That image passes the real pre-game menu, Preview-OFF ordinary Start, source
+intro/title, Controls, Training, live steering/roll, both eyes and lower HUD
+in accuracy-enabled Vulkan Azahar 2126.2. Source terrain bands, white ground
+details and ring/tower bases remain visible. Select+Start retires the guest,
+and the same emulator process exits 0 normally without a kill or restart.
+Its first observation window expires while alive; the continuation checks the
+same PID/birth time/image and holds the actual process handle through exit.
+The emulator still reports unimplemented New-model CPU configuration and
+presentation remains slow; console FPS and audible NDSP acceptance are not
+claimed. No minor hardware retest is requested. Assets/save state remain
+preserved on installation. The previous local 88-case executables/archives are not rebuilt or
+overwritten to make this candidate, so their existing receipts stay meaningful.
+
+Clock-unit conversion of the R376 console CSV shows the dominant gameplay
+group at 78.67 ms/frame, with layers 18.84 ms and composition 18.30 ms. The
+current R403 emulator Training sample records 5.87 ms layers, 2.91 ms
+composition and 7.47 ms uploads; emulator and console are different workloads
+and clocks, so these are bottleneck guides, not a measured device speedup.
+Parent/child and parallel audio phase totals are not added together.
+
+The October 11 basic-ground follow-up now uses actual BG2 atlas row order for
+the first/last colour endpoints, rather than brightness-sorted palette extrema.
+It normalizes only the sampled basic-ground inks, retains live CGRAM fades and
+black, excludes sparse details/sky, and leaves liquid/mirror/gold/lava shading
+on its existing path. Terrain-bank ownership prevents a last sky row from
+being mistaken for the first ground row (the expanded check caught and then
+verified the correction in EX7-1). The ordinary and calibrated callers share
+the collector; EX weather-transition ground stays basic rather than switching
+to water during a blue palette phase. Literal fixtures cover 16 atlas layouts,
+32 fade levels, flips/pages, returning ramps and protected/liquid exclusions.
+Fresh Vulkan cartridge checks pass the seven EX5/6/7 basic-stage samples and
+seven enhanced-sky/ray/liquid samples including EX6-6 and EX7-5. Fresh D3D12
+checks pass four Original stages, including Titania's authored blue snow and
+Macbeth's red-sand selection. These are sampled checks, not all-stage acceptance.
+
+The actual PC player is rebuilt from fresh desktop/input/calibrated caller
+objects, reusing the existing archives and packaged resource objects without
+copying private assets. Both `build/current/starfox_pc.exe` and
+`build/release/starfox_pc.exe` now have SHA256
+`f593bcc5a1dbf47071b006e305b6b7b130963a73b31479563add8bf884508c2c`
+(325,253,411 bytes). Thirty real pre-game cases pass: heavy enhancements,
+SSAA, SR selection and both DLSS selections leave Preview-OFF images unchanged;
+live navigation/renderer restoration pass and Preview ON presents its loading
+indicator before the scene. Twelve actual player captures compare Ground
+OFF/ON in Original 4:3 and EX7-5 16:9; each stage/toggle is byte-identical across
+Software, Vulkan and D3D12, and the enhanced ramp differs from the source bands.
+The saved-profile ordinary Start check exits normally after rendering the intro
+and evaluating DLSS; it records two bootstrap response timeouts and a 1,422 ms
+maximum unresponsive streak, not universal lag-free startup. Preferences remain
+unchanged. Current small receipts/captures are under `build/validation/active/`;
+scratch is about 162 MiB, with no new worktree, full snapshot, third embedded
+player copy, commit or release. Full rendering/3DS completion and physical
+New-console FPS gains remain unclaimed.
+
+The recovered R403 ARM candidate is now adopted in the root: its five PICA
+source/test files exactly match CI commit `4c8768b9f173c8e1bd9eab20772edfbf51598549`.
+Fresh strict host execution passes 107,115,993 checks, including exact texture
+bytes and LCD pacing sequences. The pacing change skips an additional refresh
+sleep only after BOTH LCD counters advance; blocking GPU retirement remains
+before uploads. RGBA word packing preserves every channel/alpha byte and does
+not remove geometry, an eye, simulation ticks or audio work.
+The successful source-only ARM run is 38181897308. Its asset-free ZIP is retained
+under `build/validation/active/3ds-test/`, SHA256
+`664bf420184e326edc0fd82e3d737eaf5f81683ce47a3b537ba09c8241019ca9`.
+The exact binary renders Original Preview ON/OFF/ON and reaches the source
+intro through ordinary Start in isolated accuracy-enabled Azahar 2126.2. That
+first emulator process ended before an exit status was captured; shutdown is
+NOT accepted from that observation. A separate monitored run of the same ARM
+binary completes ordinary Preview-OFF Start, title, Controls, Training with
+independent eyes and lower HUD, Select+Start guest retirement and normal host
+close with exit code 0 in 287.6 seconds. The actual process handle retains the
+exit result; no process was forcibly stopped. Accurate GPU timing/math, memory
+exceptions, Vulkan, New-model mode and slider 100 are verified in the live log.
+Azahar reports New-CPU configuration as unimplemented at clock 100, and uses
+HLE DSP with a zero-byte placeholder, not console firmware. Thus neither New
+CPU performance nor physical audio/HOME behavior is accepted from this run.
+Current C: evidence is in `build/validation/active/`, including the exit receipt,
+native CSVs, strict PICA output and individually reviewed screenshots.
+No physical New-family FPS gain or full-port completion is claimed. Current
+scratch at that ARM checkpoint was about 111 MiB; the redundant emulator download and an unapproved
+mixed-desktop capture were removed. Installed emulator settings, other projects,
+root HEAD/index and the working PC player remained unchanged at that checkpoint.
+
+The owner now reports 2--3 FPS on an Original 3DS and changes the supported
+target to the New family only: New 3DS/XL stereo and New 2DS XL mono. Original
+3DS/XL/2DS are unsupported. Their conservative legacy mono fallback remains,
+but old-model optimization and hardware performance qualification are no
+longer requirements. Historical old-model emulator results below are retained
+as history, not evidence of supported/playable hardware. Current development
+continues on the New-model emulator; no incremental hardware test is requested.
+
+R393's validated-composition handoff is now adopted in the root source, exactly
+matching the five files tested in source-only CI 38175739042 and the local
+strict build. The composer still validates every input vertex/draw/matrix and
+copies geometry and metadata. Its private lifetime/generation handle lets the
+native presenter avoid a second identical vertex walk; changed artwork keeps
+the original residency/ownership checks, queue waits, uploads and eye draws.
+The full PICA suite passes 106,491,697 checks. Sixteen alternating host-only
+composition/preflight pairs retain all geometry bits, draw fields and source
+texture metadata; measured throughput is 1.18--1.69x the unchanged R382 baseline
+in that fixture. These are not ARM timings or whole-game/console FPS.
+The exact ARM package passes a diagnostic New-model Azahar lifecycle in 210.96
+seconds: menu, Preview ON/OFF/ON, ordinary Start, outdoor gameplay/audio,
+guest shutdown and normal host exit 0, with accurate GPU timing/math, memory
+exceptions and native slider 100. No forced cleanup or capture failure occurs.
+Sampled outdoor images retain ground lights and visible tower bases, while
+the initial entry image still has the source's opening transition. This is not
+all-stage fidelity or physical-performance acceptance. Existing emulator
+settings, saves, assets and log are restored exactly. The diagnostic explicitly
+preserves the failed full50 host status; it does not admit the pending renderer
+GPU workload. Receipts are in `D:/SFE-validation/r393-3ds-validated-handoff-strict/`
+and `D:/SFE-validation/r397-newmodel-handoff-diagnostic/`.
+
+R383 resumes the rendering deadline investigation with an isolated identity-first
+guard candidate over R357. Four addition/multiplication guard prefixes check
+exact bitwise zero/one/minus-one identities before checking the other operand's
+finite/ordered range. An exact identity already proves its own range; invalid
+other operands still execute the original directed arithmetic. The bounded
+four-prefix inverse restores R357 exactly. Rounding, waves, derivative products,
+prior failure, source work, scheduling, quality, ABI and compiler policies stay
+unchanged. Across the actual DXIL/Vulkan arithmetic bodies, each gradual/FTZ
+run covers 11,311,232 raw primitive comparisons plus 16,384 scalar and 16,384
+full-jet lava cases. Bounds, refusal/branch/first-failure payload and wave/product
+counts match; the actual invalid-input bypass control is detected. Instrumented
+range-check calls fall from 75,602,958 to 32,641,216 in gradual mode and from
+75,654,354 to 32,657,644 under FTZ/DAZ. Those are host operation counts, not a
+GPU or whole-game speedup. The strict compile and both host runs exit 0 without
+a resource stop. CI 38170890533 passes all 42 shader jobs at source-only commit
+`72623aa0829459d67710f62cebf3ce5a8adfbed3` on
+`codex/identity-first-optical-r383-20261011`. Downloaded binaries independently
+pass full compiler/flags/closure/resource/byte/format/allowlist checks; unchanged
+closures match R357 exactly. The host input snapshot is preserved separately
+from the mechanically updated CI manifest. Evidence is in
+`D:/SFE-validation/r383-identity-first-optical/`. R384 finishes all four fresh
+native units, both original observer controls and the complete 50-array linked
+resource audit against these outputs. The actual GPU launch helper then refuses
+admission before launching any GPU process: the previous full50 host aggregate
+holds 56 changed root paths, including 20 actual compiled inputs. That is a
+prelaunch provenance refusal, not a GPU workload result. Original receipts are
+preserved, not re-pinned to current bytes. R385 prepares a genuinely fresh
+current-source 24-target build and the original 50 cases, preserving every
+name/order/argument/property/timeout and the original resource/observer policy.
+Its case-executor adaptation has an exact inverse to the prior wrapper. The
+fresh build completes all three operations with exit 0 and no resource stop,
+retaining 4,226 inputs, all 16 declared generated dependencies and the actual
+865-file compiler closure. Its first actual runtime suite passes cases 1--20,
+then case 21 retires with CTest exit 8 and an assertion failure, without a
+resource/monitor stop. The FPS-chord fixture hard-coded convergence 1024 while
+its fresh native preferences use 512. The complete compiled failing source is
+preserved separately and matches its build input hash. The corrected fixture
+uses its declared convergence and covers both 512 and saved/custom 1024, doubling
+those setup/runtime/rate/navigation fixtures without weakening any VM/SPC/PCM
+comparison. Its three-edit inverse restores the failing source exactly.
+R387's first preparer refuses an existing R385 output before any build/test;
+its Windows path-binding correction is isolated in a fresh R389 directory.
+R389 finishes a genuinely fresh complete24 build with all 50 original registered
+cases and 865 actual compiler dependencies held, then passes its original
+read-only preflight. Its runtime suite passes cases 1--30 without reusing old
+results, then Original model-stream case 31 fails at LEVEL1_1 phase 1037 with
+CTest exit 8 and no resource/monitor stop. Its terrain assertion still requires
+BG2 model-depth writes, contrary to the R377 ground-occlusion fix. The corrected
+assertion retains finite world/source-UV geometry, explicitly requires no BG2
+depth test/write, and additionally checks every terrain vertex against its
+authored plane and near/far clip. Coverage and source/PCM checks are retained;
+the original failed source/output remain preserved. The remaining root build
+console label now names New 3DS/XL stereo and New 2DS XL mono. A fresh complete
+full50 run of this corrected/adopted source is still required; neither the
+earlier 30 passing cases nor the native emulator diagnostic replaces it.
+No new GPU result or production adoption exists yet. Main, releases, root
+HEAD/index and the working player remain unchanged; the full rendering/3DS
+goal remains open.
+
+The previously live PC DXC owner completes normally, and the full Release
+player build returns exit 0. `build/release/starfox_pc.exe` is 325,244,914 bytes,
+SHA256 `9eb45b47d3c041ab6d3279616536a232e8debae0b6820bd0b0de3a72d713a5c7`.
+The R390 saved-profile Preview-OFF check runs 64 actual D3D12 frames on the
+RTX 5070 Ti Laptop GPU: one plain-menu texture upload, 63 retained frames,
+zero game/effect shader resources and zero DLSS evaluations, with preferences
+unchanged. Its original responsiveness gate passes but includes five bootstrap
+probe timeouts and a 2,328 ms maximum unresponsive streak; it is not an instant
+startup or universal latency/FPS claim. The existing working `build/current`
+player is not replaced, and no release is published. Evidence is in
+`D:/SFE-validation/r390-rebuilt-pc-plain-menu/`.
+
+R382 follows the working-console profile's expensive composition path: vertex
+envelope validation now uses exact IEEE binary32 bit comparisons rather than
+repeated floating-point finite/range comparisons. It retains every submitted
+vertex, signed zero, range boundary, matrix/ownership/opacity/colour-operation
+check, authored draw order and cumulative budget; no source, audio, shader or
+quality reduction is made. An independent previous floating-point oracle
+checks all exponent/sign combinations with representative mantissas, adjacent
+range boundaries and 131,072 randomized encodings in each of nine lanes under
+both UV policies. Integration checks retain clamped, repeating, untextured,
+opaque-provenance and fixed-colour draw behavior. The exact revised local
+PICA/raster/layers/tile CTests pass, and the PICA suite reports 106,491,655 checks.
+The first helper-only-fast candidate regresses whole composition and is not
+published. Its corrected successor is measured against an unchanged R381
+composition implementation over 24,576 vertices/32 draws/two eyes and changing
+geometry: sixteen alternating host pairs report 1.64--1.79x composition
+throughput. These are host component timings while other projects keep compiling,
+not native ARM timings, an overall game speedup or a New-console FPS result.
+The immutable baseline, failed-first and corrected benchmark receipts remain
+in `D:/SFE-validation/r382-3ds-vertex-validation/`. Source-only candidate
+`1292fb2d16569ac588e04083e832cbca8198f7f5` passes ARM CI 38168774524 on
+`codex/3ds-vertex-validation-r382-20261011`: all 47 host CTests and native
+ARM/stack/shader/package gates pass. A bounded source inverse restores the
+exact R381 header, confirming all other layout/math/validation checks remain.
+Independent ZIP/CRC/manifest, New-family SMDH and matching ELF/3DSX checks pass
+for `build/StarFoxEnhanced-3ds-test-r382.zip`, SHA256
+`febadfb205a555790b1c8f65434a9aec2ae6ae93c88da8c74a460402fc9a5f11`.
+The working R376 shader is unchanged. This exact native package passes the
+strict New-model/Vulkan Azahar lifecycle in 214.39 seconds with fresh defaults:
+retained menu, Preview ON/OFF/ON, ordinary Start through source menus, a minute
+of outdoor gameplay, audio submissions, guest shutdown and normal host exit
+code 0. Accuracy timing/math and invalid-memory exceptions are logged active;
+the original input/resource/420-second deadline gates remain, with no guest
+memory patch, capture failure or forced cleanup. The native slider stays 100
+while desktop captures show the full left eye. The reviewed preview and initial
+opening-strip captures are pixel-identical to R381's; later outdoor captures
+retain white ground lights and visible tower bases. This is sampled visual and
+lifecycle evidence, not all-stage, binocular-aesthetic or physical FPS acceptance.
+Receipts are in
+`D:/SFE-validation/r373-3ds-accurate-preview/r382-new-model-preview-outdoor-accuracy/`.
+Root HEAD/index, main and releases remain unchanged; no incremental hardware
+test is requested. Native throughput and the full rendering/3DS goal remain open.
+
+R381 strengthens the fresh native stereo depth balance without changing saved
+settings: separation remains 16 and convergence becomes 512. The existing
+parallel off-axis cameras already project distant backgrounds at infinity;
+the new default gives eight LCD pixels of behind-screen binocular disparity
+at maximum slider rather than four. This is pixel disparity, not a physical
+depth-distance claim or a separate background-only shift. Finite terrain/models
+use the same projection; zero slider and New 2DS XL remain mono. Existing
+journal versions, custom convergence, full-state restores and EX SRAM retain
+their stored values. Shared desktop/VR defaults are unchanged.
+All four affected local CTests pass. Actual Original and EX cartridge sessions
+pass 24,668 additional fresh/saved-depth, menu/Preview/Start, settings-reset,
+full-state and exact independent source/SPC/PCM parity checks; these host tests
+do not establish native GPU/NDSP speed or aesthetic stereo acceptance.
+Source-only candidate `c9a96e30cc94c9eb4100aebd31154e1636ddd622` passes ARM CI
+38167086579 on `codex/3ds-stereo-depth-r381-20261011`: all 47 host CTests and
+native ARM/stack/shader/package gates pass. Independent CRC/member/manifest,
+New-family SMDH and matching ELF/3DSX checks pass for
+`build/StarFoxEnhanced-3ds-test-r381.zip`, SHA256
+`3a81c8cdc70c8159cedeb750c718e828353d9e1929afd771c3c2147a76d8d9a1`.
+The unchanged working R376 shader is retained. The exact package completes
+the strict New-model/Vulkan Azahar lifecycle in 211.17 seconds: fresh defaults,
+retained menu, Preview ON/OFF/ON, ordinary Start through actual source menus,
+a minute of outdoor gameplay, audio submissions, guest shutdown and normal
+host exit code 0. Accuracy timing/math and invalid-memory exceptions are logged
+active; no guest-memory patch, capture failure or forced cleanup occurs. Guest
+slider remains 100 while desktop capture displays the full left eye. The first
+outdoor capture has a narrow visible opening strip; later captures show the
+outdoor scene, white ground lights and tower bases. These are sampled images,
+not all-stage fidelity or binocular aesthetic acceptance. Receipts are in
+`D:/SFE-validation/r373-3ds-accurate-preview/r381-new-model-preview-outdoor-accuracy/`.
+Read-only R380 profiling still shows substantial source/SPC/audio work; sparse
+upload reductions alone do not establish 60 FPS on New hardware. Root HEAD/index,
+main and releases are preserved. The README's post-CI wording clarification
+distinguishes LCD disparity from physical depth; it does not alter this binary.
+No incremental hardware test is requested. New-console throughput, stereo
+background-depth balance, broader fidelity and the full rendering goal remain open.
+
+R380 stages exact changed-tile colour uploads for the New-family performance
+follow-up. Successfully resident logical pixels remain the comparison base;
+small changes repack native 8x8 Morton tiles and flush one enclosing aligned
+range rather than every padded pixel. Initial/layout-change uploads and retries
+after a failed native flush still fully initialize the texture. Broad/dense
+changes keep the complete packer; A8 ownership validation is unchanged.
+The strict PICA test passes 104,075,828 checks, including RGB/RGBA, row strides,
+transparent pixels, clamped/repeated padding, sparse/dense changes, bounded flush
+ranges, rejected aliases, failed-flush repair and zero warm staging allocations.
+All four local PICA/raster/tile/layer CTests pass. A one-tile 400x240 HUD edit
+packs/flushes 256 bytes instead of its 524,288-byte padded allocation. Alternating
+host-only residency/packing benchmarks report 3.43--4.24x throughput for three
+sparse fixtures, with no measured dense-fixture regression; these are not native
+Citro3D timings or console FPS. Source-only candidate
+`d4a2fd4df8d4ed712ef328406af01fd1cada024b` passes ARM CI 38165017908 on
+`codex/3ds-changed-texture-tiles-r380-20261011`: all 47 host CTests and native
+ARM/stack/shader/package gates pass. Independent ZIP/CRC/manifest, New-family
+SMDH and matching ELF/3DSX checks pass for `build/StarFoxEnhanced-3ds-test-r380.zip`,
+SHA256 `ea39402989d1d1c684f920b0bde0ae90a16e2fec70ab4076bed0ac455d036892`.
+The unchanged working R376 shader is retained. The exact package completes
+the strict New-model/Vulkan Azahar lifecycle in 211.92 seconds: retained menu,
+Preview ON/OFF/ON, ordinary Start through actual source menus, a minute of outdoor
+gameplay, audio submissions, guest shutdown and normal host exit code 0. Accuracy
+timing/math and invalid-memory exceptions are logged active; no guest-memory
+patch or forced cleanup occurs. Reviewed outdoor captures retain white ground
+dots and tower bases, not all-stage fidelity or hardware-performance acceptance.
+Receipts are in `D:/SFE-validation/r373-3ds-accurate-preview/r380-new-model-preview-outdoor-accuracy-v2/`.
+The first attempt fails before menu evidence at the process-identity observer and
+requires forced cleanup; its failure is preserved and is not a game/pass verdict.
+The observer now reobserves unavailable image queries on the same live handle
+for at most three seconds, still refusing actual birth/path changes. Six actual
+observer controls and an exact whole-harness inverse pass; all original inputs,
+accuracy/lifecycle/resource/deadline gates remain. The initial refusal did not
+record its differing values, so its precise cause is not proven by the successful
+retry. The root checkout/index, main, releases and earlier tester packages are
+unchanged; no incremental hardware test is requested. Console throughput,
+stereo background-depth balance and broader fidelity remain open.
+
+R379 adds exact validated landscape-mesh reuse when source vertices, plane,
+projection limits and declared coverage are unchanged. Current eye matrices,
+artwork/draw headers and residency/vertex budgets still apply. Regression checks
+compare a reused mesh byte-for-byte with a fresh one and exercise source/plane/
+projection changes, narrowed coverage, rejected publication and water replacement.
+The affected local PICA/raster/layers/tile/profiler tests, both profiler modes,
+cartridge-loader tests and seven packaging tests pass. A held-terrain host-only
+benchmark saves preparation work; this does not establish New 3DS FPS. Final
+source-only candidate `f29409b07d3020991de51a45a1076ff985ce2661` passes ARM run
+38163161770: all 47 host CTests, native compilation and ELF/stack/shader/package
+gates succeed. The exact R379 ZIP has five expected members, matching native
+ELF/3DSX/SMDH hashes, New-family launcher labels and no embedded private assets.
+The earlier run 38162730392 was deliberately canceled to correct residual native
+SMDH/build/banner labels, not accepted as a complete native build.
+The exact package passes the New-model Azahar 2126.2 Vulkan run with accurate
+GPU timings, accurate shader math and invalid-memory exceptions enabled, native
+slider 100, and no guest-memory patches. The 211.27-second lifecycle includes
+Preview on/off/on, ordinary Start, title/Controls/planet menus, sustained outdoor
+gameplay, audio submissions, guest shutdown and normal host exit (code 0; no
+forced cleanup). Individually inspected outdoor captures retain ground dots and
+tower bases; this is bounded visual evidence, not all-stage fidelity acceptance.
+Read-only imports of the archived profile/startup CSVs separate Preview from
+gameplay. The final outdoor stretch records 419 frames over 62.98 seconds of
+timed work, with 164 terrain-reuse calls and 242 terrain-build attempts. Reuse
+therefore occurs in live gameplay, not just a held-input host benchmark. These
+accuracy-emulator timings are not New 3DS hardware FPS or a measured console
+speed gain; parent/worker phases must not be summed. New-console throughput,
+distant-background stereo balance and broader fidelity remain open. Root
+HEAD/index are preserved; no main/release update or tester request is made.
+
+R376 now has physical New 3DS XL confirmation from the owner/tester: the
+player runs, sound works, the 3D slider works and HOME/exit works. This
+supersedes the pending physical boot/lifecycle verdict below. It is not
+full-port or performance acceptance: the subsequent tester report describes
+missing white ground lights, ground obscuring the bottoms of torii-like
+objects, and an estimated 10 FPS or less while game speed remains correct.
+The subsequently supplied working-run logs contain 512 completed-frame
+windows. The longest gameplay/background-27 stretch records 5,397 frames
+over 424.56 seconds of timed frame work: 12.71 FPS, 78.67 ms/frame. Background
+preparation averages 18.84 ms, assembly 18.30 ms and presentation 22.35 ms.
+These are separate owner phases; nested source/SPC rows must not be summed
+into another FPS figure. The bounded startup trace completes all 17 recorded
+GPU submissions and all 70 audio-worker handoffs. Raw uploads remain private.
+Ground/model composition and presentation throughput are the current 3DS
+follow-up, not another demonstrated startup freeze.
+The R377 emulator candidate retains finite stereo terrain but removes BG2's
+incorrect reconstructed-depth occlusion of BG1 lights/models. Its regression
+exercises lights and gate bases in both raster and atlas paths, with the old
+depth flags as a failing negative control. Assembly retains complete input
+validation/cumulative texture budgets without rechecking the identical
+concatenated vertices; preflight reuses already-validated eye projections.
+GPU subphase counters now separate queue waits, uploads and command encoding. Hardware
+visibility and any speed improvement from these changes are not accepted yet.
+The owner requested emulator-led investigation now, without further minor-gain
+hardware tester runs. Use accuracy-enabled Vulkan regression/profiling checks
+for the follow-up; do not present emulator throughput as console acceptance.
+R377 source-only CI succeeds at 2ed72a7eb934117b7e23eca1071300b37286ce2b
+(run 38158290813): all 47 host tests, ARM compilation, unchanged working R376
+SHBIN, ELF/stack and asset-free package checks pass. Independent local ZIP,
+CRC/manifest and matching ELF/3DSX/SMDH checks pass. The earlier R377 CI run
+38157946889 failed one stale terrain-depth assertion; its corrected successor
+retains the finite geometry and source-UV checks rather than waiving them.
+The exact candidate completes strict Azahar Vulkan Preview ON/OFF/ON,
+ordinary Start through the actual Original title/Controls/planet menus,
+outdoor Corneria (flow 9/background 27), a minute of continued outdoor frames,
+guest DSP/GPU shutdown and host exit code 0 in 210.72 seconds. Accuracy GPU
+timings/math, invalid-memory exceptions and 100% clock are logged active;
+no guest RAM edit or forced cleanup occurs. Receipts are in
+`D:/SFE-validation/r373-3ds-accurate-preview/r377-original-outdoor-accuracy-v2/`.
+This is lifecycle/emulator evidence, not complete visual or hardware FPS
+acceptance. The native-size SBS screenshot appears to crop each eye, so a
+full-width visual check is separate. Fresh defaults/A-confirmed Start then
+pass the full outdoor route and clean guest/host exit in 131.74 seconds,
+with the desktop displaying only the full left eye while the guest retains
+100% slider/stereo rendering. Both output mode and slider are verified in
+the emulator runtime log. Full-width captures show white ground lights and
+sampled tower bases above the ground; the earlier half-width SBS capture is
+not a native menu/model-cropping verdict. These sampled images do not accept
+every gate, stage or physical-console performance. Receipts are in
+`D:/SFE-validation/r373-3ds-accurate-preview/r377-original-outdoor-full-eye-v2/`.
+An earlier screenshot-shortcut harness
+attempt and an incorrectly configured full-eye/focus-loss attempt remain
+unaccepted, with their original receipts retained.
+Additional R376 feedback says the mountains feel too close/flat at maximum
+slider while the ship/near objects have strong pop-out. Stereo background
+depth balance is a separate follow-up, after visibility and throughput.
+
+The R377 full-eye emulator profile now separates presentation costs: its
+gameplay/background-27 group records 378 completed frames, averaging 165.12 ms
+of guest-clock frame work. Source advancement dominates at 113.00 ms; the
+presentation parent is 22.98 ms, including uploads 8.50 ms, synchronization
+8.33 ms and command recording 1.23 ms, with negligible queue retirement.
+Assembly averages 5.84 ms and background preparation 17.57 ms. These are
+emulator timings, not a comparison against the R376 console FPS; parent/worker
+rows overlap. Derived analysis remains local in
+`D:/SFE-validation/r377-3ds-ground-priority/emulator-full-eye-analysis.json`.
+R378's follow-up packs RGBA/A8 textures in sequential native 8x8 Morton tiles,
+hoisting row/padding decisions without changing colors, transparency, wrapping,
+source-layer ownership, allocation budgets or queue retirement. Independent
+byte oracles cover both LCD sizes, padded edge tiles, thin maximum dimensions,
+1023/1024-square images, repeated artwork and minimal borrowed spans. All
+33,417,301 local PICA checks and the four targeted layer/raster/tile tests pass.
+A local alternating host packing benchmark reports 1.23--1.46x throughput for
+four sampled layouts with identical bytes; this is not a console FPS gain.
+The authorized source-only candidate is
+`6673685384f5783f8e5474064cbabf1a71312806` on
+`codex/3ds-tile-upload-r378-20261011`, CI run 38160482688. All 47 host checks,
+the ARM build, unchanged working SHBIN, stack/ELF gates and asset-free package
+pass. Independent local CRC/member/manifest and matching ELF/3DSX/SMDH checks
+also pass; ZIP SHA256 is
+`3fc704072861504f40a5e1aded908d234749fe830fa018f65f46fb9f3d31a6a7`.
+Only two public C++ source/test files differ
+from the verified R377 parent; no main/release, private assets or logs are
+published, and the root checkout/index remain intact.
+R377 also completes the untouched-default A-confirm Start route through the
+actual Original menus, a minute of outdoor gameplay and clean guest/host
+shutdown on the accuracy-enabled Original-3DS emulator configuration in
+130.49 seconds, without forced cleanup. This is old-model fallback/lifecycle
+evidence, not physical Original-3DS performance acceptance. Receipts are in
+`D:/SFE-validation/r373-3ds-accurate-preview/r377-old-model-outdoor-accuracy-v2/`.
+The previous old-model Preview run completes ON/OFF/ON but fails a conflicting
+test-harness route argument before Start; that failure is retained and is not
+a cartridge hang or completed gameplay pass. The exact R378 candidate then
+passes New-model Preview ON/OFF/ON, ordinary Start through the Original menus,
+a minute of actual outdoor gameplay and clean guest DSP/GPU/host shutdown in
+211.53 seconds. Accurate GPU timing/math, memory exceptions and 100% clock
+are logged active; maximum native slider/both-eye rendering and full-width
+left-eye desktop output are retained. No forced cleanup or capture failure
+occurs. Receipts are in
+`D:/SFE-validation/r373-3ds-accurate-preview/r378-new-model-preview-outdoor-accuracy/`.
+This accepts that sampled native lifecycle, not all stage visuals, physical
+New-family performance or the complete port. Future package metadata/docs
+now enforce the owner's New-family support policy; the older immutable R378
+ZIP retains its pre-policy metadata, and is not relabeled in place.
+
+Fresh current-player menu isolation passes 29 Preview-OFF cases / 2,320
+presented frames: Original and EX on Software, D3D12 and Vulkan, with matched
+baseline/heavy/SSAA/SR selections, separate DLSS/DLSS4.5, renderer transitions
+and actual options navigation. Paired baseline/heavy images are byte-identical;
+every unchanged plain case uploads the menu once and retains the next 79
+frames. No scene/effect/neural evaluations occur on this path. The separate
+Preview-ON case presents the visually reviewed RENDERING indicator, then
+enters the native scene pipeline rather than remaining on the loading image.
+Results are in `tmp/r376-current-menu-isolation/results.json`, using an
+isolated hard link of the current player `4338d0b3...`, not the stale release
+player. Both original preference files and the current executable retain
+their prior hashes. Concurrent compiler activity prevents an FPS claim.
+The actual release-folder rebuild remains live; its executable has not yet
+been replaced or accepted. This is not a release or full-goal completion.
+
+The owner confirmed the newly supplied physical-device CSVs are R375.
+`native-startup-8213413910.csv` has 282 data rows and ends inside the active
+first-GPU trace window at frame 1, `gpu_wait`, tick 10154557092. The first
+frame reaches all validation/upload/bind/draw/submission receipts; the second
+frame finishes source advancement and VBlank synchronization, then never
+records `gpu_wait_complete`. That wait is Citro3D's queue retirement inside
+`C3D_FrameBegin(0)`, not VBlank or cartridge loading. A CPU submission receipt
+does not prove that the submitted GPU commands completed. All 42 recorded
+audio dispatch/wait/completion triples match. `native-frame-profile-8208511522.csv`
+has 61 data rows in four completed-frame windows; its final window records
+flow 3/background 243 and actual model/layer/composite work. It cannot measure
+the unfinished second GPU frame. This is a physical R375 failure, superseding
+the emulator-only pass below; raw uploads remain unchanged and private.
+
+R376 conservatively completes every enabled PICA output register exactly
+once, including unused texture-coordinate lanes. The prior compiled SHBIN
+only wrote XY on two output registers and X on the projection-Q register;
+the native source computes in temporary registers before final full-register
+writes. Sampled UV/Q values and independent-eye projection are unchanged.
+A fail-closed compiled instruction/operand-mask gate now checks these actual
+writes before shader embedding, with malformed/duplicate/missing-output and
+unsupported-flow fixtures. The local Picasso-compiled R376 shader passes;
+the exact R375 shader fails this stronger gate. This removes a concrete
+hardware-sensitive hazard; the subsequent working hardware report is recorded
+above, without establishing that this was the only possible freeze cause.
+Source-only ARM validation passes at 454e8fb8839d021c7482e41cfe8b224ccba84947
+(run 38154475650): all 47 host tests, actual ARM compilation, shader embedding
+gate, linked stack and asset-free package gates pass. Independent local
+verification checks all five ZIP members, CRCs, manifest hashes, matching
+ELF/3DSX/SMDH and the exact local/CI SHBIN. The resulting handoff is
+`build/StarFoxEnhanced-3ds-test-r376.zip`, SHA256
+`385b9c99de7ed9694c0ffa77828f548a1dfef776bd42c0fc5a6c43fb3fb815d2`.
+The exact native binary passes strict Azahar 2126.2 with GPU timing, shader
+multiplication and invalid-memory exceptions verified active: untouched
+Original defaults, Preview OFF, 12-second menu idle, A-confirmed Start,
+three new PICA/audio windows and a minute of continued rendering, normal
+guest shutdown and host exit. The 88.45-second run has no forced cleanup
+or guest RAM patching. These specific results are emulator-only; the subsequent
+physical R376 boot/audio/slider/HOME report is recorded above. Companion
+START-HERE instructions originally asked for one console attempt,
+preserving assets/saves and requesting newest logs only if it still freezes.
+Main, root HEAD/index and published releases are unchanged.
+
+The exact R376 EX native-binary follow-up also passes strict Preview ON/OFF/ON,
+ordinary Start, a minute of post-menu rendering and normal guest/host shutdown
+with explicit host exit code 0 (173.06 seconds). Receipts are in
+`D:/SFE-validation/r373-3ds-accurate-preview/r376-ex-preview-repeat-04/`.
+Earlier harness attempts remain unaccepted: missing ZIP assembly, missing
+successful host-exit evidence, and the low-RAM safety floor respectively.
+The successful retest retains all strict accuracy settings and native input
+edges; it uses no guest RAM patch or forced process cleanup. This adds EX
+emulator coverage, not a physical-console verdict or a fresh package.
+The same binary also passes fresh Original defaults with the emulator's
+original-model setting verified active, Preview untouched, a 12-second idle,
+A-confirmed Start and a minute of rendering. Guest shutdown and host exit
+code 0 complete normally in 89.43 seconds, without forced cleanup. Receipts
+are in `D:/SFE-validation/r373-3ds-accurate-preview/r376-original-model-default-start-01/`.
+This does not establish original-console mono performance or HOME/sleep.
+
+Physical R373 acceptance FAILS: a New 3DS XL tester reports three identical
+hard freezes after default-menu START GAME, without enabling Preview; even
+HOME is unavailable and a forced console shutdown is required. The owner
+confirmed R373. This supersedes the pending-only physical assessment below.
+The fresh-default, A-confirmed direct Start sequence passes on the exact R373
+binary in strict Azahar 2126.2, so the emulator pass is not a hardware fix.
+EX also passes strict repeated Preview, Start, a minute of rendering and clean
+exit. Its first attempted harness check used Original's background ID 27
+instead of EX's 51; that run was stopped with normal guest/host exit and its
+failed harness receipt is preserved, not labeled a game defect.
+
+R375 adds diagnostic coverage rather than claiming to fix the freeze: the
+bounded trace rearms before a normal source Start gesture and before first
+GPU initialization, then identifies frame validation, uploads, binding and
+drawing separately from queue/VBlank waits. R373's first-16-frame trace could
+expire during menu idle before direct Start. Enabled/disabled strict trace
+tests and the actual menu test pass, including same-tick navigation, runtime
+Back and held-input exclusion. Source-only ARM CI run 38152287169 passes
+at 2bb572d160786fc8682a1f446177b3b0a3412ac3. The exact five-member, asset-free
+package, matching ARM ELF, extended 3DSX and embedded/standalone SMDH hashes
+are independently verified. The exact native R375 passes strict Azahar
+2126.2 (accurate GPU timing/multiplication and invalid-memory exceptions
+verified active): fresh defaults, Preview untouched, 12 seconds of menu idle
+past trace expiry, actual START GAME row confirmed with A, a minute of
+post-menu PICA/audio progress, normal guest shutdown and host exit. Start /
+first-GPU trace rearming and validation/upload/bind/draw/submission receipts
+are checked explicitly. The 88.53-second test used no forced cleanup or guest
+RAM writes. All 46 CI host tests pass, as do linked ARM stack reservation and
+individual-frame checks (not a complete call-chain/physical peak measurement).
+Only eight scoped public source files changed on its test branch; the root
+HEAD/index and published releases are unchanged. R373 hardware CSVs arrived:
+`native-frame-profile-8272612374.csv` has 65 data rows in five completed-frame
+windows, all flow/background zero. `native-startup-8276862842.csv` has 331
+data rows, two completed source loads, and 50 matched audio worker dispatch /
+completion pairs. Its final window ends at the 16-frame trace limit with
+`menu_lcd_present_complete`; neither file records first GPU initialization.
+That limit, not a stalled audio-worker receipt, explains why this trace cannot
+locate the later Start freeze. Completed-frame totals omit an unfinished
+frame. Original uploads are unchanged; the bounded trace must cover the next
+ordinary Start. No crash cause, final fix or console performance verdict exists.
+The R375 handoff is `build/StarFoxEnhanced-3ds-test-r375.zip`, SHA256
+`d57eeed2f05361611e28148d9598c8b520efe3cfb0aa31e2d30c2a96a6f64657`;
+`build/StarFoxEnhanced-3ds-test-r375-START-HERE.txt` asks for one direct-Start
+attempt with Preview OFF and slider down, keeping assets, saves and prior
+logs. This is explicitly a diagnostic correction, not a hardware fix.
+
+R373 supersedes R371 for the 3DS tester handoff. Azahar 2126.2, with accurate
+GPU timing, accurate shader multiplication and invalid-memory exceptions
+actually enabled in its boot log, exposed a stale Citro3D shader-program
+pointer when starting after Preview. The CPU shader owner now survives
+Citro3D teardown until the next program binding has finished reading it.
+The native ARM build and all 46 CI host tests pass at source commit
+f5876fc1bfd153a044ea0232c6c9350f2c3b0a33 (run 38148953720). The exact native
+R373 binary passes Preview ON/OFF/ON, ordinary Start, a minute of post-menu
+PICA/audio progress and normal guest/host exit under those strict settings.
+Preview is session-only and boots OFF, preserving other settings and saves.
+The candidate is `build/StarFoxEnhanced-3ds-test-r373.zip`, with instructions
+in `build/StarFoxEnhanced-3ds-test-r373-START-HERE.txt`. This fixes a reproduced
+emulator crash, not a proven cause or resolution of the physical New 3DS XL
+freeze. Actual console stability, sound, slider, HOME/sleep and FPS still
+require the tester's retest. Memory exceptions are not a heap-bounds sanitizer.
+
+R374 closes the unsigned mobile handoff gap without changing native payloads.
+`build/StarFoxEnhanced-android-test-r369.apk` and
+`build/StarFoxEnhanced-quest-test-r372.apk` are installable copies signed with
+the preserved release certificate, not a new key. Signature verification,
+16 KiB alignment and every unchanged ZIP payload entry pass. Independent
+arm64/runtime, 38-backdrop, CRC and private-data package checks pass; Android
+contains exactly one complete current selected SDL effects SPIR-V program.
+These are the named R369 flat-Android and R372 native-Quest source snapshots,
+not a claim that every later root source edit was rebuilt into both packages.
+No device installation, release replacement or physical runtime acceptance
+was performed. Instructions are in `build/StarFoxEnhanced-mobile-tests-START-HERE.txt`.
+Signed output hashes and checks are recorded at
+`D:/SFE-validation/r374-signed-mobile-tests/`; protected signing files are
+unchanged and absent from the repository and APKs. The published release,
+root HEAD and index remain unchanged. R372 remains the PCVR candidate below.
+
+R372 corrects an additional definite VR teardown defect: the shared ray compute
+pipeline/layouts now outlive the ray scenes and queued producer commands in
+both frame drivers. Seven source-wiring tests, including the rejected old
+pipeline order in each driver, pass. Both actual PCVR drivers rebuild, and
+eight selected VR CTests pass in 1.09 seconds. The actual Quest arm64 build
+succeeds in 1m29s; all 799 public inputs remain pinned, and independent package
+checks pass its VR/SDL, 38-backdrop, CRC and private-data inventory. The new
+PCVR candidate is `build/StarFoxEnhanced-pcvr-diagnostic-r372.zip`, 176,376,277
+bytes, SHA256 `e8dfe40f377e81ff47c9236cc6e7e12845d81413c4d109c4f6423c50b67ad301`.
+All 11 members match current component inputs. Packaging avoids extra large
+EXE staging copies. The unsigned Quest validation APK remains in its task
+directory, not signed/installed/released. There is no headset stability or
+minute-long crash-cause verdict. Root HEAD/index and prior packages remain
+unchanged. See `docs/VR-CRASH-INVESTIGATION.md` for scope and identities.
+
+New physical-console report supersedes the R180 handoff-only assessment below:
+a New 3DS XL stops while still displaying the loading image. The supplied
+`native-frame-profile-2494071077284.csv` contains one completed 391,087,806-tick
+frame at 268,111,856 Hz (about 1.459 seconds), with setup flow 0, one menu pass
+and one returned presentation call. Loading is therefore not the demonstrated
+stall; first GPU submission completion is not established by this CSV. R371
+defers PICA initialization and uses the exact CPU menu canvas while Preview is
+OFF, with bounded first-16-frame phase-entry diagnostics to distinguish input,
+source/audio worker and GPU waits. Three local display/diagnostic CTests pass.
+Source-only ARM CI run 38145498329 succeeds at commit
+5e399bcd4b122832da394253ae1b6e53897cd1d2: all 45 host tests, native ARM,
+stack and package gates pass. The independently checked five-member asset-free
+ZIP is `build/StarFoxEnhanced-3ds-test-r371.zip`, 1,123,763 bytes, SHA256
+`429c558684753a16f63a3f5645e05e5d7f9830b2a70a3f33be365b52be6f9877`.
+Its companion START-HERE note describes replacement of only application files,
+retention of existing BIN/settings/saves, and the new startup CSV. These doc
+updates are later than the immutable CI source; its packaged README retains
+older history. No console fix is yet claimed, and R180 must not be presented
+as hardware-ready while this failure is unresolved.
+
+R370 corrects two actual VR resource-lifetime defects: transition layers now
+outlive queued eye commands, and ray scenes outlive their producers during
+teardown and error recovery. Both actual PCVR frame drivers and the Quest
+arm64 app compile. The injected-driver regression fails the independently
+compiled old ordering and passes the production owner; six source-wiring
+controls and eight selected actual CTests pass. The new PCVR candidate is
+`build/StarFoxEnhanced-pcvr-diagnostic-r370.zip`, 176,376,026 bytes, SHA256
+`99fc01e975a4c2a2c7e488f66b61ef5381c9cd4e2f526837451d5871063040dc`.
+All 11 staged archive members/CRC pass. The final unsigned Quest validation
+APK independently passes its native/38-backdrop/private-data/CRC checks;
+all 798 source pins match. These corrections do not establish the cause of
+the reported minute-long gameplay exit or qualify physical headset stability.
+The freshly relinked XR diagnostic exits 2 because this workstation has no
+active OpenXR runtime; the Vulkan loader is present. Existing tester archives,
+3DS candidate, root HEAD/index and releases are not replaced. See
+`docs/VR-CRASH-INVESTIGATION.md` for exact source/test/package scope.
+
+Apple application/package validation is now complete for the R359 snapshot;
+the newer R367 preview/bloom application rebuild failed before app compilation
+because the new checker used Apple's invalid unqualified `-std=metal2.1` flag.
+The actual compiler identifies `ios-metal2.1` and `macos-metal2.1` as supported.
+R368 corrects only the checker invocation, adds three command-vector controls,
+and moves the SDK check before lengthy app configuration. Source-only CI
+run 38140573902 (commit ad7db305658d789f02c474cdac1b4fc7a771bb39) is successful.
+It compiles both exact embedded SDL Metal effects programs for each Apple
+SDK using Metal 2.1 and precise math, then builds/packages the actual apps.
+Local emission/binding checks and 16 parser/binding/invocation tests pass. The
+unchanged emitted source hashes match R367. Both actual Apple SDK compilation
+steps now pass, including both emitted variants. The actual iOS job succeeds;
+its downloaded proper Payload/arm64 IPA independently passes CRC, identity,
+unchanged iOS 15 minimum and exact aligned read-only embedding of all four RT
+libraries. Both actual SDL Metal sources/AIR outputs are independently hash-
+checked; the selected variant 1 source is found exactly once in the executable.
+The new tester IPA is `build/StarFoxEnhanced-ios-r368-unsigned.ipa`, 85,199,122
+bytes, SHA256 `25ef1c333260ce2624462a99ebdb7d71e10bb74a1ad168e501e14a5377221fb0`.
+The entire actual Apple run is now successful. Independent inspection of the
+downloaded macOS archive passes CRC, identity, unchanged macOS 11 minimum and
+both x86_64/arm64 native slices. Each contains all four exact aligned read-only
+RT libraries and exactly one current selected portable Metal program. Both
+downloaded source/AIR products are independently hash-checked. The new tester
+ZIP is `build/StarFoxEnhanced-macos-r368-test.zip`, 174,325,389 bytes, SHA256
+`c93843bfc45b5d63262f4c41c03946593e661d51a36d8c59697d5b93321ff5e6`.
+Neither package has physical Metal/gameplay or crash-free acceptance.
+R367's failed receipts and existing R359/R363/R180 packages remain unchanged.
+The normal Apple build helper now runs the same exact portable-effects SDK
+check; its shell syntax passes. This helper edit is later than the immutable
+R368 CI source and does not change runtime/shader source. Fresh single-worker
+host builds and all ten selected frontend/HUD, Original/EX landscape, terrain,
+MSAA/TAA/stereo, input and audio-queue regressions pass (17.43 seconds), with
+the actual log at `D:/SFE-validation/r368-metal-checker-platform-flag/public-regressions.log`.
+This is not physical rendering/audio/FPS or full-campaign acceptance.
+The R369 local Android/Quest refresh uses the existing pinned SDK/JDK without
+signing/install/release. Its original wrapper pool-registration failure is
+preserved. The corrected original invocation completes both actual APK builds
+with exit 0 in 9m47s. All 797 recorded source pins match after the build.
+Independent Android inspection passes the arm64
+payload, all 38 backdrop resources and private-data/CRC checks; it contains the
+complete exact current selected SDL SPIR-V program, unlike the October 3 debug
+APK. Independent Quest inspection passes its arm64 VR/SDL runtime, all 38
+shared backdrops, CRC and private-data/flat-entry exclusion. The copied
+validation APKs remain unsigned, uninstalled and unpublished. This is not
+physical boot/GPU/performance or headset-crash acceptance. Exact copied-package
+hashes and preserved failure are in
+`D:/SFE-validation/r369-current-android-quest/RESULT.md`.
+Device/gameplay validation and 3DS console acceptance remain. All 101 current 3DS audio/platform code files match
+the built R180 source after Git newline normalization. The R180 3DS tester
+package is playable in the emulator; console performance,
+audio, slider and Home/sleep behavior are not yet verified. Source/build checks
+are not substitutes for those device results.
+
+## Implementation/build handoff versus external acceptance
+
+The current 3DS startup follow-up is the R376 experimental 3DSX. Physical
+R180/R373/R375 failures supersede the earlier handoff-only assessment. R375's
+trace locates the stall at the second-frame GPU queue wait. R376 corrects
+partial shader outputs, while retaining the real pre-game menu, HUD routing,
+New-model stereo / Original-model mono policy and deferred Preview-OFF PICA
+initialization. Native compilation, all 47 host tests and strict Original
+default Start/render/shutdown pass; resolution of the console freeze remains
+unverified. The owner has no console locally. Do not repeatedly
+request tester results while other relevant implementation work can proceed.
+
+Current rendering build/package checks are complete for the Windows player,
+R368 Apple packages and R374-signed R369 Android/R372 Quest handoffs. These
+immutable packages are not rebuilt snapshots of later source edits. The
+known PCVR gameplay process-exit investigation remains genuinely unresolved;
+R370/R372 correct verified lifetime bugs but are not a reproduced crash fix.
+Console FPS/audio/slider/sleep,
+physical Apple/Android/Leia rendering and sustained headset stability remain
+external acceptance, not evidence of new missing implementations. No release
+or main update is implied by this handoff, and the full goal is not declared
+complete merely from successful compilers and host checks.
+
+Scope correction: the calibrated renderer and its 30-program Metal experiment
+are not an unfinished normal-iPhone integration. The actual game selects
+DisplayXR only in the Windows desktop build (`CMakeLists.txt`), and
+`DisplayXrDesktop` chooses D3D12 or Vulkan. Normal Apple mono/stereo rendering
+calls `MetalHardwareRt` directly. The exhaustive source-reflection validator
+also requires explicit diagnostic opt-in; it is never a menu/config setting.
+Its R358 deadline failure remains recorded below, but is not an ordinary-game
+FPS result or evidence of an iPhone/3DS defect. Further work on that experiment
+must be justified by a player-facing requirement, not by its existence.
+
+R359 Apple integration: the reviewed newer MetalHardwareRt producer is now in
+the main working source, together with native material coverage/colour,
+canonical liquid adapters and all four embedded RT-library build targets.
+The normal indexed defaults remain supported. Embedding is enabled for the
+actual Apple app rather than gated by an undefined test-branch-only variable.
+No working executable, root HEAD/index, main branch, release or 3DS tester ZIP
+is replaced. A narrow CMake inverse audit preserves all pre-existing unrelated
+dirty changes. All25 exact source/assembly/dependency/binding checks pass, and
+the actual root CMake graph builds/passes both provider contract tests, the
+real fixture-parameter test and the source-assembly CTest (4/4). The four emitted full shader sources retain their
+previous independently SDK-compiled hashes. These are not GPU/runtime tests.
+The R359 current-source macOS/iOS application rebuild passes in source-only CI
+run38132420873, commit226e21f42dc272fe508d2d7cf6278c49806408b6. The immutable
+temporary branch does not publish a release. Historical full50 receipts are
+not requalified after these legitimate source/CMake changes. Independent local
+inspection of the downloaded packages passes archive CRC/private-path checks,
+native app identity/deployment checks and exact aligned read-only embedding of
+all four actual libraries. macOS contains arm64 and x86_64; iOS contains arm64
+under the proper Payload app root. The unsigned tester IPA is
+`build/StarFoxEnhanced-ios-r359-unsigned.ipa` (85,198,778 bytes), SHA256
+`bacef47b8ecce81558f89a6911e115b9ac60a3755f40cb2fd7f27e79ce5d1e10`.
+No device or physical-GPU execution is claimed. The full goal is not complete;
+physical Apple/3DS checks and the existing VR stability investigation remain.
+
+R360/R361 diagnostic follow-up: the standalone Metal checker now uses the
+actual 416/352-byte producer ABI, copies the primary-ray range and explicitly
+rejects extended resources its indexed fixture does not own. Its 4,102 actual
+conversion checks and all25 source checks pass locally and with strict Apple
+Clang. The corrected ObjC++ checker compiles and links with the Apple SDK in
+run38133419295, commit3688258caf3049016867f28165dfe1bb0dd08966. R360's unused-
+binding compiler failure is preserved; R361 removes only that unused binding.
+This qualifies the diagnostic build, not GPU execution or physical gameplay.
+These follow-up diagnostic/test changes are newer than the completed R359 app
+snapshot and must not be described as included in its immutable source tree.
+
+PCVR launcher close-out: `LAUNCH-PCVR.bat` now captures the actual signed exit
+code immediately, records it in pcvr-log.txt, displays every nonzero result
+(including negative Windows exception codes) and returns that same code.
+The companion `BUILD-ASSETS.bat` now also preserves and reports every nonzero
+builder exit. Ten real cmd/native-process fixture cases pass across both
+launchers, including success, positive/negative exits, missing assets/builder,
+missing ROM argument and quoted argument/stdout/stderr retention. These
+fixtures do not generate assets or reproduce a game crash. The first harness
+run failed because list2cmdline escaped cmd's quotes; that invocation was fixed
+before acceptance. The earlier targeted CTest set passed5/5.
+
+R363 rebuilds the actual PCVR player and matching asset builder successfully.
+Application/session-log, cockpit-input and all38 embedded-backdrop checks pass.
+The new tester archive is `build/StarFoxEnhanced-pcvr-diagnostic-r363.zip`
+(176,380,550 bytes), SHA256
+`83347e61c23660bbe5b836be4a68252b3f8752ad2ac48a8165c5520dfa873e9f`.
+All11 archive entries are independently read and hash-matched to the staged
+files; player/builder manifest pins and both current launchers match. No private
+assets are included. This repairs error reporting, not the tester's unidentified
+VR crash cause. Headset gameplay remains untested; release archives, main,
+`build/current` and existing user installations are not replaced.
+
+R364 desktop close-out: the October7 `build/current/starfox_pc.exe` was older
+than the current application source. A single-worker rebuild now succeeds
+against the actual working tree, with the existing verified embedded DLSS
+runtime and no ReShade dependency. The new executable is 325,244,457 bytes,
+SHA256 `6dbf8a3c459b5e4543005b741aa122e4d130808c684b250623a0f85ca28d20fc`.
+The ordinary startup helper passes all six Original/EX Software/D3D12/Vulkan
+cases, including four renderer switches in each GPU case and a nonblack
+completed presentation capture. This is startup/renderer-switch coverage, not
+every effect combination, sustained FPS or headset acceptance.
+
+On the actual RTX5070Ti Laptop GPU, the saved-profile plain/preview, standard
+DLSS, separate DLSS4.5 and native preview cases all pass. Preview OFF prepares
+zero scene/effect shader resources, performs zero neural evaluations, uploads
+the menu once and retains it for63 subsequent frames. The plain presenter still
+has its own startup preparation; this is not a claim of zero bootstrap delay.
+Preview ON produces the loading-indicator capture and joins responsive shader
+preparation. Standard DLSS and DLSS4.5 each perform32 evaluations; the separate
+4.5 trace requests presetM rather than merely repeating the saved standard
+mode. Saved preferences remain unchanged. Responsiveness probes observe short
+startup stalls (up to960ms in the initial four-case run), so these runs do not
+prove absence of all startup latency or temporal wobble. Results are retained
+under `tmp/current-r364-startup`, `tmp/current-r364-profile` and
+`tmp/current-r364-dlss45`. No release/main/3DS package is replaced.
+
+R365/R366 displayed-preview close-out: all eight standard DLSS/DLSS4.5
+Quality/Balanced/Performance/DLAA modes pass actual drawable-frame comparisons
+at4x. The plain R365 matrix proves genuine reconstruction rather than a native
+bypass. Its enhanced matrix exposed a real13-pixel selected-label discrepancy,
+after a checker self-comparison bug was independently repaired. All14 checker
+unit tests pass, including near-white rounding and actual moved/softened ink
+negative controls; tolerances were not relaxed to hide the renderer failure.
+
+R366 fixes the cause: clipped world bloom can equal white host-menu ink, so
+colour equality alone incorrectly extracts that ink into the separately
+resampled glow texture. SDL effects now consult declared setup-overlay
+ownership during the split; the software painter protects the same ink in its
+bloom snapshots. An actual GPU fixture fails before the fix and passes after
+it on D3D12 and Vulkan, checking1x/2x/4x and0/7/15 brightness while requiring
+unrelated world bloom to remain. All portable shader variants regenerate and
+the actual desktop application rebuild succeeds. The current player is
+325,244,914 bytes, SHA256
+`4338d0b3d0fafc28263a5f6c959ce45cf46c9d8645ad3ff29ba98e180ff50006`.
+
+Fresh enhanced captures test all32 actual displayed frames65..96 for native
+and all eight neural modes, with heavy bloom, RT/reflections and enhanced scene
+settings. All18,612 checked grey/yellow/white glyph samples and HUD samples
+match exactly, and the held model output is stable at the actual drawable
+resolution. Reconstruction still changes718..2,343 model pixels from native.
+Six actual software heavy-bloom frames also preserve the same glyphs/HUD
+exactly. The fresh five-case saved-profile startup check also passes: preview
+OFF performs zero neural evaluations and retains the once-uploaded menu for63
+frames; ordinary DLSS and separate DLSS4.5 previews each perform32 evaluations.
+Its results are in `tmp/current-r366-startup-profile`, with saved preferences
+unchanged. Reports/logs and first/last images are in
+`tmp/current-r366-dlss-enhanced-display` and
+`tmp/current-r366-software-bloom-menu`; failed R365 evidence is retained.
+Only redundant successful-run intermediate BMPs are removed. This is frozen
+preview coverage, not sustained gameplay/VR FPS or physical Apple/3DS
+acceptance. Existing Apple/VR/3DS tester packages remain their immutable prior
+snapshots; no main branch or release is changed.
+
+R357/R358 follow-up: the isolated native scalar optical stage now shares only
+fixed plane normals and Gram terms within each validated source group. Hit/ray/
+cell values remain dynamic. Already-failed, failed-cache and unprepared cases
+recalculate using the original prior state: simply restoring an old cache would
+change the current certified sqrt/divide widths. Actual controls detect that
+unsafe prior-state cache, stale group data and poisoned preparation. Both
+backend arithmetic bodies pass248,832 raw normal/face/Gram/fallback comparisons
+per gradual/FTZ mode, over five stages and768 mixed groups. Exact two-file source
+inverse preserves all other math/guards/cells/lobes/target/writer/ABI policy.
+All42 source-only shader jobs pass in run38130341056; downloaded outputs and
+their strict compiler/closure/resource provenance pass independent inspection.
+Only four native optical binary pairs change; the other38 are byte-identical.
+R358 freshly rebuilds all four native units, both complete observer controls and
+all50 linked shader arrays. Its full original GPU investigation retires exit1
+(PID33288, birthUTC2026-10-11T10:05:29.7214421Z, exec session58189), without resource
+or monitor stop or device loss. The complete first RGBA-sRGB sweep passes;
+second-format rough-lava phase1 still misses the original completion deadline.
+Later cleanup is not accepted presentation; remaining formats are untested.
+The group cache is not adopted and gets no unchanged retry. Working executable,
+main and releases are unchanged. This exhaustive opt-in validator is not normal
+gameplay FPS. Physical3DS and Apple runtime/gameplay acceptance remain open.
+
+Earlier completed GPU result (R356): the isolated renderer passes the entire first
+RGBA-sRGB water/lava, sharp/eight-lobe two-eye reflection sweep, including the
+formerly missing right-eye sharp-lava coverage and rough-lava phases. The second
+BGRA-sRGB sweep again fails the original rough-lava completion deadline, this
+time at phase1 after phase0 passes. Neither linear format is reached. No
+device-loss mode occurs in this run, but this is not complete GPU acceptance.
+Nothing from these candidates is installed in the production game. 3DS host/ARM/
+emulator checks pass; physical3DS results and Apple runtime/gameplay integration
+remain open.
+
+- R351 exact within-wave cosine reuse passes full scalar/jet host comparisons
+  in both backend arithmetic bodies and gradual/FTZ modes, all42 shader compiler
+  jobs and independent downloaded-artifact audits. R352 freshly rebuilds all
+  four native units, both complete observer controls and all50 final-PE shader
+  arrays. Its full GPU run exits1 without resource/monitor stop: first texture
+  format passes the complete sweep (33,940 changed incidents), but second-format
+  rough lava still misses the unchanged completion deadline. It stays isolated.
+- R353 instead reuses the raw checked sine/cosine intervals already computed by
+  the jet height. Cosine derivative products remain at their original use; no
+  cross-cell/frame cache, approximation, changed branch or omitted wave occurs.
+  Explicit source inverses and full host comparisons pass, including variable
+  x/z/time/footprint gradients, overflow refusal states, all raw output words,
+  branch/first-failure payload and wrong-phase negative controls. Each mode has
+  16,920 scalar plus16,920 full-jet cases, with exactly ten further polynomial
+  evaluations saved per jet invocation. Full42 source-only shader CI has been
+  completed successfully; the independently downloaded artifact audit passes.
+  R354 freshly rebuilds all four native units, both complete observer mocks and
+  all50 linked shader arrays. Its full GPU run exits1 on second-format rough-lava
+  phase2 without resource/monitor stop or device loss; late cleanup is not accepted
+  presentation. Complete GPU and production acceptance remain absent. Checked
+  optical computation still dominates the measured diagnostic cost. No unchanged
+  retry is authorized by that failure.
+  Identical division-corner reuse was found already present in the parent and
+  was not redundantly reimplemented. Original failed transports/logs stay held.
+- R355 reconstructs the identical48-bit significand product with three bounded
+  uint32 products instead of four. Every float range/endpoint/sign/rounding/
+  refusal/fallback and compiler boundary is unchanged. Actual host controls pass
+  33,554,432 integer product pairs and525,732 directed-bound cases per mode,
+  plus all16,920 scalar and16,920 complete jet cases, both arithmetic bodies and
+  gradual/FTZ, with lost-carry and wrong-phase negative controls. All42 actual
+  shader jobs and downloaded-artifact audits pass; actual optical-stream DXIL
+  retains three versus four integer mul instructions, not a GPU speed claim.
+  R356's four fresh native units, both complete observer mocks and all50 final-PE
+  shader arrays pass. Its original full GPU run retires exit1 (PID11800, birth
+  UTC2026-10-11T09:37:23.0157801Z, exec session21165), without resource/monitor
+  stop or device loss. The complete first RGBA-sRGB sweep passes; second-format
+  water/sharp-lava phases pass, but rough-lava phase1 misses the original deadline.
+  Later cleanup is not accepted output; phase2 and both linear formats remain
+  untested. No unchanged retry. Checked optical work still dominates the measured
+  diagnostic cost; removing one integer multiplication does not prove GPU speed.
+  No production source or working executable is replaced. The original failed
+  host path-key audit/compile is preserved; only separately corrected key
+  normalization precedes the successful controls, without source/guard changes.
+
+- Native reflection follow-up: both new caching candidates pass their exact
+  host controls and all 42 shader compiler jobs. Their full native GPU runs
+  still fail the unchanged rough-model completion deadline, after sharp-model
+  phases pass. Neither candidate is installed in the production game; this
+  exhaustive opt-in validator result is not gameplay FPS or a device crash.
+  The separate R327 exact-product comparison candidate also passes its host
+  controls and all 42 actual shader jobs. R328's full native build and all 50
+  linked shader-array audits pass. Its full original GPU fixture now exits 1:
+  sharp phases pass, but rough model 81 at phase 1 still misses the original
+  completion deadline. It is not accepted or adopted.
+  R329's lazy primary-plane normal/Gram cache also passes strict host and all
+  42 shader builds. Its R330 full native GPU run again fails the rough-model
+  deadline after the sharp phases pass. That cache also remains isolated.
+  R331's checked-helper placement candidate passes strict host controls and
+  all 42 shader builds; all Vulkan binaries are unchanged. R332's complete
+  native build and all 50 linked shader-array checks pass. Its full GPU test
+  still fails the original rough-model deadline after the sharp phases pass.
+  It remains unadopted; the checked-helper boundary was not sufficient.
+  R333 instead shares the identical initial divide/product between lower and
+  upper bounds, retaining both full checked loops. Strict host comparisons
+  pass with fewer compensated products; all 42 shader jobs now pass. Their
+  complete R334 native build and linked-array checks pass, but the full GPU
+  run still fails the original rough-model deadline. It remains unadopted.
+  R335's scalar early-refusal host controls pass, but save only about 1–2% in
+  the representative arithmetic profile; no GPU benefit is claimed or adopted.
+  R336/R337 restore original64 root scheduling to isolate the unaccepted8
+  experiment. All42 shader jobs, the full native build and all50 linked-array
+  checks pass. The unchanged full GPU fixture still fails the rough-model
+  deadline after sharp phases pass. Restoring the workgroup is not the fix.
+  R338/R339 instead test a guarded native-double exact product on supported
+  D3D12, retaining the original checked loops and all Vulkan binaries. Host
+  numerical controls, native capability checks, all42 shader jobs and full
+  native/link checks pass. The full GPU fixture again fails the unchanged
+  rough-model deadline. This candidate is also isolated, not a production fix.
+  R340 instead changes scheduling capacity from64 to504 queries per batch.
+  The complete ordered record/cell/lobe set, optical256/root64 workgroups,
+  checked value/derivative arithmetic, quality and deadline remain unchanged.
+  Exact source inverses, complete stream/compaction/address checks and all42
+  shader builds pass. Scratch grows to18,490,764 bytes, below the existing
+  one-GiB limit; the maximum indirect group count remains64512, below65535.
+  R341 stops before link because a helper was edited while its input hash was
+  held; that failure is preserved separately. Corrected R342 rebuilds all four
+  native units, archives/links successfully and passes all50 final-PE shader
+  checks. Its old64-query diagnostic observers must not be used for this run.
+  R343 adapts only their batch bookkeeping, keeping complete record capture,
+  all numerical/lifetime/retirement criteria and original total-memory ceilings.
+  Both actual observer mocks pass, including all73728 records/two eyes/eight
+  lobes and every source-proof prefix. The byte-identical full native fixture
+  rebuilds/links and passes all50 final-PE checks with those private adapters.
+  The actual full GPU run now passes all three sharp-water and rough-water
+  phases under the original completion deadline. Rough-water composition has
+  59,475 independently checked lobe footprints and20,637 changed incidents.
+  Each eye retains all73,728 records in147 complete batches. The run then
+  reaches and completes all three sharp-lava GPU/readback phases, but exits1
+  on the original positive-coverage criterion: phase1/right-eye curved-model
+  reuse is0 while direct-model reuse is158. There is no resource/monitor stop.
+  This is progress beyond the former deadline failure, not complete rendering
+  acceptance or gameplay-FPS evidence. The lava coverage gap is the next
+  investigation; the batch candidate remains isolated and unadopted.
+  R344 adds only right-eye read-only proof capture/correlation; exact inverses,
+  actual mock controls, the fresh full fixture and all50 PE checks pass.
+  The full GPU run repeats the lava coverage failure without resource/monitor
+  stop. Its18 unique right-eye roots are all rejected by the source witness:
+  seven missing/mismatched tap cases and11 feature-footprint cases. None reach
+  fold/guide/colour. All1,391 held inputs remain unchanged after retirement.
+  R345 then captures only raw right-eye CURRENT pixel92,27 geometry/calibration/
+  path/depth and all9,216 old visibility inputs; no GPU root/guide/RGB is replay
+  input. Its narrowed capture exits0, which is NOT a full pipeline pass.
+  A freshly compiled independent binary64 replay accepts the existing complete
+  source guard at texel91.999893188476562,26.998266220092773. Six necessary-domain
+  starts and all31 eligible old-pixel starts converge to that one visible source.
+  Finite searches are not global uniqueness evidence. This valid point lies
+  inside the wider GPU unique enclosure rejected by the feature witness; the
+  next fix must tighten the certified enclosure, not relax safety thresholds.
+  R346 removes only redundant final quotient/sqrt expansion inside a bounded
+  exact-product range, keeping all original checked attempts and fallbacks.
+  Both actual host modes pass 299,144 cases; all42 shader jobs pass. R347 freshly
+  builds all four native units and passes all50 final-PE shader-array checks.
+  Its full GPU run passes sharp water, rough water and sharp lava. The former
+  phase1/right-eye lava coverage gap now has six curved-model matches instead
+  of zero; all original independent checks and positive-coverage criteria pass.
+  Rough lava then completes phase0 but loses the D3D12 device in phase1 with
+  HRESULT0x887a0006. DRED stops at the indirect optical dispatch; no page-fault
+  address is reported. The actual process exits1 without resource/monitor stop.
+  This is NOT full rendering acceptance. The next experiment partitions that
+  resident optical task list into smaller dispatches without dropping work or
+  changing checked arithmetic, acceptance thresholds or the original deadline.
+  R348's exact shader/owner inverses and transported integer controls pass every
+  total0..64512, complete page addresses and malformed/dropped/overlap controls.
+  All42 shader jobs pass; R349's fresh full native build/all50 PE audits pass.
+  Its GPU run repeats identical accepted water/sharp-lava results, but rough
+  lava still loses the device at ExecuteIndirect. Smaller dispatches alone are
+  insufficient. A native-only follow-up will shorten command-buffer boundaries
+  from16 batches (8064 queries) to2 (1008), restoring the original maximum
+  command work envelope without dropping the complete stream or weakening any
+  mathematical, lifetime, quality or deadline check. This is not yet a fix.
+  R350's exact command16->2 inverse, two fresh complete observer mocks, four
+  freshly compiled native units and all50 PE-array checks pass. Its full GPU
+  run keeps identical accepted water/sharp-lava results and no longer reports
+  device loss. Rough-lava phase1 instead remains pending at the original
+  deadline. Late cleanup profiles all147 batches per eye, with optical work
+  about6.83/6.30seconds and roots1.64/1.69seconds; these are diagnostic costs,
+  not accepted late presentation or player FPS. The next fix must reduce the
+  repeated checked optical arithmetic without dropping work or relaxing any
+  source/failure/fallback/quality/deadline criterion. The candidate is isolated.
+  Production sources, current application, main, tags and releases are unchanged.
+- 3DS: all 50 unchanged host cases have actual successful terminals.
+  Original Fortuna, the EX serial/parallel sessions and EX capabilities now pass;
+  the EX stage sweep, EX death route, both EX Continue routes and EX game-model
+  case also pass, as do EX native models, effects, menu composition and landscape.
+  The same-build aggregate retains the 33 original completed cases and 17 fresh
+  continuation cases, with the original work, executor, resource policy and
+  deadlines. The actual continuation runner exits zero and both owners retire.
+  Physical-device acceptance is still open. The existing R180 tester ZIP
+  already contains the current game/audio/controller implementation.
+- Metal: all 30 shader programs compile and link on the supported Apple
+  deployment profiles. The first complete driver attempt, run 38105638246,
+  stopped before GPU initialization because the artifact copy was not
+  executable. Commit 3e43251b188131bd8ef60d02183076fb122d3145 selects the actual
+  CMake-built executable after checking identical bytes. Corrected source-only
+  run 38105995564 completes all four native build/link/metadata operations, then
+  actually launches that binary. SDL rejects the runner's Metal device as
+  incompatible (exit 77), before any program constructor passes. Independent
+  downloaded object/link/terminal inspection confirms both complete read-only
+  bundles and this unavailable result; it is not GPU acceptance. No unchanged
+  Intel-runner retry is warranted.
+- Application delivery: the unsigned iOS test IPA has passed archive and
+  native-binary checks. macOS packaging-only run 38105095122 now succeeds through
+  actual application compilation, linking and packaging. Independent inspection
+  of the downloaded 174,173,019-byte ZIP accepts every member CRC, executable
+  permissions, the actual arm64/x86_64 slices, matching macOS11 binary/plist
+  deployment and absence of private game inputs/signing keys. This unsigned
+  test application is not GPU/device or frame-cost acceptance.
+  The new calibrated rendering components have not yet been adopted into
+  ordinary Apple gameplay. Runtime output/frame-cost, the queued local GPU
+  investigation and real 3DS hardware testing remain unfinished.
+
+R309's original full GPU investigation is now admitted by that complete host
+result. Its existing helper rechecks the exact 1,368 candidate inputs, all 50
+read-only linked shader arrays, every complete host terminal and retired owners,
+then launches native PID 32312 at 2026-10-11T03:55:45.7928840Z. The original full
+fixture, precision, query coverage, retry deadlines and memory policy are
+unchanged. The native process now exits 1 with no resource stop or observer
+failure (sampled peak private memory 2,659,381,248 bytes). Sharp-model phases
+0/1/2 complete; rough model 81 at phase 1 misses the original completion
+deadline. Both eyes retain all 73,728 records and 1,152 batches. Cleanup profiles
+report approximately 4.5 seconds per eye in optical evaluation and 3.7 seconds
+in roots; these contended diagnostic timings are not player FPS evidence.
+The private eight-thread root candidate therefore remains unadopted. The failure
+and complete logs are preserved; no deadline, precision, work or quality is
+reduced to turn it into a pass.
+
+R319 stages an optical occupancy experiment outside production: 64 rather than
+256 lanes per optical stream group, with matching private owner metadata. An
+exact inverse restores the R308 shader and actual failed R309 owner; the full
+optical calculations, source cells, budgets, scratch ABI, root attempts,
+compiler policy and original 42-job matrix remain unchanged. Local integer
+checks cover all 8,193 allowed cell counts and 68 receipt reductions; an
+intentional dropped-work control is rejected. These are not GPU/performance
+results. Source-only commit 784fffb059ef278e8ca6b75e732c612a48df6d9c on temporary
+branch codex/optical-workgroup-shader-ci-r319-20261011 starts run 38110328841.
+The current branch/index, production owner, main, tags and releases stay intact.
+All 42 R319 compiler jobs now succeed. Independent downloaded-artifact checks
+accept every original entry, closure, strict flag, compiler identity, memory
+guard and complete binary. Forty outputs are byte-identical to R308; only the
+two optical stream binaries differ. Actual DXIL metadata and SPIR-V execution
+mode both specify 64x1x1. This still is not a numerical or speed result.
+R320 freshly compiles/links the full original native fixture with those complete
+outputs and current audio declarations. All six build/archive operations pass,
+and all 50 final-PE shader arrays pass exact read-only/bounds/byte checks. The
+existing admission policy then launches native PID 14404 at
+2026-10-11T04:13:28.8997397Z. The actual process now exits 1 and retires,
+with no resource stop or monitor failure (sampled peak private memory
+2,784,043,008 bytes). Sharp-model phases 0/1/2 and rough-model phase 0 complete;
+rough model 81 at phase 1 again misses the original completion deadline.
+Both eyes still retain all 73,728 records and 1,152 batches. Cleanup reports
+approximately 12.1/13.0 seconds of optical evaluation and 3.7/3.9 seconds of
+roots per eye. These contended diagnostic timings do not qualify player FPS
+or establish a controlled speed comparison with R309. The 64-lane optical
+experiment is not accepted or adopted, and its complete failure logs remain
+preserved. An unchanged retry is not warranted.
+
+R321 instead reuses four repeated complete cosine interval results inside the
+lava body, with invocation-local captured endpoints. An exact inverse restores
+every original expression and guard in the R308 source; all other source files,
+compiler flags, optical256/root8 workgroups, full cell coverage, budgets, root
+attempts, shader interfaces, quality and original owner/deadlines remain intact.
+The first strict host build rejects three existing HLSL implicit integer-to-float
+argument conversions; its actual failure logs are preserved. The separate
+corrected host transport spells only those existing conversions explicitly,
+without changing shader source. It compiles successfully and passes 26,518
+complete lava height/normal/refusal/call-count cases in each gradual and FTZ/DAZ
+mode, using both backend arithmetic bodies and both initial-refusal states.
+Six raw endpoint words and refusal flags match the baseline bit-for-bit; four
+complete cosine evaluations are removed per lava call. Deleting the hot-wave
+derivative is rejected by the same controls. These are host controls, not GPU
+or speed acceptance.
+
+Authorized source-only commit 056f6fd01c9e3f8b9b4c352686d6beb131d11891 on temporary
+branch codex/lava-optical-cosine-reuse-r321-20261011 starts the original complete
+42-job shader run 38111436742. No main, tag, release, private asset or credential
+is published; the root HEAD/index and production rendering sources stay intact.
+All 42 jobs now succeed. The downloaded artifacts independently pass every
+original entry, compiler, closure, strict flag, resource guard and binary check.
+Thirty-eight binaries remain byte-identical to R308; only both formats of the
+two optical entry points change. The independently audited complete inventory
+SHA256 is 3700386701D8D335CE82333EB9D9FC78E9103D0AAE8B869B695FA40B4FBB9428.
+R322 binds that actual inventory, with unchanged optical256/root8 workgroups,
+and completes all six fresh native build/archive/link operations. All 50
+final-PE arrays pass independent exact read-only/bounds/byte checks and all
+1,368 held inputs remain intact. Native receipt SHA256:
+2F8F2BD9427B269BED6769CD27130E84274257FA02F9D06556DD5BA06379CFC0.
+Executable SHA256:
+824052467C1F1EF7AAFDFCB721DFE72C1A329EDFB9701F3B04E60AC46DC59B2D.
+The actual GPU PID 28252, born 2026-10-11T04:30:02.8195865Z, exits 1 and
+retires with no resource stop or monitor failure (sampled private peak
+2,652,241,920 bytes). Sharp phases 0/1/2 and rough phase 0 complete, but rough
+model 81 at phase 1 still misses the original deadline. Both eyes retain all
+73,728 records and 1,152 batches; cleanup reports about 4.4/4.5 seconds of optical
+work and 3.6 seconds of roots per eye. This does not qualify player FPS or a
+controlled speed comparison. The experiment stays unadopted; its full failure
+and earlier strict host-transport failure are preserved.
+
+R323 begins a separate plane-normal caching candidate from R308,
+not an unchanged GPU retry. It evaluates each group's identical full plane
+normal once in shared storage, then merges that normal's original failure only
+when the forward path actually reaches the plane. Curved planes and unused or
+later failed planes must preserve the original path behavior. This does not
+remove any source cell or root attempt. Exact inverse, bit/refusal/unused-plane
+controls, complete shader compilation and full native GPU acceptance remain
+required before adoption. Its first strict host compile rejects a declaration
+which tries to deduce one C++ `auto` type across two namespace-distinct interval
+types; that failure is preserved. A separate host-only correction splits the
+two declarations. The actual source fragments and shader are unchanged.
+The corrected strict compile and both runtime modes succeed: 1,116 cases and
+37,152 raw normal/orientation/refusal lookups per gradual/FTZ run match both
+backend arithmetic bodies. Preparation occurs only in the leader; subsequent
+worker/cell lookups do not recalculate normals. Lost-required-refusal and
+eager-later-plane-poisoning controls are rejected. The host barrier shim does
+not establish GPU synchronization or speed. Host receipt SHA256:
+B09E60D26F9C870AFAA6EA84DC9CA8DA04F72F90A8432B70DE29C3169591D752.
+Authorized source-only commit 9b15f066b2e8e1a215fd37f240b05316251b0bdd on branch
+codex/optical-plane-normal-cache-r323-20261011 starts the original complete
+42-job shader run 38112196814. This is not GPU, performance or production
+acceptance; main, tags, releases and the root HEAD/index remain unchanged.
+
+All 42 R323 jobs now succeed. The independent downloaded-output audit accepts
+the complete original compiler graph, flags, guards and bytes: 38 binaries are
+unchanged, and only the four optical binaries change. Inventory SHA256:
+F845FE424FF4F787BD95C8EE0FADF50B1D85E4916D56AE1B946A77995D63677E.
+R324 freshly builds the unchanged complete fixture with those outputs; all six
+build/archive operations and all 50 final-PE shader-array checks pass. The
+actual native GPU process is PID 17680, born 2026-10-11T04:45:41.4445354Z. It
+exits 1 and retires, without a resource stop, monitor failure or query failure
+(sampled peak private memory 2,689,892,352 bytes). Sharp phases 0/1/2 pass and
+retain 2,043 independent changed-incident witnesses. Rough model 81 phase 1
+still misses the original completion deadline; both eyes retain every 73,728
+record and 1,152 batch. Cleanup profiles report optical work of approximately
+4.7/4.9 seconds and roots of 3.7 seconds per eye. These contended, exhaustive
+opt-in validation timings are not ordinary gameplay FPS. The normal-cache
+candidate remains unadopted; the original precision, work and deadline remain.
+
+R325 separately reuses the original complete interval endpoints for 42 exact
+ratio inputs. The raw input words must match; every unlisted, adjacent, invalid
+or dynamic input retains the complete original fallback. The table does not
+tighten enclosures or clear an existing refusal. Actual original DXIL/SPIR-V
+scalar bodies agree in gradual and FTZ modes. Fresh strict host controls pass
+35,240 ratio/fallback comparisons and 4,096 full lava height/normal/refusal
+comparisons per mode; a one-ULP corrupt constant is rejected. Host receipt:
+07CEF370F127CF658C9C2A79045B49B779E6167C1A6C3804FB17677B37F9FAB6.
+Authorized source-only commit 4fadf8787b89771544083bdc51b22caa80817acd on branch
+codex/optical-constant-ratios-r325-20261011 completes run 38113009956: all 42
+compiler jobs succeed. Independent artifact checks pass the original complete
+source graph, flags, guards and binary hashes. Only the eight optical/root
+binaries change; the other 34 are byte-identical. Inventory SHA256:
+CDD5145870988503101563C13BAD9934CF935B51A3329ABB91B1BEA97FBAF6A0.
+R326 freshly builds the same full native fixture against these outputs. All
+six actual build/archive operations and all 50 final-PE shader checks pass.
+The exact original admission checks launch GPU PID 32844 at
+2026-10-11T05:00:03.7806062Z. It exits 1 and retires, with no memory-limit stop,
+observer failure or resource-query failure (sampled private peak 2,729,562,112
+bytes). Sharp phases 0/1/2 again pass with the original 2,043 independent
+changed-incident witnesses; rough model 81 phase 1 still misses the original
+deadline. Both eyes retain all 73,728 records and 1,152 batches. Cleanup timings
+show approximately 4.3/4.5 seconds optical and 3.6/3.8 seconds roots per eye;
+these are contended diagnostics, not a controlled speedup or player FPS result.
+The constant-cache candidate remains isolated and unadopted. No original
+quality, precision, cell set, root attempt, deadline or memory guard is reduced.
+
+R327 replaces the repeated exact-product comparison inside checked quotient
+and square-root steps, only for normal factors in [2^-30,2^30] and finite
+targets. It compares the complete 48-bit significand product with the exact
+target representation using two uint32 limbs. Out-of-range or unexpected
+representations retain the complete original compensated-product fallback.
+The original eight attempts, endpoint words and refusal rules remain. The
+exact inverse restores every original expression outside that comparison.
+Actual strict host compilation and gradual/FTZ executions pass 334,539
+independent exact-order comparisons, 136,848 full primitive comparisons and
+4,096 complete lava comparisons per mode. Raw endpoint/refusal and actual
+attempt counters agree; the lost-carry control disagrees on 24,714 cases and
+is rejected. Host receipt SHA256:
+C2AA56427374E8E3AFE329466DC130ABC845C88991C9ED703D0D80F0348A54BD.
+Authorized source-only commit e2a616a88df9fdeadfc293747e144c5ca76a1762 on branch
+codex/exact-product-order-r327-20261011 starts the original complete 42-job run
+38113957107. All 42 jobs now succeed. Independent downloaded-artifact checks
+accept every original entry, source closure, compiler identity, strict flag,
+resource guard and binary. Thirty-two outputs remain byte-identical to R308;
+ten optical/jet/witness outputs change. The complete compiled inventory SHA256
+is 96BDEF9DCA92BB48978DE9885C6D517EE418B51023ADDDEA2CA5416396A69B97.
+R328 freshly compiles the full original native fixture and unchanged
+256 optical/8 root owner metadata against that actual inventory. All six
+build/archive/link operations succeed. Independent final-PE inspection accepts
+all 50 read-only, aligned, bounded and byte-exact shader arrays and all 1,368
+held inputs. Native receipt SHA256:
+ACA4BB0648E089D07BEDCAFC99BE729DFB37BCBE7909AB29A15E28AAB80B1B84.
+Executable SHA256:
+0D7CE3F58CC93708DCEA65B0A2A017BB1E08CEDB05149934E17C7112172F8887.
+The original full GPU fixture launches PID 26100, born
+2026-10-11T05:19:43.5637604Z, after the unchanged full50 host admission and
+owner/resource checks. That actual process now exits 1 and retires, with no
+resource stop, monitor failure or resource-query failure. Sampled peak private
+memory is 2,676,912,128 bytes. Sharp-model phases 0/1/2 pass, including 2,043
+changed incident witnesses and 4,531 full unrounded composition footprints.
+Rough model 81 at phase 1 still misses the original deadline; both eyes retain
+all 73,728 records and all 1,152 batches. Cleanup reports optical work of
+4,890.44/5,340.17 ms and root work of 3,953.91/4,240.28 ms per eye. These
+contended diagnostic timings do not qualify gameplay FPS or a speedup.
+The helper SHA256 is
+4AE709BE1C1CB31EC0FCA9E0DAA050E13A76A3813BB1DCB888C7259A34C0D2A9.
+The complete terminal and logs remain preserved. R327/R328 stays isolated;
+no game/main/release adoption or unchanged GPU retry occurs.
+
+The next structural target identified in the actual source is the repeated
+constant-plane calculation across a local root's up to four complete forward
+evaluations. `write_optical_local_root` repeatedly calls the same plane-normal
+and finite-face Gram calculations with unchanged triangle coordinates. Any
+cache must preserve lazy evaluation, raw interval endpoints, prior/per-call
+refusal and the axis-correlation guard; it may not skip a cell, root evaluation,
+later-plane failure, full derivative enclosure or original retry deadline.
+R329 below now tests that target; it is not a qualified production improvement.
+
+R329 now implements an isolated invocation-private PRIMARY-plane cache for
+the complete checked normal and face Gram coefficients. Primary hit coordinates,
+orientation, jet axis-correlation, all nonprimary planes and every original
+cell/forward/root evaluation stay live. Normal and Gram caches are separately
+lazy, preserve their own failure, and reset at the actual optical group/root
+writer lifetime. The exact inverse restores all five original source files;
+compiler flags, workgroups, scratch interfaces and original 42-job graph remain.
+Strict actual host compile and gradual/FTZ runs pass 2,025 cases and 648,000 raw
+normal/jet/face/Gram/refusal comparisons per mode. Dynamic-hit, unused analytic
+Gram, nonprimary/later failure, prior-refusal and reset controls pass; lost cached
+failure and stale-reset controls are rejected. Host receipt SHA256:
+EA68EFE38FB404B72C8F23CEEF340FE47E3B160B7DB35E63F634576589CBFF00.
+Authorized source-only commit 2dd9aebf11f010e5a4f9760d300e2fb93b5ac68e on branch
+codex/primary-plane-cache-r329-20261011 has all 42 actual jobs succeed in run
+38115000003. Independent downloaded-output audit accepts all original entries,
+flags, compiler identities, guards, closures and binary bytes. Thirty-four
+outputs remain byte-identical to R308; only both formats of the two optical and
+two jet entry points change. Actual DXIL/SPIR-V metadata retains optical256 and
+root8. Full inventory SHA256:
+FE6E7CDCC709B14E4B6AACBA2EDD1CB2A0350AE62E444C6417D3BDF06452A9E1.
+R330 freshly builds the complete original native fixture with those actual
+outputs. All six build/archive/link operations succeed, and all 50 final-PE
+shader arrays pass exact read-only/bounds/byte inspection. Native receipt SHA256:
+9EE2CA471AA64B983B3E0D5B708C9808EE47F558C8CE5410CDF6E079CC46C1A3.
+Executable SHA256:
+705989727B84980A108BBB3DC883820B70138B8CCB4F9D3257DD8E9A90113EC0.
+The unchanged full50 admission, original fixture/work/deadline and resource
+checks launch native PID 3240 at 2026-10-11T05:35:17.1957336Z. That actual owner
+exits 1 and retires without a resource stop, monitor failure or query failure;
+sampled private peak is 2,654,167,040 bytes. Sharp phases 0/1/2 pass, including
+2,043 independent changed incident witnesses and 4,531 composition footprints.
+Rough model 81 phase 1 still misses the ORIGINAL completion deadline. All
+73,728 records and 1,152 batches remain per eye. Cleanup records optical work
+of 4,493.87/4,642.77 ms and root work of 3,450.35/3,481.09 ms per eye. These
+contended opt-in diagnostic timings do not qualify a speedup or gameplay FPS.
+GPU-helper SHA256:
+3A665D14FDC41581A0CEB15F86C2A489FDBF5C62942277002F9466C7D72DFDD8.
+The full failure outputs remain preserved. R329/R330 is not adopted or retried
+unchanged; no main, release, game quality, cell, forward evaluation, root attempt,
+deadline or memory policy is altered to turn this result into a pass.
+
+R331 removes the forced DXIL function boundary only around the checked
+quotient/square-root helpers. Their complete eight-attempt bodies, arithmetic,
+refusals, strict flags, interfaces and Vulkan placement are unchanged. Both
+gradual-underflow and flush-to-zero host runs match the original raw primitive
+and full lava results, including failure flags and attempt/product counts;
+the shortened-attempt negative controls are rejected. Source-only commit
+3ec0559b2ea4fb73ced125e3fd8145a8be183b31 passes all 42 shader jobs in run
+38115718091. Independent artifact inspection confirms that only the four
+targeted DXIL binaries change; the other 38, including every Vulkan binary,
+are byte-identical to R308.
+
+R332 freshly builds the complete original native fixture with those outputs.
+All six compile/archive/link operations and all 50 final-PE shader-array
+checks pass. The unchanged admission checks launch native PID 17300 at
+2026-10-11T05:49:31.4290650Z. The actual process exits 1 and retires with no
+resource stop, monitor failure or resource-query failure; sampled private
+peak is 2,734,391,296 bytes. Sharp phases 0/1/2 pass, including 2,043 independent
+changed incidents and 4,531 composition footprints. Rough model 81 phase 1
+again misses the original completion deadline. All 73,728 records and 1,152
+batches remain per eye. Cleanup records optical work of 4,345.30/4,583.42 ms
+and root work of 3,573.41/3,710.70 ms per eye; this instrumented diagnostic
+is neither gameplay FPS nor a controlled speed comparison.
+
+The checked-helper placement is therefore not sufficient. R331/R332 remains
+isolated from production, main and releases; its original failure output is
+preserved, and no unchanged retry is planned. No deadline, query coverage,
+precision or quality was reduced to obtain the host/compiler passes. The
+next investigation must address the actual repeated interval work rather
+than treating this function-boundary change as an accepted optimization.
+
+R333 now reuses only the identical initial quotient and compensated product
+between the lower and upper checks. Both directions keep their original
+eight-attempt loops, guards, comparisons, steps and failure propagation. The
+complete source inverse restores R308; no other published source, interface,
+compiler flag, work item or quality setting changes. Strict gradual/FTZ host
+tests pass 34,212 quotient pairs, 34,212 full interval cases and 4,096 complete
+lava cases per mode, with raw bounds/refusals/attempt counts unchanged. They
+avoid 141,080/140,676 actual host compensated products. Both shortened-attempt
+and corrupted-seed controls fail as intended. The first host compile failed
+only on misleading indentation in the diagnostic corrupted-seed control;
+that failed source/output is preserved. The corrected host run uses the same
+41 publication files, checked byte-for-byte before publication.
+
+Source-only commit 8af5431e5f522cd29e1b55ad1246a3b4f7a4f24c passes the unchanged
+full42 shader matrix in run 38116502831. Independent artifact inspection
+accepts the exact original flags, compiler, closures, guards and every binary;
+only the ten optical/root/witness outputs differ, with the other 32 byte-exact.
+R334 freshly builds the complete original native fixture with those outputs.
+All six compile/archive/link operations and all 50 read-only final-PE shader
+array checks pass. The first GPU admission stops BEFORE launch because a
+documentation-only edit changed the pinned 3DS testing guide. That edit is
+restored exactly to F0BB7918D9E8A3E590AFB602495016AFDFA7FBFEDBB30117EBFEB281BAA8DE75;
+the full50 proof, original code, executor and guards are not changed.
+The subsequent qualified admission launches native PID 28100 at
+2026-10-11T06:05:59.2827569Z. That actual process exits 1 and retires without a
+resource stop, monitor failure or resource-query failure; sampled private peak
+is 2,667,986,944 bytes. Sharp phases 0/1/2 pass, with 2,043 independent changed
+incidents and 4,531 composition footprints. Rough model 81 phase 1 still fails
+the ORIGINAL completion deadline, retaining all 73,728 records and 1,152
+batches per eye. Cleanup records optical work of 4,517.88/4,674.78 ms and root
+work of 3,700.86/3,768.89 ms per eye. These instrumented diagnostics do not
+qualify gameplay FPS or a controlled speedup. The full failure output and
+all source/build receipts remain preserved; no unchanged retry is planned.
+The new source remains isolated under
+D:/SFE-validation/r333-paired-quotient-seed; main/current/releases are unchanged.
+This is host work-reuse evidence, not a GPU speed or production acceptance.
+
+The next target is fail-closed short-circuiting of an ALREADY INVALID optical
+path. The scalar predicate's arithmetic-failure flag is monotone: only its
+caller resets it per cell; all predicate callees can only set it true. Once
+true, every remaining scalar return is necessarily false. Its native writer
+observes that predicate only to keep/exclude the same original cell and hull;
+it does not publish the intermediate arithmetic. Any experiment must prove
+the exact boolean/failure result, retain every cell, original writer/coverage,
+successful-path math and checks, and measure real failed-path work before
+claiming a benefit. Jet output also exposes branch/failure diagnostics, so
+scalar reasoning alone cannot authorize changing its early-exit behavior.
+R335 now tests nine fail-closed scalar early exits, leaving all successful-path
+math and the jet diagnostics unchanged. The first complete host transport
+failed to map one HLSL `inout` qualifier; its failure logs are retained. The
+separate corrected transport passes 24,104 complete predicate/refusal cases in
+each gradual and FTZ/DAZ mode, with both scalar backend bodies. Unsafe acceptance
+and overbroad-refusal controls are rejected. All successful-path work matches.
+The finite-frame profile (without preset failure) reduces counted host arithmetic
+from 5,371,426 to 5,267,880 in gradual mode and 5,372,426 to 5,308,700 in FTZ/DAZ:
+only about 1–2%. This is not enough evidence to claim a GPU bottleneck fix;
+R335 is not published, GPU-qualified or adopted.
+
+R336 instead isolates the unaccepted eight-thread root occupancy experiment:
+only the root-stream workgroup is restored to its original 64 threads, with
+the matching unchanged original owner. An exact one-line inverse, absence of
+group/wave math dependencies and all 64 query-count coverage checks pass;
+a dropped-query control is rejected. Complete math, source cells, attempts,
+quality, optical256 workgroup, ABI, strict compiler flags and guards remain.
+Source-only commit 16fce90fc4ec89f65f68921b30e9dc15599c7464 on temporary branch
+codex/original-root64-r336-20261011 starts the unchanged full42 shader workflow
+run 38117961092. No main, current executable, tag, release or private input
+changes. All 42 shader jobs now pass. Independent artifact checks accept the
+original compiler, flags, closures, guards and complete binaries. Forty outputs
+are byte-identical to R308; only the two root-stream formats change. Actual
+DXIL metadata and SPIR-V execution mode both specify 64x1x1. Complete compiled
+inventory SHA256: 5E2BBC584A77819EF78D254D05852E3BF595CA05CADB9DE1B59C6001FA070D7B.
+R337 then freshly builds the complete original native fixture with that
+inventory and exact original64 owner. All six build/archive/link operations
+and all 50 actual final-PE array checks pass; all 1,368 held inputs remain.
+Native PID 22604 (creation 2026-10-11T06:29:24.6041132Z) actually runs the full
+unchanged fixture, then exits 1 and retires without resource or monitor stop.
+Sampled peak private memory is 2,698,854,400 bytes. Sharp-model phases 0/1/2
+pass, with 2,043 independent changed incidents and 4,531 complete composition
+footprints. Rough model 81 phase 1 still misses the original completion
+deadline; both eyes retain all 73,728 records and 1,152 batches. Cleanup reports
+optical 4,486.59/4,570.15 ms and roots 4,237.04/4,222.23 ms per eye. These
+instrumented, contended timings are not gameplay FPS or a controlled speed
+comparison. Original64 restoration does not resolve this timeout. The complete
+failure logs remain isolated; no unchanged retry or production adoption.
+
+R338 tests a guarded exact binary64 product only for normal binary32 operands
+in [2^-30,2^30], retaining the complete original compensated fallback outside
+that range, all original divide/sqrt attempts and the original Vulkan program.
+Its first host build rejects an unused variable in the deliberately corrupted
+negative control; the source and failure logs remain. The corrected host-only
+control passes 131,433 raw products (67,112 guarded, 64,321 fallback), 136,848
+complete primitive checks and 4,096 complete lava cases in each gradual/FTZ
+mode. Raw words, endpoints, refusal and eight-attempt counts match. Lost-attempt
+and lost-residual controls are rejected; 118,286 compensated core calls are
+replaced in this host corpus, not a GPU-speed measurement.
+Source-only commit e140b9c6f7af20ee7ba760c981d9e5c5bb9525c1 on temporary branch
+codex/guarded-fp64-product-r338-20261011 passes all42 jobs in run 38118836056.
+Independent inspection accepts all original compiler/flag/closure/guard and
+binary identities. All21 Vulkan and16 unrelated DXIL outputs are byte-identical
+to R336. The five changed DXIL outputs actually require double precision and
+contain uncontracted double multiplication/subtraction and explicit truncations.
+Compiled inventory SHA256: AB7FCF0834DA25D50CA31F2A3E95A1615AC4EE262C99984092B0C24ACE5127CF.
+
+R339 freshly builds the unchanged complete native fixture and original64 owner
+against those outputs. All six build operations and all50 read-only final-PE
+array checks pass, with 1,376 held inputs including the actual capability closure.
+A fresh native SDL/D3D12 probe immediately before admission confirms the same
+adapter (LUID low93500/high0) supports DoublePrecisionFloatShaderOps; this is
+not rendering acceptance. PID33544, creation2026-10-11T06:47:57.9097009Z, then
+actually runs the full unchanged fixture. It exits1 and retires without a
+resource or monitor stop, sampled peak private2,733,215,744 bytes. Sharp phases
+0/1/2 pass (2,043 changed incidents/4,531 complete composition footprints), but
+rough model81 phase1 still fails the original completion deadline. All73,728
+records and1,152 batches remain per eye. Cleanup reports optical5,109.30/5,288.93
+ms and roots4,823.27/4,895.24 ms per eye. These instrumented timings neither
+qualify gameplay FPS nor provide a controlled speed comparison. The native
+double candidate does not resolve this timeout and remains unadopted; original
+binary32 production fallback has not been replaced. No unchanged retry planned.
+
+Actual application follow-up: R316 moves the ordinary MetalHardwareRt owner's
+four existing full shaders (shadow, reflection and both empty-scene variants)
+from first-use source compilation to build-generated read-only libraries. This
+is not an unused link of the separate 25+five calibrated components. All three
+real owner factory paths select the corresponding full native library; shader
+math, source geometry, resource bindings, quality and work are unchanged. The
+same dedicated-hardware gate protects the libraries' macOS14/iOS17 minimum,
+while the application retains its intended macOS11/iOS15 minimum. Missing
+library/function failures are reported before attempting a pipeline with a nil
+function.
+
+The preserved local Windows emissions of all four full sources match the
+previous application byte-for-byte;
+the original 21 source/CMake assembly tests pass. Two actual strict host builds
+and executions pass 17 provider bounds/role checks using deliberately fake
+bytes; those are not Metal acceptance. The new read-only-section inspector also
+correctly reads both architectures of the actual prior macOS application. Its
+new-library embedding result remains unaccepted until real SDK compilation,
+linking and archive inspection finish. Source-only commit
+84c543c2eca1325fac9a68fa54a63ecd76618df1 on temporary branch
+codex/native-metal-libraries-r316-20261011 starts run 38107335104. Both actual
+application jobs pass their native provider controls and complete configuration.
+Both jobs also pass the complete four-program source/SDK checks. iOS completes
+the actual full application compilation/link, but package inspection fails:
+the pinned source hashes were Windows CRLF emissions and the Apple SDK inputs
+are LF. The actual macOS compile/link also succeeds, then package inspection
+fails for the same source-hash mismatch. Both original failures are preserved.
+No production adoption, main/release update, GPU output or speedup is claimed;
+the root HEAD/index and held 3DS/native GPU investigation inputs are unchanged.
+
+R317 adds independent final-binary inspection of the eight real loader data/size
+symbols, their read-only ownership, exact complete-library addresses and size
+cells. Its synthetic valid layout and ten corrupt-layout refusals pass. Both
+actual architectures of the prior R311 app are correctly rejected because they
+lack these new loader symbols. Those are inspector controls, not acceptance of
+the pending R316 app or Metal execution. The published candidate is unchanged;
+this additional check must run against its actual downloaded package/libraries.
+Update: the downloaded iOS application's four complete SDK libraries pass the
+actual linked data/size-symbol and read-only-section checks. Its 85,199,026-byte
+unsigned IPA also passes native arm64/iOS15, bundle, full archive CRC and
+private-input/signing-key checks. Package SHA256:
+2c676b5cee676effbeedff10da68d173937f89ce9d53deadb25a1c88f4edee92.
+This is build/container/loader-binding evidence, not Metal device execution.
+The downloaded macOS app also passes its complete-source/library and all eight
+loader-symbol checks in each actual Intel/Apple Silicon slice. Independent
+archive inspection accepts its full CRCs, executable permissions, bundle,
+macOS11 binary/plist minimum and absence of private game inputs/signing keys.
+Its unsigned test ZIP is 174,325,337 bytes, SHA256
+532479d8bfa94799a511e47a5fb27b638fc3050478ebf3399ba1f37b4d5cefc6.
+These actual native owner libraries are embedded; the separate calibrated
+25+five component family still is not installed in ordinary Apple gameplay.
+No Metal execution, physical-device or frame-cost acceptance is inferred.
+
+R318 fixes the source emitter to write canonical LF on every host; the inspector
+still requires exact complete source hashes, not whitespace-normalized input.
+Independent byte comparisons prove all four actual SDK inputs differ from the
+preserved pre-embedding baseline only by CRLF-to-LF translation. All original
+21 source/CMake checks plus the new full-source exact-byte check pass. The same
+22-case suite against the old emitter rejects all four programs for CR bytes,
+while retaining the other checks. The corrected inspector independently accepts
+all four full compiled libraries in the actual iOS app. No shader arithmetic,
+geometry, resources, quality, work or native application source was changed.
+Source-only commit d4ff98808434826291295bacd2dd6c09b64128be changes only the
+emitter, inspector and regression test on temporary branch
+codex/native-metal-canonical-sources-r318-20261011. Full actual application run
+38108931423 is live for both SDKs with the original build/package workflow;
+both jobs pass provider controls, configuration and the complete four-program
+source/SDK checks, and are compiling/linking the actual applications. No main,
+release, production adoption or GPU/device acceptance is claimed.
+
+Update: both actual R318 application jobs now succeed through compilation,
+linking, verification and packaging. Independent fresh downloads pass native
+deployment/bundle/archive checks and all eight real loader symbols in each
+actual architecture. All four complete SDK source hashes equal the pinned LF
+baseline, and full compiled libraries are present at the exact read-only symbol
+addresses. The corrected unsigned iOS test IPA is 85,199,026 bytes, SHA256
+bb142698e1f7127f44dc3c1f46d89b6451af7a85e3df896e08ba71ede98f0ed9.
+The corrected unsigned universal macOS test ZIP is 174,325,337 bytes, SHA256
+5c20873f92bf76167aca022bf06e89c281c69c28658c4f59026f49310fcf9a68.
+These are actual application build/package results, not Metal execution,
+physical hardware, full-game fidelity or frame-cost acceptance.
+
+October 10 combined native Metal factory follow-up: R314 stages the complete
+25-program history and five-program graphics families in separate SDK-specific
+static libraries with one real SDL dependency, 21 original factory sites and
+no duplicate history object. The graphics camera headers now use the same
+pinned public OpenXR header SDK as the application. All ten graphics library
+and receipt pins pass offline validation; both read-only source bundles are
+generated from the actual accepted SDK outputs. The original SDK compiler
+observer, strict floating-point flags and resource checks are unchanged.
+
+The first actual strict host compositor compilation failed on four implicit
+unsigned-to-float conversions; its terminal and logs remain preserved. The
+staged follow-up makes exactly those conversions explicit. Four shared effect
+helper conversions are also explicit, with 2,560 exhaustive comparisons against
+the original helpers passing. Metal-only factory compilation now excludes the
+foreign DXIL/SPIR-V bytecode header while preserving every complete legacy
+factory branch and all live arithmetic/resource/draw work. Its inverse source
+check and actual strict host syntax compilation pass, with observed owned-tree
+peak 497,647,616 bytes versus 1,930,891,264 in the prior compile. This is compiler
+residency evidence, not gameplay performance or Apple-native link acceptance.
+
+Source-only commit d5e26984bdcc64d5cf89c06e750b4aa5dccf15ab on temporary branch
+codex/metal-combined-factories-r314-20261011 starts run 38104921956. Both macOS11
+and iOS15 jobs fetch the actual accepted 25+five SDK families and are performing
+native factory compilation/linking. Neither native result is accepted yet.
+Update: both jobs finish successfully. Downloaded iOS arm64 and macOS x86_64
+artifacts pass independent actual-terminal and read-only Mach-O object/link
+inspection for all 25 history plus five graphics libraries. The macOS non-GPU
+consumer also runs the actual owner, all payload descriptors and SDL property
+lifecycle checks; iOS is compiled/linked only. No Metal device was launched.
+This is explicitly a factory/link consumer: the calibrated renderer remains
+in the Windows stereo path, so these static components do not by themselves
+install it into the ordinary iOS gameplay renderer. Production renderer bytes,
+HEAD/index and held native-test inputs remain unchanged; no main update or
+release was made. R311's actual iOS app/IPA pass remains separate. Its macOS
+application also completes real arm64/x86_64 compilation and linking, but the
+packaging step fails because it uses the iOS bundle paths. Packaging-only
+commit a182177679498b711f5d697b6a81a633615603ed corrects those paths and adds
+SDK selection; macOS-only run 38105095122 is configuring the unchanged actual
+application. No successful macOS ZIP is claimed yet. R312 still has only 33 accepted 3DS
+host cases; its actual Fortuna child and original observer/deadline remain live.
+
+October 10 complete Metal compositor follow-up: R313 extracts the five exact
+resident graphics stages after the original full generated-source check passes.
+All ten translation/descriptor operations complete. SDL's actual Metal graphics
+layout requires uniforms before storage buffers; the staged sources change only
+those entry resource annotations, retaining unused declarations and sampler slots
+correctly. Forty-seven invalid descriptor controls and exact source inverses pass.
+Initial run 38103209253 / commit 5a9046a2ca1380cbd13ced8aaf356051e2e2ef3e
+has six SDK passes and four real strict compiler failures: three unused translated
+constant arrays in each of the two composition stages. The follow-up preserves
+all six arrays and their initializers with unused-value attributes, not deleted
+work or warning suppression. Commit b9cf8e90b528347bcaede434b9248991afddf977 /
+run 38103454445 passes all ten macOS11/iOS15 Metal2.3 compiler/link jobs. Independent
+artifact audit accepts all twenty actual terminals and source/entry/library pins;
+maximum observed compiler-tree residency is 116,977,664 bytes.
+
+The isolated full compositor adds payload selection at all five real factories:
+vertex, composition, edge witness, retained liquid guides and analytic panel
+guides. Inversion recovers the entire original compositor. Metal selection checks
+the exact stage and resource recipe, including reuse of the same create-info
+between vertex and fragment creation. Both five-program SDK-specific read-only
+assembly/provider sources are generated from the actual audited outputs. These
+are source-only additions: their native application linking, shader pipeline
+creation, GPU output, timing and device lifetime remain unaccepted. Production
+compositor bytes, HEAD/index and other held compiler inputs remain unchanged;
+no main update or release was made. Corrected iOS application job 114361279233
+in run 38102539298 succeeds through actual application compilation, linking and
+packaging. Independent archive audit accepts the 85,114,543-byte unsigned IPA,
+every ZIP CRC, the actual arm64 Mach-O executable, matching iOS15 binary/plist
+deployment, and absence of private game inputs or signing material. This
+integration-test app contains R311 native material/empty-scene changes, not the
+newly staged R313 compositor. GPU/device behavior remains unaccepted. The macOS
+job is still compiling. The separate fresh 3DS suite
+still has only its original 33 accepted results while its Fortuna case remains
+live under the original memory pause/resume policy and unchanged CTest deadline.
+
+October 10 full-game Metal integration follow-up: the initial temporary snapshot
+f5f6e55d8e444b7a01403161e1bb6f5e11f9668b / run 38090109239 failed configuration
+because it omitted the public FSR headers. Follow-up commit
+f6fb8267a7e60fe788f847bbb937dce340fe84a2 / run 38094114153 includes the existing
+public FSR, SMAA and SFVR source/license files unchanged. All 68 portable shader
+stamps and their recursive include graphs pass preflight in that exact Git tree.
+That follow-up also failed configuration because public backdrop resources were
+omitted. Commit e63f9712393fbab27ad1aecd9fb82d1b1904e301 / run 38101637822
+adds only existing tracked public artwork, fonts, localization and model inputs;
+all 38 catalogue bitmap resources pass exact-tree preflight. Both full application
+targets also need the existing Apple bundle template, which that snapshot omitted.
+The iOS job failed generation on that missing template; its still-configuring
+macOS job was canceled, not recorded as a compiler failure or pass. Commit
+87fda687de2917655201df520b0a2ce7567f917d restores only that tracked template,
+and exact-tree preflight now checks all four application configure templates.
+Corrected run 38102539298 has both application builds in progress; neither is
+accepted yet. The
+staged application accepts validated empty indexed-palette ray scenes, resets
+stale geometry/material offsets, supplies live water palette colour with explicit
+sRGB encoding, and selects Metal reflection output only after successful
+submission. No full-game compiler/link/runtime pass is
+claimed for these application changes yet.
+
+All 21 native shader-source assembly checks pass locally. A separate strict-O3,
+no-fast-math host fixture passes 15 empty-geometry contract checks, including
+stale/missing buffers, wrong devices, material offsets and nonempty payloads.
+These are source/helper checks only, not actual Metal output or device lifetime,
+visual quality, frame cost, history/ordered curved paths or physical testing.
+The inspected pre-commit whitespace failure was CRLF being misclassified as
+trailing whitespace. A CR-aware check retains the other whitespace diagnostics
+and leaves the exact staged tree unchanged, including canonical generated bytes.
+The production HEAD/index and held root compiler inputs remain unchanged; no
+main update, release or application adoption was made.
+
+Fresh R300 has 33 accepted host cases under its original work, resource gates
+and timeouts. Its observer and native processes disappeared without a recorded
+verdict for case 34. The original results are preserved. R312's corrected preflight
+passes all 33 original results and the same complete build. Its detached runner
+is now executing the remaining 17 unchanged, beginning with the actual Fortuna
+test. No completed result is inferred for the interrupted attempt.
+Do not infer full50 completion or admit the waiting GPU investigation yet.
+Git-tree and exact-blob comparison
+also confirm that the existing R180 3DS tester ZIP already contains the current
+game/audio/controller implementation; a redundant ARM rebuild is not needed.
+Physical New 3DS stereo/performance, old-model mono fallback, audible playback
+and full campaign validation remain open. The full rendering/3DS goal is active.
+
+R310 completed all 25 SPIRV-to-MSL translations and descriptor extractions.
+The prepared SDK candidate passes 100 negative descriptor controls and exact
+inverse source checks; 19 programs match the previous accepted MSL byte-for-byte.
+Its eight-thread stream recipe now matches the shader and staged SDL dispatch.
+Temporary source-only commit e17b83f1079a40eee8d412bb0355a6bb395e90c6 / run
+38094226540 passes all 50 Metal 3.0/macOS13/iOS16 SDK jobs. Independent download
+audit accepts all 100 actual compiler/link terminals and every source/entry/library
+pin; maximum observed compiler-tree residency is 827,658,240 bytes. That profile
+does not prove the application's existing older deployment compatibility.
+Commit a91cd4d2bdc02879c6929101f4b4d4ed3815756c / run 38101859976 passes all
+50 jobs for the same 25 programs at existing Metal2.3/macOS11/iOS15 profiles,
+retaining O3, warnings-as-errors, strict math and the original resource monitor.
+Independent download audit accepts all 100 actual compile/link terminals, exact
+sources/entries/libraries and residency limits; maximum observed compiler-tree
+residency is 817,750,016 bytes. The isolated component now references these new
+library receipts and the current complete source manifest, preserving historical
+inputs separately. Full factory/source-graph preflights and 606 offline bundle
+checks pass against the actual new fifty compiler outputs. These do not launch
+a GPU or qualify native application linkage, shader pipeline creation, output,
+frame cost, history/ordered curved paths or physical testing. No production
+adoption, main update or release was made.
+
+October10 root-solver scheduling follow-up: source-only commit
+a57e6f83058522980307101f5e50f3cb749f8be5/run38086865365 passes all42
+original DXIL/SPIR-V jobs. Independent source/closure/compiler/flags/resource/
+binary audit accepts every output, inventory
+SHA256FE8E10FFEF983E4639BF89B8312802B9EFE3C47AADE5B6E2309827ADCFB81B0A.
+Forty binaries remain byte-identical to R257; only the two stream-root binaries
+change. The actual SPIR-V declares LocalSize8,1,1. This replaces one expensive
+64-thread group with eight8-thread groups for a64-query batch, without changing
+scratch bounds, optical equations, original work, query order or deadlines.
+
+R309 keeps the matching owner scheduling constant private: no public header,
+structure or API change is required. Inverse checks recover both complete
+original owner sources, and all query counts1..64 retain every original query.
+The full original native fixture is freshly compiled against the current
+audio declarations: R288 legitimately changed a fixture-only audio header, so
+the cached fixture cannot be silently requalified by refreshing its old pin.
+The old header/source receipts and failed GPU runs remain intact. Two unrelated
+cached renderer units and original core libraries remain explicitly historical;
+this candidate is not a current full-app or3DS build. All six actual native
+assemble/compile/archive/audit/link operations exit0 without a resource stop.
+The fresh owner compile peaks at555,356,160 sampled private bytes; the fresh
+whole fixture compile peaks at1,733,099,520, with its entire730-file compiler
+closure checked against the original729 inputs plus the new stem declaration.
+Three short assemble/archive/audit operations have no sampled private peak;
+complete memory-measurement coverage is not claimed.
+
+Actual native build receipt
+SHA2564CE2E200AD2325F4CD71A1EA977B1FA1628EA7293583DB0267A7A1F5E41564A1
+and final executable
+SHA25606AD6FF21566180FBFBB5838F2A0E68B06AF2D56B569336D3F75039E8564C822.
+Independent final-PE inspection accepts all50 full shader payloads, including
+all42 new CI outputs and eight unchanged legacy arrays, checking exact bytes,
+read-only sections, symbol uniqueness, alignment and bounds. No GPU has been
+launched from this candidate. Read-only preflight accepts all1,368 held build
+inputs. The actual live R300 owner refuses GPU admission before any full50
+aggregate is read; original GPU work/deadlines and resource gates remain intact.
+
+GPU output and the original reflection completion deadline still need testing;
+compiler success does not establish a performance fix. Root runtime/shader
+sources remain unadopted while the live R300 suite holds them. No main update or
+release was made. Fresh R300 has28 accepted cases, including Original Attack
+Carrier and death source routes; the other22 remain pending under the original
+work, inputs, timeouts and resource gates. The complete goal remains open.
+
+October10 empty-scene Metal follow-up: R307 adds actual dedicated empty-caster
+shadow and analytic-surface reflection pipelines. Empty scenes bind an ordinary
+buffer instead of an acceleration structure; they neither construct a dummy
+triangle nor submit an unbound/zero-geometry acceleration structure. The complete
+water, mirror, sky, colour and surface-layer programs remain in the reflection
+specialization. Resident empty-scene metadata and real buffer bounds are checked
+before submission. Both new pipelines are retained and retired with their owner.
+
+Source-only commit ccec2598db0d69453b100dbe514ae730dfa68f8a,
+run38086083559, passes macOS job114312754703 and iOS job114312754614.
+All twenty source checks pass; both SDKs compile the whole ObjC++ producer and
+compile/link all four complete normal/empty runtime shaders with the unchanged
+strict native compiler settings. Independent full source/tree/header/runtime/
+artifact audit passes, SHA25655296B5AA0BCB9F50567A5F60084FA9BB9A0924D2AF3A9E52AD014B4ECAC704F.
+All eighteen native operations retire with exit0 and no resource/observer stop.
+The two short empty-shadow link operations have no sampled resident-memory peak;
+full resource-measurement coverage is therefore NOT claimed. The normal shadow
+and reflection AIR/library bytes remain identical to R306 on each SDK.
+
+This is compiler/link acceptance only, not actual empty-scene GPU output, full
+history/ordered curved paths, app linking, frame cost or physical-device proof.
+No release or main update was made. Root Metal compiler sources remain unadopted
+while the independent fresh host suite holds them. The full rendering/3DS goal
+and its original correctness/performance requirements remain open.
+
+Fresh R300 additionally accepts case26/Original Corneria source route, exit0,
+sampled private peak26,464,256 bytes and no resource/observer stop. Terminal
+SHA25660299053F569857B5E9DD86C2CBD77BCA8A75470B6A345E9F5E38F3FE4172AF6.
+The same verified live suite owner remains active; the remaining twenty-four
+cases still require actual execution under the original gates and inputs.
+
+October10 calibrated Metal liquid follow-up: R304 implements current native
+water colour, hidden-world colour and camera-space surface normal/depth layers
+in one retained SDL allocation. Host/runtime uniforms are extended together
+to416 bytes, with source colour at384 and layer metadata at400. The full
+20/24-byte canonical per-pixel prefix is overflow-checked, allocated and bounded
+against actual MTL buffer length. Completed output publishes the same legacy
+RGBA row pitch plus the canonical layer descriptor; capacity accounting counts
+all layer bytes. Layer requests without validated native calibrated source
+colour refuse before allocation/submission. Singular transforms are rejected.
+
+Water uses the canonical shared liquid geometry with syntax-only Metal
+adaptation, entering/exiting refraction and total-internal-reflection handling,
+opaque submerged receivers, virtual bed, transmission, caustic visibility,
+linear Fresnel/specular response and nested-mirror water transport. Hidden-world
+water does not replace primary opaque models; non-liquid surface data and
+off-ground world pixels are explicitly cleared. Native mirror/gold ground
+retains an authored diffuse base independently of reflection strength, and
+primary calibrated native model lobes are independent of nested-model transport.
+
+Source-only commit dc6e051858c68bb0260660f79a7ac51b764a1665,
+run38084671566, passes both whole native SDK producer/runtime-library jobs
+114308598312/macOS and114308598100/iOS. All seventeen source assembly/contract
+checks pass; the original thirteen checks remain with the intentional extended
+ABI. Independent exact source/tree/header/runtime/artifact audit passes,
+SHA2563B23B0B21924A12DAE9DBC0CE664C45EE69A21DB96D0A8062757F805CFE1064B,
+including owned-memory samples for all ten actual native compiler/link
+operations. This is compiler/link acceptance only, NOT GPU optical output,
+full reflection history/ordered curved paths, full app linking, frame cost or
+physical-device acceptance. Root Metal compiler inputs remain unadopted.
+
+R305 prepares actual canonical CMake source generation and dependency-driven
+regeneration for both runtime headers, using both full colour inputs and the
+full liquid helper. All eighteen local checks pass, including a real CMake/Ninja
+NONE-project configure/regeneration against temporary public input copies and
+byte-exact full runtime assembly. That is build-source integration only, not
+an app/compiler/GPU result. Source-only commit
+aa68cde99aa0c3fd0b36bebf80c0f03270e94d90/run38085007909 fails both Apple jobs
+before native compilation: Windows-generated held helpers use CRLF, while
+Python's Apple-host default generation emits LF. The existing byte-exact check
+correctly rejects that mismatch. Original full failed run/logs are retained;
+failure receipt SHA2562BEE79A2D836F0B5CF21590267BE26733E23397C73C8CB8B0D809D18D01BD72B.
+No compiler/GPU acceptance is inferred from that failed source preflight.
+R306 makes both generator CLIs explicitly emit the held CRLF format on every
+host, with no equation or shader change and without weakening byte checks.
+All eighteen checks pass locally and on both Apple jobs. Source-only commit
+d4259bd908b1da8028fabeba88a17038d6de3f02/run38085237173 passes both whole
+producer/runtime-library jobs114310271229/macOS and114310271064/iOS. Independent
+full artifact audit SHA256E05AEEFF687F7FA85F4897632799BC2FC51A6E07F4F39EB5E6EEC6322140C262
+passes, with owned-memory samples for all ten native operations. Actual whole
+producer object bytes, both AIR inputs and both complete libraries on each SDK
+remain byte-identical to accepted R304. This qualifies deterministic build
+generation without changing those optical programs. Full app source adoption,
+linking, GPU/physical output, history/curved paths and frame-cost acceptance
+remain open; no main/release/compiler-input update is inferred.
+
+Fresh R300 now has twenty-five accepted cases: the full parallel Original
+session exits0 with sampled private peak39,452,672 bytes and no resource/monitor
+stop, followed by the Original capabilities case and full Original stage sweep.
+The stage sweep exits0 after663.81 seconds, sampled private peak41,590,784 bytes,
+terminal SHA25666A414C05D39A32A59D634E938A6DEECDB9D5FB1A0733F086D87C0FD1A1C8D5D.
+Case25/Original Fortuna source route also exits0, sampled private peak25,481,216
+bytes, terminal SHA2569ACC4C7EB02DE7960A6AE977C6B2263101AFA66EF31B748DA13A86ADC9B47A8E.
+The remaining fresh cases are pending under the original inputs, work,
+properties, timeout and resource gates. No fresh50 completion is inferred.
+All original failure records and
+main/release/HEAD/index state remain unchanged; the full goal remains active.
+
+October10 native Metal completion/cleanup follow-up: R303 adds nonblocking
+completion polling and try-cleanup to the entire native optical producer,
+plus output-image capacity accounting that excludes source/AS/scratch and
+available VRAM. Submitted work without a fence retains every native allocation;
+a later empty same-queue marker certifies completion without replaying or
+cancelling the consumed command. Blocking cleanup certifies all three slots
+before releasing any storage. A failed later wait cannot partially release
+an earlier slot; failed completion retains the owner/device for explicit
+retry and invalidates borrowed outputs. Failed destructor completion retains
+GPU-visible storage rather than allowing ARC to free it. Ordinary slot reuse
+retains its original wait behavior, now with missing-fence recovery.
+
+Temporary source-only commit442a350f9d92d22d13f1a94ce6cf5358c40f903d,
+run38083647038, passes both actual SDK producer/full-runtime-library jobs
+114305511719/macOS and114305511915/iOS. All thirteen source-contract checks
+pass, retaining the ten previous checks. Independent full artifact audit
+passes, SHA2564C1BB3A74B0100902CF23ECB62FA5B1031AB660A07CE6F4154EE8FF904235499;
+all ten native compiler/link operations have owned-tree memory samples.
+All four actual shader libraries remain byte-identical to R302. A separate
+strict-O3/Werror/no-fast-math C++ fixture executes the unchanged six native-owner
+methods against deterministic SDL/opaque-resource doubles. All fifteen cases
+pass, including pending polling, later-slot wait failure with no partial
+release, missing fence/marker submission, idle failure/retry and no replay.
+Receipt SHA256595FE03ED2787BEB74E81A1277168EBFEDFD983068B793C22B8EABD1F8291E75.
+Those CPU doubles prove control flow only, not actual Metal/GPU completion or
+runtime fault injection, ARC lifetime on hardware, full guide/history/curved
+paths, game link or frame-time/physical acceptance. Root Metal compiler sources
+remain unadopted while the independent fresh host suite holds them.
+
+R300 now has twenty-one actual fresh accepted cases, including the complete
+Original game session; case22/parallel Original is running. Case21 terminates
+with exit0, no resource/observer stop and sampled private peak38,318,080 bytes.
+No completed fresh50, GPU rough-deadline repair, ARM/physical performance or
+whole-goal result is inferred. Original failure records, HEAD/index/main and
+release state remain unchanged. The full rendering/3DS objective stays active.
+
+October10 native Metal optical transport follow-up: the isolated entire
+producer adds negotiated legacy/linear/sRGB optical colour, resident environment
+cube sampling with cross-face bilinear taps, calibrated primary/nested conductor
+model response and compensated native banked ground depth. Native mirror/gold/
+copper transport retains all eight rough-lobe samples and four nested bounces;
+legacy default arguments and secondary limits remain. Host/MSL reflection
+uniforms agree at384 bytes, with explicit encoding/model/cube metadata. Resident
+cube bounds include the actual native allocation and the full appended payload;
+no CPU atlas/cube upload is introduced. Unsupported liquid guides/history and
+ordered curved paths still refuse rather than claiming incomplete success.
+
+R301 actually fails both native producer compiler operations at the missing
+public environment descriptor header. Those exit1, non-resource-stop terminal
+receipts and logs remain in that attempt. R302 retains the whole Metal producer,
+API, shaders and all ten source-contract tests unchanged, adding only that
+complete public header to its tracked145-header/162-file source-only closure.
+Authorized commit875b2553dfda80c41d720db1ace46edde7112552 and run38083221881
+pass both actual SDK jobs114304253121/macOS and114304253260/iOS. Independent
+artifact audit verifies the entire source tree, full producer Mach-O object,
+both complete runtime shader libraries, strict original compiler/FP/deployment
+arguments and all ten actual native compiler/link operations. All operations
+have sampled owned-tree memory measurements. Audit SHA256
+7A18A43BA3F144E8205CA256309F166E4046EC88842A03B72A9A75481DE5D314.
+Both actual shadow libraries remain byte-identical to R297. This is SDK compiler
+acceptance only, not GPU numerical, frame-cost, full25, application/guide/history,
+physical-device or full-goal acceptance. Root Metal compiler inputs are not
+adopted while the independent applied-root host suite is running. No main,
+release, ROM, private asset or credential is published.
+
+The freshly built R300 suite has twenty actual accepted cases, with Original
+game-session case21 currently running; this is not a completed fresh50 result.
+Native owner174276/birth2026-10-10T20:05:38.1160506Z is observed alive. Existing
+successful R286 casewise evidence and the failed R287 GPU deadline are retained;
+neither is reclassified as this fresh-suite or whole-goal acceptance. Root HEAD
+and index remain unchanged. The full rendering/3DS objective stays active.
+
+October10 applied-root handoff and native Metal camera range: the complete
+unchanged50 independent host cases finish successfully in R286. Cases1..32
+remain the original actual R231 completions,33 is R249,34..41 are R271 and
+42..50 are actual R286 completions. This is not retrospective acceptance of
+those failed whole runs or a fresh single-run50/FPS/console claim. Aggregate
+SHA256 C1CE632BD6895225C50F1AF46BF49CFA5332D03B09BB4066F333DDC013DB376F.
+The subsequent unchanged R287 full GPU fixture genuinely exits1 at its
+original rough-reflection completion deadline; it is not resource/observer
+stopped. The sharp source phase completes but the rough phase remains
+unaccepted. That failure and its native/diagnostic records are preserved.
+
+Actual full50 evidence and native-owner retirement then permit R288's entire
+reviewed17-source handoff:12 changed files are applied through apply_patch and
+five previously matching files remain identical. Whole-source and217-evidence
+verification passes. Source application is not fresh-build/runtime/ARM or
+physical acceptance. R289's fresh-build preflight fails before compilation:
+the reviewed workflow is a noncompiler input, so it cannot be counted as the
+twelfth compiler input. R298 separately verifies all11 compiled sources plus
+that exact whole workflow, retaining all24 targets/50 tests and adding five
+source-projection refusal controls. Its actual configuration succeeds, then
+verification fails before the24-target build because the checksum header is
+a build-time custom-command output. Both failed attempts remain failures.
+R299 uses a new empty build destination and the unchanged original declared
+checksum generation, all16 generated inputs, full24 targets/50 registrations,
+strict compiler and original resource observer. Its actual configuration,
+declared checksum/dependency generation and complete24-target rebuild all
+retire with exit0 and no resource stop. All16 generated inputs and original50
+registered command/property/timeout recipes match. Actual whole owned-tree
+private peaks are37,953,536/380,047,360/483,647,488 bytes for those three
+operations. Receipt SHA25694ADF57AD449658B5E9FE466C9BFF8126136612E6AB48047A5ADE36EAF76FD46.
+R300's separate fresh-full50 executor first refuses prelaunch while that actual
+complete build receipt is absent, then its actual preflight passes after the
+build retires. The fresh applied-root runtime suite is starting; no earlier
+test result is reused as a pass of those newly compiled executables.
+
+R297 adds optional explicit primary camera-depth planes to the entire isolated
+native Metal shadow and packed-reflection producer. Invalid/collapsed native
+float ranges refuse before GPU allocation; primary models and ground use the
+submitted +Z camera depths, while every secondary light/reflected/refracted/
+nested-mirror ray retains its original independent range. Host/MSL layouts
+match at352 shadow and304 reflection bytes. The previous five source-assembly
+checks remain, with two camera-contract checks added. Temporary source-only
+commit7d1e05ecf9f580006d571b79304f499452db34d6, run38081374001, succeeds on both
+Apple SDK jobs114298815140/macOS and114298815034/iOS. Independent whole-source,
+native Mach-O/runtime shader/library, strict argv/identity/terminal/resource
+audit succeeds, SHA25614DD85C3D7A34C3E302F4083500B1033D94F07699AAD9525B4CAE4F0DBAE7248.
+The very short iOS reflection-link operation has no sampled memory peak;
+measurement incompleteness is explicit, not a zero-memory claim. No Metal
+GPU/guide/history/environment/curved-path/full-game/FPS acceptance or root
+Metal source adoption is supplied by those compiler artifacts.
+
+The original R266 full25 native pipeline job ends cancelled after six hours
+without a complete native pipeline command terminal. Its retained macOS output reports
+actual nil-pipeline failures for optical/optical-stream/jets/jets-stream and
+stops after beginning witness; no complete native command terminal or all25
+runtime acceptance exists. Actual runner cleanup explicitly terminates the
+orphan probe PID4142 at20:00:54.3502810Z and Python PID3351 at20:00:54.6996590Z.
+That is observed forced retirement, not native exit0 or successful pipeline
+creation. The completed iOS compile-only job is not GPU proof. Original
+artifacts/work sizes/precision/deadlines remain untouched;
+the full rendering/3DS goal remains active and no release is published here.
+
+October10 native Metal reflected-material integration: R296 adds real resident
+kind2/kind3 coverage and canonical reflected texture colour sampling to the
+complete native Metal producer. Primary/reflected/refracted/nested-mirror queries
+share the same bounded resident atlas view; opacity precedes colour, kind2
+solids are not restyled, and kind3 samples receive the canonical input decode,
+one style application and submitted output encoding. Native material/atlas
+CPU uploads are absent. The private reflection uniform is consistently288
+bytes with its native coverage view at offset272. The original R295 shared
+candidate query, shadow kernel and entire shadow producer remain byte-identical;
+both SDK shadow metallibs have identical actual bytes too.
+
+The source-only161-file candidate, branch
+codex/metal-native-reflection-materials-r296-20261010,
+commit2dd420c53bded906c0ca7cbe7fa066d0b8f78fc5, run38080314058, completes both
+actual whole-producer/two-runtime-library SDK jobs successfully:
+114295699958/macOS and114295700013/iOS. Five source-assembly tests and original
+complete-source/refusal controls pass. Independent full remote tree/source/
+header closure, actual Mach-O object, generated header/runtime source bytes,
+native incarnation/terminal/resource/strict argv and complete library audits
+pass, receipt D:/SFE-validation/r296-metal-native-reflection-materials/sdk-audit.json,
+SHA256999AA4DC1F77A8DCC9E20B090FBA0536D83EDF7A82BA11243896E9C552029D9D.
+All ten native compiler/link operations have sampled process-tree peaks; that
+is not GPU or frame-cost proof. One first local source assertion counted five
+adjacent coverage arguments instead of the four colour calls plus the separate
+candidate-query macro; its failure is recorded, and the corrected assertion
+checks all four calls, the definition and the exact fifth macro separately.
+No original shader/test/work/precision/resource requirement is reduced.
+
+Full calibrated optical encoding/primary range/environment cube, liquid guide
+layers/history/ordered curved paths, empty-caster/nonblocking lifecycle/native
+application link, actual GPU/game/numerical/performance and physical acceptance
+remain open. Unsupported calibrated liquid layers still explicitly refuse.
+Production/root compiler inputs/HEAD/index/main/releases remain unchanged;
+these additional compiler checks do not complete the original full25 suite.
+R286 resumes original case46/EX models after headroom is restored: CTest
+PID110536/birth2026-10-10T19:32:52.7636614Z and actual native models checker
+PID19112/birth2026-10-10T19:32:52.9800952Z are live at the read-only check.
+Cases46..50/full50, R287 original GPU handoff, R288/R289 source/fresh build,
+ARM/native and physical-console gates remain unaccepted. R266 remains live
+and untouched; neither timeout nor elapsed time is treated as retirement.
+
+Subsequent actual R286 terminals accept original cases46/EX models,
+47/EX native model,48/EX effects and49/EX menu composition, each exit0 with
+no resource/monitor failure. The latest49-case count is not full50 acceptance.
+Case50/EX landscape has not launched at the subsequent check: actual host
+owner188840 and admission owner182436 remain live, with5.690GiB available
+physical memory below the unchanged6GiB native launch floor. No process is
+killed or restarted, no test is omitted, and the original helper remains
+responsible for launching the final case when its complete admission checks
+allow it. The original R266 remote native job is likewise still in progress.
+
+October10 native Metal colour and whole-producer continuation: R293's separate
+colour adapter preserves the canonical calibrated/scene-colour equations and
+applies texture styles once after opaque selection. Its actual macOS/iOS
+compile/link run38077943698 succeeds, commit239e10e09e38231beae9c86835584588bd2143e1.
+The independent complete-source/terminal/strict-argv/library audit accepts only
+that additional component, SHA256
+B293D4FC1191A0C1E8DD0BE6099D8DDD3C359F2EA2888B13A96EFBBFBA573F1D.
+This is not colour-output/GPU/traversal/game or complete-producer acceptance.
+
+R294 connects the previously tested exact opacity decoder to native Metal
+candidate queries and tracked resident RGBA records/atlas for shadows. Native
+reflection still explicitly rejects that ABI; empty-caster and full reflection
+colour/history/output integration remain open. The complete159-file public
+source-only branch codex/metal-native-shadow-producer-r294-20261010,
+commit9373ba9faea07506085a9d5479970b60988e86cc, run38079565884, genuinely fails
+both whole ObjC++ compiler jobs at unchanged macOS11/iOS15 deployment targets.
+Both errors are the existing unguarded triangle vertexFormat setter, introduced
+in macOS13/iOS16. Original terminals and compiler diagnostics remain preserved
+under D:/SFE-validation/r294-metal-native-shadow-producer/sdk-evidence; no native
+runtime kernel or producer acceptance is inferred. Its pre-publication privacy
+scan initially refused the byte-identical public SDL fictitious-user path
+example; the exact single example is subsequently allowed after the original
+whole-header hash check, while other privacy/binary/source checks remain.
+
+R295 is a distinct follow-up, not a rerun or replacement of that failed record.
+Both setter calls are availability-guarded; earlier descriptors retain their
+float3 default/16-byte stride. Minimum targets, Werror, strict FP, native
+observer/resource guards, full producer/header closure and both entire runtime
+kernel recipes remain unchanged. Source-only branch
+codex/metal-native-shadow-availability-r295-20261010,
+commit162da804af4ba4b76cacc998bcba96fc254663f1, run38079787291 now succeeds on
+both SDKs: macOS job114294145050 and iOS job114294145131. Independent exact
+remote-source/header closure, whole ObjC++ Mach-O object, generated shader-header
+and complete runtime-source byte order, native terminal/incarnation/resource/
+strict-argv and both actual shader-library audits pass. Acceptance receipt:
+D:/SFE-validation/r295-metal-native-shadow-availability/sdk-audit.json,
+SHA256068ED91E69A1FD3087EAC122436E868CCB7A947E3DC89D8E3278994A1AD34B48.
+The short macOS reflection link has no sampled owned-tree peak and remains
+explicitly unmeasured. No main/release/production adoption, native interop
+application link, GPU execution, colour/parity/history or frame-cost acceptance
+is inferred from these additional whole-producer SDK checks.
+
+The unchanged original 3DS cases44/EX continue-yes and45/EX continue-no both
+complete with exit0 and no resource or monitor failure. Cases46..50 remain;
+the live continuation is waiting for original native launch headroom, not
+reported as complete from45 cases. R287 still requires the actual full50
+aggregate and owner retirement before its unchanged full GPU fixture. R288
+whole source handoff/R289 fresh24-target/full50 build, ARM/native and physical
+console acceptance remain deferred. The original live R266 driver operation
+also remains untouched; no restart or completion from elapsed time is inferred.
+
+October10 native Metal material-coverage continuation: the production Metal
+producer still rejects the native RGBA material ABI. A separate shared scalar
+decoder now implements native64-byte kind2 solid/dither and kind3 RGBA/indexed
+atlas opacity, with actual bound-word/payload checks. Native palette index0 can
+be opaque black; only fully opaque alpha casts a ray. It deliberately performs
+no colour styling, sRGB conversion, traversal or reflection evaluation.
+R290's initial strict C++ compile genuinely failed on two misleading-indentation
+warnings in the copied existing fixtures. That failure is preserved. R291 fixes
+only those two fixture line breaks and actually compiles, links and executes
+the identical decoder under O3/Werror/no-fast-math/contract-off. All original24
+opacity variants and4,217,088 independently computed opacity samples pass,
+including opaque-zero, fractional-alpha cutouts, bounds and nonfinite controls.
+CPU receipt SHA25680E9A964856F2AEEB6DE5ED586F790EEE4AAE9773C3C1B6490C9497AB788ED91.
+The short linker/runtime peaks are unmeasured, not zero-memory/performance proof.
+
+With the user's source-only shader-CI authorization, R292 publishes only17
+allowlisted public text files on codex/metal-native-coverage-sdk-r292-20261010,
+commit2faee21e18fd03995a8969e90053d97fd0f1f907. This is one explicitly additional
+coverage kernel, NOT a shortened replacement for the original complete25
+producer/suite. Its source manifest covers every16 component input files; eight
+missing/duplicate/escaped/changed/scope mutation controls refuse. The original
+native SDK observer, flags, minimum SDK targets, process-incarnation checks,
+launch/running memory floors and resident cap are unchanged; only its source
+qualification callback checks the complete new component. The probe adds a
+query-count guard before reading its query buffer. Two initial pre-publication
+source qualification errors (an observer hash literal typo and the omitted
+existing fixtures include search path) were repaired before any native launch.
+Run38077282939 completes both real compile/link jobs successfully:
+114286799138/macOS and114286799269/iOS. Independent remote-commit/tree, actual
+terminal/native incarnation/strict argv/SDK/source/entry/binary artifact audit
+accepts this scoped SDK compilation:
+D:/SFE-validation/r292-metal-native-coverage-sdk/sdk-audit.json,
+SHA25612AA07A5517CA44315D6E82741D9A1CBC67A4C0061665300E5B0FEF1EF8A1196.
+The iOS link has no sampled owned-tree peak and remains explicitly unmeasured.
+No GPU execution, complete game producer ABI, colour/traversal/history parity,
+frame cost, production adoption or release is accepted by these checks.
+Root/main/compiler inputs/HEAD/index/assets/releases are unchanged. The original
+live R266 native driver test remains untouched and still requires its own actual
+terminal/evidence before the separately compiled R285 runtime probe.
+
+R286 additionally completes the unchanged original EX stage sweep/case42 and
+EX death source route/case43, both exit0 without resource or monitor failure.
+Original case44/EX continue-yes is live; full50 is not yet complete. R287 remains
+waiting for that full50 aggregate and actual owner retirement before the
+unchanged full GPU fixture. R288 whole17-file/12-change source handoff and R289
+fresh24-target/full50 build remain deferred, not applied. Fresh-root, ARM/native
+and physical-console acceptance gates remain required.
+
+October10 offline SDL composition continuation: R284 connects the already
+compiled R283 exact-workgroup opt-in/nil-pipeline refusal to the source-built
+Metal component too. The complete104-file public tree changes only the source
+build module, its CMake fixture/harness, manual workflow and README. The original
+shader sources, factory/provider, metadata lifetime implementation, observer,
+workgroup sizes, bindings, strict floating-point recipe and resource guards are
+unchanged. The actual offline graph now requires the private opt-in compile
+macro and exact patched SDL source; both CPU-only consumers are linked, and
+macOS must execute the original full25/625-refusal/idle-owner and metadata tests.
+Actual local112 source composition checks/six mutation refusals pass:
+D:/SFE-validation/r284-metal-source-built-exact-workgroup/integration-controls.json,
+SHA256 5597661519F620378C7AC34518368A0517CCAE7CD19F122BE5521F667F7EEDEC.
+The unchanged offline adapter also passes606 complete50 retained SDK metadata/
+byte/context/refusal checks, SHA256
+AFA6DC03BE3A5D27EB0C41FFDB750A025645BE566CFB7F515622D11A65B09B12.
+Temporary source-only branch codex/metal-source-built-exact-workgroup-r284-20261010,
+commit47a6e016fb2617309e30d82ebb97fc6d153b6ff1, dispatches run38073203287.
+Actual jobs114274702934/iOS and114274703109/macOS now complete successfully,
+freshly compiling all25 original shaders per SDK before the patched native
+component/consumer links. No previous compiled artifact substitutes for this
+source graph. The independent terminal/source/strict target/payload/patched SDL/
+metadata audit now accepts the actual complete50 SDK payloads and both real-SDL
+native links, including actual macOS full25/625-refusal/idle-owner and metadata
+ownership tests: R284/native-payloads-audit.json, SHA256
+4F7E0F2EC7D4B4BBD1F2935C0097F56AE877162CFCF1F6AED40384675F25E4B3.
+Original resource guards are unchanged;33 short native operations have no
+sampled process-tree peak and remain explicitly unmeasured, never zero-memory
+or performance acceptance. Earlier stricter R281 resource audit failures stay
+unaccepted/preserved. No GPU is launched; the separately live R266 driver owner
+remains untouched. Actual pipeline/dispatch/numerical/frame-cost, game producer/
+adoption and physical gates remain.
+Main/root compiler inputs/HEAD/index/releases are unchanged. The publisher's
+first pre-publication attempt correctly refused a generated Python bytecode
+cache; only that exact candidate cache was removed, no user/source artifact.
+R271 also actually accepts case41/EX capabilities with exit0, no live/resource/
+monitor failure; terminal SHA256
+CE0FBED861B765D87138C77036314FE8573234596AA7FF9C954366FDB6A79B8D.
+The R271 host and R274 GPU-admission wrappers have now genuinely retired with
+exit1, not an observation timeout. All cases1..41 independently completed, but
+the next launch was refused by the old process-ID reuse predicate. The original
+full50 aggregate does not exist; R274 records admission-failed/no GPU launch,
+SHA256 3368CDC9896DAA7F44B6C2D05727AB64BA68164C8B7184F5D93EADC8FD8D49EA.
+The historical PIDs are absent at the later read-only query; the old error does
+not identify which was reused at the failure instant. Preserve both failures.
+R286 now runs a separate continuation for unchanged cases42..50, checking all41
+actual prior terminals/recipes/logs against the same held24-target build. Only
+the old owner-PID predicate is corrected: a later fully identified foreign
+process is unrelated, whereas unknown/original/restarted owners still refuse.
+Thirteen read-only controls pass, including an actual unrelated queried process;
+no foreign process is signalled. Native cases, timeouts, private caps, global
+memory floors, compiler inputs and scoped-native serialization are unchanged.
+Remaining nine cases/full50 aggregate, GPU handoff, fresh applied-root/ARM/native
+and physical3DS gates remain open; no source adoption or full50 success yet.
+
+The actual41-case preflight passes before native launch. JSON trailing-zero
+timestamp differences are compared at full100ns UTC precision; one-tick changes
+refuse. R286 wrapper PID188840 has actual Get-Process birth
+2026-10-10T18:22:44.6456575Z, helper SHA256
+94CDACE2098B0AB69575347F0FA0B8DF2C90CC708B28EF488682D4FCDB4820DA.
+Original case42/EX stage sweep is live, CTest PID170832 and native PID143996;
+their output is not yet a completion result. R287's admission owner PID182436,
+birth2026-10-10T18:26:03.7102345Z, waits for complete50/retirement and preserves
+the original full GPU fixture, resource guards and1187-input/all50-array build.
+Actual preparation checks pass: full native-helper inverse, live-owner refusal,
+four identity mutants and incomplete41 refusal. No GPU is launched.
+R288 rehearses the unchanged whole17-file/12-change 3DS application plan and
+actually defers Prepare with exit3 while the host owner is live; no source write.
+R289's complete24-target/26-argument/50-recipe/863-dependency/16-generated-file
+controls pass, including exact41 actual command transports, changed-header
+refusal and actual unapplied-root exit3/no build writes. Component receipt:
+D:/SFE-validation/r289-retired-owner-applied-root-build/component-controls.json,
+SHA256 5B59C90168E7E6A88E6768346F6172068DA1EC1686A7757801A9FC65627B9D68.
+This prepares the safe follow-on route, not source adoption, new host/ARM/native
+runtime or physical acceptance. Earlier R276/R277 routes remain preserved.
+
+R285's actual SDL full25 constructor probe now compiles and links against the
+complete component/patched real SDL for both SDKs. Temporary source-only branch
+codex/metal-sdl-pipeline-probe-r285-20261010, commit
+458ce49b75a165d580b0f03aaad66b387f3a7f11, completes run38074427875 successfully:
+jobs114278307498/iOS and114278307702/macOS. It uses the same payload selector,
+joined creation helper and original workgroups/resources, retains all pipelines,
+preserves caller metadata, attempts all25 after individual failures and separately
+initializes the actual history owner. Nine source/deferral controls (including
+eight mutation refusals) pass. Source-only CI never executes this probe. The
+independent actual terminal/source/strict target/read-only payload/patched SDL/
+metadata audit accepts both native links and the unchanged actual macOS CPU
+full25/625-refusal/idle-owner and metadata checks: R285/native-component-audit.json,
+SHA256 DC03766B3E2595751EC79BB31AF6DE964788F3D6760A99818758DA9D5435E544.
+Short CPU consumer peaks are explicitly unmeasured, never performance or zero
+memory acceptance. R285 reuses the original50 R260 libraries; R284 separately
+proves fresh source compilation. No GPU, game adoption or release. This probe
+does not replace compiled workgroup-capacity, dispatch, numerical or frame-cost
+qualification. Before any runtime, require
+the original R266 authoritative terminal/evidence and actual native retirement,
+exact accepted component inputs and the unchanged native observer/resource
+guards. Source-only CI must not execute this probe; no source check substitutes
+for actual full25 driver, dispatch/numerical/frame-cost or game qualification.
+
+October10 actual SDL constructor continuation: R283 connects the exact-workgroup
+candidate to the full original reflection factory graph through a private SDL
+property. Only the isolated component opts in; default SDL descriptors retain
+their automatic limit. Caller descriptor fields/metadata are preserved in a
+temporary group during joined creation, including borrowed pointer properties
+with original cleanup ownership. A nil Metal pipeline now refuses even when no
+NSError is supplied; it cannot become a falsely usable SDL pipeline wrapper.
+The actual pinned SDL archive patch passes application, idempotence and five
+constructor-mutation refusals, without changing shader math/precision/resources/
+dispatch work. Controls: R283/patch-controls.json, SHA256
+A986821210844900AA5A5FC7523299D6C9A35C6B341FBFC39801A2F3EC895AAB.
+The original full16 factory/full25 variant/strict source preflight still passes.
+Temporary source-only branch codex/metal-sdl-exact-workgroup-r283-20261010,
+commitb64264486913e23d84c3a2bc223f9a0313106ec6, dispatches run38071847635.
+Actual jobs114270684898/iOS and114270685028/macOS now complete successfully.
+Both build/link the complete native component against privately patched real
+SDL, retaining all50 original read-only SDK libraries. The actual linked
+executables contain the private opt-in and nil-error refusal constructor.
+macOS additionally passes actual real property value/isolation/failure/exception/
+lifetime tests, including caller pointer preservation and exactly-once cleanup,
+plus the unchanged full25/625-refusal/idle-owner consumer. Independent source,
+native terminal/tool/target/strict recipe/object/archive/final-binary audit:
+D:/SFE-validation/r283-metal-sdl-exact-workgroup/native-component-audit.json,
+SHA256 23D7F0666C08751DBCA53C53F2C139D7F1A63912811C3238800E988143ACF51D.
+Short native-consumer tree peaks remain explicitly unmeasured, not zero-memory
+or performance acceptance. Original resource guards remain unchanged. These
+changes remain isolated; the separately live R266 GPU test is not replaced or
+restarted. This accepts both native links and actual macOS metadata checks,
+not GPU execution of this candidate, frame cost or game adoption.
+Actual pipeline/dispatch/numerical/frame-cost/game wiring/physical acceptance
+remains open. Root compiler inputs/HEAD/index/main/releases are unchanged.
+R271 now actually accepts case39/EX session, terminal SHA256
+301E1862EAB56A61385D797314AF4BBE6319D8DC322B77CE0CDA0680638F5804;
+Case40/parallel EX session now also passes; its terminal SHA256 is
+9350950715A47AF1151A1CE7FCE42203F48066EA710AA013513756046DCC4DCA.
+Remaining full50, actual GPU handoff,
+fresh applied-root, ARM/native and physical3DS gates are unchanged.
+
+October10 exact-workgroup descriptor continuation: R282 prepares a separate
+Metal descriptor candidate that supplies each original shader workgroup's exact
+64/128/256-thread limit. All25 shader sources, original50 SDK library bytes,
+binding layouts, dispatch sizes, precision and native resource observer remain
+unchanged. The complete probe is reversibly changed only at descriptor creation;
+68 actual source/family/runtime-deferral controls pass. Apple documents this
+property; improvement is an inference to test, not a measured result:
+https://developer.apple.com/documentation/metal/mtlcomputepipelinedescriptor/maxtotalthreadsperthreadgroup
+Temporary source-only branch codex/metal-exact-workgroup-r282-20261010, commit
+f5cf6ba14f1d92a6f5870bc3fcfbca7a1d5ad544, completes run38070727934 successfully.
+Actual jobs114267411626/macOS and114267411844/iOS compile the SDK descriptor
+candidate, embed all25 original libraries per SDK and link the macOS probe.
+The workflow explicitly uses compile-only; no GPU or replacement runtime is
+launched. Independent actual native terminal/target/resource/source/binary audit:
+D:/SFE-validation/r282-metal-exact-workgroup-proof/sdk-descriptor-audit.json,
+SHA256 46802320E8614A2F84871996463E0E36C59DB1849055F27BFE2CF7AFCB05B0BE.
+The audit initially rejected an incorrect section-count-as-protection field;
+actual Mach-O headers confirmed max/init protection5 before correcting that
+reader field, not the binary or read-only requirement. All four actual native
+operations have positive sampled tree residency within the original caps.
+This is SDK/API compile/link acceptance only. Actual full25 Metal pipeline,
+dispatch/numerical/frame-cost, application/SDL wiring and physical gates remain
+open. The original R266 runtime owner is still independently live; its eventual
+result must be preserved before any replacement comparison. Main/root compiler
+inputs and the original live processes are unchanged; no release is published.
+R271 has now actually accepted cases34 through38, including original effects,
+menu, landscape and EX HUD. The unchanged EX session case39 is running; full50,
+retired-owner/GPU handoff and fresh applied-root/ARM/physical3DS gates remain.
+
+October10 end-to-end offline source-build continuation: R281 adds an explicit
+native build mode to the previously verified R280 graph harness. The complete
+101-file public source tree changes only the harness, manual workflow and its
+description; all25 Metal shader sources, actual factory/provider/header inputs,
+CMake target/build adapter, strict flags and original SDK/process/resource
+guards remain identical. Fresh unique builds must compile all25 shaders from
+source, verify their actual individual compile/library-link receipts, generate
+the full original bundle, and link the original component with real SDL.
+Complete read-only/aligned native object/archive/final-executable payloads are
+checked against those actual new libraries. macOS additionally runs the same
+full25/625-refusal/idle-owner consumer; iOS remains compile/link only. Failed or
+partial SDK attempts and native terminals/logs are uploaded separately so a
+failure is not lost when the full build cannot produce its final archive.
+Temporary source-only commit2c716f2366ceb407882054036af8fac2d481d162 on
+codex/metal-source-build-r281-20261010 dispatches run38068548979. Both actual
+jobs114261068685 (macOS) and114261068691 (iOS) now complete successfully.
+The downloaded native binaries contain all50 newly source-built SDK libraries;
+both real-SDL native links pass, as does the macOS full25/625-refusal/idle-owner
+consumer. Independent payload/link correctness audit:
+D:/SFE-validation/r281-metal-source-built-component/native-payloads-audit.json,
+SHA256 88E0867BC5C993C327A10A15FC589C11127BF89AD107CC8B36F929AA8C50AA9C.
+Its resource-measurement acceptance is explicitly false. The stricter resource
+audits remain unaccepted:31 short SDK library links and one small iOS compiler
+operation have no sampled process-tree peak; the fast macOS consumer also has
+none. Actual process identities and exit0 terminals are present, but a missing
+peak is not zero memory or a performance pass. Original guards are unchanged.
+The R266 runtime owner remains independently live. R271's original36000-tick
+Fortuna case34 now actually passes in5651.91 seconds with exit0, same CTest
+identity and original7200-second timeout. Accepted receipt is R271/cases/
+34-accepted.json; its native terminal SHA256 is
+D7C5596AC03B3D0FB3ED956961BBA93CA459FF454FD311F84ED32E33157C20FF.
+The host continuation owner remains live with16 cases still required; no
+restart, reduced work, timeout/cap relaxation or skipped case is made.
+This does not adopt the game producer ABI, launch a GPU, qualify numerical/
+frame-cost/physical behavior, complete the full host/ARM3DS suite or publish a
+release. Root HEAD/index/main and production compiler inputs remain unchanged.
+
+October10 offline Apple build follow-up: R280 adds a reusable source-driven
+CMake adapter for the complete25 Metal family, preserving the original shader
+sources, factory/provider/public-header inputs and strict native observer.
+All25 compiles are serialized by actual build dependencies. Failed attempts
+remain separate; only verified successful outputs can enter the complete
+read-only embedding. Configured SDK root/version/tool hashes invalidate stale
+outputs, and mismatched cached libraries refuse. No GitHub/artifact API is
+used by the compiler/bundle adapter; the consumer still supplies real SDL.
+Actual local retained50 SDK-output/metadata checks and failure/context mutation
+controls pass606 checks, with byte-identical original generated assembly and
+provider metadata. This is adapter verification, not a new native build.
+Temporary source-only branch codex/metal-offline-build-r280-20261010, commit
+005d9d9dd45d6d06f825311c9eafb3d89246d016, dispatches manual native graph
+configuration run38067922441 for macOS/iOS. Dispatch alone is not acceptance.
+That run identifies real SDK compilers/configures real SDL and all25 serialized
+source-build commands; it does not repeat the successful prior component build
+or restart the separate R266 driver check. Game producer ABI/integration,
+actual Metal pipeline/dispatch/numerical/frame-cost and physical acceptance
+remain open. No root compiler input/main/tag/release is changed. R271's actual
+Fortuna child and R274 handoff remain live; later memory-pressure pauses retain
+the same native identity and unchanged original CTest timeout, not skipped or
+accepted game work. Full50/fresh root/ARM/physical3DS gates remain required.
+
+R280 run38067922441 now actually completes successfully, attempt1. The two
+native configuration jobs114259256556 (macOS) and114259256384 (iOS) pass.
+Independent downloaded-artifact/source/terminal checks confirm both actual
+native CMake operations, original resource caps, all25 compiler commands per
+SDK, complete serialized dependencies, SDK-context invalidation and original
+strict factory/provider/consumer compile declarations. Evidence:
+D:/SFE-validation/r280-metal-offline-build-integration/source-graphs-audit.json,
+SHA256 AD176B0F854CFEC92E71BCA11DD78828C0A719474695D2A090DD806BF47C73CC.
+This accepts both native build configurations, not execution of that new full
+source-built target, game wiring, driver/dispatch/precision/frame cost or
+physical acceptance. The earlier actual component-link results remain
+separate; no compilation success is inferred just from a configured graph.
+
+October10 current continuation: R271's actual Fortuna child186352 pauses at
+15:41:56UTC during global memory pressure, then resumes the same handle/PID/
+birth at15:47:28UTC after the original6GiB headroom returns. CTest101056 is
+never paused and its original timeout remains live. The actual yield log is
+under R271/cases; this is recovery observation, not a complete case/full50 pass.
+
+R274 repairs the GPU handoff to this actual R271 wrapper119084 instead of the
+retired failed R261 route. The exact original complete GPU fixture inverse,
+1187 compiled inputs/all50 linked arrays, actual live-host refusal, four owner
+identity inverses and incomplete33 refusal checks pass. Admission owner176528,
+birth2026-10-10T15:43:26.4244627Z, is actually waiting for full50 and retirement.
+No GPU launch or rendering/FPS result is inferred. Handoff helper SHA256:
+97FE9B5D59B164F6270EBE4FB9080C11FB432BD966ACF3775020EB5B6C693DFE.
+
+R276/R277 likewise repair the complete17-source/12-file3DS application route
+and fresh24-target/50-test recipe to the actual R271/R274 owners. Whole-source
+rehearsal and original configuration/commands/timeouts/generated-dependency
+controls pass; actual Prepare/preflight defer without source/native writes.
+The failed old routes are preserved, not relabeled. Root production source is
+still unadopted; fresh host/ARM/native/physical acceptance remains required.
+
+R275 creates a reusable native Apple CMake component with all16 actual factory
+sites, the complete25 SDK program provider/bundle and real pinned SDL. Source-
+only run38065196621, commitb9db6d2970ae2db8cde53e6cedb679cf6205e373,
+actually fails at linking on both SDKs: the harness resolves clang++ to clang,
+omitting the C++ runtime. Actual compilation succeeds, but no link pass is
+claimed. Preserved build terminal hashes: macOS3270F5BDECAF2FA6CBDC9CD24B55EFB2F0783AE44CC0F7E1FD62C12B4EE1555A;
+iOSBCBD5E815046AB9780C97E783620BA46C7AB962854DF53DF67DB107F35340A1A.
+R278 makes only the reversible C++ invocation-name correction. Its temporary
+source-only run38065696696, commit27d820f2bdcab0a9c4043fb9aecfca07b1654d63,
+terminates with a successful complete macOS native link and actual idle-owner/
+full25 payload/625-refusal consumer. iOS native configure and build/link also
+exit0, but the job fails on a subsequent harness artifact-path lookup: iOS
+places the binary in its .app bundle. Failure receipt SHA256:
+E93C6071674F3920A36A1D1E79EDB21AB6280C1EC8E5769059B56D6E7501A9FF.
+R279 changes only that iOS executable lookup and runs the entire original
+iOS component/SDL recipe, without repeating successful macOS native work.
+Source-only run38066146383, commit3fc70305cd74704f980f78bdd537b7a6a2e0ad22,
+actually completes successfully. The independent both-SDK native audit passes
+all50 original read-only payloads in actual objects/component archives/final
+native executables, real SDL linkage, strict compile recipes and actual five
+native-operation terminals. macOS's actual idle-owner/full25/625-refusal consumer
+passes; its very short execution has no sampled owned-tree peak, not a memory/
+frame-cost measurement. This combines the successful R278 macOS job and R279
+iOS job; it is not a single all-SDK successful run and the earlier failures
+remain preserved. Evidence: D:/SFE-validation/r279-metal-ios-bundle-artifact/native-links-audit.json,
+SHA256 94397B4465EA573F6A7A034B59BC621E8200F6308F94B32F3087A7D56A20C24C.
+All original shader/factory/header/component/strict-FP/resource
+inputs remain unchanged. It does not create a GPU device or restart R266.
+Application integration, Metal dispatch/numerical/frame cost and whole-goal
+acceptance are still open; no main/tag/release or root compiler-input change.
+
+October10 host resource interruption: R261 actually stops case34 (Fortuna
+Original) when global free physical memory reaches924332KiB, below its
+unchanged1GiB floor. The owned tree peaks at48807936bytes; this is a genuine
+resource stop, not an assertion failure or completed case. Its exact terminal
+SHA256 is F56AA84E4C879E00AABDAE78FC2C55D094F231430C9EBD09BCA279FCA5226542.
+The R261 native/observer owners have retired. R262 also retires with an
+admission failure and launches no GPU work. The earlier live-owner notes below
+are historical, not current readiness. R267/R268 remain unapplied preparations
+bound to that failed route, not completed integration.
+
+R271 tests Windows handle-bound pause/resume controls outside production
+source. Actual native child work resumes without skipped ticks; wrong birth,
+wrong path, self, nested pause and unbalanced resume are refused. A separate
+real CTest control retains its unchanged2s timeout while only the child pauses:
+actual timeout exit8 at2.1375161seconds, with the child retired. The first
+standalone6s scheduling fixture actually times out and remains preserved.
+A separate30s controller fixture completes all600 actual child ticks across
+recovery, unchanged private-cap signalling and wrong-child rejection. Those
+policy samples are explicitly synthetic, not real global-memory measurements.
+The unchanged33-case prefix/source/recipe preflight passes. A fresh complete17
+continuation wrapper (PID119084, birth2026-10-10T15:04:03.0076176Z) launches
+case34 only after the original6GiB headroom checks. Actual CTest PID101056,
+birth2026-10-10T15:26:56.4977113Z, owns model-check child PID186352,
+birth2026-10-10T15:26:56.7608539Z. They remain live; no fresh game case/full50
+result is accepted. Controller helper SHA256:
+824B552D0C1895387E501086A994FB0DAEFAD4B99C96B3E955ABA012F0131523.
+This changes no test workload, private-memory cap, global floor or timeout;
+only the proposed response to global RAM pressure changes from abort to
+pausing the exact registered test child. CTest itself and other jobs are never
+paused. No application source adoption or full50 acceptance follows from
+these control checks.
+
+R272 prepares the actual sixteen reflection factory sites for the complete
+twenty-five embedded Metal program variants. All52 original code-pointer/size
+assignments are guarded only for the Metal build; native code and the rest of
+the original source invert exactly. Full original descriptors, math, dispatch
+and qualification predicates remain intact. Forty-four exact public dependency
+headers accompany the source-only candidate. Its source/recipe/inverse checks
+pass; this is not production source adoption or application linking.
+Temporary source-only branch codex/metal-actual-factory-wiring-r272-20261010,
+commit db970d98ef0c7fdde9a4a577b6be5780b2faa519, run38062424754 compiles the
+actual factory module and SDK program provider. No GPU/driver diagnostic is
+restarted by this independent compile job. Main, tags and releases stay
+unchanged. Both actual SDK factory compilations fail on16 existing signed-
+conversion warnings in three shared headers; no resource or observer stop.
+The failures and native objects/terminals remain preserved under R272.
+
+R273 makes those same original integer destination types explicit in an
+isolated follow-up. Exact source inverses permit no extra arithmetic, branch,
+bound or workload changes. No warning suppression or FP-flag relaxation.
+Source-only run38063036542, commitf6255c719790cb79570421b81f9ebdd8a08dd10b,
+actually completes successfully on both SDK targets. Independent checks
+confirm all six native operation terminals, four actual factory/provider
+Mach-O objects, the exact full50 embedded original SDK payloads and all25
+shader resource-slot signatures against the pinned actual SDL Metal backend.
+Evidence: D:/SFE-validation/r273-metal-sdk-cast-followup/native-factory-results-audit.json,
+SHA256 B3C710C6BD351D559E27C39385977D84234D894B1AF17612DE63AEB80A7F0153;
+binding inventory: D:/SFE-validation/r273-metal-sdk-cast-followup/metal-binding-slots.json,
+SHA256 1D99AAED1CDB6834E07D79A4F5063FF8B5410D589A765A77BA24556ED214A5EC.
+This is complete module/provider compilation and source-binding verification,
+not application linking/adoption or GPU execution. R266 remains the separate
+live driver owner; its result is not inferred from these compile passes.
+Metal precision/dispatch/performance, whole application wiring and physical
+acceptance remain open. Main, tags, releases and root production source remain.
+
+October10 SDL Metal payload follow-up: R269 implements an isolated complete25
+payload selector, not production adoption. It requires the original full
+library/variant/entry/resource/workgroup inventory before changing only the
+format, bytecode pointer and byte count. Native DXIL/SPIRV descriptors remain
+unchanged; ordinary/curved paths are distinguished by variant despite sharing
+an entry. Texture, uniform, sampler, storage, dispatch and extension fields
+are not rewritten to make an invalid descriptor pass.
+
+R270 source-only run38059195206 actually completes successfully on both
+Apple SDK targets, commit2b818d1f961e9d5d44258d0318b6e4018615f557. The test
+uses the actual pinned SDL3-3.4.14 GPU header and all25 original libraries per
+SDK, compiled into native read-only objects. The macOS native C++ test passes
+all25 selections, preserves both native backend descriptors and rejects625
+changed descriptors/incomplete inventories. The same interface compiles for
+arm64 iOS15. Independent artifact/terminal/binary/recipe audit:
+D:/SFE-validation/r270-metal-sdl-payload-ci/native-payload-audit.json,
+SHA256 2C0A8799B8759F4ADBDA8A4328C102C64D55079A999CB4297D47A07F7254ABA8.
+No GPU device, pipeline or dispatch is launched by this independent test;
+it neither substitutes for nor restarts the live R266 Metal driver check.
+It does not prove actual Metal precision, optics, practical frame cost,
+production application wiring or physical device acceptance. Only a temporary
+source-only branch is pushed; root HEAD/index, main, tags and releases remain.
+
+October10 native Apple embedding follow-up: R265 run38057045926 terminates
+with a genuine macOS pipeline failure, not a full runtime pass. All25 exact
+libraries per SDK are present in actual native read-only Mach-O objects;
+both strict Objective-C++ SDK probes compile, and the macOS executable links
+with the entire original bundle. Independent artifact audit:
+D:/SFE-validation/r265-metal-embedding-ci/native-results-audit.json,
+SHA256 7E634CFDFDE2B28B784B2471D575B3D2151B23430E60CC8135B8F23A39702832.
+The iOS job passes compilation only. Six macOS pipelines load before optical
+returns nil without NSError; remaining18 were not attempted by that diagnostic.
+Its actual native terminal is exit1, no observed resource/monitor stop.
+Actual device dispatch, numerical/optical/frame-cost and production acceptance
+remain open. The earlier failure and receipts remain unchanged.
+
+R266 is a new source-only diagnostic, not an unchanged retry. It matches the
+actual local SDL Metal backend's descriptor-based pipeline constructor,
+prints generic device capabilities, and attempts all25 original libraries,
+kernels and pipelines even after a rejection. No shader math, precision,
+bindings, workgroup dimensions or coverage changes. Manual run38057899662
+uses temporary branch codex/metal-complete-pipeline-diagnostic-r266-20261010,
+commit97456192b4f587648c51fe1f15bec46bde1d2411. No main/tags/releases change;
+its live macOS job has not established complete runtime acceptance.
+
+R267/R268 now prepare the 3DS source/application-build route for the actual
+R261 continuation and R262 GPU admission owner, preserving the earlier failed
+R245/R249 evidence. The exact same12-file patch and17 whole source files are
+retained. Source rehearsal passes; the actual live-host check returns WAIT
+without writing a before-application receipt or changing source. The fresh
+24-target/50-test build recipe, original configure/test/timeouts and all16
+generated compiler inputs pass component checks, including altered-input
+refusals. Its real preflight defers because source application has not occurred.
+Evidence: D:/SFE-validation/r268-current-owner-applied-root-build/component-controls.json.
+This replaces the stale R251/R252 route, not full50, GPU, adopted-root, native
+ARM or physical 3DS acceptance. Root production source remains unmodified.
+
+October10 current shader follow-up: the failed R256 colour/SPIRV checkout job
+retries only after its actual terminal failure is observed and preserved.
+Actual retry job114224767403 completes successfully at13:32 UTC. R264 executes
+the original full42 source/closure/compiler/entry/flags/guards/allowlist/binary
+auditor, changing only the expected producer attempt for this actual retry.
+A wrong-producer inverse rejects. All42 current compiler results pass across
+41 first-attempt successes plus one second-attempt success; this is not a
+single-attempt42 pass. Its new colour binary exactly matches the unchanged
+complete-closure array already linked by R257. The failed checkout, old cached
+inventory and actual native receipts remain unchanged. Evidence:
+D:/SFE-validation/r264-complete-native-ci-retry/full42-accepted.json.
+
+R263 prepares all50 actual R260 libraries as an isolated embedded-binary bundle,
+retaining all25 variants per SDK, full original resource/workgroup recipes and
+strict compiled bytes. A first preparation refuses duplicate kernel entries
+before creating a bundle: paths and curved_paths intentionally share an entry.
+The corrected lookup requires both variant and entry, never conflates them.
+All50 actual native COFF objects/final C++ linked arrays pass byte/alignment/
+metadata checks plus450 descriptor/workgroup/lookup refusal controls. An
+independent object audit verifies read-only storage and all original SDL
+recipes. No shader source/math/coverage/dispatch change or production adoption.
+Mach-O assembly and actual Apple runtime/precision/frame-cost are still open.
+Evidence: D:/SFE-validation/r263-metal-embedded-libraries/native-bundle-audit.json.
+
+R262 is the new real GPU admission owner79476, creation
+2026-10-10T13:24:02.4415059Z. It binds the actual R261 owner183804 and requires
+all50 unchanged host cases,33 preserved complete cases plus17 fresh cases, and
+actual retirement before GPU admission. Its independent helper inverse
+retains the entire original R258 fixture/precision/work/deadlines/memory recipe,
+changing only the output directory and adding the R261 owner exclusion.
+Actual live-host rejection, four identity mutants and incomplete33 refusal
+controls pass. Full GPU execution has not launched; the real queue is waiting
+on Fortuna and the rest of the host suite. Failed R258 admission is preserved.
+Evidence: D:/SFE-validation/r262-complete-host-gpu-handoff/admission-status.json.
+
+October10 latest continuation: R260 run38054247676 completes successfully.
+All25 unchanged current-candidate shaders compile and link on both Apple SDKs
+for the application's configured minimum targets (macOS11/iOS15, Metal2.3).
+All50 artifacts independently pass the original complete source/entry/strict
+float/native-terminal/resource/nonempty-library checks. Audit SHA256:
+4BC576BA737A7FAC24EA9BE63F7D6D1310628379289EB031CFF9714EF9F920FA.
+Largest sampled owned compiler resident set is821,981,184 bytes. This closes
+the SDK-target mismatch, not physical old-OS, numerical, runtime, frame-cost
+or production acceptance. Only the temporary source-only branch is updated;
+main, tags and releases remain unchanged.
+
+R249 Fortuna case34 actually stops at13:06 UTC when free physical RAM falls
+below the original1GiB running floor. Its owned peak is50,118,656 bytes;
+there is no code-assertion or observer failure. The failed terminal remains
+preserved. Its GPU admission owner correctly terminates without launching
+because the complete50 host aggregate is absent. Both actual owners retire.
+R261 independently verifies the33 completed cases and exact unchanged full50
+registry, retaining all original commands, timeouts and memory guards. Its
+initial preflight timestamp-parsing refusal is preserved; the correction only
+reads literal immutable dates as strings. After actual6GiB launch headroom
+returns, its real observer183804 starts at2026-10-10T13:20:50.4878557Z to run
+the remaining17 cases. Helper SHA256:
+126196F608354A9446224E8C35B9DB60272A3787A8151283DED9B5C7B833439E.
+This is an active continuation, not complete50 or GPU acceptance. R251/R252
+still bind the older failed continuation and cannot admit source adoption.
+No12-file3DS source integration has occurred. These observations supersede
+the older live-R249/live-R258 status descriptions below.
+
+October 10 latest verified compiler update: R248 run38047940654 has actually
+completed successfully. All50 macOS/iOS SDK results are independently audited:
+each library is nonempty, contains its exact kernel entry and matches its
+compiler/link/source/target/strict-flag/resource receipts. The largest sampled
+compiler resident set is695,574,528 bytes. Artifact API pagination was corrected
+before the complete50 audit; older partial snapshots remain preserved. This is
+MSL3.0 SDK compilation/linkage, not old-OS compatibility, GPU mathematics,
+runtime performance or production adoption.
+
+The separate R250 DirectX map-boundary experiment fails actual DXIL validation
+in jets and jets_stream; all40 other binaries match R234 exactly. It is not
+adopted and validation is not bypassed. R253 instead retains the same complete
+eight-step interval-sine calculation as a DXIL loop. Its actual source-only
+run38049710571 passes all42 jobs and artifact audits; all21 SPIRV binaries and
+17 DXIL binaries remain byte-identical. Four DXIL binaries differ. R254 now
+passes its actual native build, raw archive and final all50-array byte audits:
+all42 revised shader arrays and eight unchanged legacy arrays are present.
+The original full fixture, four compiler units and1187 inputs are retained.
+R255's read-only preflight passes; its GPU launch remains deferred until the
+actual3DS host owner retires. There is no new GPU/numerical/frame-cost pass or
+production shader adoption. The held native build also depends on the SPC
+header in the3DS integration plan: run this GPU investigation before that
+source change, or freshly rebuild all affected native units afterward.
+
+The actual R249 full50 host continuation has completed the unchanged Original
+Attack Carrier composition case33 with exit0, no resource/observer failure and
+sampled owned peak67,440,640 bytes. There are33 actual accepted cases (32 earlier
+complete cases plus this fresh one), not a full50 pass. The exact observer is
+live. After original6GiB launch headroom became available, Fortuna case34
+actually started under CTest40328/native164824 at12:24:50 UTC; it remains live.
+R251/R252 prepare the exact same12-file/17-source
+3DS integration and fresh24-target build, binding32 original completed cases
+plus18 fresh continuation cases and actual failed R245 GPU retirement. Their
+readiness controls reject premature integration/build; no source application
+or aggregate full50 pass has occurred. Earlier failed R231/R242 receipts remain
+failed and preserved. No main/tag/release or completed-goal claim.
+
+R256 separately evaluates an exact guarded sign-based product-extrema
+selection. The actual HLSL selector is compiled verbatim by a host component
+check:1,004,430 cases include exact integer-dyadic extrema, bit-identical directed
+endpoints against the complete four-corner calculation and invalid/range
+refusals. Two independently compiled wrong-extremum/broadened-guard mutants
+actually reject. Only normal, ordered, nonpoint endpoints inside the original
+exact-residual range are eligible; all original identity/four-corner fallbacks
+remain unchanged. The independent source-only41-file commit
+c7959137db2998c13d1bd88deefe05f04ced0981 starts manual full42 shader run38051189115.
+Its actual run is not yet complete (the last job is in checkout); no complete
+same-run full42 CI, GPU, performance or production acceptance is claimed.
+The existing R254/R255 candidate and receipts remain unchanged.
+
+The pending colour/SPIRV shader does not include the changed interval header:
+its complete four-source recursive closure, entry and compiler flags are
+unchanged from R253. A separate cache audit executes the original strict
+per-pair checks for all42 slots:41 actual current outputs plus this one earlier
+output with exact unchanged dependency bytes. No receipt/producer identity is
+rewritten and no pending CI job is marked passed. The complete native-cache
+inventory is6F17FFA9A8499EA717F9C7E9807D7CE5ABAD36683C0CC5EBB0AB0B4DE36EAD1B.
+R257 actually builds and links against that inventory, retaining four original
+compiler units,1187 held inputs,40 unchanged archive members and the complete
+fixture/deadlines. Actual archive and final all50 linked-array byte/read-only/
+alignment/bounds audits pass. Executable:
+29BBC9491DA4390DD80898C5CA7734ACB6EEABE538DBE1D8E45C9ED93CC9A807.
+R258 read-only preflight passes; its full GPU launch remains deferred while the
+actual host owner is live. This is full native shader-slot build qualification,
+not single-run full42 CI, numerical/frame-cost/physical or production acceptance.
+
+October10 current-candidate Apple follow-up: R259 translates all25 actual
+SPIRV programs bound by the R257 native receipt, including the four unchanged
+legacy programs. Actual25 translation and25 descriptor operations exit0 with
+the original compiler/resource guards. The complete SDL binding recipes and
+100 changed descriptor/workgroup/entry controls pass. All generated-source
+transforms invert exactly:31 original DontInline boundaries, unused SSA
+initializers,51 typed-uint comparisons and the original post-barrier shared
+reads are retained. Nineteen unchanged SPIRV programs regenerate exactly the
+accepted R248 MSL bytes; six carry the current sign-corner calculation.
+The first metadata extraction refuses a translation-log path collision before
+native launch; those logs remain intact and reflection has its own directory.
+
+Only31 source-only files are published at77e8cb822b7eb037a2f52264aaa272ad07a66a16
+on the existing temporary Metal branch. Actual full50 strict SDK run38053307926
+finishes successfully: all50 complete compile/link artifacts independently
+pass source/entry/target/strict-flag/native-terminal/resource/nonempty-library
+checks at12:56 UTC. Largest sampled owned resident set is826,802,176 bytes.
+The earlier partial snapshot correctly refuses an artifact whose job is not
+yet terminal; its snapshot/artifacts remain preserved. No compiler failure is
+inferred from that observation race, and the success uses a fresh complete
+terminal snapshot. Full audit SHA256:
+1412A53C285E8DBE26BC63D2FD31C4C1DB0DFC7CA752FA797AC4E7689CFAB8ED.
+This is current-candidate SDK compile/link acceptance, not runtime/numerical/
+frame-cost or production acceptance. SDK targets remain MSL3.0/macOS13/iOS16,
+not proof of the application's older deployment minimums.
+Root HEAD/index, main, tags and releases remain unchanged. Evidence:
+D:/SFE-validation/r259-sign-corner-metal/preparation.json, publication.json,
+translation-receipt.json and reflection/reflection-receipt.json.
+
+R258 now has an actual admission owner173804, immutable creation
+2026-10-10T12:50:37.8251809Z. It waits on the exact R249 owner and independently
+validates the original full50 casewise aggregate before invoking the unchanged
+full GPU investigation. All original6GiB launch floors, fixture/work/quality,
+native deadlines, resource caps and running floors remain. It neither stops
+nor restarts the host and cannot accept partial/failed/missing host evidence.
+No GPU has launched yet; actual Fortuna164824/CTest40328 and host19468 remain
+live. This is queued admission, not test acceptance. Inspect the actual process
+and D:/SFE-validation/r258-sign-corner-gpu/admission-status.json before any new
+launch or12-file3DS source application. The SPC header remains a compiled input
+of this GPU candidate and must not change before its actual retirement.
+
+October 10 SDK-link acceptance correction: inspecting the actual R241 and
+R244 libraries reveals that every earlier reported linked output is an
+empty 92-byte MTLB. The linker warns that it ignored the input AIR (2.5)
+because its default target is 1.8. The helper resolved the metallib frontend
+to air-lld and did not specify an SDK target/root. Therefore the older
+16/25 and 9/25 counts are compiler exit-zero results only; there are zero
+qualified linked kernels from those runs. Their receipts remain preserved,
+but their compile/link acceptance labels are superseded by this correction.
+
+R244 run38045860060 has actually failed both SDK jobs: jets exceeds the
+earlier 2 GiB resident cap (about 2.20 GiB), followed by an observer identity
+failure. The original logs do not retain the mismatching identity, so its
+cause is not yet proven. A null compiler exit in that receipt is not a
+normal terminal result; job cleanup later retires the orphan process.
+R246 prepares a separate cloud-only resource recipe, retaining shader
+math, strict flags, source pins and global memory floors, with explicit
+SDK targets/roots, frontend paths and nonempty/exact-entry library checks.
+This is not a pass of the old cap, runtime acceptance or source adoption.
+
+R246 publishes only the31 source-only files on the existing temporary branch:
+commit0115326a8ab379903be02523968f1d88217ada49, actual dispatch
+run38046983339. All25 shader bodies, bindings and manifest bytes match R244;
+only the compile/link helper, manual50-job workflow and scope README change.
+The target is MSL3.0 on macOS13/iOS16; this does not raise the application's
+macOS11/iOS15 minimums or prove compatibility on those older versions.
+The CI run is dispatched, not accepted. Root HEAD/index, main and releases
+are unchanged. Metadata: D:/SFE-validation/r246-metal-toolchain-correction/
+publication.json.
+
+R246 is cancelled, not accepted, after the actual tiles compiler snapshot
+identifies the mismatch: the same PID13216/birth1791630156:260634 execs from
+Xcode16.4 usr/bin/metal to usr/metal/32023/bin/metal. R247 pre-pins existing
+matching frontend/versioned executables inside the selected toolchain and
+their SHA-256 before launch. Only a verified path transition under the same
+native PID/birth is accepted and recorded; changed births/PIDs, unverified
+paths or changed tool bytes still reject. Source controls and all25 held
+shader bodies/bindings/manifest bytes remain unchanged. Commit
+f71387f4c93c699bfd022ba46b6dcf5dfe5ff3e4 dispatches fresh run38047174668.
+That run is not yet accepted. Main/releases and root HEAD/index are unchanged.
+
+R247 actual artifacts now demonstrate real nonempty, exact-entry libraries,
+but that candidate is not accepted: folds reports48 additional typed uint
+self-comparisons, and macOS jets is resource-stopped at6,449,963,008 resident
+bytes over its6,442,450,944-byte cap (exit-9, no monitor failure). Read-only
+SPIRV parsing identifies original DontInline masks that SPIRV-Cross replaces
+with forced-inline MSL annotations. R248 restores only those31 original
+function boundaries across eight programs and uses the existing pure uint
+identity helper for the48 comparisons. All25 exact inverse source audits
+pass; function bodies, bindings, threads/work, strict compiler flags and
+the6GiB cloud memory recipe are unchanged. The initial patch-order and mixed
+line-ending rejections are preserved; sorted hunks and held CRLF formatting
+are independently verified before publication. Source-only commit
+7eba06bf116378f6fe7117b5aa810c57cc6ef245 dispatches run38047940654, still
+not accepted. Root HEAD/index and main/releases remain unchanged. Metadata:
+D:/SFE-validation/r248-metal-original-function-boundaries/preparation.json,
+publication.json and checkpoint.json. Original3DS/full50 host and actual
+GPU optics/frame-cost gates remain incomplete and are not replaced by SDK CI.
+
+October 10 independent GPU follow-up: R245 runs the exact R235 paired-sine
+native candidate only after scoped GPU/emulator/host owners retire, with all
+1187 compiled inputs/all50 linked arrays verified and the original native
+fixture, precision, work, quality, eye/lobe counts, deadlines and resource
+bounds retained. This independent investigation does not close or replace
+the missing full50 host/adoption gate. Actual native160712 birth
+2026-10-10T10:47:47.3786155Z exits1, no resource or monitor stop, sampled peak
+2,713,157,632 bytes. Sharp liquid cases complete; the first rough ground5 /
+model81 phase1 exceeds the original completion deadline. Cleanup reports
+73728 records/eye with optical/root stages roughly5.6–6.0s/eye; those are
+diagnostic timings, not a practical-FPS qualification. No lava completion,
+GPU success, source adoption or unchanged retry is claimed.
+Metadata: D:/SFE-validation/r245-independent-paired-sine-gpu/terminal.json.
+
+October 10 Metal SDK correction follow-up: both jobs in run38044016963
+actually finish with16/25 complete compile/link results; the other nine
+programs fail generated-code warnings-as-errors. No resource or monitor stop
+occurs in those jobs. R243 verifies all25 complete declared descriptor maps
+against the frozen SDL pipeline recipes and corrects20 programs' buffer
+annotations, with every nonbinding source byte unchanged. The CLI's JSON
+reflection fast path ignores --remove-unused-variables; its second metadata
+run is not evidence of an active-only interface. A declared sampler may be
+absent from a texture.read() MSL program; only exact sampler symbols absent
+from the entire held generated source are omitted, with SDL slots reserved.
+
+R244 preserves unused SSA initializers/calls, makes three uint-only identity
+comparisons explicit, and reads the original threadgroup objects by reference
+after the original lane-zero writes/barrier. Exact inverse source checks pass;
+no floating-point expression, thread/work count, shared layout, compiler flag
+or resource floor changes. The31-file source-only follow-up commit
+c32692c2a41ac57c27063875e8f1bc536b4260f1 dispatches actual run38045860060
+for both SDKs. It is running, not accepted. Production wiring, numerical
+parity, optics and frame-cost acceptance remain separate. Main, release,
+root HEAD/index and the12 held source originals are untouched.
+
+R242 case33 actually resource-stops again at the original global physical
+memory running floor: exit-1, ResourceStopped=true, MonitorFailed=false,
+sampled owned-tree peak56,266,752 bytes. No fresh cases pass and no full50
+receipt exists; the32 previously complete independent cases remain held.
+No unchanged native retry is started under the same resource pressure, and
+no failed attempt is relabeled as accepted. The earlier live statuses below
+are historical checkpoints, superseded by these actual terminal results.
+Metadata: D:/SFE-validation/r244-metal-sdk-diagnostics/publication.json,
+D:/SFE-validation/r243-metal-sdl-bindings/mapping-receipt.json and
+D:/SFE-validation/r242-casewise-resource-continuation/cases/
+33-starfox_3ds_game_attack_carrier_composition_original-terminal.json.
+
+October 10 Metal SDK/source-only follow-up: R241 actually translates all25
+SPIRV programs bound by the R235 native candidate to standalone MSL3.0:
+all21 native stages plus four legacy history/path programs, unchanged math.
+All25 translator processes exit0 without a resource stop; actual full-source
+pins and missing/duplicate/escaped/changed source/entry/size controls pass.
+SDK compilation is not Metal runtime, SDL binding ABI, numerical parity,
+optical quality or performance acceptance. The first source-only SDK run
+rejects Git-normalized line endings before compiler launch. A byte-preserving
+attributes follow-up retains the exact generated source. Its smaller Mac
+runner run is explicitly cancelled, not accepted; the latest31-file source-
+only commit f20d6333691c09af0d53291f88631e68721f558f dispatches both complete25
+SDK jobs on macos-15-intel, preserving6GiB launch/2GiB owned-resident cap and
+running floors. Actual run38044016963 is pending at this checkpoint.
+The Metal backend gap is independently confirmed: the current calibrated
+history CPP selects only DXIL/SPIRV, and default translated multi-uniform
+buffer slots (guide is one example) do not match SDL's uniform-first layout.
+These are not yet wired/fixed or device-tested; primary hardware Metal RT
+is a separate existing path. No playable package, main update or release.
+
+R231's original case33 Attack Carrier attempt actually resource-stops at
+the1GiB global physical-memory running floor, exit-1, no monitor failure;
+its32 previously complete independent cases remain unchanged. It has no
+complete50 proof. R236 retires without launching the GPU candidate, because
+the original host did not complete. R242 independently verifies all32 complete
+case commands/properties/input/terminal/log bytes and rejects resource-stopped
+terminal inverses. It continues the identical independent50-case schedule
+with fresh case33 through50 under the original resource/timeout/coverage
+limits, recording any future aggregate in its own directory, never turning
+the failed R231 attempt into success. Actual fresh CTest105252 birth
+2026-10-10T10:06:22.9498283Z and native181340 birth
+2026-10-10T10:06:23.2576318Z are live. No new cases are accepted yet.
+All12 root source originals and HEAD/index remain unchanged. R237/R240's
+old handoff is not automatically qualified by this continuation: complete
+case evidence, GPU retirement, fresh applied-root builds/tests and native/
+physical validation remain necessary. No source adoption or goal completion.
+Metadata: D:/SFE-validation/r241-metal-reflection-shader-check/checkpoint.json
+and D:/SFE-validation/r242-casewise-resource-continuation/checkpoint.json.
+
+October 10 applied-root build follow-up: R240 prepares the fresh main-working-
+tree24-target build executor without launching it or applying source changes.
+Its26 original configure arguments and all50 command/property/timeout recipes
+are retained. Component transports cross-check31 actual completed cases.
+The actual863-file compiler closure exposes16 generated SPC/manifest inputs;
+the executor requires identical original whole bytes for their fresh paths
+before compilation. An actual altered-header control rejects, as do changed
+flags, targets, routes, timeouts, executable paths, hashes and coverage.
+The initial preparation-only25-argument assumption fails and is corrected to
+the observed26; no original recipe or resource bound changes. Actual early
+preflight exits3 while the application receipt is absent, creating no build
+directory, acceptance or native process. The original scoped CPU guard is
+reused only as pinned function definitions, not its historical launch body.
+R231 advances to32/50 accepted, including both Original Continue routes and
+model checks. Actual32-case I/O/terminal/observer inverses pass. The original
+host and GPU wrappers retain their same births; Attack Carrier composition
+is live and GPU remains queued. All12 live root source originals, HEAD/index
+are unchanged. No fresh-build/full50/GPU/console/release/goal completion.
+Metadata: D:/SFE-validation/r240-applied-root-host-build/checkpoint.json.
+
+October 10 full-input projection follow-up: the exact pinned R237
+after-application comparator passes all3,106 original source/dependency inputs
+using the actual R238 isolated patch. All3,106 canonical paths remain unique;
+only12 complete reviewed source projections and two already-reviewed
+noncompiler documentation changes are allowed. Changed and refreshed original
+hash controls reject. This is an integration rehearsal, not applied-root or
+full-suite acceptance. The same R231 host owner has29/50 accepted cases,
+including the actual Original Continue-Yes route (CTest179196, exit0, no
+resource or monitor stop). The same R236 GPU owner remains queued without a
+native launch. No release, source adoption or goal completion is claimed.
+Metadata: D:/SFE-validation/r238-3ds-application-rehearsal/checkpoint.json.
+
+October 10 isolated integration/storage follow-up: R238 copies only17 exact
+root source files and applies the corrected12-path patch through apply_patch
+in that isolated copy. All17 resulting whole sources and their actual ARM
+blobs matchbbc5d969, retaining strict native O3. All3106 live inputs/root/index
+remain unchanged. The complete1504-public-source projection audit matches1502
+files; only the two reviewed3DS README/TESTING updates differ. No native code
+or build recipe delta requires a duplicate ARM CI at this point. This is source
+equality, not production adoption or fresh-build/physical-console acceptance.
+R239 independently disassembles all42 unchanged compiler outputs with actual
+tool/process/birth/exit evidence and bounded CPU diagnostic resource guards.
+Eight outputs retain the paired-sine endpoint: SPIRV declarations are Private;
+DXIL declarations are internal default-address-space scalars, with no shared
+address-space cast. The other34 outputs do not retain its name. Shared-storage
+negative controls reject; all tool exits are0. This is a storage/declaration
+audit, not a separate runtime concurrency, numerical or speed oracle.
+The same R231 host124528 and R236 GPU queue170484 are confirmed live at the
+later snapshot; host acceptance reaches28/50, including Fortuna/Corneria/
+Attack Carrier/death source routes, and GPU has not launched. Free RAM is
+near the original6GiB next-case gate; no gate is weakened, process restarted,
+other project stopped, or full-suite/goal completion inferred.
+Metadata: D:/SFE-validation/r238-3ds-application-rehearsal/checkpoint.json;
+D:/SFE-validation/r239-paired-sine-storage-audit/checkpoint.json.
+
+October 10 integration handoff: R237 corrects the prepared3DS integration to
+retain the already-built seven-line native/GNU/Release strict-O3 recipe.
+All17 complete source blobs match successful ARM commitbbc5d969; the entire
+new recipe inverses to the older candidate after removing only those seven
+lines. The complete12-path patch dry-checks, and all3106 held inputs plus root
+HEAD/index remain unchanged. No redundant ARM build or source adoption.
+The handoff gate now uses the actual R23150-case protocol, not the failed
+R196 single-run provenance. Its before/after projection preserves original
+case evidence while allowing only the12 complete reviewed root file changes.
+Pure controls pass for17 sources/207 evidence paths and reject partial,
+duplicate, wrong-whole-file and refreshed-pin inputs. Current ARM state
+restoration and actual live-owner refusal verify; no readiness is recorded.
+The same host wrapper124528 has24/50 accepted cases, including the full
+Original stage sweep. Independent actual24-case I/O and observer inverses
+pass. The same GPU wrapper170484 remains queued with no native launch.
+Source-only shader CI38034343514 independently rechecks completed/success,
+all42 jobs at6ae8d1b. No full50 aggregate, GPU/applied-root/console acceptance,
+main update, release or rendering/3DS goal completion is claimed.
+Metadata: D:/SFE-validation/r237-latest-3ds-integration/checkpoint.json.
+
+October 10 queue follow-up: R235's queued GPU wrapper is stopped by exact
+identity BEFORE any native launch after the actual accepted-prefix I/O check
+catches PowerShell array/concatenation precedence in expected filenames.
+Original helper/module/verifier bytes and the prelaunch stop are preserved.
+R236 repairs only three filename-expression parentheses. Whole-module inverse,
+synthetic refusal checks, actual23-case prefix I/O checks and changed hash/path/
+PID/recipe controls pass, along with strict Boolean and exact native observer/
+body inverses. The single repaired wrapper is verified live at170484; it waits
+for the exact existing R231 host wrapper124528 and complete50 acceptance.
+The host run has23 cases passed at this snapshot; no full50 aggregate or native
+GPU result exists yet. No GPU retry, source adoption, release or completion.
+Metadata: D:/SFE-validation/r235-paired-sine-native-runtime/prelaunch-stop.json;
+D:/SFE-validation/r236-paired-sine-queue-io-repair/checkpoint.json.
+
+October 10 paired-sine follow-up: R232 shares the two endpoints of the same
+complete interval sine polynomial. All coefficients, ordered Horner steps,
+range/refusal/precision checks and the other37 sources remain unchanged.
+An initial host compile failure is preserved; R233 repairs only the host
+transport of an HLSL attribute. Gradual and FTZ/DAZ runs each pass198176 cases /
+594528 raw-bound/refusal comparisons; the actual polynomial-call count drops
+from2 to1 and the collapsed-upper negative control is rejected. All190 actual
+dependencies /272 held inputs verify. User-authorized source-only R234 CI
+38034343514 passes all42 jobs at6ae8d1b on a parent-free41-file temporary tree.
+Downloaded outputs independently audit exact bytes, compiler, entries, full
+closures, flags and unchanged resource guards. R235 builds all11 native
+operations and audits all50 linked arrays /1187 inputs. No GPU test has run,
+and no performance gain or production adoption is claimed. Main and releases
+are unchanged. GPU qualification must wait for the live R231 host suite.
+Metadata: D:/SFE-validation/r233-sine-host-attribute-transport/checkpoint.json;
+D:/SFE-validation/r234-paired-sine-shader-ci/checkpoint.json;
+D:/SFE-validation/r235-paired-sine-native-runtime/checkpoint.json.
+
+October 10 complete3DS follow-up: R230 refuses before native launch on two
+changed noncompiler documentation files. R231 pins only those exact reviewed
+README/TESTING updates, retains every compiled-source/dependency check and
+starts a fresh unchanged50-case run with per-case resource monitoring.
+The exact existing wrapper is still live;17 cases have passed at this snapshot,
+not the complete suite. No source integration or physical-console acceptance
+is implied. The case receipts and eventual full50 aggregate are authoritative.
+Metadata: D:/SFE-validation/r231-casewise-doc-provenance/checkpoint.json.
+
+October 10 optical-workgroup follow-up: R227 changes only the stream's256-to64
+thread shape and matching native metadata, on the R221 numerical snapshot.
+Whole-source/C++ inverses and all8192 budget-size complete-cell/unsigned-integer
+receipt comparisons pass; missing-lane/metadata mismatch controls are rejected.
+Other37 shader sources, cell arithmetic, maps, barriers, budgets, quality and
+guards remain exact. Source-only R228 CI38032114434 passes all42 jobs at601ad7d;
+its parent-free41-file tree and downloaded binaries/compiler/flags/closures/
+resource guards audit. R229 builds all11 actual operations successfully and
+audits all50 linked arrays/1266 held inputs. A shell continuation check refuses
+after the successful builder; the original receipt is preserved and no native
+operation is retried. Independent manifest and final byte audits verify the
+build, actual candidate compiler input and emitted SPIRV64-thread dimensions.
+Strict Boolean regressions and full-input runtime preflight pass. Actual native
+158484 exits1 without resource/observer stop. Sharp water's three first-format
+phases pass, but rough water's hot phase misses the unchanged deadline. Cleanup
+retires1152 batches/73728 records per eye, not a passing frame. Optical19472.9/
+21193.1ms and roots6307.73/6829.43ms are instrumented/contention-sensitive
+diagnostics, not player FPS or a controlled benchmark. The smaller optical
+workgroup is substantially slower in this run and is rejected. Lava/later
+formats remain unreached. All1266 inputs and exact native/helper retirement
+verify after exit; original resource/precision/quality/deadline gates remain.
+No unchanged GPU retry, production adoption, release or goal completion.
+Metadata: D:/SFE-validation/r227-optical-workgroup-scope/checkpoint.json;
+D:/SFE-validation/r228-optical-workgroup-shader-ci/checkpoint.json;
+D:/SFE-validation/r229-optical-workgroup-native-runtime/checkpoint.json.
+
+October 10 dispatch follow-up: R223 changes only the root stream's workgroup
+shape from64 to8 with matching native metadata/dispatch. Whole-source inverses,
+all65 batch-size query partitions, disjoint writers, closure independence and
+mismatched-dispatch negative control pass. Source-only R224 CI38030397867
+passes all42 jobs at bf9625c; downloaded outputs and unchanged strict compiler/
+resource guards audit. R225 builds/audits all50 linked arrays and1266 held inputs;
+actual source/dependency and emitted SPIRV LocalSize64/8 coupling verify.
+Its first runtime wrapper is stopped by exact identity BEFORE native launch
+because scope diagnostics contaminate Boolean readiness. R226 repairs only
+observer output routing, requires exactly one Boolean and passes negative
+regressions. Actual GPU178652 exits1 without resource/observer stop: sharp
+water's three first-format phases pass, but rough water's hot phase still
+misses the unchanged completion deadline. Cleanup retires1152 batches/73728
+records per eye, not acceptance. Optical8039.28/9352.63ms and roots7254.29/
+8367.82ms are instrumented/contention-sensitive diagnostics, not player FPS
+or an isolated speed comparison. Lava/later formats remain unreached. All1266
+inputs and exact native/helper retirement verify after exit. No production
+adoption, release, or rendering/3DS completion.
+Metadata: D:/SFE-validation/r223-root-dispatch-parallelism/checkpoint.json;
+D:/SFE-validation/r224-root-dispatch-shader-ci/checkpoint.json;
+D:/SFE-validation/r225-root-dispatch-native-runtime/checkpoint.json;
+D:/SFE-validation/r226-root-dispatch-observer-repair/checkpoint.json.
+
+October 10 quotient follow-up: R219 reuses only bit-identical checked-division
+corners of finite ordered intervals. Original eight-step quotient checks,
+sentinel folds, precision and refusal/identity/range guards remain unchanged.
+R220 repairs only the HLSL-to-host transport after a preserved host compile
+failure. Both normal and FTZ/DAZ runs pass 816384 cases / 1632768 raw bound-
+and-refusal comparisons each; an incorrect distinct-corner reuse is rejected.
+All 189 actual dependencies / 199 held inputs verify. Source-only R221 CI
+38029498323 passes all 42 jobs at 49a3e15, with a parent-free 41-file tree and
+no assets/history/main/release publication. All downloaded binary bytes,
+entries, closures, flags, compiler and resource guards audit. R222 links and
+audits all 50 arrays / 1187 held inputs. Actual native 183128 exits 1 without
+resource or observer failure: sharp water's three first-format phases pass,
+but rough water's hot phase misses the unchanged completion deadline. Cleanup
+retires all 1152 batches / 73728 records per eye, not a passing frame. Optical
+7081.62/7171.61 ms and roots 6327.41/6270.58 ms are diagnostic costs, not player
+FPS. Lava/later formats remain unreached. Post-terminal inputs/hashes and exact
+native/helper retirement verify. Production sources remain unchanged.
+Metadata: D:/SFE-validation/r220-quotient-host-transport/checkpoint.json;
+D:/SFE-validation/r221-duplicate-quotient-shader-ci/checkpoint.json.
+Native result: D:/SFE-validation/r222-duplicate-quotient-native-runtime/checkpoint.json.
+
+October 10 native R218: the duplicate-corner candidate links the independently
+audited 42 shader outputs; all 50 linked arrays and 1187 held inputs verify.
+Actual GPU process 170512 exits 1 without a resource or observer stop. Sharp
+water's three first-format phases pass, but rough water's hot phase still
+misses the unchanged completion deadline. Cleanup retires every 1152 batch /
+73728 record per eye; that is not frame acceptance. Optical 7112.9/7475.37 ms
+and roots 6370.46/6587.29 ms are instrumented diagnostic costs, not player FPS.
+Lava/later formats remain unreached. Post-terminal hashes and exact native/
+wrapper retirement verify. No production adoption or release.
+Metadata: D:/SFE-validation/r218-duplicate-corner-native-runtime/checkpoint.json.
+
+October 10 duplicate-corner follow-up: R215 changes only the two native
+interval-multiply call sites to reuse bit-identical finite ordered endpoints.
+All mathematical corners, exact bounds, invalid/distinct evaluation order,
+precision and guards remain. The initial supplemental host compile fails only
+on GCC's misleading-indentation warning for two pre-existing HLSL same-line
+ifs. R216 applies checked whitespace-only host line breaks, without suppressing
+warnings or changing compiler flags. Actual compile and gradual/FTZ tests pass:
+816384 cases/1632768 bit-exact DXIL/SPIRV-path comparisons per mode; endpoint
+bits and refusal state match the pinned R213 bodies. Point/point, interval/point
+and distinct cases use1/2/4 calls; an incorrect distinct-corner reuse control
+is rejected. All188 actual dependencies/196 held inputs verify. Source-only
+R217 CI38028356756 passes all42 jobs at a40fb53; its41-file parent-free snapshot
+changes one shader header, preserves37 sources and the original compiler/flags/
+resource helper. Actual download/audit37192 exits0; all42 receipts, binary
+bytes/hashes/formats/entries/closures/compiler/flags/guards and artifact
+allowlists independently verify. Complete inventory SHA020c0e70 is recorded.
+No production adoption, release or GPU/performance acceptance yet.
+Metadata: D:/SFE-validation/r216-duplicate-corner-host-format/checkpoint.json;
+D:/SFE-validation/r217-duplicate-corner-shader-ci/checkpoint.json.
+
+October 10 native R214: the paired-product candidate links all42 audited
+outputs, retains40 archive members/eight legacy shaders, and independently
+audits all50 linked arrays and1187 inputs. Actual GPU156432 (creation
+UTC2026-10-10T05:29:05.2154240Z) exits1 without resource/observer stop or error.
+Sharp water's three first-format phases pass. Rough water's hot phase still
+fails the original completion deadline. Cleanup retires1152 batches/73728
+records per eye; it is not a passing frame. Optical7624.86/8720.56ms and
+roots6611.96/7412.2ms are diagnostic timing, not player FPS. Lava/later formats
+are not reached. Independent post-terminal verification retains all1187 pins,
+executable/helper hashes and native-owner retirement. No production adoption,
+release or broad rendering/3DS completion.
+Metadata: D:/SFE-validation/r214-paired-endpoint-native-runtime/checkpoint.json.
+
+October 10 paired-product follow-up: R212 computes both directed endpoints
+at one scalar boundary; only the two DXIL/SPIRV multiplication corner blocks
+change from eight duplicate calls to four paired calls. Every original corner,
+identity, range, fallback and precision guard remains. The byte-identical
+independent dyadic regression passes gradual and FTZ/DAZ modes with the same
+1919565 enclosures/1116905 minimal bounds/802660 fallbacks/71431 refusals each.
+Actual compile and both runs exit0; all185 dependencies/191 held inputs verify.
+Source-only R213 CI38027184590 passes all42 jobs at73d8c21. Its parent-free
+41-file tree contains38 sources, with36 unchanged from R210, and the exact
+original compiler helper/flags/resource guards. All42 downloaded receipts,
+binary bytes/hashes/formats, entries/closures/compiler/flags/guards and artifact
+allowlists independently audit; complete inventory SHAa3f53af6 is recorded.
+No main, release, assets/history upload or production adoption. Full GPU runtime
+qualification remains pending. Current 3DS tester instructions now identify
+the already-audited R180 package; no new console-acceptance claim is implied.
+Metadata: D:/SFE-validation/r212-paired-directed-endpoints/checkpoint.json;
+D:/SFE-validation/r213-paired-endpoint-shader-ci/checkpoint.json.
+
+October 10 follow-up: source-only R210 CI38025785041 passes all42 native
+DXIL/SPIRV jobs at e7068a7. The parent-free41-file tree changes only the actual
+R209 CPU-tested scalar header; all37 other source files and compiler/flags/
+resource helper remain exact R207 bytes. Downloaded all42 receipts and binary
+bytes/hashes/formats/closures/entries/flags/guards independently audit; full
+native inventory SHAe55046cf is recorded. Main/root HEAD/index/releases remain
+unchanged. R211's isolated full native build then passes all five actual
+assembly/history/archive/audit/link operations; all40 untouched archive members
+and eight legacy shaders stay exact. Final PE audit verifies all50 arrays and
+all1187 held inputs/full original fixture. Native runtime is still unaccepted;
+its helper retains the complete original cases/oracles/deadlines/resource
+thresholds, with exact failed R208 retirement checks added. A helper syntax
+preflight refusal launched no native GPU; corrected preflight verifies the
+same retained body. After serialized6GiB headroom, actual native115120
+(creation UTC2026-10-10T05:10:36.6523443Z) exits1: sharp water's three phases
+pass, but rough water's hot phase fails the original completion deadline.
+There is no resource stop, observer failure or resource-query error; sampled
+private peak2749702144 bytes. Cleanup retires all1152 batches/73728 records
+per eye, which does not turn the failed frame into a pass. Optical work is
+10171.1/11023.9ms and roots8838.77/9532.72ms in that diagnostic phase;
+these instrumented timings are not player FPS. Lava/later formats are not
+reached. Post-terminal independent verification retains all1187 input hashes,
+executable/helper hashes and actual native-owner retirement. R211 remains
+unaccepted; no production adoption or release.
+Metadata: D:/SFE-validation/r210-integer-endpoint-shader-ci/checkpoint.json;
+D:/SFE-validation/r211-integer-endpoint-native-runtime/native-build-receipt.json.
+
+October 10 native update: isolated R208 assembled/compiled/archived/linked all42
+verified shader outputs into the bounded-command candidate. Independent raw
+archive audit retains40/42 members byte-identically; final PE audit verifies
+all50 actual arrays, including eight unchanged legacy shaders. All1187 inputs
+and four actual dependency sets hold. Full original fixture and runtime helper
+body/guards/deadlines are retained. Actual GPU39172 exits1 without resource or
+observer stop/failure/query error; sampled private peak2660515840 bytes.
+Sharp water passes all three first-format phases. Rough water's hot phase fails
+the original completion deadline; cleanup retires every1152/1152 batches/eye,
+which is diagnostic retirement, not a passing frame. Optical/root work is
+substantially more expensive than the prior candidate. Lava and later formats
+are not reached; no numerical fix, production adoption or release acceptance.
+Post-terminal1187 inputs/executable/helper and actual owner retirement verify.
+Metadata: D:/SFE-validation/r208-directed-native-runtime/checkpoint.json.
+R209 changes only the exact residual-sign calculation inside the proved scalar
+ranges: magnitude-ordered FastTwoSum and exact24-bit significand comparison
+using uint32 limbs. Original identities, fallback/refusal/ranges remain.
+The unchanged actual shared-header integer-dyadic oracle passes both gradual
+and FTZ/DAZ modes with exactly the prior1919565 enclosures/1116905 minimal
+bounds/802660 fallbacks/71431 refusals. Actual compile and both runs exit0;
+all185 dependencies/191 inputs hold. CPU evidence, not GPU or speed acceptance.
+All rendering and3DS source-adoption/platform qualification gaps remain open.
+
+October 10 shader-CI update: R204's directed binary32 endpoints pass the actual
+integer-dyadic CPU oracle in gradual-underflow and FTZ/DAZ modes (1919565
+enclosures and1116905 minimal eligible bounds per mode). Its six diagnostic/
+ordinary/stream DXIL/SPIRV jobs38023782541 pass and emitted bytes are audited.
+The complete native42-stage expansion R205 passes39 shaders; three actual
+compilers hit the unchanged2GiB cap. R206 adds only two scalar noinline
+boundaries, with an exact arithmetic-body inverse, and passes41/42; Vulkan
+witness remains resource-stopped. These failures are preserved, not successes.
+Focused R207 job38024552247 compiles all three companion variants using shared
+DXIL optical scalar calls and bounded Vulkan witness storage/SSA cleanup, with
+the same38 byte-identical source files and original math/refusal/resource
+guards. All42 required native outputs now have verified entry/closure/compiler/
+flags/byte/hash/format receipts:39 selected R206 plus three R207 replacements.
+No C++ link or GPU/lava/numerical/runtime/production acceptance yet. All four
+temporary branches contain only41 allowlisted source/CI files, no inherited
+history/assets/credentials; root HEAD/index and main/releases are unchanged.
+Actual CPU observer path-key repairs reused the exact passed compiler output,
+not another compile or a weaker oracle. Metadata and complete native inventory:
+D:/SFE-validation/r207-bounded-compilation-flags/checkpoint.json;
+D:/SFE-validation/r207-bounded-compilation-flags/compiled-native-inventory.json.
+Next is linking these42 outputs into the exact bounded-command R192 baseline,
+retaining all8 legacy arrays/full fixture, then fresh serialized GPU validation.
+All rendering and3DS qualification gaps below remain open.
+
+October 9 current observation: source-only shader CI37972245677 passed all6
+jobs at37e3370; no release or production shader adoption. Its local Vulkan
+runtime remains unaccepted after the recorded pipeline-creation resource stop.
+Observer repair R196 independently recovers the entire old preflight/source/test/
+serialization inventory, retaining every original case, argument, timeout and
+memory threshold. Controlled regressions cover late process/memory-query failure,
+bounded live retries, persistent-error refusal, whole owned-tree accounting,
+exact path/100ns stop identity, all failed acceptance flags and a real exit7
+receipt before disposal. The actual complete19 unit/status/worker/SPC subset now
+passes68.37s, native exit0, no resource/monitor stop/failure, no query failures;
+sampled owned-tree private peak18853888 bytes. All863 compiler dependencies and
+3690 held inputs verify. This is host/observer evidence, not console performance.
+Its complete50 successor stops after23 genuine passes at the unchanged1GiB
+physical-memory floor (1027736KiB free). The owned tree peaks at40259584 bytes.
+Actual CTest163280 exit=-1, Live=false, ResourceStopped=true; no observer error.
+The complete serial Original session passes584.19s, parallel audio575.53s and
+capabilities45.70s. The remaining tests are unaccepted. R197/R198 then retire
+with actual prelaunch refusal, without GPU/emulator/SD/config changes.
+R200 reorders the independent GPU diagnostic after those exact retirements,
+not after full50 success. The full50 gate for source adoption remains required.
+Whole original native body/resource thresholds recover exactly; retirement
+negatives and complete947-input/549-dependency/all50-array preflight pass.
+Actual DRED diagnostic171892 exits1, no resource or observer stop, private peak
+781099008 bytes. Sharp reflection passes; rough reflection cold phase passes,
+hot phase fails with DXGI_DEVICE_HUNG0x887a0006. DRED records258141 operations,
+59343 completed; its retained ring does not contain the failure's operation.
+No page-fault address is reported, which does not prove a cause or a fix.
+The already prepared bounded-command R192 candidate is the next experiment,
+not production acceptance. No mathematical/quality/case/deadline reduction.
+R201 preserves the entire strictO3 native route and result gate with only queue
+bindings/output root changed. Its audited five-member package preflight and
+whole original body/result inverse pass. The actual GPU retires during the
+live-queue test; ready=true is valid terminal retirement, not a queue defect.
+The actual New-model/Vulkan/CPU100% player142992 completes the full42-edge
+ordinary route and all5 guest lifecycle steps, normal host exit0 and exact
+private SD/config restoration. Its independent result gate passes414263;
+the profile contains5295 rows/232 windows/86 gameplay windows on BG3/27.
+The bounded reader passes4c8815 without dropping startup/transition windows;
+inclusive/overlapping timings and unmatched scene work prevent a speedup or
+physical-FPS claim. Audited local tester ZIP and simple SD-card guide are now
+build/StarFoxEnhanced-3ds-test-r180.zip and its START-HERE.txt. These are
+asset-free experimental artifacts, not a release or full-campaign acceptance.
+R202's complete bounded-command runtime preflight/inverse passes. It retains
+the full original GPU fixture/DRED/math/deadlines and all50 linked shader arrays,
+checks every1015 consumed input and actual four-unit dependencies. It queues
+only after exact current ARM retirement/restoration and original6GiB headroom.
+R202 subsequently retires before launching native, with both exact wrapper
+identities absent and no native stdout/stderr/terminal. Cause/exit unobserved;
+its helper/logs remain preserved and it is not a GPU pass or failure.
+R203 recovers the whole original runtime helper exactly after undoing four
+queue/output/retired-input bindings; preflight passes dc7269 and whole-body
+inverse d46cf9. The fresh hidden helper65112 launches actual candidate176440
+at2026-10-10T03:57:41.4532700Z after original6GiB headroom. Actual native exit1,
+Live=false, no resource/monitor stop or query failure; private peak2894401536
+bytes. First-format water sharp/rough passes all three phases, including the
+prior hung hot phase. Lava sharp completes GPU/readback phases0/1/2 but fails
+positive curved reuse at phase1/eye0: changed model/liquid233/57, curved/direct
+model0/210. Eighteen unique optical proofs all fail source-footprint witness
+(three reason3, fifteen reason5); downstream gates refuse rather than reuse
+unproven old colour. This locates the failed stage, not its mathematical cause.
+Actual terminal/all1015 held inputs/executable/owner retirement verify15fc84.
+The remaining cohorts/formats and complete numerical/device-hung-fix/platform/
+natural-gameplay/performance acceptance remain open. No unchanged runtime retry.
+The first read-only terminal audit's ISO-string comparison refuses; correctly
+comparing both parsed UTC datetimes verifies the same native receipt without
+changing it. Current metadata:
+D:/SFE-validation/r200-dred-independent-after-host-resource-stop/checkpoint.json;
+D:/SFE-validation/r201-native-after-independent-dred/checkpoint.json;
+D:/SFE-validation/r202-bounded-source-command-runtime/checkpoint.json;
+D:/SFE-validation/r203-bounded-runtime-after-queue-retirement/checkpoint.json.
+Earlier R178/R181/R182 failures below remain preserved and are not successes.
+R199 updates only the adopted-source readiness gate's owner/terminal bindings
+and fresh output path. Whole original17-file source checks and24-target/50-test
+configure recipe recover exactly; the read-only17-file rehearsal passes, while
+normal mode correctly rejects the actual live current host owner. No source
+adoption, fresh configure/build/test or production acceptance yet. Metadata:
+D:/SFE-validation/r196-complete-host-observer-repair/checkpoint.json;
+D:/SFE-validation/r197-dred-host-terminal-repair/checkpoint.json;
+D:/SFE-validation/r198-current-native-after-host-repair/checkpoint.json;
+D:/SFE-validation/r199-adopted-3ds-after-observer-repair/checkpoint.json.
+Current3DS full50 suite has50 passing cases in actual terminal CTest output,
+including complete serial and
+parallel Original sessions, capabilities, stage sweep, Fortuna/Corneria/
+AttackCarrier, death/restart, both Continue source routes and Original/native
+model host checks, complete Original AttackCarrier/Fortuna compositions,
+effects, menu composition and landscape; EX HUD, complete serial/parallel EX
+sessions, EX capabilities, the full EX stage sweep, EX death/restart and
+both Continue source routes, EX model/native-model checks, effects, menu
+composition and landscape pass.
+EX Continue YES preserves732 consecutive cartridge/SPC/PCM/raster windows and
+16980 complete supported-eye/mono compositions through four natural deaths,
+GAME OVER, ordinary option input, fresh map confirmation and120 bright recovered
+gameplay phases. Peak padded scene/lower textures:3830016 bytes. No cheats or
+source writes. EX Continue NO retains703 consecutive cartridge/SPC/PCM/raster
+windows and11625 complete supported-eye/mono compositions through natural
+reserve exhaustion, ordinary DOWN/START and120 bright title recovery phases;
+the same3830016-byte padded texture peak. This is host source/composition
+evidence, not ARM/PICA or FPS.
+The monitoring wrapper exits1 after a Windows CIM query reports "Call cancelled"
+and before saving the native exit/guarded-provenance receipt. All50 numerical
+passes are preserved, but fully guarded suite acceptance is not established;
+native exit status must not be retrospectively invented. Its owned processes
+have retired. An observer repair must retain the entire suite and all original
+resource gates; this is not console FPS proof.
+R194 passes the complete unchanged original reflection timestamp protocols
+plus35 additive two-eye/sample-stream edge cases: short final batches, exact
+16-batch boundaries and independent1/2/4/8 sample groups. Its unchanged32-context
+diagnostic cap explicitly rejects over-limit profiling without dropped renderer
+samples, early reads/destruction or false timing acceptance. Actual compile/link/
+CPU runtime and233 full dependencies verify; no production source, GPU/emulator,
+renderer quality or shader math changes. This is diagnostic protocol evidence,
+not actual segmented-GPU correctness/performance or a device-hung fix.
+R193 prepares the complete17-file joined-SPC integration (12 changes/five
+already matching), with33 additive root-CMake lines retaining all45 old tests
+plus five regressions. Read-only git apply check and actual apply_patch rehearsal
+both pass; every rehearsed file matches the complete tested candidate, exact raw
+bytes for14 and only LF/CRLF differences for three, with reviewed blob identity.
+Root source/HEAD/index remain untouched. This readies application after actual
+held-owner retirement/full validation; it is not production integration or new
+runtime/performance acceptance. Fresh adopted-root builds/tests remain required.
+R195's read-only adopted-source/fresh-configure gate passes all17 rehearsal
+files and correctly rejects the actual unintegrated root and live validation
+owners. The entire configure recipe is retained except actual-worktree/fresh
+build paths; all24 targets and50 tests remain required. No fresh configure,
+build, test, source adoption, SD/config change or runtime acceptance occurs.
+Preparation does not substitute the staged graph for an actual adopted build.
+DRED observer R179 stops before GPU launch
+after reporting a reused/changed wrapper PID. Failed log preserved; corrected
+R181 observer independently passes full-helper inverse/identity regression and
+same947-input preflight. It now exits before GPU launch because the retired
+full50 helper has no final native/guarded receipt. Failed logs are preserved;
+there is no GPU runtime result or rendering fix. Retained CTest wrappers have
+retired; an unrelated reused PID is never treated as that owner.
+An isolated bounded-command source-validation experiment now passes the full
+original and additive CPU timestamp protocols, all four actual native producer/
+presenter/fixture compilation units and complete link. R192 independently
+recovers all nine original source bodies after undoing scheduling-only additions;
+all42 archive members compare (39 unchanged, three exact new objects), and all50
+linked shader arrays retain their exact bytes, bounds, alignment and read-only
+placement. Original full native fixture is byte-identical. No pixels/lobes/proof
+stages, shader math, fixture cases or deadlines are removed. This candidate is
+not production-adopted, not GPU-tested and not a proven device-hung fix; inspect
+the corrected DRED follow-up before selecting its runtime experiment. Failed compile/
+recipe/observer attempts remain preserved; memory guard thresholds unchanged.
+Current-source strict native Release O3 experiment passes temporary
+source-only CI38000160275 atbbc5d969, parent232e8f37. All43 host tests, all7
+ARM targets/arithmetic/stack/package gates and independent81-command SDK,
+five-member ZIP, ELF binding and3222 compiler-frame audits pass. This is not
+native runtime, physical console or measured performance acceptance. Sole7 native CMake
+lines change; whole1504-file public tree and existing host/ARM/math/stack/
+package gates are preserved, no assets/history/main/tag/PR/release publication.
+R182 independently verifies the complete42-edge baseline runtime route against
+the actual new ARM package. It now exits before emulator launch on the same
+missing full50 native/guarded receipt; no SD/config mutation occurred. Original
+input events, guest/host lifetimes, save/config restoration, memory guards and
+deadlines remain. No optimized ARM runtime or sustained-console performance
+verdict yet.
+The same shared joined-SPC audio translation unit also compiles with Windows
+MSVC in default and thread-local profiling modes. Both actual AMD64 objects,
+all182 ordered include entries (180 files, UCRT assert.h reported three times)
+and5504 retained compiler/header inputs independently verify. The first helper
+refuses only the unstarted profiling case during a RAM dip; that log is retained,
+and a scoped successor waits at the original thresholds before compiling it once.
+The initial verifier's unsupported unique-header assumption remains a recorded
+observer failure; its correction retains every dependency entry and exact order.
+This is shared-code compile compatibility, not a full desktop link/game, ARM
+runtime, console performance or rendering acceptance. No held source is edited.
+The scoped MSVC runtime follow-up R188 now passes the complete original
+synthetic SPC state/PCM and zero-warmed-allocation fixture in all four
+serial/actual-joined-host-worker and OFF/ON profiling combinations. Independent
+artifact checks bind12 additional actual source objects,964 ordered include
+entries,5573 retained inputs and the two previously qualified audio objects.
+The helper invocation and omitted save-container/CRC link failures remain
+preserved; successful compiled objects are reused, and no source, oracle,
+assertion, lifetime or memory threshold is changed. This is host compatibility
+with libctru doubles, not a full desktop game, ARM/physical performance or
+graphics acceptance. Source-only shader CI is rechecked completed/success;
+full3DS terminal output records50/50 numerical passes, but its observer fails
+before final provenance; DRED/strictO3 follow-ups consequently fail before launch.
+No performance, physical-console or completed-goal claim. Metadata:
+D:/SFE-validation/r178-complete-3ds-suite-after-native/checkpoint.json;
+D:/SFE-validation/r179-moving-owner-dred/checkpoint.json;
+D:/SFE-validation/r180-current-native-strict-o3/checkpoint.json;
+D:/SFE-validation/r181-dred-queue-observer-repair/checkpoint.json;
+D:/SFE-validation/r182-current-native-o3-route/checkpoint.json;
+D:/SFE-validation/r185-joined-audio-profile-on-queue/checkpoint.json;
+D:/SFE-validation/r188-msvc-spc-runtime-complete-link/checkpoint.json.
+
+Latest actual terminal882cc6/93a398/4461e0 supersedes prior live notes:
+R173 Vulkan resource-stops at original physical floor773,312KiB during
+pipeline creation, sampled native peak3,004,575,744bytes; no numerical cases.
+R168 full45 CPU suite reaches28 passing cases then resource-stops during
+AttackCarrier composition at original physical floor908,056KiB; sampled
+whole owned tree peak55,996,416bytes, not a native-private-cap failure.
+R170 helper then refuses its baseline-success queue prerequisite before
+any full50 CTest launch. Failed logs retained; no unchanged native retry.
+R176 first actual full50 preserves all45 original names/full cases/commands/
+assertions/timeouts plus5 additive regressions and original memory guards.
+Whole-runner inverse519d40 proves only independent receipts and stronger
+GPU/emulator serialization/queue policy differ. Baseline failure remains
+unaccepted; no old partial pass count is reused and no test is skipped.
+It queues behind R174/R175 terminal retirement and state restoration.
+Current rendering/native emulator diagnostics remain queued for headroom;
+other projects untouched, no root adoption/release or full-goal completion.
+
+Read-only Windows System-log evidence60b7a3/9d7a65 finds three NVIDIA driver
+error153 events at18:14:56Z during the original failed R165 native fixture.
+Insertion text reports a GPU error, not its cause or a specific TDR/reset.
+R174 exact-error diagnostic remains queued behind the verified-live R173
+Vulkan pipeline build. Full current3DS CTest145268 and exact AttackCarrier
+composition child174812 remain live;28/45 passed, no whole-suite verdict.
+No unchanged-input restart or other-project interruption. Correlation:
+D:/SFE-validation/r174-moving-owner-device-reason/driver-event-correlation.json.
+
+Latest device-error diagnostic R174 builds and independently preserves all
+41 other native archive members and all50 linked shader arrays. Exact
+one-query D3D12 HRESULT/Vulkan result reporting is the sole isolated C++
+change; original health predicate/lifetime, shader math, full fixture and
+deadlines remain. Full diagnostic helper112016 queues behind exact R173
+wrapper33412/native166872 terminal retirement; no second GPU/emulator or
+runtime result. This is observability, not a reflection fix or proven TDR.
+Metadata: D:/SFE-validation/r174-moving-owner-device-reason/checkpoint.json.
+Current-root full3DS CPU suite now28/45 pass, including native-model;
+AttackCarrier composition running. Integrated full50 still queued. No
+root adoption, main/tag/release or full-goal completion.
+
+R175 read-only five-member actual R171 ARM-player preflight and whole-route
+inverse pass (dbcf97/e7f7a8). The full42-edge original normal route, exact
+process/UI identity, DSP/GSP/audio/kernel plus host retirement and journal/
+config restoration remain. Only actual new package metadata and additional
+R173/R174 no-overlap queue differ. Helper101252 queues without changing SD/
+config or launching the emulator; original6GiB launch/8GiB cap/floors remain.
+No new native/emulator, physical stereo/audio or console-FPS verdict yet.
+Metadata: D:/SFE-validation/r175-current-source-native-3ds/checkpoint.json.
+
+Latest terminal observation046842/73392b: R166 full31-case matrix exits125.
+Both complete D3D12 formats passed; Vulkanlinear resource-stops during
+pipeline creation at original physical floor459,196KiB, sampled private
+peak3,235,262,464 bytes. VulkansRGB never launches; no full4 acceptance or
+unchanged retry. R173 exact changed-loop native166872 actually launches
+18:37:17.0687582Z after its full wrapper/native retirement and original6GiB
+headroom6,367,788KiB. Actual command/path/creation verified; pipeline creation,
+no numerical verdict or memory/performance improvement established. R168
+now28/45 pass including Original models/native-model; composition running.
+These terminal/live observations supersede earlier live/queued notes below.
+
+R171 fresh complete1504-file current-root plus audited joined-audio public
+source-only ARM CI37971795605 actually completes successfully at232e8f3.
+Downloaded artifacts independently pass all81 actual ARM SDK compile
+commands (7 display owners/1 native worker), exact asset-free5-member
+package/CRC/checksums/3DSX/SMDH, all7 actual ARM ELF headers/player-to-ZIP
+binding, and actual linked stack overrides/3437 individual frames. All43
+CI host tests and native SPC arithmetic/RAM/output gates pass. Experimental
+tester ZIP: build/StarFoxEnhanced-3ds-test-r171.zip (94bf4d2e...). New3DS
+slider stereo, Original3DS/XL/2DS mono. No physical/console FPS acceptance,
+root adoption, main/PR/tag/release publication or included private assets.
+Initial CRLF index-info observer refuses with zero staged paths; exact LF
+transport recovery/new isolated index retains old log/index and all1504
+source/tree guards. README AI disclosure unchanged. Metadata:
+D:/SFE-validation/r171-current-source-arm-ci/checkpoint.json.
+
+R172 authorized source-only shader CI37972245677 at37e3370 compiles all6
+strict diagnostic/ordinary/stream DXIL/SPIR-V entries. Independent actual
+compiler/source/closure/flags/guards/byte/format/allowlist audit passes98bffc.
+Exact whole-source inverse proves only a Vulkan interval-sine loop hint
+changes; all8 ordered Horner operations/math/precision remain. All3 DXIL
+outputs every byte unchanged; all3 SPIR-V every word unchanged except one
+OpLoopMerge control1->2. Module sizes/instruction counts are unchanged,
+not a demonstrated memory/performance fix. Manifest observer correction
+independently checks the exact Git LF blob and sole Windows CRLF checkout
+transform; old failed logs retained. No runtime or production adoption.
+R173 fresh unchanged full47 checker compiles/links exit0 (0df400), original
+CPU guards; peak1,454,866,432 bytes. All12 actual consumed shader headers,
+550 dependencies/552 audit inputs and every candidate embedded byte pass.
+Full Vulkan helper33412 queues behind exact R166 wrapper/native retirement
+including final pin checks (a0309a); no GPU overlap or numerical verdict.
+Metadata: D:/SFE-validation/r172-vulkan-optical-polynomial-loop/checkpoint.json;
+D:/SFE-validation/r173-vulkan-loop-runtime/checkpoint.json.
+
+R161 full Vulkan actually resource-stops125 during pipeline creation before
+numerical cases (5fa0a3): original physical floor996,696KiB, sampled private
+peak3,028,246,528 bytes. Not8GiB private-cap failure, inferred hang or pass;
+exact43228 retires, no unchanged retry. Earlier full D3D12 diagnostic pass
+remains464-byte scope only. R165 full native512 moving-owner actually
+exits1, resourceStoppedfalse (9d5f83), peak857,182,208 bytes. Sharp mirror
+all3 phases and rough phase0 pass; ground5/model81/phase1/sRGB/8 lobes
+fails the GetDeviceRemovedReason-backed health check. Exact HRESULT/cause
+not yet recorded; no TDR, full-cohort or practical-FPS claim. All original
+fixtures/math/guards/deadlines retained, failed logs preserved. R166 actual
+full31-case D3D12 linear and sRGB exits0 without resource stop and with zero
+critical/discarded messages through teardown. Exact Vulkanlinear173544
+remains live at pipeline creation; VulkansRGB queued, not full4 accepted.
+R168 full45 current-source CPU suite now26 cases pass (d8dabb), including
+Original stage sweep/all source routes/ContinueYES and NO; models running.
+R170 integrated full50 remains queued behind its exact terminal retirement.
+Metadata: corresponding D:/SFE-validation/r161,r165,r166,r168,r170 roots.
+
+R169 audits the complete16-file joined-audio delta against current root:
+5 already match,10 pending exact updates and one checker overlap (54df2d).
+Whole-file reversal of exactly the additive worker-only checker changes
+proves every current case/assertion/modification is retained (347823).
+R170 copies1495 complete current-source/public companion inputs plus all16
+audited paths into a separate source snapshot (c3ee9f). No private cartridge,
+BIN/DSP/key or root/index/ref/remote mutation. Staged whole-root CMake adds
+33 lines/deletes0: all45 old tests plus5 worker/SPC/full-parallel regressions.
+Actual configure152908 exits0, no resource stop,24 targets/50 tests. Complete
+169-task build19452 actually exits0 (84cc7d), no resource stop, sampled peak
+479,526,912 bytes. Actual runtime preflight independently retains all45 old
+names/commands/full cases/timeouts plus all5 additive regressions,863 compiler
+dependencies/3685 test pins. All19 unit/status/worker/SPC tests actually pass
+(572d16/1f2f6a), no resource stop, sampled peak18,722,816 bytes. Full50 wrapper
+96120 is actually queued (6c03c0), no CTest child or full-suite pass, waiting
+exact R168 CTest/wrapper terminal retirement and original6GiB headroom.
+Original CPU guards and3106 source/original/dependency/cartridge build pins held.
+No ARM/native/FPS/player-package or production-adoption claim. Metadata:
+D:/SFE-validation/r169-3ds-production-integration-audit/checkpoint.json;
+D:/SFE-validation/r170-current-root-joined-audio/checkpoint.json.
+
+R168 fresh CPU-only current-source host graph actually passes all157 build
+tasks,20 configured 3DS targets (22cb72 exit0), no resource stop; sampled
+whole owned-tree private peak468,606,976 bytes. Source/local-dependency/
+cartridge1608 inputs held. Independent runtime preflight matches all45
+original names, command cases/arguments and per-test timeouts, with857 actual
+compiler dependencies/2181 held inputs. All16 fresh unit/status tests pass
+(3b7344 exit0), no resource stop; full45 CTest145268 actually launches at
+17:40:00.2350435Z. Actual identity verified,19 cases pass (2011e3), including
+the complete Original default session; Original stage sweep is running.
+No whole-suite terminal pass yet. Pure CPU host runtime/tools-OFF scope is explicit; not normal
+graphical-root, ARM/PICA/NDSP/console FPS or new player ZIP. Same-source full
+serial/parallel Original/EX R163 passes remain separately accepted. Metadata:
+D:/SFE-validation/r168-current-source-3ds-headless/checkpoint.json.
+
+R167 fresh current-source CPU-only root-CMake configuration registers all20
+targets/45 tests, but build118804 actually exits1, not resource-stopped
+(dbebed). Installed SDK FXC adds a DXR custom command with no DXC compiler
+in a runtime/tools-OFF graph. Exact failed logs/build retained. The root
+Windows shader block now requires runtime OR VR OR tools, preserving those
+branches and excluding irrelevant desktop shaders from a pure CPU graph.
+No root CMake/cache/Ninja input is held by the active R165/R166 native GPU
+manifests (419eef); their inputs are not changed. Fresh R168 configure109612
+exits0, no resource stop, again registers20/45. Independent graph receipt
+028087 finds zero desktop shader header inputs. Its complete157-task build
+is actually running, not yet accepted. Scope is current-source CPU host,
+not normal graphical-root, ARM/PICA/NDSP, console FPS or a new player ZIP.
+Original memory guards, root index/HEAD and local assets remain preserved.
+
+R166 links the unchanged complete source-composition fixture against R165's
+qualified native512 library (e7217a), with529 native/654 fixture compiler
+dependencies and960 held inputs. All50 actual final-PE shader array bytes,
+read-only symbols/bounds/alignment independently pass1960fa. The first
+recipe observer used the wrong index and refused before linker launch;
+original failed log retained, only observer corrected. Linker3048 exits0,
+not resource-stopped; it finishes before the first memory sample, so the
+zero sampled peak is not an actual zero-memory claim. Full unchanged31-case
+DX12/Vulkan linear/sRGB matrix preflight passes450eaa and helper is actually
+queued (7c5a41) behind R161 Vulkan and R165 moving-owner terminal retirement,
+not launched or accepted. No shader math, precision, fixture or production
+change. Metadata: D:/SFE-validation/r166-native512-full-source-composition.
+
+R163 now accepts all four complete same-source default serial/parallel
+Original/EX suites (396bd2 exit0, actual retired handles4950a1). Fresh full
+parallel EX exits0 with20,789 checks/5,301 actual joined SPC blocks and
+38,154,240-byte sampled private peak, no resource stop. Full serial Original
+and EX each pass20,651 checks; parallel Original passes20,789/5,229 actual
+joined blocks. Original cases/oracles/source and memory guards remain.
+All actual terminal/stdout/stderr hashes are retained in its checkpoint.
+Normal root20-target read-only preflight92b885 requires CMake regeneration;
+its full45 tests (16 unit/status plus29 cartridge/routes) have not been
+re-run against a freshly regenerated normal graph. Shared-build mutation is
+deferred while GPU helpers hold inputs. Host parity is not physical PICA,
+NDSP, slider/audio/HomeSleep or sustained console FPS acceptance. Metadata:
+D:/SFE-validation/r163-remaining-complete-3ds/checkpoint.json.
+
+R165's identical native512 C++ source snapshot compiles within the original
+2GiB CPU guard, with527,605,760-byte sampled private peak. Exact raw shader
+resources remove large C++ array initializers without changing GPU math,
+source/packet ABI, precision or fixtures. Final isolated archive/link passes
+d0ea5f:39 original members unchanged,1 exact native replacement and2 data
+objects; full frozen moving-owner fixture and8-library order retained.
+Independent final-PE audit fd7df8 verifies all50 actual read-only array byte
+hashes/symbols/bounds/alignment (42 native,8 immutable legacy),529 actual
+compiler dependencies and793 held inputs. Windows ar-print LF translation
+caused an observer refusal, corrected by a direct binary archive reader;
+original failed log/data objects retained, no shader/C++ recompile or archive
+mutation during recovery. Full moving-owner helper29356 is actually queued
+after exact Vulkan43228 (de6403), not launched or runtime accepted. Metadata:
+D:/SFE-validation/r165-native512-complete-raw-resources/checkpoint.json.
+
+R163 retains the exact same-source full serial Original pass. Fresh unchanged
+full serial EX exits0 with20,651 checks and full joined parallel Original
+exits0 with20,789 checks/5,229 actual joined SPC blocks, neither resource-
+stopped (a9c086). Full parallel EX152924 is actually live (de6403), not all4
+accepted. Original cases/source/oracles and6GiB launch/1GiB native cap/
+1/1.5GiB running floors remain. CPU host parity is not PICA/NDSP/physical
+slider/audio/HomeSleep/sustained console FPS. Metadata:
+D:/SFE-validation/r163-remaining-complete-3ds/checkpoint.json.
+
+R162 and R164 direct full C++ attempts resource-stop on original2GiB private
+cap, not shader-math failures or runtime passes (21d357/def9fc). R164 actually
+assembles/audits42 native resource arrays; remaining legacy inline arrays
+still exceed the compiler cap. R165 adds exact immutable8 referenced legacy
+arrays to the raw resource path and succeeds without increasing any guard.
+These trials remain isolated: no production source adoption, main/tag/PR,
+release or completed-goal claim. Exact R161 Vulkan43228 remains CPU-active
+at pipeline creation (de6403); no Vulkan numerical verdict yet.
+
+R161 freshly compiles/links the unchanged full checker against actual R160
+shaders (b66bdc), with550 actual compiler dependencies and554 held inputs.
+Independent actual-compiler every-byte embedding audit passes f59526.
+Full D3D12 numerical run exits0, not resource-stopped (f59756): all47 cases,
+6,347 independent forward samples,25,388 derivative checks and original raw
+lava/held/refinement assertions pass. No critical/discarded D3D12 messages
+through teardown. Diagnostic private peak539,516,928 bytes is not player FPS
+or frame-cost evidence. Full Vulkan native43228 is actually live at pipeline
+creation (de5a62/2b90dd), not yet numerically accepted. This remains464-byte
+diagnostic evidence, not native512/global/source/RGB/moving-owner acceptance.
+The initial prelaunch observer matched its own calling shell and refused
+before compiler launch; exact PID guard plus independently audited existing
+headers correct it without discarding the refused receipt or weakening guards.
+Metadata: D:/SFE-validation/r161-complete-map-runtime/checkpoint.json.
+
+R162 prepares all4 actual ordinary/stream native512 R160 shader outputs under
+their correct application symbols, with independent every-byte/declaration/
+length comparisons and13 held inputs (377b17). No fresh native C++ consumption,
+archive/link or GPU verdict yet. Root source/fixtures/libraries are unchanged.
+Metadata: D:/SFE-validation/r162-native512-map-candidate/checkpoint.json.
+
+Earlier live observations below are historical: R152 Vulkan39640 resource-
+stops at841,720KiB physical (1871d6); R155 compiler157296 then resource-stops
+at997,048KiB (a55b0a). R159 full serial EX121000 resource-stops at736,648KiB
+(a26bc6), before any complete EX output; both parallel suites were not started.
+The full Original20,651-check pass remains valid. All exact terminal handles/
+resource logs are retained. No elapsed termination, other-project interruption,
+unqualified GPU pass, all4 session pass, main/release or completed-goal claim.
+
+R160 adds Vulkan-only noinline hints to the complete lava/liquid-normal/forward
+functions. All six authorized strict source-only CI37954723248 builds pass;
+independent artifacts pass19f7a2. Exact source reversal and every actual byte
+of all3 DXIL outputs match R158 (f0dbc8), with80 inputs held. All3 SPIR-V
+modules emit the requested3 function controls; full forward body separates
+from13,027 to7,558 instructions, with5,371 in liquid-normal and7,692 in lava.
+This is emitted-code structure, not driver compliance or GPU performance.
+Full math/guards/precision/rounding/cases remain. No production/main/tag/release
+or PR change. Numerical/native512/global/source/RGB/moving-owner/practical-cost
+acceptance remains open. Exact R152 Vulkan native is still live; R155 build
+queued. Metadata: D:/SFE-validation/r160-vulkan-map-boundaries/checkpoint.json.
+
+R159 starts the unchanged complete4 CPU-only 3DS functional suites without
+waiting for the Vulkan compiler. Full serial Original native175536 exited0,
+not resource-stopped, with20,651 checks and29,917,184-byte private peak
+(6fbe3c/29ae6f). Full serial EX121000 is actually live (e080b7/ec1bfe);
+both actual joined-worker parallel suites follow automatically. Not all4
+accepted. Read-only preflight89de4a passes with254 audited source
+files,800 compiler dependencies and819 held inputs. Actual link graphs show
+CPU/frontend/raster/geometry/SPC test libraries, not SDL/Vulkan/PICA/NDSP.
+Recovered headroom permits this scheduling change; original6GiB prelaunch,
+1/1.5GiB running floors and1GiB owned-private cap remain. Cases/assertions
+are unchanged. Only the unstarted R156 waiting wrapper was canceled
+(a55f54/5f9aca exit-1), with no native session launched; old logs are retained.
+No Vulkan stop/restart, other-project interruption or sustained FPS claim.
+Host parity is not physical PICA/NDSP or sustained console FPS acceptance.
+R152 Vulkan remains live and R155 build queued.
+Metadata: D:/SFE-validation/r159-decoupled-complete-3ds/checkpoint.json.
+
+R158 keeps exact R155 interval-value add/multiply functions on SPIR-V and
+R157's scalar-only code sharing on DXIL, using DXC's documented target macro.
+Authorized source-only CI37950721223 passes all six full strict entries under
+unchanged compiler flags and memory limits. Independent artifact checks pass
+(6b048a); every actual byte of all six outputs independently matches its
+intended R155 SPIR-V/R157 DXIL reference (61eafa), with12 inputs held. This
+avoids R157's SPIR-V growth without discarding its DXIL compiler-memory gains.
+It does not transfer a numerical acceptance those references do not yet have.
+No production/main/tag/release/PR changes. The full goal remains active.
+
+A bounded owned-thread sample (1c0116) captures native39640/thread17008 inside
+nvgpucomp64.dll during logged complete Vulkan pipeline creation. The sample's
+0.1645ms debugger-style pause is undone in native finally (prior0/resume1);
+the exact native remains live. No register/code write, dump, driver reset,
+elapsed stop/restart or other-process sampling. One PC is not a full stack,
+hang/loop proof, GPU numerical verdict or native performance acceptance.
+The exact R155 build and full4 R1563DS sessions were queued at239687;
+R159 above supersedes only the 3DS scheduling, not the original test scope.
+A supplemental read-only Deck SSH check times out; no device mutation.
+Metadata: D:/SFE-validation/r158-backend-arithmetic-boundaries/checkpoint.json.
+
+R157 shares the full guarded add/multiply endpoint bodies at scalar-only
+boundaries in the isolated R155 closure. The authorized40-file source-only
+CI37948802790 passes all six complete strict entries; independent artifact
+checks pass (56954a), with original compiler flags and memory guards intact.
+DXIL compiler-private peaks fall from about2GiB to334/353/380MB. This is
+compiler-memory evidence, not GPU frame cost. Actual SPIR-V grows from
+31,557/32,831/32,825 to34,643/36,135/36,129 instructions; no Vulkan pipeline
+or performance improvement is established. Full math, identities, finite/order
+guards, signed-bit negation, outward rounding and all fixtures remain;
+numerical equivalence is unproven. No production/main/tag/release/PR changes.
+An initial preflight wrapper incorrectly propagated its final expected
+negative-control exit1; explicit helper exit0 and fresh negative fixtures
+correct that observer, retaining the initial log (4aed64). Full runtime and
+native512 global/source/RGB/moving-owner/practical-cost acceptance remain.
+Metadata: D:/SFE-validation/r157-shared-basic-arithmetic/checkpoint.json.
+
+R155's independent before-compiler embedding check now compares every
+1,238,700 DXIL/523,664 SPIR-V byte with its generated header and checks all12
+headers, ten unchanged noncandidate headers and552 held inputs (86c42e).
+The550 dependencies are baseline-mapped: the fresh compiler is still queued,
+so actual new compiler consumption/build acceptance is not inferred.
+
+R154 uses newly authorized source-only shader CI, preserving working HEAD/index
+and publishing only an independent40-file source/helper/manifest/workflow tree.
+No ROM/private assets/inherited history or release/main/tag/PR. Six positive
+and three altered-input negative closure checks pass before publication.
+CI37942170309 compiles five of six complete strict diagnostic/ordinary/stream
+DXIL/SPIR-V entries; ordinary DXIL stops at the original2GiB native-private cap
+(2,235,830,272 bytes), not a shader success. Both diagnostic outputs independently
+match the original locally tested R152 bytes exactly. No unchanged retry.
+
+R155 shares the same eight checked quotient evaluations at a scalar-only
+boundary, preserving their order, identity/range guards and outward rounding.
+CI37943332711 now compiles all six actual entries under the same pinned
+DXC1.9.2607, strict flags and original memory limits. Ordinary DXIL peaks at
+2,128,723,968 bytes. Independent byte/hash/native-format/entry/closure/compiler/
+guard/allowlist checks pass (1586ef); an earlier audit's uninvoked binary-check
+block is corrected and its initial log remains unaccepted for those checks.
+This isolated candidate is not adopted into production and has no numerical,
+source/global/RGB/moving-owner/gameplay or practical-cost verdict yet.
+
+The full unchanged R15247-case/raw Vulkan native39640 is actually live during
+pipeline creation after system headroom recovers materially (10,131,696KiB
+physical at launch). All original assertion and safety guards remain. R155's
+fresh full550-dependency checker build wrapper45245/43980 is serialized behind
+that exact Vulkan native; no CPU compiler or new numerical verdict yet.
+Metadata: D:/SFE-validation/r154-source-only-shader-ci/checkpoint.json and
+D:/SFE-validation/r155-shared-divide-boundary/checkpoint.json. Full goal active.
+
+R156's complete four Original/EX serial/actual joined-worker session suites
+pass read-only preflight against the exact R149 ARM source commit:254 actual
+first-party files,800 complete compiler dependencies and819 held inputs.
+Wrapper167384/session12153 is queued behind exact R155 build wrapper43980,
+which itself waits for Vulkan39640. No session native has started; no suite or
+hardware-performance result is inferred. Original launch/running memory
+guards remain. The corrected read-only SPIR-V function inspection is only
+structural evidence; its initial zero call count had a numeric-key observer
+bug and is not accepted. An independent byte-walk confirms the corrected
+counts. No shader arithmetic/compiler flags or production files changed.
+
+R152's complete strict SPIR-V and DXIL diagnostic compilers now exit0
+(b62d55/f79ca8). The full checker builds under strictO3 with550 actual compiler
+dependencies held; every1,269,976 DXIL and523,036 SPIR-V embedded byte is
+independently compared (f74023/3d0cc1). All12 consumed shader headers are
+accounted for, with ten noncandidate headers unchanged. Its first actual full
+47-case/raw D3D12 run passes (68f2af), including6,347 independent forward
+samples,25,388 derivative checks,184 local unique-root enclosures and all
+original held/refinement/refusal assertions. The captured raw lava replay also
+passes126 forward/504 derivative checks with three unique local enclosures.
+No assertion/tolerance/resource floor changes; no stored critical/discarded
+D3D12 messages through teardown. This is diagnostic464-byte LOCAL evidence,
+not native512/global-source/RGB/moving-owner/gameplay or performance acceptance.
+The actual native512 ordinary SPIR-V wrapper18052/79964 subsequently ends
+exit125 before native launch (4ccbfd), at its unchanged6GiB launch-memory gate.
+No unchanged retry or native512 result. R154 uses newly user-authorized
+source-only shader CI with the same compiler, flags and guards; stream/native
+owner and Vulkan verification remain required.
+
+R153 adds only seven native GNU ReleaseO3 build-recipe lines to the isolated
+verified3DS parent. Source-only commit28a28d01 goes to the authorized temporary
+test branch, preserving working HEAD/index. ARM CI37936446669 passes (b57fd6),
+as do independent five-member asset-free ZIP and real81-command SDK audits
+(549a34/11fb6c). The audited experimental ZIP is copied without replacing prior
+candidates to build/StarFoxEnhanced-3ds-test-r153.zip (1,114,274 bytes / SHA256
+9259bf8b). Its hardware_accepted=false metadata and installation instructions
+remain intact; no runtime or release qualification is implied.
+All native commands end in effective-O3 after the SDK's earlier
+O2; stack reports/profile remain ON, IPO/fast-math/LTO remain OFF. These are
+build/package gates, not a measured console speedup. Its real packaged ARM
+ordinary route starts but stops at the unchanged1GiB physical-memory floor
+(71007b:1,019,948KiB free) after26/42 input edges. Journals/configuration are
+restored; no complete route/FPS/physical-console pass or unchanged retry.
+The earlier observer timestamp-precision refusal happens before any SD/config
+change and is retained. Neither the nativeO3 recipe nor R152 shader is adopted
+into production. Metadata: D:/SFE-validation/r152-canonical-primary-depth/checkpoint.json
+and D:/SFE-validation/r153-3ds-native-release-o3/checkpoint.json. Full goal active.
+
+R151 completes the corrected first actual R149 ARM route (da1ec7): all42
+ordinary input edges, ordered guest DSP/component/GSP/audio/kernel retirement,
+then normal host close with exit0. No resource stop, debugger or timer-forced
+termination; original journals/configuration restored. A missing97 in the
+observer's transcribed checksum is corrected, with read-only ZIP preflight and
+both malformed/wrong-checksum negative controls before any SD change
+(a5677b/8aa7fb). The package was valid and unchanged. This is emulator
+functional/lifecycle evidence, not physical core permission, stereo, audio,
+Home/sleep or sustained console FPS.
+
+The first actual R140 full47-case/raw D3D12 run creates its pipeline but fails
+strict optical-value containment (b81089). R151 adds only precise failure
+reporting, rebuilding under strictO3 and550 actual compiler dependencies
+(5a7648). The unchanged GPU/test arithmetic reproduces exit1 (db28e2): first
+flat receiver's primary depth is bounded by exactly[40,40], excluding the
+normalized binary64 reference39.999999999999993. No tolerance is loosened.
+R152 therefore encloses the complete checked normalized-depth expression
+alongside canceled real depth, while retaining correlated hit construction and
+normalized clipping/branch guards. This shader candidate stays isolated and
+unverified. Its first strict compiler wrapper waits behind all four complete
+R149 serial/parallel Original/EX suites. Their source-only254-file closure and
+all800 actual compiler dependencies pass read-only preflight with819 inputs
+held. The first full serial Original native later stops at the unchanged1.5GiB
+virtual-memory safety floor (dc6d3f:1039788KiB free), despite using only29,212,672
+private bytes itself. The other three suites never start; no parity verdict or
+unchanged automatic retry. The exact R152 compiler wrapper is still live at its
+unchanged6GiB prelaunch gate after that retirement (c5f526). No complete
+cartridge, new shader numerical/native512/source/RGB or physical verdict yet.
+Metadata: D:/SFE-validation/r151-optical-value-diagnostic/checkpoint.json and
+D:/SFE-validation/r152-canonical-primary-depth/checkpoint.json. Goal remains active.
+
+R150 records the actual R140 strict DXIL compiler's success (fb82b6):
+1,257,340 bytes / SHA2569e34b150. The complete unchanged47-case/raw checker
+compiles under strictO3 with all550 actual dependencies pinned. Its first link
+hits a process-monitor loading/exit race, so that emitted executable is not
+accepted. A separately observed held link then exits0 (bb37e4), with554 inputs
+revalidated and every embedded shader byte independently compared. No fixture,
+shader precision, source/RGB criterion or resource floor changes. The numerical
+wrapper1785 subsequently defers before native launch (895a10); no GPU result.
+
+The verified R149 geometry-only optimization is now adopted into the actual
+working tree after its baseline and entire resulting source canonically match
+the independently tested files; only line endings differ (c9f031/da3d85).
+All20 configured root3DS targets rebuild under1151 held inputs (e383a3), then
+all16 root unit/status tests pass with1103 actual inputs held (dbf339). The
+remaining29 root cartridge/route tests are not covered by that unit result.
+Joined audio and rejected-plan cache candidates stay isolated. No measured
+native or physical speedup, new package or release follows from this adoption.
+
+The new faithful ARM observer retains all42 ordinary input edges and requires
+actual guest retirement before normal host close, with no elapsed force-close
+or debugger. Its wrapper10619 ends prelaunch resource-deferred (d63776): no
+emulator or SD/config change. R145 Vulkan166580 also becomes terminal at its
+unchanged1GiB physical safety floor (c43279:985300KiB free), during pipeline
+creation and without a numerical verdict. R148's wrapper4709 then defers
+without launching any cartridge (0ac09d). Neither native is restarted unchanged.
+The D3D12 wrapper1785 subsequently defers before launch at the unchanged6GiB
+headroom gate (895a10). No native-runtime, physical-console, numerical/native512/source/RGB
+or practical-cost acceptance; full goal remains active.
+Metadata: D:/SFE-validation/r150-r149-arm-runtime/checkpoint.json.
+
+R149 reuses each retained clipped atlas corner's depth/position/UV transform,
+instead of repeating it for triangle-fan shared edges. The isolated complete
+R148 candidate keeps every corner, triangle, float conversion, budget, guard,
+draw order, infinity/finite region and borrowed-frame transaction. The fresh
+174-task graph passes (720a7c), followed by all 43 registered tests (e9a78b).
+An independently linked unchanged R148 baseline and fresh R149 graph match
+20,434,900 exact serialized fields across 3,675 frames and 2,129,355 vertices
+(82557e). A deliberately shifted production geometry copy fails the identical
+fixture (87ec6c). All 765 input cases remain, including 30 unchanged bounded
+coverage refusals; no guard or tolerance is loosened. A held complete repeat
+passes with all 556 actual dependencies, archives, executables and baseline
+receipt inputs revalidated before/after (06e862).
+
+Actual 254-file compiler dependencies match verified R148 CI except the single
+tested scenery file. Temporary source-only commit 48535357 is pushed with the
+working HEAD/index preserved (352b47). ARM run 37920848892 passes (30138d);
+independent five-member ZIP/native 3DSX/SMDH and 81-command real SDK audits
+also pass (744256). The asset-free experimental package is copied without
+replacing earlier candidates to build/StarFoxEnhanced-3ds-test-r149.zip,
+1,009,519 bytes / SHA256 c1436b4c. This is compile/link/package evidence,
+not actual core/TLS/PICA/NDSP, stereo, full game or sustained console FPS.
+No release or production adoption is claimed.
+
+The original shared diagnostic graph now exits 0 (5ccc2e), after its long strict
+shader compile and current check-tool links. The current independent CPU owner
+oracle is rebuilt strictly rather than using its stale October 8 executable,
+then passes its full default tests (041a67) and the actual raw lava replay
+(1d6865: 9,216 taps / 56 triangles). This is local CPU/source-guard evidence,
+not GPU uniqueness, native512, RGB or performance. R145 Vulkan native 166580
+is still identity-confirmed in pipeline creation; R148's complete cartridge
+suites remain serialized behind it. R140's first actual strict SPIR-V compile
+passes after unchanged 6 GiB prelaunch headroom recovers (08d86c):
+517,480 bytes / SHA256 e1de4f62, no resource stop and all 36 baseline inputs
+revalidated. Its first DXIL wrapper is now launched separately. This is
+compilation only, not a numerical, native512, source/RGB or cost result.
+The full rendering/3DS goal remains active and incomplete. Metadata:
+D:/SFE-validation/r149-3ds-atlas-corner-reuse/checkpoint.json.
+
+R148 adds an isolated exact rejected-tile-plan cache to the complete R147
+candidate. A declined topology retains just one source/batch/width/budget entry;
+palette/OBJ-only presentations reuse the decline while preserving the complete
+raster fallback. Public validation stays live, and topology/scroll/character/
+coverage/budget changes retry planning. Successful borrowed atlas views remain
+valid after declined attempts. The fresh complete graph builds under strict
+changed-owner warnings (19309d), then passes all43 registered tests (70cd51).
+The full BG2 fixture passes24584446 pixel/palette/ownership/HDMA/budget/cache
+checks (b96e29); an independently linked removal of only the cache-reuse guard
+fails the identical test object as intended (cae8c5). Exact254 actual first-party
+compiler dependencies match R147 CI except the tested three-file delta.
+Source-only commitbf2e4901 is pushed to the temporary branch
+codex/3ds-tile-rejection-cache-r148-20261009 (71b854), with working HEAD/index
+preserved. ARM run37917956715 passes (210006); independent ZIP and81-command
+actual SDK settings audits also pass (097aec). The verified asset-free package
+is copied without overwriting earlier candidates to
+build/StarFoxEnhanced-3ds-test-r148.zip,1009318 bytes/SHA256d992126e.
+This proves ARM compile/link/package gates, not runtime/core access or physical
+performance. All four complete
+fresh serial/parallel cartridge suites4709 are serialized behind the two verified
+heavy native jobs, with increased6GiB launch headroom and unchanged running
+floors (10f426); no cartridge runtime has started. Initial strict allocation-hook
+warning and premature missing-executable invocation are retained; no warning,
+assertion, source/timing bound or resource floor was relaxed. No measured native
+speedup, physical-console acceptance, production adoption or release claim.
+
+R147 integrates the joined worker with all four ordinary SPC render sites,
+native owner lifetime and state reconstruction in an isolated source candidate.
+The complete fresh host CMake graph passes174 tasks and43/43 tests
+(1ad047/5c24e3); its254 actual first-party dependencies canonically match the
+exact source-only CI commit4276d125 (e0a13d). Strict compilation covers all
+changed owners, with host SDK doubles confined to the two explicit fixture
+commands. The independent complete Original serial session suite passes20651
+checks, byte-identical to R141 (d920be); EX also passes20651 with byte-identical
+output (6c32b0). Original parallel also passes20789 checks and5229 actual joined
+SPC blocks against the unchanged complete serial SourceOracle (835582).
+EX parallel stops when free physical RAM reaches1039312KiB, below the unchanged
+1GiB safety floor (f14c2c); no complete EX parallel verdict is claimed.
+the mixed-archive checkers are NOT the fresh
+CMake executables. A supplemental restored-executor oracle passes871 checks
+for each real cartridge, all six partial-audio restores and eight actual joined
+blocks after each restore (436d7b). Its negative control drops only executor
+propagation and fails as intended (fbc4db); initial pre-raster full-checkpoint
+validation refusal is retained, and no state validation guard was relaxed.
+Source-only temporary branchcodex/3ds-joined-audio-r147-20261009 is pushed with
+exact16-file delta and unchanged working HEAD/index (030180). Run37913961912
+passes job113765534987 (201005). The downloaded ZIP passes independent exact
+source/five-member/CRC/checksum/native3DSX/SMDH/readme checks (43c2a2), and all81
+real ARM compile commands include the genuine libctru worker with no fake SDK
+headers (a8bc29). It is copied without replacing R134 to
+build/StarFoxEnhanced-3ds-test-r147.zip (9bfc18),1008233 bytes/SHA256cf3240c9.
+ARM compile/link and CI stack/memory/package gates pass; actual TLS runtime/core
+permissions, physical audio, stereo and sustained console performance do NOT.
+Fresh whole-CMake cartridge wrapper87379 then correctly refuses native launch
+because that prerequisite suite did not fully pass (fef8bd). Its four complete
+runtime commands have NOT run. Workspace production
+SPC/session/profile wiring remains unchanged while the shared renderer graph
+is live. No main/tags/release or private assets were published. Metadata:
+D:/SFE-validation/r147-3ds-joined-audio-integration/checkpoint.json.
+
+R146 implements an actual joined libctru stem-worker backend, with New-model
+core2 requested and serial fallback for old/denied/failed cases. Its strict
+host adapter tests pass15470 synchronization/exception/retirement checks
+(ce0d46). An isolated dual-SPC candidate then passes the complete existing
+PCM/state oracle in both profiling modes: every sample/state byte/port matches
+serial, independent pre-refactor digest stays e7cddb7195a79cc2 and warmed
+allocations remain0 (620317). The held repeat verifies4637 inputs and every
+actual compiler MD dependency.1024 joined profiler blocks check all25 phase
+merges and thread-local isolation; the existing full profiler suites pass
+both macro modes (9dc496/ce0d46). New backend files are present but not yet
+CMake/native-owner wired; SPC/API/profile candidates remain external pending
+shared build termination. No ARM/TLS/core permission, cartridge-wide parallel
+PCM, physical audio/FPS or new package acceptance. Metadata:
+D:/SFE-validation/r146-3ds-joined-stem-worker/checkpoint.json.
+
+The shared root build46642 has progressed past both ordinary and streaming
+native512 optical shader generation in DXIL and SPIR-V (fe786b/ce0d46).
+All36 baseline shader inputs are independently revalidated. Streaming DXIL
+is2682700 bytes/SHA25622a81ae9; SPIR-V523976 bytes/SHA25670b8f2d1.
+These are compile outputs, not native512/source/RGB numerical acceptance.
+The graph now compiles the separate diagnostic shaders; DXC167508 remains
+identity-confirmed live (c864d7). The R138 Vulkan numerical native166944 stops
+when physical headroom reaches1022700KiB, below the unchanged1GiB floor
+(48da7c), before pipeline creation completes. No Vulkan numerical pass, elapsed
+stop, unchanged retry or source-history opt-in adoption is claimed.
+
+R145 adds an isolated, default-disabled Vulkan driver-compilation flag probe.
+Its independent1520 name/enable/bit policy cases pass; exact entrypoint names
+alone can request the documented DISABLE_OPTIMIZATION flag. The complete
+unchanged R138 checker object is linked with a new external SDK archive after
+strict O3 native compilation and250 SDK/PCH/build input checks (6a01f2). All267
+archive members are independently compared: only the Vulkan object and its
+symbol index differ (6d1b83). Original SDK/source remain byte-identical.
+An initial path-normalization verifier refusal is retained, then repaired;
+compiler-child memory accounting is also corrected. No shader, assertion,
+precision, physical wave or source/RGB criteria change. The complete47-case/
+raw-lava GPU script now launches once after the prior R138 native is terminal
+and6GiB launch headroom returns (72927a). Session20040/native166580 is confirmed
+live with the exact guarded executable/arguments/creation, and native telemetry
+confirms the selected driver flag (c864d7/dde870). It remains inside complete
+pipeline creation without a numerical result. This is a linked diagnostic,
+not Vulkan/native512/source/RGB or cold/steady performance proof.
+No production adoption, installed player, CI or package change. Metadata:
+D:/SFE-validation/r145-vulkan-cold-pipeline/checkpoint.json.
+
+R144 follows the successful full stage-entry sweeps with nine existing full
+natural-route commands on the same fresh R141 CMake executable. Fortuna,
+Corneria3 and Corneria1/AttackCarrier each pass exit0 through actual boss
+damage/defeat, results and map return (758118):47755/47109/41169 checks with
+exact VM/raster/SPC/PCM and eye/mono source purity. Existing ordinary inputs
+and God preference are retained; no shortened source bound or skipped oracle.
+Each completed command revalidates all249 source hashes, six fresh archives,
+executable and private cartridge/symbol pairs. Original natural death/restart
+also passes19480 checks/1536 eye-mono compositions (2b5067); its115 live circle
+phases lead through black fade to120 bright recovered phases. Original natural
+GAME OVER -> Continue YES -> route/gameplay then passes97488 checks/14271
+compositions (951b85), including three actual reserve-consuming deaths, ordinary
+choice/Start and the source-required fresh map confirmation. These two routes
+use no survival cheats or source writes. Original Continue NO also passes70111
+checks/8934 compositions to120 bright title phases (90adee). EX natural
+death/restart passes30930 checks/1767 compositions (9e117c). All six Original
+commands, EX death and EX Continue YES now total536408 checks. The latter
+passes182366 checks/16980 compositions through four natural deaths, game over,
+ordinary choice/Start, fresh map confirmation and120 bright gameplay phases
+(6bbdff). Collection36043 then terminates when EX Continue NO/PID171472 hits
+the unchanged system RAM floor:995500KiB free, native exit-1, resource-stopped
+(056c54). Its latest complete phase30000 has two deaths, not final Continue
+acceptance. All inputs are revalidated and both natives/wrapper are absent
+(93de38); no unchanged immediate retry or whole-nine-command verdict. Finalized
+logs are hashed; sharing denial on a live log is not a failure/restart claim.
+This is host full-route evidence, not every course, native PICA/NDSP/physical
+stereo/FPS acceptance or a newer ARM package. Metadata:
+D:/SFE-validation/r144-current-3ds-natural-routes/checkpoint.json.
+
+R143 independently checks R140's proposed primary camera-ray cancellation
+against the actual bounded raw camera/liquid and all56 previous finite faces,
+plus axis and one-ULP tilted controls. Two offsets per128x72 pixel produce
+1079424 accepted samples and5397120 depth/distance/XYZ comparisons; all pass
+in binary64, with8064 original singular/clip refusals. A deliberately dropped
+ray-length distance factor is detected on every accepted sample. Strict host
+compile passes, and the complete210-dependency/212-input held repeat passes
+with byte-identical output (bfd788). This is point-algebra evidence, not
+checked binary32 intervals/derivatives, displaced waves, native512/source/RGB,
+GPU runtime or FPS. R140 remains isolated, uncompiled and unadopted; original
+shader thresholds, source guards and the physical wave model are unchanged.
+Metadata: D:/SFE-validation/r143-primary-correlation-raw-oracle/checkpoint.json.
+
+R142's unchanged fresh-core Original stage/flow command passes exit0
+(3ee2e2): all19 stage entries and nine flows,306401 complete source VM/SPC/
+PCM/raster/stereo-mono/suspend checks. Each entry retains30 source seconds,
+1818 source rasters and606 SPC blocks. Peak private usage is33218560 bytes;
+no resource stop. The captured EX command also passes exit0 (0d4e8f): all40
+stage entries and nine flows,536204 checks, with the same full test length
+and38072320-byte peak. Both natives are absent and all249 consumed first-party
+sources are revalidated (398113). The complete wrapper also revalidates all
+six fresh archives, executable and private cartridge/symbol pairs after each
+suite. Total842605 checks cover59 stage entries and18 flow entries, not full
+level/boss completion or physical PICA/NDSP/stereo/FPS. No elapsed-time stop,
+other-project stop, new ARM package or production change. Metadata:
+D:/SFE-validation/r142-current-3ds-stage-flow/checkpoint.json.
+
+October9 R141 independently rebuilds the complete current 3DS host core in
+a new standalone graph: all164 tasks and41/41 registered tests pass. Both
+complete real Original and EX default session suites then pass20651 checks
+each using that exact CMake-built executable and six fresh real archives.
+Both console outputs match R136 byte-for-byte, and all249 consumed first-party
+source hashes plus local cartridge inputs are rechecked after the suites
+(f0c656). Production inputs match current ARM package6d5e00a3; only the newer
+regression-test file differs. The executable's actual2MiB default stack works
+for both suites: no stack/source fix, new ARM player or CI dispatch is implied.
+This is host-source integration, not physical PICA/NDSP/stereo/Home-sleep,
+full-game pixel acceptance or sustained console FPS. Current tester ZIP stays
+build/StarFoxEnhanced-3ds-test-r134.zip. Metadata:
+D:/SFE-validation/r141-current-3ds-core-integration/checkpoint.json.
+
+The R138 Vulkan numerical process74349/PID166944 remains identity-confirmed
+and live (c7a4b5/793698/f0c21c), without a numerical result. A read-only,
+noninvasive and nonsuspending stack sample places pipeline creation inside
+NVIDIA's shader compiler; it proves neither a deadlock nor a particular driver
+fault. Actual SPIR-V retains33 functions and2906 calls (53672c), not an
+all-inlined program. No timeout restart, process stop or performance claim.
+R140's two-header candidate is isolated, but its wrapper98706 ended in a
+prelaunch resource deferral: no native compiler started. Its first compiler
+launch still waits for actual preceding-process termination and headroom.
+Normal root46642 remains live in native jets-stream DXC70312; no second shared
+build or reconfiguration. Native512/source/RGB/full-owner and practical
+rendering acceptance remain open; production source-history opt-in is OFF.
+Metadata: D:/SFE-validation/r138-shared-scalar-bounds/checkpoint.json and
+D:/SFE-validation/r140-primary-shared-bounds/checkpoint.json.
+
+October9 R138's isolated scalar shared-helper shader passes strict DXIL and
+SPIR-V compilation and the full current D3D12 optical suite:47 canonical cases
+plus the actual raw lava replay. Its complete console output is byte-identical
+to R135's same-backend baseline, with zero critical/discarded D3D12 messages.
+This is diagnostic448-byte/float3 evidence, not native512/source/RGB acceptance;
+the known lava enclosure still crosses107.5. The first full Vulkan numerical
+run74349/PID166944 is live (42000c), without a result yet. Only the isolated
+interval header differs; workspace production and source-history opt-in stay
+unchanged. Smaller DXIL is not an FPS claim. Metadata:
+D:/SFE-validation/r138-shared-scalar-bounds/checkpoint.json.
+
+R139 runs the current R134 ARM player through ordinary owned-window inputs
+on the New-model Vulkan emulator at100% clock. Guest DSP/GSP/audio/kernel
+shutdown is observed before the host deadline, and4999 finalized profile rows
+pass numeric/timing-bound/monotonic-counter checks (42000c). Azahar nevertheless
+requires force-close at303s: host exit-1, not a whole-run clean-exit pass. Original
+config and both SD-journal slots' presence/bytes are preserved; slot1 was absent.
+This is actual ARM functional evidence, not physical stereo/FPS/pixel/lifecycle
+acceptance or a new player build. Metadata:
+D:/SFE-validation/r139-r134-arm-flow/checkpoint.json.
+
+October9 R134 fixes native FPS actions to follow actual source navigation,
+release guards and action-before-Start ordering, rather than the old cursor/raw
+pressed bits. Final independent Original and EX default suites each pass20277
+checks (617470/acd0e8); their16 FPS fixtures each pass1712 checks, and the exact
+old-session negative control fails as expected (c59386). Initial test-oracle
+Start/EX SD-default mismatches are preserved and corrected, not hidden or used
+to weaken parity. Strict isolated compile/link passes. The249-file real input
+audit identifies only two changed source/test files, pushed through an isolated
+index to authorized temporary commit6d5e00a3. Native CI37889505276 completes
+successfully (c3d834); independently downloaded ZIP/source/CRC/five-member/
+checksum/native-structure and80-command/seven-SDK-owner ARM checks pass (e99299).
+The guarded new copy (6b680a, no earlier ZIP replaced) is
+build/StarFoxEnhanced-3ds-test-r134.zip,1006004 bytes,SHA256
+6ac79746f8ccd80158d023176459c1fee487175ccbeb6de5797dd1666328d96d.
+The local tester notes identify it and retain physical/full-flow acceptance gaps.
+Metadata: D:/SFE-validation/r134-3ds-source-owned-fps/checkpoint.json.
+
+R135's full current baseline D3D12 numerical run completes successfully
+(51086/2b8cb1), on RTX5070Ti Laptop with3495325696-byte peak private usage.
+All47 canonical planar/water/lava fixtures pass their complete independent
+forward/derivative/root/refinement/held/malformed/shared-boundary checks;
+the additional actual lava input replay also passes its local checks. D3D12
+reports zero stored critical/discarded messages through teardown. These are
+diagnostic448-byte/float3 local results, not native512/source/RGB/full-owner
+acceptance: the recorded lava enclosure still crosses source boundary107.5.
+The candidate DXIL compiler starts only after actual memory recovery, then
+terminates resource-stopped at2430242816 private bytes (20222/99960f), without
+output/header or unchanged retry. Its first Vulkan candidate numerical launch
+43994/PID155680 confirms the RTX5070Ti Laptop float contract, but stops before
+pipeline creation completes when actual free physical RAM reaches647420KiB
+(909f78). Peak private usage is5450928128 bytes; wrapper exit125, native exit-1.
+There is no candidate numerical result or unchanged restart.
+The same full47-case/raw checker and all guards/assertions remain unchanged.
+No candidate improvement, same-backend comparison, shader adoption or source
+history opt-in is claimed. Normal shared46642 remains live in strict native
+jets DXC125760. Full native512/source/RGB/moving-owner/material/format/eye/
+camera/MSAA/gameplay/performance and console acceptance stay open. Metadata:
+D:/SFE-validation/r135-d3d12-full-optics/checkpoint.json.
+
+R136 strengthens native state-import coverage without a production change.
+The initial test incorrectly assumed archived desktop stereo settings should
+replace the live device's setting; actual GameState restore preserves the live
+setting. Both rejected test/clamp iterations and failed receipts are retained.
+The unnecessary clamp is removed and GameSession remains byte-identical to
+R134. The corrected strict complete-core checker passes390 focused checks in
+each Original/EX variant (9d733b/da246f):30 real BOOT/stage imports, three live
+native stereo values, five archived desktop values, actual SD journal save/
+reopen, unchanged-write suppression and source/VM/SPC/grid preservation.
+Complete Original and EX default suites each pass20651 checks
+(fe2987/c9351a), retaining all existing VM/SPC/PCM/raster/menu/FPS/editor/
+partial-audio/state contracts. No new ARM player or physical-console result
+is claimed. Metadata: D:/SFE-validation/r136-3ds-state-stereo-bounds/checkpoint.json.
+
+R137 isolates a code-size experiment: replace eight unrolled checked-quotient
+call sites with one looped site, visiting the same four corners, lower then
+upper, with unchanged bracket/outward/failure arithmetic. All36 baseline
+shader files and the complete diagnostic wrapper are pinned; only the isolated
+interval header differs. Strict Vulkan SPIR-V compile passes (9acac5),502756
+bytes, SHA256e6e4e912684f34a3978bd8092df7c207e90ba4b3c0b58eb8dbb120c16e3f0bc8,
+190234624-byte compiler peak. Strict O3/Gis D3D12 compile67412/PID161924
+terminates at its unchanged private-memory cap (ac1906),2476474368 bytes,
+wrapper exit125/native exit-1, without a usable DXIL result or unchanged retry.
+This is not a numerical/native512/source/RGB/runtime/FPS result or production
+adoption. Its first actual full47-case/raw Vulkan numerical launch55572
+confirms the RTX5070Ti Laptop float contract, but is also terminal resource-
+stopped before pipeline creation completes (a828d4):2095865856-byte private
+peak, system physical RAM897080KiB. Wrapper/native absence is confirmed
+(345647); no numerical result, performance attribution or unchanged retry.
+Existing memory guards and assertions stay. Metadata:
+D:/SFE-validation/r137-interval-single-quotient-site/checkpoint.json.
+
+October9 R133 provides stronger actual ARM lifecycle evidence for the existing
+R131 package. With host-exit observation and no capture/resize, the normal input
+route reaches gameplay, then the270-second Select+Start chord produces guest
+DSP/GSP/kernel cleanup before planned host-window closure. Host exit0 is captured;
+no emulator force-stop occurs, and isolated save/config are restored byte-exact.
+The observer's final-event command needs cleanup after recording that real exit;
+this is not an emulator crash. No pixel/physical-console/FPS/stereo acceptance
+or causal fix for R130's unknown early exit is inferred. Metadata:
+D:/SFE-validation/r133-3ds-host-exit-observer/checkpoint.json.
+
+R132 is now terminal resource-stopped before pipeline creation finishes
+(37234/0bccd6), not a GPU numerical result. Its exact owned baseline is stopped
+at979068KiB free physical RAM,1598595072-byte peak private usage; candidate never
+launches and other projects are untouched. Baseline/wrapper are absent (a929a8).
+Normal shared66784 also becomes terminal: strict jets DXIL finishes, but the
+previously observed native panorama link failure remains in its old graph.
+Only after that terminal result (a88ae3) is the normal root regenerated (a3d293).
+New single-job build46642 is live; no integration pass is claimed yet.
+
+October9 R131 fixes a separate native editor routing bug: old-row Controller
+interception stole direction+confirm, and Customize Screen ignored navigation
+onto its row. Both now use the same source-owned destination calculation as
+capability gating, preserve the actual navigation/click/audio tick, and leave
+Back/Start chords with the source. Full164-task standalone core build passes
+(d3fb0b), with strict warnings on all three changed production/test owners.
+All41 registered tests pass (f9a300),117.43 seconds, including109122 menu
+checks. An isolated old-row GameSession fails the unchanged new tests as
+intended (280335), while production remains fixed. Complete Original VM/SPC/
+PCM/settings/state/HUD/remap/handoff parity passes18565 checks (f4eea3),
+including48 setup/runtime editor-chord fixtures. This is host-source evidence,
+not ARM PICA/NDSP or physical stereo/FPS acceptance. EX also completes18565
+checks (12356/d8b8c5), with the same48-fixture independent parity scope.
+A249-file real build-dependency audit identifies exactly
+five changed project inputs; only those are pushed via an isolated index to
+the authorized temporary codex/3ds-editor-r131-20261009 branch, commit8dd11720.
+CI37885687517 completes successfully (d95caa). Downloaded ZIP and80-command/
+seven-real-SDK-owner compiler graph independently pass (33d527), including
+exact source, five members, CRC/checksums and3DSX/SMDH structure. The guarded
+new copy (cf9d4f) is build/StarFoxEnhanced-3ds-test-r131.zip,1006124 bytes,
+SHA256114dd6d31ee0f11a48327b6f0d3e5739b15907561984ed4b241bdeb2221096f8.
+Separate CI ELF/memory/stack gates pass; the debug artifact is not independently
+re-inspected. Physical hardware acceptance remains false. Main, working
+index/checkout, tags/releases, private assets and earlier tester ZIP remain
+untouched. No unchanged rendering trial is restarted or shader candidate adopted.
+Metadata: D:/SFE-validation/r131-3ds-editor-routing/checkpoint.json.
+
+Following R132 starts the same full47-case/raw-lava low-power GPU comparison
+only after actual system RAM recovers above the unchanged6GiB launch guard
+(62f109). Exact baseline106324 launches with7759660KiB free RAM, confirms
+Intel(R) Graphics/Vulkan1.2 andSignedZeroInfNanPreserve32 support, and remains
+live in pipeline creation (ebcbc5/bc7c37). Candidate is not yet launched and
+no numerical result is claimed. No source/assertion/precision/guard changes,
+old-log overwrite or other-project stop. Diagnostic448-byte results will not
+qualify native512/full-owner/RGB/performance. Separate live metadata:
+D:/SFE-validation/r132-memory-recovered-full-optics/checkpoint.json.
+
+October9 R130 has no passing numerical or native-run verdict. The full47-case
+plus raw-lava differential comparison on the low-power adapter terminates
+resource-deferred before native GPU launch (82193/5f146a); its unchanged
+six-GiB guard never becomes ready. Neither baseline nor candidate launches.
+The actual R129 ARM player under New3DS/Vulkan emulation exits unexpectedly
+at85.49 seconds, exit1 (26181/ba6a22), before its planned270-second guest exit
+chord. Only eight normal keyboard edges are sent. Native profiling records
+1994 video phases,563 logic ticks and664 audio blocks, but the only captured
+image is black and no guest clean-shutdown record or matching emulator WER
+report proves the cause. Do not infer a port crash or successful visual run.
+Actual native/wrapper processes are absent (900cb5); save and config are
+restored byte-exact. Logs/profile/receipt remain preserved. Neither terminal
+trial is restarted unchanged. Metadata:
+D:/SFE-validation/r130-integrated-full-optics/checkpoint.json.
+
+October 8 R129 fixes a 3DS capability-filter bypass: source menu navigation
+runs before activation, but the native filter checked only the old row.
+Direction+confirm could therefore activate an unsupported destination from
+an enabled neighbour. The filter now resolves the same source-owned menu
+order/Up priority/wrap before gating activation, without changing held/released
+input, navigation, Back or Start. New asset-free cases exercise every row,
+all seven pages, setup/runtime and combined buttons. The full standalone
+cartridge-core host build completes all164 tasks (ce7efc); an initial
+global-Werror trial fails on unchanged pinned SPC warnings. That failure is
+preserved. The normal complete build retains strict warnings specifically
+for both changed menu files. All41 registered host tests pass (9bfdd9),
+including106097 menu checks, in118.84 seconds. The complete log SHA256 is
+78c1b8895c9ed36eb1a59b9f482e499a4fd47831101e78906aee53cc65098d08.
+Physical console acceptance remains pending.
+The same tests reject an isolated old-row filter (8c6a46 exit1), confirming
+the new regression catches the prior behavior; production stays fixed.
+The11-file source-only follow-up9d0c46f5 is pushed to the authorized temporary
+codex/3ds-menu-r129-20261008 branch and CI37881321281 completes successfully
+(c1364b/129592), including ARM, memory/stack/package gates. Downloaded artifact
+verification passes (b37ca3): exact source, CRC, five members, checksums and
+3DSX/SMDH structure. Its downloaded80-command/seven-real-SDK-target ARM graph
+also passes (eab5da); a stale native-LASTEXITCODE caused the outer copy wrapper
+to stop after the passing checker. The passing JSON and all input hashes are
+revalidated before the guarded copy (5a02a5). The new tester ZIP is
+build/StarFoxEnhanced-3ds-test-r129.zip,1006116 bytes,SHA256
+6a74b23770dff4c5f1dd01f4afc8a928d113ca3e95d87c2c01c86d336a06de8a.
+This is a new native candidate, not physical-console/FPS or full-goal acceptance.
+The working
+index/checkout, main, tags/releases, assets and credentials are untouched.
+No installed desktop player or earlier native tester ZIP is replaced.
+
+October 8 R128 adds actual raw-input lava differential replay to the full
+unchanged47-case canonical GPU checker. The complete independent CPU oracle,
+eight malformed replay-path guards and actual9216-tap/56-triangle bank pass
+(b26f91), recovering source107.50061327039238/29.496416160399388 with error
+1.1357996026746387e-11 and accepted independent old-source guard. Fresh strict
+checker compile/link passes (4477cf),551 consumed inputs unchanged. Baseline
+then candidate GPU comparison80557 launches exact baseline149004 under
+wrapper172296 with6492580KiB free RAM (142944). Baseline terminates resource-
+stopped (c0d04d), native exit-1, at1028284KiB free physical RAM and2221871104
+peak private bytes, before pipeline creation finishes. Wrapper/native are
+absent (c1364b); candidate is not launched. The255-byte stdout is preserved,
+SHA256ee026771966f98e31136a6aebc95fe9474155d2dba627c25aade5ea51ad1afeb.
+This is a failed resource trial with NO GPU numerical verdict; no unchanged
+retry, other-project stop or production shader adoption.
+The additional replay uses the diagnostic448-byte frame's float3 terminal,
+not the native512-byte raw-feature target interval. Local results are not
+global-source/RGB/moving-owner/camera/MSAA or performance acceptance. Candidate
+shader remains isolated/unadopted; production history opt-in remains OFF.
+Metadata: D:/SFE-validation/r128-raw-replay-correlation/checkpoint.json.
+
+October 8 R127 implements an isolated exact primary-ray correlation candidate:
+cancel the positive camera-ray normalization length before enclosing primary
+depth/hit, retaining normalized direction and every physical/source guard.
+The full36-file baseline source closure remains unchanged in the workspace.
+The fresh current numerical harness compiles/links under strict warnings;
+candidate Vulkan1.2 SPIR-V compiles exit0 (64c8a6),513812 bytes,195448832-byte
+compiler peak. This is not numerical or native-owner acceptance. The original
+complete baseline numerical command55424 terminates resource-deferred before
+native launch (79a9d5): wrapper160692 is absent and neither native output log
+exists (d5ffd2). It has NO numerical result. The complete47-case candidate
+numerical run is not yet launched. No
+production adoption, opt-in, player/package change or source-guard weakening.
+Normal shared66784 remains live; root regeneration still waits for its actual
+terminal result. Metadata: D:/SFE-validation/r127-primary-ray-correlation/checkpoint.json.
+
+October 8 R126 identifies a normal-root 3DS host link gap: GameSession's
+presentation uses native_panorama_scene from game_layers, but did not export
+the raster archive dependency. An isolated link of the exact current object
+and archives reproduces that unresolved symbol (3fcaa1); adding the existing
+raster archive succeeds (e6f7ea). The root target now exports that dependency.
+The normal shared build still awaits its last strict jets compiler; no second
+shared build or regeneration was started, and normal integration is not yet
+claimed. The independently linked checker21391 finishes exit0: Original3175
+checks (fc6165), EX3657 (2f3297), including the existing damaged-save and
+retired-owner regressions. Both processes are absent. These are Windows host
+checks, not a new ARM package or physical console/PICA/audio/FPS acceptance.
+
+The original full moving-owner92875 is now terminal exit1 (c22782), with exact
+wrapper/child absent (a71499). Both moving-water material cases finish, but
+lava/mirror phase1 eye0 fails the unchanged positive curved-reuse assertion:
+5492 current curved paths, zero reused. Its72386-byte log is preserved with
+SHA25607f0a63014e8a54de1e2cb9affc611b725294da6863148f53c81631d6326d459.
+Remaining formats/material/lobe cases did not complete; this is a failed full
+trial, not a passing lava fix. Production source-history opt-in remains OFF.
+
+October 8 R125 uses a non-invasive, non-suspending CDB stack snapshot of the
+exact live moving-owner process. Exported module stacks and current COFF
+symbols locate the long phase1 delay in NVIDIA's compiler, reached through
+D3D12 compute-pipeline creation in enqueue_source_root_stage. It is not a
+rendered-frame readback wait; the snapshot does not identify a particular
+driver optimization defect or qualify player performance. A separate strict
+unchanged-source compile experiment preserving existing noinline function
+boundaries is stopped by its captured-process memory guard (fe56eb), with no
+shader output. It is not adopted and no numerical/runtime pass is claimed.
+
+October 8 R124 observes a real resource failure in the full Vulkan linear
+composition run: private memory reaches9.83GB, with98.27% system commit and
+heavy paging before any of the31 case receipts. A first guarded stop refuses
+when pressure eases; on recurrence only exact owned123252 is stopped (775894).
+Original34669 is terminal exit1 (72ba59), wrapper/child absent (890233), sRGB
+never launched. The142-byte log is preserved/hashed (cb7fc8). No Vulkan pass
+or particular driver fault is claimed; no other build or player is stopped.
+Current regular/stream jet SPIR-V bytes still match the frozen inputs (11e7a6),
+so simply relinking those same bytes is not an evidenced fix. The serialized
+full moving-owner92875 then revalidates its inputs and actually starts with
+7050404KiB free RAM (402339), native161044 (fc9731). Initial real-queue/eye-owner
+checks pass and material motion begins; no full suite result yet. Shared
+66784/strict DXC remains live. Production opt-in stays OFF, goal incomplete.
+
+October 8 R123 prepares the unchanged full moving native-owner trial using
+the current compiled fixture, not another narrow optical probe. Read-only
+Ninja dependency inspection finds all 729 consumed files present and no newer
+than its actual compiled object (80e96c). A frozen copy, 211 project dependency
+hashes, eight current frozen libraries and five native source inputs are
+verified. Direct isolated linking with the independently verified SDL
+copy-ordering candidate passes (cf506f), without a shader compile or second
+shared Ninja. Exact object/executable/manifest bytes are rechecked (eeb420).
+One actual command92875/PID148672 waits behind original matrix34669/PID152804
+and the unchanged6GiB GPU-test guard. It will run --source-motion-owner-only,
+the full moving water/lava, mirror/rough, one/eight-lobe, both-eye, four-format
+native producer/compositor/ownership cohort. Timing/proof receipts are read-only;
+no focused lava bypass or changed numerical/acceptance budget. No runtime pass
+yet. Fixed eyes/AA OFF and mocked XR are not natural gameplay, camera/MSAA,
+physical platform/panel or practical player FPS qualification. Existing shared
+66784 and Vulkan123252 remain actual live processes (ce65e9), original handles
+polled; no player/package/main/release change or completion claim.
+Metadata: D:/SFE-validation/r123-current-moving-owner-oct8/checkpoint.json.
+
+October 8 R122 adds a permanent host regression for the actual native NDSP
+adapter, rather than only its PCM helper. Strict O2/Werror compilation and
+all 753 queue/lifecycle/failure checks pass. The standalone registered audio,
+NDSP and CSND CTests also pass 3/3 in 0.21s (fcdb4f); their log and executable
+hashes are verified (dd66db). Root and standalone host graphs register the
+new test; normal root regeneration waits for existing shared66784 to finish.
+The same isolated strict-warning host graph subsequently builds all54 pending
+tasks and passes its complete20 asset-free registered tests in61.06s
+(299400), including frontend/display/remapping/HUD/raster/audio. The full
+CTest log is preserved separately and hash-checked (41f6a2); this does not
+change the ARM tester package or qualify console output/performance.
+Explicit libctru test doubles do not establish firmware/IPC/worker timing,
+physical DMA/audio/APT or FPS. No production audio/player or ARM package
+change. Metadata: D:/SFE-validation/r122-ndsp-owner-oct8/checkpoint.json.
+The original full composition matrix34669 also advances: D3D12 sRGB finishes
+exit0 (e6998a), all 31 footprints/chains, four material refusals and one mixed
+lobe case, zero critical/discarded messages through device teardown. The
+18004-byte log/hash and previous native-process absence are verified
+(8c9728). Its next complete Vulkan linear suite is running as actual child
+123252, followed by queued Vulkan sRGB. All36 current sources and frozen
+binary/manifest hashes were rechecked before each launch; no narrower probe
+or guard change. Real moving producer/camera/MSAA/practical-cost and physical
+3DS acceptance remain open. Source-history production opt-in remains OFF.
+
+October 8 R120 extends the existing native viewer state regression without
+changing the player. All three partial audio phases now reject corrupt and
+truncated outer saves plus checksummed invalid VM/SPC components, preserving
+the actual active Continue raster, VM/SPC archive and silent preparation.
+The test then retires the old decoder and ROM/symbol/VM owner, rebases through
+the public focus API and compares24 more ordinary-input frames with exact
+VM/SPC/PCM/palette/primitive/material/texture equality. All R118/R117 checks
+remain. Strict isolated O3/Werror compilation passes (7fc86e); Original39455
+exits0 with3175 checks (84cd62), EX47040 exits0 with3657 (1d9f55).
+Both actual processes are absent; logs/source/binary hashes are verified
+(a6e264). This is host failure/retired-owner coverage, not physical SD/PICA/
+NDSP/Home/sleep/FPS or a new ARM package. The R117 tester ZIP remains exact.
+Normal shared66784 remains live. The original resource-wait command52859
+now finishes exit0 (a70887): full31-case current-source D3D12 linear colour/
+composition,31 footprints/chains, four complete-pixel material refusals and
+one mixed-lobe case; zero critical/discarded messages through device teardown.
+The18004-byte log and exact frozen executable are verified (e69a1c); this
+does not establish real moving producer, all backends/cameras/MSAA or FPS.
+One new sequential complete-suite command34669/PID152804 waits behind the
+unchanged6GiB guard for D3D12 sRGB, Vulkan linear and Vulkan sRGB,31 cases each.
+No duplicate build/test, quality/precision/domain/quota/deadline change or
+release/main push. Matrix metadata: D:/SFE-validation/reflection-current-composition-r121-checkpoint-oct8.json.
+Native metadata: D:/SFE-validation/r120-native-viewer-retirement-oct8/checkpoint.json.
+
+October 8 R119 obtains the original full current-source D3D12 witness35593
+terminal result: exit0 (1e637b), all26 source-footprint and26 local-root-chain
+cases, with zero critical/discarded D3D12 messages through device teardown.
+Its frozen current-source executable remains byte-exact; the14541-byte log
+has SHA25652f602c7a19263db54de48d1d3745d503dcac20e45ba8e40abf8e2217b81241f.
+This proves the unchanged suite's source hull/retention/refusal assertions,
+not complete source membership, final RGB, moving producer or practical FPS.
+The next full31-case colour/composition suite was deferred before process
+launch by the unchanged6GiB RAM guard (379919); this is not a shader failure
+or a numerical pass. Shared build66784 remains live with its two strict native
+jets compiler processes; no duplicate build or reconfiguration was started.
+All eight R117 native death/Continue tests and the R118 state/PCM tests remain
+terminal passes. The asset-free R117 tester ZIP hash was rechecked, unchanged;
+physical 3DS output/audio/slider/Home-sleep/FPS and full rendering acceptance
+remain open. Follow-up: D:/SFE-validation/reflection-current-witness-r119-checkpoint-oct8.json.
+
+October 8 R118 extends the existing native-model checker with Continue
+save/load and suspend regressions. Three source checkpoints120/121/122 cover
+all partial20Hz audio phases: exact self-archive roundtrip, live-owner purity,
+no PCM during replacement preparation,60 source replay frames each with exact
+VM/SPC/PCM/raster/palette/primitive/material/texture comparisons, public focus
+rebase and another roundtrip. Every earlier R117 viewer assertion remains.
+Strict direct compilation passes; Original75519 exits0 (6c2df8),2476 checks;
+EX38743 exits0 (28791d/da24f5),2958 checks. No production/native ARM package,
+timing/math/precision/domain/resource/deadline changes or physical APT/FPS claim.
+The frozen R117 registered eight-test CTest17851 also finishes exit0 (433313):
+all eight pass within their unchanged1800s per-test deadlines, total2146.13s.
+Original YES/NO823.74/535.70s and EX YES/NO1366.24/1028.78s retain full natural
+reserve exhaustion, actual title or120 bright returned gameplay phases,
+source/audio/raster parity and complete eye/mono compositions/budgets.
+R117's independently verified asset-free native tester ZIP remains byte-exact.
+Shared incremental66784/PID159044 is running39/105, now strict native jets
+DXC149224/stream163092; full unchanged native source-witness35593/PID159856
+also remains live (3380c5). No concurrent shared build/reconfigure, further
+heavy GPU run, main/release push, installed-player replacement or completion
+claim. State-followup metadata: D:/SFE-validation/r118-native-viewer-state-oct8/checkpoint.json.
+
+October 8 R117 fixes an actual gap found in the R116 native Continue capture:
+MSHOWOBJ3's Arwing was absent because it has no normal object-list entry.
+The native raster now captures its source pose/angles/live zoom/depth palette
+and the PICA adapter emits the dedicated shape in source painter order. The
+baseline host regression fails with the empty stream; the fix passes970
+Original/1452 EX checks, including real EX L+Select entry, rotation/zoom,
+immutable snapshots, failure rollback and source NO cleanup. Front-end policy
+remains mono; New-model gameplay stereo is unchanged. Five rebuilt surrounding
+host suites and strict warning checks pass. The independent Original full
+stage/flow sweep40665 exits0 (58c232):19 stages/nine flows,306401 checks,
+1818 source rasters/606 exact SPC blocks per entry including suspend/resume.
+The EX full sweep49624 exits0 (57c2d0):40 stages/nine flows,536204 checks,
+with the same1818 rasters/606 exact SPC blocks and suspend/resume per entry.
+Source-only CI37858079646 passes for4189673e8f9d1600365d71602204bbc4e9a0d566;
+native compiler/SDK graph and downloaded ZIP were independently verified.
+R117's ordinary-input native image route57108 exits0 (1ff568), host closure
+graceful without forced termination. Two individually reviewed actual ARM/PICA
+Continue captures530/550 show the restored Arwing in different rotated poses,
+inside the source front border; capture480 shows preceding live gameplay.
+Guest DSP shutdown569.122370, GSP release569.135971 and kernel cleanup569.496979
+precede planned host closure at600s; the708099-byte profile is finalized.
+Configuration/save are restored byte-exact (21041b); all four reviewed public
+images are delivered to the authorized Discord relay (81af26,70 total images,
+last attachment verified). Planned host closure alone is not an exit pass.
+No death-circle stills, Continue YES/NO, full level/boss or physical PICA/audio/
+FPS/slider/Home-sleep acceptance is inferred. No release/main update.
+The exact current R103 Vulkan local differential check96312 exits0 (3f6d3c),
+with47 cases/299of329 boxes/6347 forward/25388 derivative checks and183 local
+unique enclosures; it is not full global cover/native integration or FPS.
+Optional R109 Vulkan candidate67328 is resource-stopped exit-1 (c6de59) after
+confirmed sub-1GiB free RAM, with no result accepted. Its two DXC candidates
+78615/72790 finish exit0 but are not adopted. Shared Ninja32743 now exits0
+(324936), with exact PID/compiler absence verified before normal integration.
+Normal configuration64177 exits0 (9236d5) and the checked-in CTest installer/
+dependency tests both pass (8ed9d0):11 guarded installer cases/54 actual shader
+rules. One initial target-name typo fails before compilation (7ffca1); corrected
+shared incremental Ninja66784/PID159044 proceeds to39/105 tasks, two workers.
+Strict jets DXC149224/stream163092 remain live; no concurrent shared build/
+configuration or further heavy GPU pipeline is launched. Current PC/PCVR
+players remain unchanged (c6e8ca). The independent changed-adapter CTest17851
+retains1800s deadlines and now passes all eight (433313), including complete
+Original/EX death and Continue YES/NO on the changed model adapter. This is
+host source/resource coverage, not physical acceptance. Public diagnostics no longer name an
+unrelated project; original timing failures/source records are preserved.
+Full unchanged R114 D3D12 source-witness35593/PID159856 starts only after the
+current Vulkan gate terminates and the6GiB free-RAM launch guard passes.
+It is running, not a pass. The full rendering/3DS goal is still active.
+
+October 8 R104 adds natural GAME OVER -> Continue YES and NO host diagnostics
+for both Original and EX. The unchanged stationary source route consumes real
+reserves; ordinary UP/DOWN/START then must produce the complete route/gameplay
+or title return, respectively, with 120 consecutive bright recovered phases.
+Source RAM observations stay nonmutating; there are no health/lives/flow writes,
+checkpoint imports or survival cheats. Consecutive VM/SPC/PCM/raster parity,
+every death/frontend native-owner composition at maximum supported stereo and
+original-model mono, and padded scene/lower-LCD budgets stay required. The
+existing single-death 18,000-phase gate is unchanged; the new full-reserve routes
+have a separate fixed60,000-phase bound. Direct diagnostic build4991 passed
+(8024d9). Both complete Continue-NO routes passed: Original72460 exit0
+(81eba7), 11,976 phases/70,110 checks/200 parity windows/8,934 complete
+compositions; EX97895 exit0 (9b4c60), 42,122/154,894/703/11,625. Peak padded
+scene/lower textures are3,805,440/3,830,016 bytes. Both reached the actual
+title and120 consecutive bright phases after source DOWN/START.
+The YES drivers omitted the fresh map-confirm input required by the original
+MAIN/PLANETSEQ .rotateforabit flow. Exact owned runners were deliberately
+stopped after source inspection (854bca);60787/30791 terminal exit-1
+(d7d469/f76cb1) remain invalid-driver failures, never passes or timeouts.
+R106 adds ordinary fresh START after30 bright returned-map rasters, without
+changing production flow or any original acceptance requirement/bound.
+Its frozen direct build74724 passed (a2c74d). Original Continue-NO also
+passed on the corrected source (36039 exit0 e9b5f1):11,976 phases,
+70,111 checks/200 parity windows/8,934 complete compositions, peak padded
+textures3,805,440 bytes, actual title plus120 bright recovered phases.
+The extra final fresh-confirm guard adds one harmless check for NO; the
+complete source route/parity/resources are unchanged. All four corrected
+Continue routes now pass. Original YES91967 exit0 (7336ad):13,755 phases,
+97,488 checks/230 parity windows/14,271 complete compositions, real fresh
+map confirmation11878 and live/full-shield gameplay13636 plus120 bright
+rasters. EX NO24712 exit0 (9368bf):42,122 phases/154,895 checks/703 parity
+windows/11,625 compositions. EX YES5911 exit0 (00c581):43,907 phases,
+182,366 checks/732 parity windows/16,980 compositions, fresh map START42024
+and live/full-shield gameplay43788 plus120 bright rasters. EX peak padded
+scene/lower textures remain3,830,016 bytes. All six R106 handles are terminal;
+do not repoll/restart. Direct external results do not qualify the pending
+registered CTest1800-second deadline or physical ARM/PICA/FPS gates.
+Both unchanged default death
+regressions also pass on R106 (55266 exit0 315fa3;7503 exit0 10123c), with
+identical complete parity/resource statistics and log hashes to R104. Those
+single-death results and the old NO passes do not qualify the new Continue
+routes or physical hardware.
+Both unchanged default death regressions passed on this same frozen R104
+binary (33688 exit0 ea3b37; 52494 exit0 a04733), retaining the original
+18,000-phase bound: Original5,020 phases/19,480 checks/84 parity windows/
+1,536 complete compositions; EX9,358/30,930/156/1,767. Peak padded scene/lower
+textures are3,805,440/3,825,920 bytes. Neither replaces a full Continue route.
+CMake registration still needs regeneration
+after the original live R103 shader build. This is added coverage, not ARM/PICA
+pixel/audio or physical console/FPS acceptance; R90 player/package is unchanged.
+Metadata: D:/SFE-validation/3ds-continue-r104-checkpoint-oct8.json.
+Follow-up: D:/SFE-validation/3ds-continue-r106-checkpoint-oct8.json.
+
+October 8 R105 isolates a D3D12 packed-copy retention failure without optical
+math: all64 slots of integer GPU scratch are initialized, five independent
+full snapshots are recorded around later GPU markers, and every word must
+match its command-time value in two held rounds. Pinned READ|WRITE D3D12
+fails twice and the failure-logging repeat also fails; the corresponding
+Vulkan run passes all11,796,480 exact comparisons. A WRITE-only diagnostic
+passes but is explicitly not an accepted substitute for READ|WRITE storage.
+A guarded pinned SDL candidate orders COPY_SOURCE through UAV before
+restoring the same default state; it changes no bytes, copy/submit count,
+CPU waits, optical math, domains, precision, tolerances or proof budgets.
+The isolated cloned backend passes unchanged READ|WRITE D3D12 twice and
+Vulkan once, including all slots, fresh snapshots and held equality; D3D12
+has zero stored critical/discarded messages through teardown. The complete
+source-witness73663 passed exit0 (54736d) with frozen R99 optical libraries
+and that cloned backend, including all26 positive/refusal/shared-boundary
+cases and full held root retention. The previously failing finite-hole,
+eight-lobe lobe7 packet survives; zero critical/discarded D3D12 messages
+through device teardown. This is not current R103 optical/moving/RGB/FPS
+qualification, and the old R99 failure stays preserved. Shared SDL source,
+current player binaries and production opt-in remain unchanged; ordinary
+incremental integration is pending terminal completion of build32743.
+Metadata: D:/SFE-validation/gpu-copy-ordering-r105-checkpoint-oct8.json.
+
+R107 additionally makes the installer refuse partial/ambiguous patches rather
+than accepting a marker alone. Nine asset-free cases pass (5df48a), including
+exact fresh replacement, byte-idempotence, and unchanged rejection of unknown,
+duplicated or altered backends. The stricter installer also accepts the actual
+R105 cloned backend without changing its digest (ef4329). The emitted native
+function is unchanged; these are installer-integrity checks, not optical,
+source/colour or performance acceptance. CTest registration is source-only
+until the original live build32743 finishes and the normal incremental
+follow-up regenerates the shared build.
+Metadata: D:/SFE-validation/sdl-copy-ordering-guards-r107-checkpoint-oct8.json.
+
+R108 retains the R107 source/test digests in byte-identical frozen copies and
+adds two duplicate-definition cases. The old installer demonstrably accepted
+an additional altered function (b3b6b1); that failure is retained. Counting the
+target definitions before either replacement or the installed early return
+now refuses both fresh and installed ambiguous backends without mutation.
+All eleven asset-free cases pass (ebbc15), and the actual R105 native backend
+is still byte-idempotent (9e9eef). The emitted native function is unchanged;
+neither installer result qualifies current optical/source/colour/cost gates.
+Four existing host raster/PICA-owner and source timing/receipt checks also
+pass (1c602e), not physical3DS acceptance. Original shader build32743 remains
+live. The separate strict DXIL -O1 stream/generic compiler trials11521/9319
+finished exit0 (7f57ba/37fba9), with unchanged source/-Gis and no CMake/player
+policy change. Actual current authored optical DXIL/SPIR-V also compile
+(19c434/39d91e); the directly rebuilt current harness60064 passes compilation
+(4ea983). Its actual current-source D3D12 gate32345 finishes exit0 (dfe6ce):
+all47 planar/water/lava paths,299/329 physical boxes,6,347 independent forward
+samples,25,388 derivative checks and183 unique-root enclosures pass. Both
+refinements retain183/183 and narrow153/153; malformed/displaced/shared-boundary
+and held refusals remain unchanged. Zero stored critical/discarded D3D12
+messages persist through teardown. The6,469-byte log digest is
+245bd5038153834c13fa1ac5749e132971de03870214718be420fbbbfac196a2;
+PID159216 is absent (b8c657). Do not restart this terminal check. This qualifies
+current strict-Gis/O1 local optical numerics only, not ordinary-O3 authored
+jets, complete native source cover, moving/source-colour RGB or practical cost.
+The actual current-code Vulkan gate96312 is still running. Its selected
+SPIR-V matches the current shared generated binary byte-for-byte (074026).
+The initial D3D12 invocation used an
+invalid backend spelling (920ab1 exit1); it is retained separately from the
+corrected direct3d12 run. A compiled shader alone cannot establish native
+correctness or practical performance.
+The older embedded-jet snapshot in `r108-current-r103-optics/generated` predates
+the current interval source despite that directory's name. Its D3D12 pass
+(8614ec) is an old-shader baseline ONLY, never current R103 qualification.
+The corresponding older-shader Vulkan baseline32546 also finishes exit0
+(b70c3e): all47 paths/299 valid boxes,6,347 independent forward samples,
+25,388 derivative checks and183 retained root enclosures pass, with unchanged
+refusals and refinement checks. PID158364 is absent (695eb7); never restart
+that terminal baseline. Current-code tests remain separately required.
+Derived-only R109/R111 compiler experiments keep repository maths and players
+unchanged; full native/source/colour/practical-cost acceptance is outstanding.
+R111's native Vulkan pipeline experiment34357 was deliberately cancelled for
+actual resource safety (de542c/8cb69c exit-1): it used7,019,167,744 private bytes
+and free physical memory fell below1GiB. Exact owned-process termination restores
+roughly6GiB free (23e01f). Pipeline creation had not finished, so no numerical
+pass/failure is inferred; the candidate/logs remain preserved and unapplied.
+The required current-code Vulkan96312 and original32743 continue unchanged;
+current D3D12 gate32345 is terminal as recorded above.
+Metadata: D:/SFE-validation/copy-ordering-compile-r108-checkpoint-oct8.json.
+
+R112 fixes missing consumed include dependencies in the native and diagnostic
+optical shader build rules (lava/water helpers, rough motion, liquid optics and
+the optical target). The new asset-free regression evaluates the actual build
+loops without executing compilers and recursively checks their quoted include
+closures. Rules with the old omissions restored fail (fc6f7e); all14 corrected
+DXIL/SPIR-V rules pass (8df393). No shader mathematics, compiler flags, player
+or acceptance gate changes. Normal generation/CTest registration still waits
+for the original build32743, which has advanced through52/62 after both native
+jets DXIL compilations finished (618291/ed674d). Source-code registration is
+not a completed shared-build or runtime qualification.
+Metadata: D:/SFE-validation/reflection-dependency-r112-checkpoint-oct8.json.
+
+R113 expands that same dependency regression to all40 native and14 diagnostic
+reflection rules, preserving every previous check. All54 pass (383d5c). A
+separate omitted fold/guide include passes the old14-rule subset (a7cd49),
+but the expanded regression correctly refuses it (8855a7); this demonstrates
+the additional coverage rather than inferring it from the new count. R112's
+exact original test/rules are frozen byte-identically (caca16). No compiler,
+player, numerical/source/colour or performance qualification is implied.
+Metadata: D:/SFE-validation/reflection-dependency-r113-checkpoint-oct8.json.
+
+R114 independently snapshots the actual current R103 source-owner object and
+libraries after their original build steps complete, verifies source/copy
+digests before and after copying, and links the unchanged full witness against
+the frozen verified R105 SDL copy-ordering backend (2913d3 exit0). This avoids
+replacing the player or reentering the still-live shared Ninja32743. The actual
+42 native shader/header outputs and their36 recursive quoted source inputs
+are recorded separately; every output follows its entire current source
+closure (7df3bc), before the shader-bearing object/archive at21:17UTC. The
+35,288,986-byte isolated executable digest is
+4a6b49fcd169c796aeb8b6ebe48a09539718877a415a0752c2f8655b0667cf73.
+This is a successful link/provenance check, not native witness acceptance.
+The same unchanged current executable subsequently passes the complete
+CURRENT-only `--capture-probe` on D3D12 (67459/a3a356 exit0) and Vulkan
+(f127e8 exit0): all eight finite/scene/water/lava, one/eight-lobe cases,
+each with two eyes and two samples, retain exact fresh colour/path fields and
+independent index banks through held/pending/discard/commit/cut/resize/disable/
+release transitions. D3D12 reports zero critical/discarded messages through
+device teardown. These small capture/index pipelines do not create the large
+optical pipelines or qualify native source-witness, moving RGB or frame rate.
+Both Intel integrated-GPU runs pass the same unchanged eight-case suite too:
+D3D12 (84802/a8a604 exit0, zero critical/discarded teardown messages) and
+Vulkan (85508/e44210 exit0, required binary32 float contract). GPU names are
+reported by the actual devices. No performance result is inferred under the
+concurrent compiler/JIT load; all four capture checks are terminal.
+The unchanged26-case `direct3d12 --source-witness` gate has not been launched:
+it waits for current Vulkan96312 and safe free RAM. Frozen R99 results remain
+separate; current moving/source-colour/RGB, global-source and practical-cost
+requirements stay open. No numerical or quality gate is changed.
+Metadata: D:/SFE-validation/reflection-current-witness-r114-checkpoint-oct8.json.
+
+October 8 R110 repeats the unchanged R90 ARM player exit on the isolated New
+model, Vulkan and normal100% emulator CPU-clock setting. Ordinary owned-window
+Select+Start is followed by guest DSP shutdown, GSP release, audio stop and
+kernel process cleanup at208.20s, roughly52 seconds before the planned host
+closure. The helper38716 returns exit0 (acf53c), but the emulator required
+forced host termination and reports exit-1. Preserve that host failure; this
+is native guest functional shutdown evidence, not a clean whole-run pass.
+Save/config restoration is byte-exact. No player/package update, physical
+pixels/audio/FPS, slider, Home/sleep or full-route qualification is claimed.
+Metadata: D:/SFE-validation/3ds-native-exit-r110-checkpoint-oct8.json.
+
+R115 captures actual unchanged R90 ARM/PICA output in the isolated New-model
+Vulkan emulator at ordinary100% CPU clock, with normal owned-window keyboard
+input and no replay or source-state changes. Five individually viewed captures
+show the real pre-game menu, Original title, Controls, planet map and launch
+tunnel. In the captured Controls pose the dark-blue surround is uniform and
+the demo model stays inside its black panel. The tunnel/ship/flare views differ
+between eyes; the lower HUD is populated. The emulator's SBS output repeats
+the one lower panel, whereas NativeGpu::present draws bottom once after the
+eye loop. These are visible functional poses, not independent whole-frame
+pixel/projection equivalence or complete natural stage acceptance.
+Helper24541 finishes exit0 (9cbaaf), but the emulator still needs bounded forced
+host cleanup (-1): preserve that failure separately. Guest DSP/GSP/audio/kernel
+shutdown occurs by208.464401s before planned host closure235s. The source
+profile ends at7,531 video phases/2,208 logic ticks/2,510 audio blocks, flow9
+BG27; no physical FPS/audibility claim. Config/save restoration is byte-exact
+(ba2bc2). Five reviewed screenshots were relayed; live delivery is drained and
+the latest actual attachment/destination verified (8bd2ec). R90 player/package
+is unchanged, physical acceptance remains open, and no release is published.
+Metadata: D:/SFE-validation/3ds-native-captures-r115-checkpoint-oct8.json.
+
+R116 extends the same ordinary-input native New-model run past launch, without
+changing the R90 ARM player, cartridge timing or source state. Six reviewed
+captures show live Corneria terrain/models/radio, naturally reduced shield,
+reserves decreasing from2 to1 to0 with bright restarted gameplay, and the
+actual Continue screen with gameplay meters suppressed on the lower LCD.
+The sampling does not capture the death circles or qualify complete pixel,
+stereo, Continue-YES/NO, full-level or physical-console acceptance.
+Helper22425 finishes exit0 (57921a); guest DSP/GSP/audio/kernel cleanup ends
+at568.722262s after the ordinary570s exit chord, before planned host closure.
+The emulator also closes gracefully with exit0, without forced termination.
+This clean planned closure does not erase R110/R115's earlier host failures.
+The finalized profile ends at20,341 video phases/5,236 logic ticks/6,780 audio
+blocks, flow12/BG27; it is not console FPS or audibility evidence. Settings/save
+restoration is byte-exact (5ed708). All six reviewed images are delivered to
+the authorized relay; actual latest attachment/destination is verified and
+delivery is drained (1a88bf). Player/package and releases remain unchanged.
+Metadata: D:/SFE-validation/3ds-native-natural-death-r116-checkpoint-oct8.json.
+
+October 8 R99 candidate separates a completely evaluated but unresolved
+Krawczyk image from a failed evaluation. Refinement intersects that checked
+image with an already-proven root enclosure, retaining the original strict
+existence/uniqueness certificate. It never promotes an unresolved first proof,
+uses no point Jacobian/CPU root, and preserves the four-forward-evaluation
+bound, source domains, stored ABI and all colour/footprint/ownership guards.
+An isolated native arithmetic contract passes on D3D12 and Vulkan
+(6f7180/3d0c3d): partially nonnested and nested valid images narrow while
+retaining the exact affine root; invalid, disjoint, branch/arithmetic-failed
+and absent inherited proofs refuse. Eight cases and held equality per backend
+are not full optical, moving-scene, source/RGB or FPS acceptance.
+The complete native optical regression additionally tests refinements1/2
+against independent binary64 roots and preserves all malformed, displaced,
+shared-boundary and zero-area refusals. Build43779 completed exit0 (385b48),
+and the ordinary follow-up incremental build reports no work (e2e425).
+Frozen R99 optical trial65601 completed exit0 (f818fe): all47 physical paths,
+299 valid boxes,6,347 independent forward samples and25,388 derivative checks;
+183/183 independent root enclosures retained and153/153 narrowed per mode,
+with all original certificates and refusals unchanged. Zero stored
+critical/discarded D3D12 messages through native teardown. This local gate
+is not complete source/RGB or moving-scene acceptance.
+The unchanged full moving-owner trial70140 completed exit1 (3121c7): sharp
+and rough water again pass4,092/10,635 complete unrounded compositions, but
+lava/mirror still has zero curved-model source reuses from5,492 current paths.
+Focused diagnostic50294 completed exit1 (eea768), confirming the same17 unique
+roots, three ownership and14 feature refusals; the107,29 enclosure still
+crosses the old pixel centre. Preserve both failures, not a claimed lava fix.
+R99's unchanged full D3D12 source-witness18268 completed exit1 (68aab9):
+the finite source-hole eight-lobe case loses the full nonzero lobe7 root
+packet after witness encoding. Preserve that failure. R105 isolates native
+copy ordering and the cloned SDL correction passes the unchanged complete
+R99-optics witness; current R103 and moving/colour gates still remain.
+Neither that candidate pass nor the earlier R94 pass erases the baseline run.
+Four existing related host tests pass (a07098). R94's failed moving/lava
+outcomes below remain failed. Its original full Vulkan witness8248 completed
+exit0 (7700a9), retaining the full positive/refusal/shared-boundary/held
+root-retention suite on native Windows Vulkan. This does not qualify Linux,
+current R103 math, moving source/colour or FPS. Never restart that terminal run;
+experimental production opt-in stays OFF, and installed players are unchanged.
+Metadata: D:/SFE-validation/reflection-source-refinement-r99-checkpoint-oct8.json.
+
+R102 separately measures optical value/residual/Jacobian widths with the
+unchanged R99 shader and the bounded raw107,29 producer input. It retains all
+six raw necessary visibility domains and fixed authored-point boxes, with a
+deliberately collapsed binary32 terminal for comparison. This is not the
+native interval target or complete source/RGB qualification. Build55784
+completed exit0 (a8882a); diagnostic62256 completed exit0 (340d6b), held equality
+and zero critical/discarded D3D12 messages through teardown. Even a point input
+has residual widths .0051755188032984734/.0025267226155847311. The complete raw
+union still refuses. This comparison does not certify native source/RGB reuse.
+Metadata: D:/SFE-validation/reflection-optical-width-r102-checkpoint-oct8.json.
+
+R103 candidate adds exact interval +0, multiply by0/+1/-1 and zero-numerator
+or divide by+1/-1 identities, only for validated finite ordered intervals and
+after the unchanged quotient range/zero-denominator guards. It changes no
+wave, derivative, source domain, tolerance, quota, precision mode or evaluation
+count. Initial isolated D3D12 passes, but native Vulkan fails on subnormal
+negation (a1ac3d/1e4014). Integer sign-bit negation corrects that exact operation;
+the corrected isolated tests pass on D3D12/Vulkan (3063c0/f5caa2), 16 input
+types x16 operations x2 held rounds, with nonfinite/divide-by-zero refusals.
+The same 16x16x2 regression is now checked in as the standalone diagnostic
+`starfox_reflected_interval_identity_check`, with embedded strict DXIL/SPIR-V.
+Its actual checked-in source compiled directly with all warnings as errors;
+native D3D12/Vulkan trials also pass (655a1d/8d8c5b). The ordinary CMake target
+build still needs the post32743 incremental follow-up. Failure-only source
+retention diagnostics now read the fresh resident packet after submit; they
+never replace a snapshot, upload a proof or relax the full retention assertion.
+These small arithmetic tests are not a lava/source/RGB or FPS fix. Four existing
+3DS raster/PICA-owner and source timing/receipt host tests pass (0b845d), not
+physical hardware acceptance. Full diagnostic-only build32743 is still running;
+installed players/package stay unchanged.
+Metadata: D:/SFE-validation/reflection-interval-identity-r103-checkpoint-oct8.json.
+
+October 8 R100/R101 actual R90 ARM player exit: ordinary owned-window keyboard
+inputs (no replay/VM or source writes) reach gameplay, then Select+Start asks
+the player to exit. Both New and original-model emulator logs show guest DSP
+shutdown, GSP release and kernel process cleanup roughly50 seconds BEFORE the
+planned260-second host-window close. New-model R100 helper19212 failed a
+terminal-process race (6a1543); retain that helper failure even though the
+original emulator handle reports exit0 and the earlier guest epilogue exists.
+The helper correction uses the original launched process handle as terminal
+authority while retaining exact live path/start-time ownership checks.
+Original-model R101 helper68754 completed exit0 (b5454c), emulator exit0,
+graceful host close and no forced termination. Its actual profile ends at
+5,079 source video phases,1,489 logic ticks and1,693 audio blocks in gameplay.
+Save/config restoration is byte-exact (b39d15/fbb023), and both owned emulator
+PIDs are absent. These are native guest functional shutdown checks, not
+physical PICA pixels, audible audio, console FPS/RAM, slider, Home/sleep or
+complete-game-route acceptance. The R90 package/player is unchanged.
+Metadata: D:/SFE-validation/3ds-native-exit-r101-checkpoint-oct8.json.
+
+October 8 R91 raw-input diagnosis: the explicitly separate capture mode
+retains the observed CURRENT pixel107,29 (primary40/control546), both submitted
+geometry/calibration states and all 9,216 actual old visibility entries. No
+GPU root/guide/source choice or old incident RGB enters the replay. Trial77529
+completed exit0 (41abf1), with zero critical/discarded D3D12 messages through
+native teardown; this mode is not a source-stream or moving-owner gate.
+Independent binary64 forward optics solve at107.50061327039238,
+29.496416160399388, residual1.1357996026746387e-11, and the unchanged complete
+source guard accepts the sample (cf3a12). Bounded raw-input recovery is valid
+and nonambiguous. This diagnoses the conservative GPU enclosure, not a
+global numerical uniqueness proof or colour/performance acceptance.
+The candidate whole-hull refinement retains the same four full forward
+evaluations: original domain + midpoint certify uniqueness; the already
+certified enclosure + its midpoint provide a tighter Jacobian/inclusion.
+No point Jacobian, CPU source/root, extra evaluations, changed tolerances,
+wave/precision/quota/deadline changes or dropped source domains. Native
+qualification is pending. Candidate build37383 completed exit0 (1f7036):
+the native presenter, source-owner and visibility executables are linked.
+R92 frozen candidates preserve exact hashes. The unchanged D3D12 complete
+source-witness suite completed exit1 (f7239a); exact PID159280 is absent
+(108625). Single-lobe interior/boundary sky, finite, water and lava cases,
+and eight-lobe planar interior cases passed, but the eight-lobe water held
+classification comparison failed. R93 added only bounded mismatch diagnostics;
+its same complete suite completed exit1 (119172). Positive family/boundary
+and bad-depth cases passed, but a finite source-hole/lobe6 root certificate
+was all-zero after witness encoding. Neither failed trial is relabeled.
+R94 routes standalone whole-hull requests through the existing production
+per-query writer with explicit full scratch clearing; per-region local
+requests and complete production stream encoding stay unchanged. This is
+a candidate, not yet a proved fix. Build69644 completed exit0 and four freshly
+rebuilt host checks passed (aba19a). Frozen R94 native source-witness trial
+66567 completed exit0 (40236c), and exact PID156792 is absent (22a644).
+The unchanged complete suite passes sharp/eight-lobe family, interior/shared
+boundary, bad-depth and source-hole cases, held equality, proof preservation,
+lifecycle and accepted-bank immutability; zero critical/discarded D3D12
+messages through teardown. This single successful trial does not erase
+R92/R93 failures or prove all future-driver determinism, moving colour or FPS.
+The unchanged full moving-owner trial48973 completed exit1 (a0479c), and
+PID161492 is absent (167710). Sharp and rough water passed 4,092/10,635
+complete unrounded compositions and 1,751/19,318 changed-incident witnesses,
+but lava/mirror curved-model source reuse remained zero. Focused diagnostic
+65141 also completed exit1 (ef2efa), preserving that full-suite failure:
+17 unique roots, three source-ownership and fourteen source-feature refusals.
+The enclosure at pixel107,29 still spans the old pixel centre. No downloaded
+root/old RGB seeds any renderer or independent acceptance oracle. Root
+refinement/source admission remains unfinished; production opt-in stays OFF.
+The same frozen source-owner also runs the unchanged full Vulkan witness
+suite (8248/PID147036), with the queried native Vulkan1.2 binary32 float
+contract (80d038). This is Windows Vulkan, not native Linux qualification.
+The unchanged canonical local differential suite passed (56394/8a82a3):
+47 paths, 6,347 independent forwards, 25,388 derivative checks, 183 local
+unique enclosures and 18 displaced no-root certificates, plus held/malformed
+and boundary checks; zero critical/discarded D3D12 messages through teardown.
+That suite uses refinements0, not the changed whole-hull refinement2.
+This is not native colour, moving-scene, MSAA, backend or FPS acceptance.
+A syntax-only HLSL
+struct-ternary rejection from the preceding build was repaired with explicit
+Interval assignments; no numerical guard was changed. R88/R89/R90 failures
+remain recorded and normal
+experimental production opt-in remains OFF. Six selected host checks pass
+(912b72); installed player hashes remain unchanged (edaaff).
+Metadata: D:/SFE-validation/reflection-source-proof-r91-checkpoint-oct8.json.
+
+October 8 R90 native texture residency: source-only
+[ARM run 37793341673](https://github.com/kandowontu2/starfox-enhanced/actions/runs/37793341673)
+PASS for `d0b89a73031f6aca415a1bed07f2f9d582c150c6`, with all 40 asset-free
+checks (35.93s), actual ARM/stack/memory/package gates. The native presenter
+reuses one comparison cache per colour/ownership plane, packs into the
+existing GPU allocation, reserves before writes and invalidates failed
+uploads. Changed palette does not upload unchanged A8. Independent padded
+Morton/ABGR/A8 comparisons, restore-after-failed-write, alias/preflight and
+storage release checks pass: 1,271,844 assertions; zero heap allocations
+over 540 warmed changed preparations (ddf679/47664e). Five related host tests
+pass (f58f16). This is not physical FPS/RAM/PICA acceptance.
+The R90 tester ZIP is 1,003,664 bytes; five allowed members, four digests,
+exact source, CRC, no-RomFS 3DSX and embedded/standalone SMDH are checked
+(122198). SHA256 `abeef63a8dedc473ad4a3964113528e0ab03fda1d43309019fa0e12a398bc636`.
+R89 is retained. Pre-game, New-model stereo and original-model mono remain;
+no private assets or release published. Hardware/full-game gates remain open.
+
+The same R90 ARM package also completed a bounded isolated New-model
+Azahar/Vulkan ordinary-input route (session41308, terminal4a9e9f): native
+title/Controls/map/briefing and gameplay flows are present in its actual
+profile, including 68 tunnel and 116 outdoor presentations, 8,995 source
+rasters, 2,508 logic ticks and 2,998 audio blocks (82952d). No replay or
+source-memory writes were used; isolated settings/save were restored exactly.
+The helper deliberately stopped the emulator after263.25s, requiring forced
+closure; that is not a spontaneous game crash or clean-exit pass. No native
+pixels/audibility were inspected. Emulated CPU-speedup is unimplemented and
+concurrent correctness checks make this no FPS comparison. Physical slider,
+PICA/audio/FPS/RAM and full-route gates remain open.
+Metadata: D:/SFE-validation/3ds-native-r90-checkpoint-oct8.json.
+
+October 8 R98 adds a natural stationary-flight death/restart host diagnostic
+to the real 3DS session checker, with independent consecutive cartridge/SPC/
+PCM/raster/fade parity and complete native owner compositions at supported
+maximum optics/original-model mono. Original and EX cases are registered.
+Build2878 completed exit0 (6226bd). Original44614 completed exit0 (c47fea):
+19,480 checks, 84 consecutive parity windows, 1,536 complete supported-eye/
+mono compositions, 115 death-circle phases and 120 bright recovered phases.
+EX5885 completed exit0 (5cc3b8): 30,930 checks, 156 windows, 1,767
+compositions, 120 circle phases and 120 bright recovered phases. Peak padded
+scene/lower-LCD textures are3,805,440/3,825,920 bytes, not total RAM. Related
+PICA/raster hosts pass2/2 (167710). R95's diagnostic bus read changed the
+open-bus latch; R96/R97 misinterpreted remaining/capped health. Their failed/
+stopped trials are preserved and corrected, not relabeled as player fixes.
+No health/flow/position/exit writes or survival cheats are used.
+This host-only addition does not replace the R90 ARM package or close
+game-over/continue, full-route, PICA or physical console acceptance.
+Metadata: D:/SFE-validation/3ds-death-r98-checkpoint-oct8.json.
+
+R89 focused moving-lava proof trial87092 completed exit1 (fe666c); its exact
+process is absent (d6f0c6). All three sRGB lava/mirror phases finished, with
+2,827 independent admitted footprints/unrounded compositions and 1,039
+changed incidents, but required curved-model reuse remained zero. The full
+9,216 query/proof receipts show 3,488 mapped curved-model queries: 2,747
+complete upstream exclusions, 127 unresolved hulls, 94 no-root classifications,
+503 forward/residual refusals and 17 unique root hulls. Those 17 all fail
+source witness: three ownership/visibility, fourteen feature-footprint.
+Later stages refuse upstream. This focused failure does not supersede R88's
+failed full moving cohort or grant native colour/cost acceptance.
+R90 trial46051, exact PID134656/path/command verified (695472/c8e80f), completed
+exit1 (a90573), and the exact process is absent (498ffb). Its complete 17
+unique-root/old-bank correlations preserve the same failure counts. The
+feature-footprint refusals cluster near raster grid boundaries; this is an
+observation, not yet a proved numerical or matching defect. Neither receipt
+roots nor downloaded taps seed the independent
+acceptance oracle or renderer. Four host timing/receipt/DisplayXR/headset
+tests pass (695472), shader/generated math and installed players remain
+hash-identical (47664e); normal experimental opt-in stays OFF.
+Metadata: D:/SFE-validation/reflection-source-proof-r90-checkpoint-oct8.json.
+The full rendering-effects/3DS goal is active and unachieved.
+
+October 8 R89 ARM/package follow-up: source-only native CI
+[37788629827](https://github.com/kandowontu2/starfox-enhanced/actions/runs/37788629827)
+PASS for `b7ca8f36dee86265e27e8bc74c327a67f717daad`. The preceding merged-main
+run failed devkitARM template deduction because uint32_t is unsigned long
+there; explicit uint32_t clamp/max types fix compilation without changing
+scale bounds or numerical behavior. All 40 asset-free checks, native ARM,
+stack/memory/package gates pass. The downloaded R89 ZIP (1,002,913 bytes),
+five allowed members, four payload digests, source identity, CRC and native
+no-RomFS 3DSX/SMDH structure were independently validated. SHA256:
+`bcfb22a7bbc6968c23298e5d2ba305e53d4ccf314b9fbfb1b4d35b3eb3cff164`.
+The package retains pre-game, New-model stereo and original-model mono;
+no ROM/BIN/DSP firmware or release was published. Hardware FPS/audio/slider,
+PICA pixels and complete gameplay acceptance are still open.
+
+R89 source-proof diagnostics add an opt-in, bounded, same-command read-only
+download of composition-stage proof prefixes. They do not alter shader math,
+admission, quotas, resource limits or deadlines. Receipt layout/lifetime and
+source-stage timing host tests pass (2/2); the R88 full moving lava/mirror
+coverage failure below remains unresolved. Normal production opt-in stays OFF.
+Shared presentation steering types and the vendored SFVR CMake target were
+separated from unrelated input dependencies. DisplayXR now resolves the new
+OpenXR request-exit entry point dynamically, preserving loader-free runtime
+dispatch. Fresh DisplayXR/headset/timing/receipt tests pass 4/4 (33dd3c);
+12 selected 3DS host tests pass (55c664). The combined DisplayXR + VR
+configuration and four VR input/standard targets build (f223de); input,
+standard and cockpit units pass (5e3c5c). Original and EX cartridge input
+checks also pass (0b1eb0/63b5f7): all 19/40 stage initializations, retained
+source-state/audio/interpolation and focus/pause behavior. These are host
+checks, not headset performance or minute-long crash acceptance.
+The focused native proof diagnostic trial87092 is now terminal failed
+(fe666c/d6f0c6), as detailed in the R90 follow-up above. No native reuse
+acceptance is claimed.
+Metadata: D:/SFE-validation/reflection-source-proof-r89-checkpoint-oct8.json.
+Protected shader/generated math and installed PC/PCVR hashes remain unchanged
+(4b9ab1/55c664); no installed player was replaced. This is progress, not
+completion of the full rendering/3DS goal.
+
 October 8 collaboration snapshot follow-up: R88 trial25557 completed with
 exit1 (51c3a2): the sRGB moving lava/mirror cohort rejected the required curved
 model reuse coverage (zero admitted curved-model paths). Earlier water cohorts
@@ -6912,8 +12438,8 @@ Five freshly linked CPU suites, 61 shader source digests, nine shader units and
 ordinary embedded K/M/K preview (96 evaluations / 24 held reuses) pass.
 Three timing batches were rejected for unrelated compiler overlap; no speedup
 is accepted and the grouped divider remains OFF by default. The last captured
-compiler sources are in UrbanRecompBuild. Release/settings/ReShade remain
-unchanged; the known mono shutdown warning remains. Exact hashes and scope are
+compiler sources are in an unrelated project's build directory.
+Release/settings/ReShade remain unchanged; the known mono shutdown warning remains. Exact hashes and scope are
 in the newest renderer-performance checkpoint. This does not renew the full
 native SDK owner matrix below or close broader correspondence, physical
 Leia/Android or sustained SBS performance. The full goal stays active; Ally
@@ -8125,9 +13651,15 @@ and explicit scope limits. This does not prove every later transition.
 
 ## Additional user-requested work still open
 
-- Enhanced Sky includes Corneria/Original Training, Macbeth, Titania, Venom,
-  Fortuna clouds and several EX landscapes/orbital scenes. Full coverage,
-  unique moon upgrades and remaining EX menu mappings are unfinished.
+- Enhanced Sky's current shared library contains 38 artwork resources,
+  including the face moons, separate orbital surfaces and Kazaru's low
+  volcanic hills. Current landscape/menu assignments, dedicated celestial
+  atlases and abstract radial treatments supersede the historical blanket
+  statement that those implementations are missing. This source inventory
+  is not full visual acceptance: unsampled routes, transitions and physical
+  presentation still need review. See `enhanced_backdrop_library.hpp`,
+  `environment_effects.hpp`, `EX-BACKGROUND-COVERAGE.md` and the dedicated
+  celestial/background coverage documents for their actual scopes.
 - Enhanced terrain has geometry and targeted captures, not all-stage visual or
   sustained-performance acceptance. Ray secondary-hit fidelity and the horizon
   blend still need broader review.
@@ -8135,6 +13667,16 @@ and explicit scope limits. This does not prove every later transition.
   sustained all-scene performance still requires wider measurement.
 - Hardware-dependent acceptance must not be inferred from a successful build,
   a mock device, a package inspection or a software reference comparison.
+- The October 12 consolidated New-3DS package is currently with testers. Its
+  ARM closure matches the current 277 compiled inputs, and all 89 fresh
+  New-3DS host cases pass. Those are source/game correctness checks, not a
+  Windows rendering-suite pass or sustained physical New-3DS FPS acceptance.
+  Keep that exact package unchanged while the consolidated playtest runs.
+- The complete Windows moving-reflection owner is still unaccepted: R458
+  fails its original completion deadline. R465's paired endpoint work-sharing
+  correction is in source-only CI run 38290547809, with the original complete
+  R466 GPU check queued afterward. No implementation, case, work bound,
+  deadline or precision requirement is waived by this status correction.
 
 Keep the full goal active until its actual requirements are proven. Do not
 close open GitHub issues, publish a release, deploy to a headset or discard
@@ -8160,3 +13702,29 @@ recovery and nonblocking cancellation. Evidence:
 This is post-order/ownership validation against independent unstyled timelines,
 not an independent optical water/depth-finish oracle, true secondary motion,
 physical Leia-panel acceptance or a performance claim. The full goal stays open.
+
+October 9 checkpoint: the authorized source-only shader CI completes all six
+jobs. Independent artifact checks retain all requested shader inputs and
+precision; the Vulkan candidate changes only the optical polynomial loop
+control hint, not its arithmetic. The complete Vulkan runtime check stops at
+the original memory floor during pipeline creation, before numerical cases.
+It is not a Vulkan runtime pass. The unchanged full moving-reflection-owner
+diagnostic then records D3D12 `0x887a0006` (device hung), without a resource
+stop. Sharp reflection phases complete, but the rough eight-lobe moving phase
+does not. The responsible command/shader and full rendering acceptance remain
+open; no Windows timeout or test deadline is extended.
+
+The current-source 3DS joined-audio candidate independently passes its actual
+ARM SDK build, asset-free package/ELF/stack checks and CI host tests. An
+experimental tester ZIP and a short matching installation guide are available
+in `build/StarFoxEnhanced-3ds-test-r180*`. It is not physical-console/FPS
+acceptance. An observer-only sharing-error repair preserves all 42 ordinary
+native input edges and shutdown/state-restoration gates. That actual current
+package passes the full emulator route, independently including pregame and
+gameplay logic/audio activity, clean guest/host exit and state restoration.
+The complete 50-case host suite resource-stopped after 23 passes; the remaining
+27 cases are unaccepted. Earlier resource stops and prelaunch observer
+failures remain failures, with their logs preserved. Production
+integration and physical New-3DS stereo/original-3DS mono, audio, Home/sleep,
+campaign and sustained performance checks are still required. No release is
+published by these temporary test branches, and the full goal remains active.

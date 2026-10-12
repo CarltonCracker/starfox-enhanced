@@ -12,6 +12,18 @@ struct ReflectionSourceStageEvent {
     std::uint64_t first{},total{};
     std::uint32_t count{},eye{},sample{};
     ReflectionSourceStage stage{};
+    // Read-only SAME-command diagnostic inputs, present only at composition.
+    // They expire before the next streamed batch. A callback may encode a
+    // diagnostic download, but must not modify/read/submit/wait these buffers
+    // or feed a downloaded receipt back into the rendering pipeline.
+    void* queries{};
+    void* proofs{};
+    std::uint32_t query_stride{},proof_stride{},proof_bytes{};
+    // Ordered submission boundaries occur only BETWEEN complete batches.
+    // A new segment must name its predecessor; stages within a batch still
+    // belong to one command. This is scheduling metadata, never optical input.
+    std::uint32_t segment{};
+    void* command_predecessor{};
 };
 using ReflectionSourceStageObserver=void(*)(void*,const ReflectionSourceStageEvent&);
 } // namespace starfox::render

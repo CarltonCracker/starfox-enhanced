@@ -1,5 +1,100 @@
 # VR delayed-crash investigation
 
+## October 11 — shared ray-pipeline retirement (R372)
+
+The continuing source audit found another definite teardown defect in both VR
+drivers: `ray_pipeline` was declared after `ray_frames`, so reverse destruction
+could release its compute pipeline/layouts before the producer retired queued
+commands that borrow them. The pipeline now precedes both scene and frame
+owners. No steady-state waits, source timing, content or quality are changed.
+This is not proof that it caused the reported minute-long gameplay closure.
+
+Seven source-wiring tests pass, including an independent old-pipeline-order
+mutation rejected in both actual drivers. The current PCVR build compiles both
+drivers and passes eight selected VR CTests in 1.09 seconds. These include the
+existing injected-driver eye retirement tests; they are not native DXR or
+headset crash reproduction. The actual Quest arm64 rebuild succeeds in 1m29s,
+with all 799 public compile-input hashes unchanged. Independent APK inspection
+passes its arm64 VR/SDL, 38-backdrop, CRC and private-data checks. The unsigned
+validation APK is
+`D:/SFE-validation/r372-vr-ray-pipeline-retirement/StarFoxEnhanced-quest-r372-unsigned.apk`,
+191,488,049 bytes, SHA256
+`f672bf70d8e38c992a7d10822eaf41f2f0bb63f92f6f76c4ff92497ce7888204`.
+It is not signed, installed or released.
+
+The separately packaged PCVR candidate is
+`build/StarFoxEnhanced-pcvr-diagnostic-r372.zip`, 176,376,277 bytes, SHA256
+`e8dfe40f377e81ff47c9236cc6e7e12845d81413c4d109c4f6423c50b67ad301`.
+All 11 component members and CRC pass; native products and each runtime/notice
+file match the actual current build/source inputs. The native player SHA256 is
+`33bc7815f80b38c616466af2db6e4ee995384dc32e974243cec982446386fbbc`.
+Packaging reads the component files directly, without duplicating large EXEs
+in another staging directory. Earlier packages, main, releases and user
+installations remain unchanged. No local active OpenXR runtime/headset result
+is available; sustained gameplay stability remains unresolved. Receipts are in
+`D:/SFE-validation/r372-vr-ray-pipeline-retirement/`.
+
+## October 11 — verified resource-lifetime corrections (R370)
+
+The current source audit identifies two definite unsafe teardown/recovery
+orders, without identifying the cause of the tester's gameplay exit:
+
+- Both VR frame drivers previously declared bomb-circle and shutter buffers/
+  pipelines after the eye command owner. On cancellation or unwinding with a
+  pending eye, those resources could be destroyed before command retirement.
+  `VulkanFrameResources` now owns these layers and declares the command owner
+  last, so its existing completion/uncertain-submit teardown runs first.
+- The ray-scene arrays previously destroyed before their frame producers.
+  Both drivers now declare scenes before frames, making producer retirement
+  precede borrowed-buffer destruction. Replacement after a size/error change
+  likewise resets the frame before the scene. The existing idle-only geometry
+  resize path is unchanged. No extra steady-state queue waits, dropped content,
+  changed timing or visual-quality reduction is introduced.
+
+The actual production transition owner passes injected-driver cancellation,
+exception unwind, uncertain failed-submit and already-completed-eye cases.
+Both buffers and both pipelines must retire safely; completed work causes no
+extra queue idle. An independently compiled old-order header fails the same
+regression at the premature-destruction assertion. Six source-wiring tests,
+including controlled old-order/recovery/owner-bypass mutations, also pass and
+are registered in ordinary VR CTest. These source/injected-driver checks are
+not physical Vulkan/DXR or headset stability evidence.
+
+The actual PCVR/player/application targets compile both frame drivers. The
+fresh current CMake graph passes eight selected VR CTests, including the
+native resource test, app, session, swapchain, cockpit depth, ownership wiring,
+help and profile CLI checks (0.55 seconds). The actual arm64 Quest build also
+passes in 1m01s; all 798 recorded public input hashes remain unchanged across
+that final build. Its independent package check verifies all 38 backdrops,
+VR/SDL runtimes, CRC and no flat entry, ROM/BIN, signing data or system stubs.
+The unsigned validation APK is
+`D:/SFE-validation/r370-vr-transition-retirement/StarFoxEnhanced-quest-ray-order-r370-unsigned.apk`,
+191,488,097 bytes, SHA256
+`0ea774f96ab8e72c519d0df003011f16208a9996156fc96d80097809c06fca13`.
+It is not signed, installed or released.
+
+The new separately packaged PCVR candidate is
+`build/StarFoxEnhanced-pcvr-diagnostic-r370.zip`, 176,376,026 bytes, SHA256
+`99fc01e975a4c2a2c7e488f66b61ef5381c9cd4e2f526837451d5871063040dc`.
+All 11 members match the newly installed native products/launchers/licences;
+the archive passes CRC and contains no ROM or generated BIN. Player SHA256:
+`518c1784e8abcdf9fcc04757e3b65d96c954db01de09e00e52bd0e85c27f2103`.
+The asset builder is freshly relinked from the same graph. R363 and the
+published release remain unchanged. The current freshly relinked runtime
+checker finds the Vulkan loader but no active OpenXR runtime and exits 2;
+there is no usable local XR graphics session for an actual gameplay retest.
+The reported minute-long exit remains unresolved, not relabelled as fixed.
+
+Build/test/package receipts are under
+`D:/SFE-validation/r370-vr-transition-retirement/`. The original negative-control
+helper initially omitted the configured OpenXR source include path; that was
+corrected before any regression verdict. A later task-helper variable collision
+misnamed the final Quest log/package/report, not their contents. The log and
+APK were moved within that exact validation directory with hashes unchanged;
+the original generated metadata is retained alongside a corrected-path record.
+No compile failure or game crash is inferred from either helper defect. No
+extra tester request, release/main update, credential use or installation occurs.
+
 ## Report and exact baseline (October 4, 2026)
 
 One tester reports an exit after roughly a minute of gameplay on the **0.0.8
@@ -71,6 +166,25 @@ the fixture did not run or crash the actual game. This explains how a native
 failure *could* escape the launcher's error display, not why the tester's game
 closed. Retain the actual signed exit code and check for any nonzero result in
 the next authorized launcher update. No failing game exception code is known.
+
+October11 launcher follow-up: the source launcher now captures `%ERRORLEVEL%`
+immediately, appends its signed value to `pcvr-log.txt`, displays the log for
+any nonzero value and returns the original code. The actual cmd/native-process
+fixture tests pass success, positive failure, two negative exception-style
+codes, missing assets and arguments containing spaces. The fixtures return
+those codes deliberately; they do not crash or reproduce the game failure.
+Release archives/user installations have not been replaced by this source fix.
+
+The current R363 diagnostic candidate is now packaged separately at
+`build/StarFoxEnhanced-pcvr-diagnostic-r363.zip` (176,380,550 bytes), SHA256
+`83347e61c23660bbe5b836be4a68252b3f8752ad2ac48a8165c5520dfa873e9f`.
+It contains the freshly rebuilt player, matching asset builder, both corrected
+BAT launchers and simple log-collection instructions. Ten native-process
+launcher cases pass, including the companion builder's negative-exit handling.
+All11 ZIP entries match their staged files and contain no private assets.
+This candidate has not been accepted on a headset and is not a claimed crash
+fix. On failure, preserve `pcvr-log.txt`, `vr-data/vr-session.log` and
+`vr-data/vr-session.previous.log` before relaunching, and share them privately.
 
 For an abrupt exit without a usable Application Error event, the tester can
 use [Microsoft ProcDump](https://learn.microsoft.com/en-us/sysinternals/downloads/procdump)

@@ -2699,8 +2699,8 @@ Three profiling attempts have **no accepted timing outcome**. D3D12
 `radix16-timing-d3d12-oct2/rejected.json` and its `-r2` counterpart reject runs
 06 and 05 after observing cmake/gcc/ninja and gcc respectively. Vulkan
 `radix16-timing-vulkan-oct2/rejected.json` rejects its first run. The latter
-captures compiler PID/parent information and gcc source paths under
-`C:/Users/kando/UrbanRecompBuild/`; the observer initially treated lowercase
+captures compiler PID/parent information and gcc source paths in an
+unrelated project's build directory; the observer initially treated lowercase
 `-c` as `-C` when labeling paths, and now uses case-sensitive matching with
 separate source-directory fields. This label repair does not alter the
 observed-overlap rejection. Earlier rows from partial batches are not promoted

@@ -9456,14 +9456,12 @@ int main(int argc, char** argv) {
             }
             const bool active=allowed && game.objects().is_active(game.player());
             const auto modes=active?unsigned(game.camera_response()):0U;
-            unsigned health=0;double bank=0;std::vector<std::uint64_t> shots;
+            unsigned health=0;std::vector<std::uint64_t> shots;
             if(active && modes) {
-                const auto& player=game.objects().at(game.player());
                 // Actual shield health comes from the cartridge meter, not
                 // the player model's commonly unchanged HP=255.
                 const auto meters=game.peek_meter_state();
                 health=meters.second_player_view?meters.damage_two:meters.damage;
-                bank=std::clamp(double(static_cast<std::int8_t>(player.rotation_z))/32.,-1.,1.);
                 if(modes&12U) for(const auto handle:game.objects().active_handles()) {
                     const auto& projectile=game.objects().at(handle);
                     // Both player strategy and owner link are required; enemy
@@ -9473,9 +9471,9 @@ int main(int argc, char** argv) {
                 }
             }
             const auto shot=camera_shot_tracker.observe(game.scene_revision(),shots);
-            auto pose=camera_response_tracker.update(seconds,game.scene_revision(),modes,health,shot,bank,game.paused());
+            auto pose=camera_response_tracker.update(seconds,game.scene_revision(),modes,health,shot,0,game.paused());
             if(modes && std::getenv("STARFOX_TEST_FRAMES") && std::getenv("STARFOX_TRACE_GPU")) std::cerr<<"camera-response-pose: "
-                <<pose.pitch<<','<<pose.yaw<<','<<pose.roll<<" health="<<health<<" bank="<<bank<<" shot="<<shot<<'\n';
+                <<pose.pitch<<','<<pose.yaw<<','<<pose.roll<<" health="<<health<<" bank=0 shot="<<shot<<'\n';
             if(const auto* forced_bank=std::getenv("STARFOX_TEST_CAMERA_BANK"))
                 pose={0,0,std::clamp(std::atof(forced_bank),-.024,.024)};
             return pose;
@@ -11401,17 +11399,17 @@ int main(int argc, char** argv) {
                         draw_graphics_row("VOLUMETRIC FOG",std::array<std::string_view,4>{"OFF","LOW","MEDIUM","HIGH"}[game.volumetric_fog()],row_y[76],game.pregame_selection()==76);
                         draw_graphics_row("MOTION BLUR",game.motion_blur() && game.renderer_mode()!=starfox::simulation::RendererMode::gpu
                             ?std::string_view{"GPU ONLY"}:std::array<std::string_view,4>{"OFF","LOW","MEDIUM","HIGH"}[game.motion_blur()],row_y[77],game.pregame_selection()==77);
-                        for(unsigned i=0;i<3;++i)
-                            draw_graphics_row(std::array<std::string_view,3>{"IMPACT SHAKE","WEAPON RECOIL","CAMERA BANKING"}[i],
+                        for(unsigned i=0;i<2;++i)
+                            draw_graphics_row(std::array<std::string_view,2>{"IMPACT SHAKE","WEAPON RECOIL"}[i],
                                 std::array<std::string_view,4>{"OFF","LOW","MEDIUM","HIGH"}[(game.camera_response()>>(i*2))&3U],
                                 row_y[73+i],game.pregame_selection()==73+i);
                         for(unsigned i=0;i<2;++i) draw_graphics_row(i==0?"IMPACT SPARKS / DEBRIS":"EXHAUST HEAT DISTORTION",
                             std::array<std::string_view,4>{"OFF","LOW","MEDIUM","HIGH"}[(game.particle_enhancements()>>(i*2))&3U],row_y[67+i],game.pregame_selection()==67+i);
                         for(unsigned i=0;i<2;++i) draw_graphics_row(std::array<std::string_view,2>{"AMBIENT OCCLUSION","DEPTH OF FIELD"}[i],
                             std::array<std::string_view,4>{"OFF","LOW","MEDIUM","HIGH"}[(game.depth_enhancements()>>(i*2))&3U],row_y[65+i],game.pregame_selection()==65+i);
-                        for(unsigned i=0;i<4;++i) draw_graphics_row(starfox::render::scene_enhancement_names[i],
+                        for(unsigned i=0;i<starfox::render::scene_enhancement_names.size();++i) draw_graphics_row(starfox::render::scene_enhancement_names[i],
                             std::array<std::string_view,4>{"OFF","LOW","MEDIUM","HIGH"}[(game.scene_enhancements()>>(i*2))&3U],row_y[61+i],game.pregame_selection()==61+i);
-                        for(unsigned i=0;i<starfox::render::global_enhancement_count;++i)
+                        for(unsigned i:starfox::render::global_enhancement_indices)
                             draw_graphics_row(starfox::render::global_enhancement_names[i],
                                 std::array<std::string_view,4>{"OFF","LOW","MEDIUM","HIGH"}[(game.global_enhancements()>>(i*2))&3U],
                                 row_y[48+i],game.pregame_selection()==48+i);
@@ -15185,25 +15183,9 @@ int main(int argc, char** argv) {
                         (game.objects().generation(item.handle)<<16)|item.handle,
                         {item.transform.x,item.transform.y,item.transform.z},exploded,weapon,item.handle==game.player(),object.health});
                 }
-                unsigned weather=0;
-                if(active && !shadowless_space && !ppu.tunnel_scene && game.flow_state()!=starfox::simulation::GameFlowState::intro) {
-                    if(environment_ids[2] && game.map().background()==environment_ids[2] && (game.scene_enhancements()>>6)) {
-                        const auto regions=starfox::render::environment_palette_regions(ppu,
-                            starfox::render::gameplay_landscape_origin("BG_2_3A",active_experience==starfox::simulation::Experience::starfox_ex).value_or(232));
-                        unsigned snow=0,dirt=0;
-                        for(unsigned i=0;i<256;++i) if(regions[i]==1 && (ppu.cgram[i]&0x7fff)) {
-                            if(starfox::render::titania_ground_material(ppu.cgram[i])==4) ++snow;else ++dirt;
-                        }
-                        if(snow>dirt) weather=1;
-                    }
-                    if(active_experience==starfox::simulation::Experience::starfox_ex) {
-                        if(environment_ids[18] && game.map().background()==environment_ids[18]) weather=2; // EX night storm.
-                        if((environment_ids[16] && game.map().background()==environment_ids[16]) || (environment_ids[21] && game.map().background()==environment_ids[21])) weather=3;
-                    }
-                }
                 presentation_effects.scene_fx=scene_fx_tracker.update(active?game.scene_enhancements():0,
                     environment_clock.seconds(interpolation_alpha,game.paused()),game.scene_revision(),emitters,
-                    {camera.x,camera.y,camera.z},weather,[&](const std::array<double,3>& p) {
+                    {camera.x,camera.y,camera.z},0,[&](const std::array<double,3>& p) {
                         const auto v=world_to_camera(p[0],p[1],p[2],camera,view_matrix);
                         return std::array<double,3>{v.x,v.y,v.z};
                     },float(game.map().read_native_word(vanish_x_address)+superfx_ui_offset_x)*render_scale,
@@ -15224,6 +15206,12 @@ int main(int argc, char** argv) {
                     std::cerr<<"scene-fx: rings="<<counts[0]<<" lights="<<counts[1]<<" exhaust="<<counts[2]
                         <<" snow="<<counts[3]<<" rain="<<counts[4]<<" ash="<<counts[5]
                         <<" sparks="<<counts[6]<<" debris="<<counts[7]<<" heat="<<counts[8]<<'\n';
+                    if(std::getenv("STARFOX_TRACE_SCENE_FX_POINTS")) for(unsigned i=0;i<unsigned(presentation_effects.scene_fx.camera[3]);++i) {
+                        const auto& point=presentation_effects.scene_fx.data[i*3];
+                        const auto& kind=presentation_effects.scene_fx.data[i*3+1];
+                        std::cerr<<"scene-fx-point: type="<<kind[0]<<" x="<<point[0]<<" y="<<point[1]
+                            <<" radius="<<point[2]<<" strength="<<point[3]<<" depth="<<kind[1]<<'\n';
+                    }
                     if(presentation_effects.depth_fx.active())
                         std::cerr<<"depth-fx: modes="<<presentation_effects.depth_fx.modes
                             <<" focus="<<presentation_effects.depth_fx.camera[3]<<'\n';

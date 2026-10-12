@@ -4,6 +4,7 @@
 #include "starfox/input/buttons.hpp"
 #include "starfox/render/asteroid_models.hpp"
 #include "starfox/render/effect_types.hpp"
+#include "starfox/render/global_enhancement_options.hpp"
 #include "starfox/render/environment_effects.hpp"
 
 #include <algorithm>
@@ -969,7 +970,7 @@ bool load_pregame_settings(
             loaded.volumetric_fog=static_cast<std::uint8_t>(value);
         } else if(name=="CAMERA_RESPONSE") {
             if(value<0 || value>63) return false;
-            loaded.camera_response=static_cast<std::uint8_t>(value);
+            loaded.camera_response=static_cast<std::uint8_t>(value)&render::camera_response_mask;
         } else if(name=="SHADOW_SOFTNESS") {
             if(value<0 || value>3) return false;
             loaded.shadow_softness=static_cast<std::uint8_t>(value);
@@ -990,10 +991,10 @@ bool load_pregame_settings(
             loaded.depth_enhancements=static_cast<std::uint8_t>(value);
         } else if(name=="SCENE_ENHANCEMENTS") {
             if(value<0 || value>255) return false;
-            loaded.scene_enhancements=static_cast<std::uint8_t>(value);
+            loaded.scene_enhancements=static_cast<std::uint8_t>(value)&render::scene_enhancement_mask;
         } else if(name=="GLOBAL_ENHANCEMENTS") {
             if(value>0x03ffffffU) return false;
-            loaded.global_enhancements=static_cast<std::uint32_t>(value);
+            loaded.global_enhancements=static_cast<std::uint32_t>(value)&render::global_enhancement_mask;
         } else if(name=="WORLD_DISTORTION" || name=="MODEL_SPECIAL_FX" || name=="WORLD_SPECIAL_FX") {
             const unsigned i=name=="WORLD_DISTORTION"?0:name=="MODEL_SPECIAL_FX"?1:2;
             if(value<0 || !(i==0?render::valid_manipulation(value) && !render::persistence_mode(static_cast<render::Effect>(value)):render::valid_special_fx(value))) return false;
@@ -1147,15 +1148,15 @@ bool save_pregame_settings(
            << "WORLD_DISTORTION " << unsigned(settings.extra_effects[0]) << '\n'
            << "MODEL_SPECIAL_FX " << unsigned(settings.extra_effects[1]) << '\n'
            << "WORLD_SPECIAL_FX " << unsigned(settings.extra_effects[2]) << '\n'
-           << "GLOBAL_ENHANCEMENTS " << settings.global_enhancements << '\n'
-           << "SCENE_ENHANCEMENTS " << unsigned(settings.scene_enhancements) << '\n'
+           << "GLOBAL_ENHANCEMENTS " << (settings.global_enhancements&render::global_enhancement_mask) << '\n'
+           << "SCENE_ENHANCEMENTS " << unsigned(settings.scene_enhancements&render::scene_enhancement_mask) << '\n'
            << "DEPTH_ENHANCEMENTS " << unsigned(settings.depth_enhancements) << '\n'
            << "PARTICLE_ENHANCEMENTS " << unsigned(settings.particle_enhancements) << '\n'
            << "PHOSPHOR_PERSISTENCE " << unsigned(settings.phosphor_persistence) << '\n'
            << "ADAPTIVE_EXPOSURE " << unsigned(settings.adaptive_exposure) << '\n'
            << "WATER_CAUSTICS " << unsigned(settings.water_caustics) << '\n'
            << "SHADOW_SOFTNESS " << unsigned(settings.shadow_softness) << '\n'
-           << "CAMERA_RESPONSE " << unsigned(settings.camera_response) << '\n'
+           << "CAMERA_RESPONSE " << unsigned(settings.camera_response&render::camera_response_mask) << '\n'
            << "VOLUMETRIC_FOG " << unsigned(settings.volumetric_fog) << '\n'
            << "MOTION_BLUR " << unsigned(settings.motion_blur) << '\n'
            << "WORLD_EFFECT_INTENSITY " << static_cast<unsigned>(settings.world_effect_intensity) << '\n'

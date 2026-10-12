@@ -12,8 +12,8 @@
 
 namespace starfox::render {
 inline constexpr unsigned scene_fx_capacity=48;
-inline constexpr std::array<std::string_view,4> scene_enhancement_names{
-    "EXPLOSION SHOCKWAVES","WEAPON LIGHTING","EXHAUST TRAILS","STAGE WEATHER"};
+inline constexpr std::array<std::string_view,3> scene_enhancement_names{
+    "EXPLOSION SHOCKWAVES","WEAPON LIGHTING","EXHAUST TRAILS"};
 struct SceneFxFrame {
     std::array<float,4> camera{}; // Stored cx,cy,focal,count.
     std::array<std::array<float,4>,scene_fx_capacity*3> data{};
@@ -55,10 +55,10 @@ struct SceneFxEmitter {
 };
 // Transient event state BEFORE any screen/eye projection. The maximum live
 // population is 6 lights + 4 rings + 24 debris/sparks + 24 exhaust/heat points
-// + 27 weather cells. Keep all of them here: clipping must happen independently
+// (no stage-weather emitters). Keep all of them here: clipping happens independently
 // in each eye before selecting its 48 visible points, not at the stereo centre.
 inline constexpr unsigned scene_fx_world_capacity=96;
-static_assert(scene_fx_world_capacity>=6+4+24+24+27);
+static_assert(scene_fx_world_capacity>=6+4+24+24);
 struct SceneFxWorldPoint {
     std::array<double,3> position{};
     float radius{},strength{},type{},age{};
@@ -134,8 +134,9 @@ class SceneFxTracker {
     double player_time_{-1};
 public:
     SceneFxWorldFrame update_world(unsigned settings,double time,std::uint64_t epoch,
-        std::span<const SceneFxEmitter> emitters,const std::array<double,3>& camera,
-        unsigned weather,unsigned extras=0,float gravity=0) {
+        std::span<const SceneFxEmitter> emitters,const std::array<double,3>& /*retired_weather_camera*/,
+        unsigned /*retired_weather*/,unsigned extras=0,float gravity=0) {
+        settings&=scene_enhancement_mask;
         if(!(settings|extras) || settings!=settings_ || extras!=extras_ || epoch!=epoch_ || time<last_time_ || time-last_time_>1.) {
             rings_.clear();trail_.clear();exploding_.clear();trail_time_=-1;player_time_=-1;
             particles_.clear();health_.clear();
@@ -174,7 +175,8 @@ public:
                 }
             }
             if(((settings>>2)&3) && (e.weapon || e.explosion) && lights<6) {
-                emitted(e.position,e.explosion?600.f:260.f,float((settings>>2)&3)/3.f,1,e.explosion?1.f:0.f,{},
+                const unsigned quality=(settings>>2)&3;
+                emitted(e.position,e.explosion?900.f:float(240+quality*160),float(quality)/3.f,1,e.explosion?1.f:0.f,{},
                     {1,starfox::bit_cast<std::int64_t>(e.id),0,0});++lights;
             }
             if((((settings>>4)&3) || ((extras>>2)&3)) && e.player && !e.explosion && time>player_time_) {
@@ -212,25 +214,8 @@ public:
             if((settings>>4)&3) emitted(position,6+age*12,(1-age/.4f)*float((settings>>4)&3)/9.f,2,age,{.15f,.55f,1.f,0},
                 {2,starfox::bit_cast<std::int64_t>(n.identity),0,0});
             if(((extras>>2)&3) && age>.035f)
-                emitted(position,10+age*25,(1-age/.4f)*float((extras>>2)&3)/3.f,8,age,{},
+                emitted(position,18+age*35,(1-age/.4f)*float((extras>>2)&3)/3.f,8,age,{},
                     {8,starfox::bit_cast<std::int64_t>(n.identity),0,0});
-        }
-        const unsigned quality=(settings>>6)&3;
-        if(weather && quality) {
-            constexpr double cell=480.;
-            const double fall=time*(weather==1?170.:weather==2?750.:75.);
-            for(int z=-1;z<=1;++z) for(int y=-1;y<=1;++y) for(int x=-1;x<=1;++x) {
-                const auto gx=int(std::floor(camera[0]/cell))+x,gy=int(std::floor((camera[1]-fall)/cell))+y,gz=int(std::floor(camera[2]/cell))+z;
-                const auto seed=hash(std::uint32_t(gx)*1973U+std::uint32_t(gy)*9277U+std::uint32_t(gz)*26699U);
-                if(seed%3>=quality) continue;
-                std::array<double,3> position{(gx+double(seed&1023)/1024.)*cell,
-                    (gy+double((seed>>10)&1023)/1024.)*cell+fall,
-                    (gz+double((seed>>20)&1023)/1024.)*cell};
-                if(weather!=2) position[0]+=std::sin(time+double(seed&255)) * 30.;
-                emitted(position,weather==2?3.f:5.f,.65f,weather==1?3.f:weather==2?4.f:5.f,0,
-                    weather==3?std::array<float,4>{1.f,.4f,.12f,0}:std::array<float,4>{.7f,.85f,1.f,0},
-                    {weather==1?3:weather==2?4:5,gx,gy,gz});
-            }
         }
         return out;
     }

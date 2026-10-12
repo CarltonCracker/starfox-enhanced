@@ -1,5 +1,6 @@
 #include "starfox/render/asteroid_models.hpp"
 #include "starfox/app/runtime_input.hpp"
+#include "starfox/render/global_enhancement_options.hpp"
 #include "starfox/app/atomic_file.hpp"
 #include "starfox/app/android_renderer_window.hpp"
 #include "starfox/app/presentation_capture.hpp"
@@ -1055,15 +1056,15 @@ int main(int argc, char** argv) {
         require(!starfox::app::save_pregame_settings(pregame_test_path,invalid_reflection),
             "invalid reflection intensity saved");
         auto settings=saved_pregame;
-        settings.global_enhancements=0x02aaaaaaU;
-        settings.scene_enhancements=0xaa;
+        settings.global_enhancements=0x02aaaaaaU&starfox::render::global_enhancement_mask;
+        settings.scene_enhancements=0x2a;
         settings.depth_enhancements=15;
         settings.particle_enhancements=15;
         settings.phosphor_persistence=3;
         settings.adaptive_exposure=2;
         settings.water_caustics=3;
         settings.shadow_softness=3;
-        settings.camera_response=57;
+        settings.camera_response=9;
         settings.volumetric_fog=3;
         settings.motion_blur=3;
         auto invalid_blur=settings;invalid_blur.motion_blur=4;
@@ -1088,10 +1089,16 @@ int main(int argc, char** argv) {
         require(starfox::app::save_pregame_settings(pregame_test_path,settings),
             "could not write shadow migration fixture");
         std::ofstream legacy{pregame_test_path,std::ios::app};
-        legacy << "ENHANCED_SHADOWS 1\n";
+        legacy << "ENHANCED_SHADOWS 1\nGLOBAL_ENHANCEMENTS "
+            << (settings.global_enhancements|starfox::render::global_enhancement_retired_mask) << '\n'
+            << "SCENE_ENHANCEMENTS " << unsigned(settings.scene_enhancements|192U) << '\n'
+            << "CAMERA_RESPONSE " << unsigned(settings.camera_response|48U) << '\n';
         legacy.close();
         require(starfox::app::load_pregame_settings(pregame_test_path,loaded_pregame)
             && !loaded_pregame.enhanced_shadows
+            && loaded_pregame.global_enhancements==settings.global_enhancements
+            && loaded_pregame.scene_enhancements==settings.scene_enhancements
+            && loaded_pregame.camera_response==settings.camera_response
             && loaded_pregame.ray_tracing==ray_tracing,
             "legacy Enhanced Shadows changed the ray-tracing choice");
     }

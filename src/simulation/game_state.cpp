@@ -126,8 +126,10 @@ std::unique_ptr<GameSimulation> GameSimulation::restored_state(
     const auto extras=result->extra_effects_;result->set_extra_effects(extras);
     if(extras!=result->extra_effects_) throw std::runtime_error("Invalid special effects");
     if(!a.empty()) a(result->global_enhancements_);
-    if(result->global_enhancements_&~0x03ffffffU) throw std::runtime_error("Invalid global enhancements");
+    if(result->global_enhancements_&~render::global_enhancement_legacy_mask) throw std::runtime_error("Invalid global enhancements");
+    result->set_global_enhancements(result->global_enhancements_);
     if(!a.empty()) a(result->scene_enhancements_);
+    result->set_scene_enhancements(result->scene_enhancements_);
     if(!a.empty()) a(result->depth_enhancements_);
     if(result->depth_enhancements_>15) throw std::runtime_error("Invalid depth enhancements");
     if(!a.empty()) a(result->particle_enhancements_);
@@ -142,6 +144,7 @@ std::unique_ptr<GameSimulation> GameSimulation::restored_state(
     if(result->shadow_softness_>3) throw std::runtime_error("Invalid shadow softness");
     if(!a.empty()) a(result->camera_response_);
     if(result->camera_response_>63) throw std::runtime_error("Invalid camera response");
+    result->set_camera_response(result->camera_response_);
     if(!a.empty()) a(result->volumetric_fog_);
     if(result->volumetric_fog_>3) throw std::runtime_error("Invalid volumetric fog");
     if(!a.empty()) a(result->stereo_separation_,result->stereo_convergence_);
@@ -192,6 +195,12 @@ std::unique_ptr<GameSimulation> GameSimulation::restored_state(
     // Older archives may have stopped on the removed Enhanced Shadows row.
     if(result->pregame_page_==PregamePage::three_d && result->pregame_selection_==26U)
         result->pregame_selection_=29U;
+    if(result->pregame_page_==PregamePage::global) {
+        if(result->pregame_selection_==51U) result->pregame_selection_=52U;
+        if(result->pregame_selection_==58U) result->pregame_selection_=59U;
+        if(result->pregame_selection_==64U) result->pregame_selection_=48U;
+        if(result->pregame_selection_==75U) result->pregame_selection_=74U;
+    }
     if(result->pregame_page_==PregamePage::three_d && (result->pregame_selection_==10
         || result->pregame_selection_==27 || result->pregame_selection_==28
         || result->pregame_selection_==29 || result->pregame_selection_==32))

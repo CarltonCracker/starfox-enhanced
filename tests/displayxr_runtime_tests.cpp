@@ -2471,10 +2471,11 @@ void gpu_presenter_tests(DisplayXrRuntime& runtime,const char* rom_path=nullptr,
         // Global effects use this independent geometric ownership oracle as
         // well, not a private native receiver readback. It includes bright
         // models, world, alpha, emissive/UI and an overlapping UI frame.
-        for(unsigned choice=0;choice<=global_enhancement_count;++choice) for(unsigned quality:{1U,2U,3U})
+        for(unsigned choice=0;choice<=global_enhancement_indices.size();++choice) for(unsigned quality:{1U,2U,3U})
             for(unsigned frame:{0U,4U,11U}) {
             auto selected=std::make_shared<CalibratedGameFrame>(*temporal_sources[frame]);
-            selected->settings.global_enhancements=choice<global_enhancement_count?quality<<(choice*2):quality*0x01555555U;
+            selected->settings.global_enhancements=choice<global_enhancement_indices.size()?quality<<(global_enhancement_indices[choice]*2)
+                :(quality*0x01555555U)&global_enhancement_mask;
             const auto actual=finish(renderer.submit(selected));
             for(unsigned eye=0;eye<2;++eye) {
                 starfox::render::Framebuffer ownership(mock.image_width,mock.image_height);ownership.enable_layer_tags(true);
@@ -2496,7 +2497,7 @@ void gpu_presenter_tests(DisplayXrRuntime& runtime,const char* rom_path=nullptr,
             if(frame==11) check(finish(renderer.submit(selected))==actual,"Held global animation phase jittered");
         }
         check(finish(renderer.submit(source))==plain,"Native global OFF failed exact source restoration");
-        std::cout<<"Native global owner format "<<unsigned(format)<<": all 13 enhancements and LOW/MED/HIGH, combined selections, independent eye/geometry flat oracle, overlapping/protected UI/alpha, held phase and exact OFF passed.\n";
+        std::cout<<"Native global owner format "<<unsigned(format)<<": all 11 enhancements and LOW/MED/HIGH, combined selections, independent eye/geometry flat oracle, overlapping/protected UI/alpha, held phase and exact OFF passed.\n";
         // Meter actual calibrated geometry, not a synthetic flat eye upload.
         // The label geometry independently defines UI/world/model ownership.
         for(unsigned quality:{1U,2U,3U}) for(bool combined:{false,true}) {

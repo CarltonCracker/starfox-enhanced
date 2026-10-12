@@ -4,23 +4,41 @@ float nx=(x+.5f)/w*2.f-1.f,ny=(y+.5f)/h*2.f-1.f;
 float sx=x,sy=y;
 float q=float((packed>>22)&3U)/3.f;
 if(q>0.f) {float r=nx*nx+ny*ny;sx+=nx*r*q*w*.035f;sy+=ny*r*q*h*.035f;}
-float original=G_SAMPLE(sx,sy);
 q=float((packed>>10)&3U)/3.f;
 if(q>0.f) {
-    float hot=G_MAX(0.f,original-.45f);
-    sx+=sin(y/(step*11.f)-seconds*2.1f)*hot*q*step*3.f;
-    sy+=sin(x/(step*19.f)+seconds*1.4f)*hot*q*step;
+    // Coherent refraction, independent of RGB channel/brightness. The old
+    // brightness gate left dark scenery motionless and split coloured edges.
+    float shimmer=sin(y/(step*18.f)-seconds*1.7f)
+        +.35f*sin(y/(step*7.f)+x/(step*37.f)-seconds*.9f);
+    sx+=shimmer*q*step*2.5f;
+    sy+=sin(x/(step*29.f)+y/(step*43.f)+seconds*1.2f)*q*step*.8f;
 }
 float value=G_SAMPLE(sx,sy);
-q=float((packed>>6)&3U)/3.f;
 float sharp=float((packed>>12)&3U)/3.f;
 float halo=float((packed>>4)&3U)/3.f;
-if(q+sharp+halo>0.f) {
-    float radius=step*(1.f+q*2.f+halo*2.f);
+if(sharp>0.f) {
+    float radius=step;
     float blur=(G_SAMPLE(sx-radius,sy)+G_SAMPLE(sx+radius,sy)
         +G_SAMPLE(sx,sy-radius)+G_SAMPLE(sx,sy+radius))*.25f;
-    value=value*(1.f-q*.55f)+blur*q*.55f+(value-blur)*sharp*.65f;
-    value+=G_MAX(0.f,blur-.55f)*halo*(channel==0?.65f:channel==1?.24f:.1f);
+    value+=(value-blur)*sharp*.65f;
+}
+if(halo>0.f) {
+    // Threshold each highlight BEFORE averaging, so a narrow bright edge can
+    // bloom onto darker neighbouring pixels without blurring the base image.
+    float glow=0.f;
+    for(int ring=1;ring<=2;++ring) {
+        float radius=step*float(ring)*(1.5f+halo*1.5f);
+        float weight=ring==1?.65f:.35f;
+        glow+=(G_MAX(0.f,G_SAMPLE(sx-radius,sy)-.65f)
+            +G_MAX(0.f,G_SAMPLE(sx+radius,sy)-.65f)
+            +G_MAX(0.f,G_SAMPLE(sx,sy-radius)-.65f)
+            +G_MAX(0.f,G_SAMPLE(sx,sy+radius)-.65f)
+            +G_MAX(0.f,G_SAMPLE(sx-radius*.7071f,sy-radius*.7071f)-.65f)
+            +G_MAX(0.f,G_SAMPLE(sx+radius*.7071f,sy-radius*.7071f)-.65f)
+            +G_MAX(0.f,G_SAMPLE(sx-radius*.7071f,sy+radius*.7071f)-.65f)
+            +G_MAX(0.f,G_SAMPLE(sx+radius*.7071f,sy+radius*.7071f)-.65f))*weight*.125f;
+    }
+    value+=glow*halo*(channel==0?1.8f:channel==1?.6f:.2f);
 }
 q=float((packed>>8)&3U)/3.f;
 if(q>0.f) {
@@ -65,6 +83,4 @@ if(q>0.f) {
 }
 q=float((packed>>18)&3U)/3.f;
 value*=1.f-q*(.1f+.1f*sin((y+.5f)/step*3.14159265f));
-q=float((packed>>20)&3U)/3.f;
-if(q>0.f && uint(x/step)%3U!=channel) value*=1.f-q*.22f;
 return G_MIN(1.f,G_MAX(0.f,value));

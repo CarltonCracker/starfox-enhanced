@@ -1,4 +1,5 @@
 #include "starfox/render/gpu_effects.hpp"
+#include "starfox/render/global_enhancement_options.hpp"
 #if defined(STARFOX_GPU_EFFECTS)
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -245,7 +246,7 @@ struct GpuEffects::Impl {
         const bool enabled[]{false,p.hdr!=0,p.chromatic!=0,p.smoothing!=0,
             p.model_effect!=0 || p.world_effect!=0 || settings.extra_effects!=std::array<std::uint8_t,3>{} || decorative_material(static_cast<Effect>(settings.material)) || spatial_manipulation(static_cast<Effect>(settings.manipulation)),p.aa!=0};
         for(const auto stage:std::array<unsigned,13>{14,6,1,2,31,41,3,4,35,34,33,5,15}) {
-            if(stage==33) {p.pad0=int(settings.global_enhancements&0x03ffffffU);p.pad1=starfox::bit_cast<std::int32_t>(float(settings.presentation_seconds));}
+            if(stage==33) {p.pad0=int(settings.global_enhancements&global_enhancement_mask);p.pad1=starfox::bit_cast<std::int32_t>(float(settings.presentation_seconds));}
             p.pad2=stage==31?0:(settings.overlay_filter?1:0);
             if(stage==5 && (p.bloom_model || p.bloom_world)) {
                 if(glow_presentation) {

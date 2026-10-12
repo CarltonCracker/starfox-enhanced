@@ -7255,8 +7255,8 @@ int main(int argc, char** argv) {
                 "Render Upscale did not step back to native");
         drive_boot({0, starfox::input::left, 0});
         require(boot_game.render_scale()
-                    == starfox::simulation::RenderScale::scale_6x,
-                "Render Upscale did not wrap backward to 6x");
+                    == starfox::simulation::RenderScale::scale_4x,
+                "GPU ACCURATE Render Upscale did not wrap backward to 4x");
         drive_boot({0, starfox::input::right, 0});
         require(boot_game.render_scale()
                     == starfox::simulation::RenderScale::scale_1x
@@ -7361,7 +7361,8 @@ int main(int argc, char** argv) {
         auto fx_saved=boot_game.restored_state(boot_game.save_state());
         require(fx_saved->extra_effects()==boot_game.extra_effects(),"independent FX lost in save state");
         boot_game.set_extra_effects({});
-        for(unsigned row=48;row<=60;++row) {
+        for(unsigned slot:starfox::render::global_enhancement_indices) {
+            const unsigned row=48+slot;
             select_menu_action(boot_game,starfox::simulation::PregamePage::global,row,&boot_audio);
             for(unsigned level=1;level<=4;++level) {
                 drive_boot({0,starfox::input::right,0});
@@ -7373,12 +7374,16 @@ int main(int argc, char** argv) {
         auto global_saved=boot_game.restored_state(boot_game.save_state());
         require(global_saved->global_enhancements()==boot_game.global_enhancements(),"global enhancements lost in save state");
         boot_game.set_global_enhancements(0);
-        for(unsigned row=61;row<=64;++row) {
+        boot_game.set_global_enhancements(starfox::render::global_enhancement_retired_mask);
+        require(boot_game.global_enhancements()==0,"retired global FX survived settings migration");
+        require(std::find(starfox::simulation::global_menu_order.begin(),starfox::simulation::global_menu_order.end(),51)==starfox::simulation::global_menu_order.end()
+            && std::find(starfox::simulation::global_menu_order.begin(),starfox::simulation::global_menu_order.end(),58)==starfox::simulation::global_menu_order.end(),"retired global FX remain in menu");
+        for(unsigned row=61;row<=63;++row) {
             select_menu_action(boot_game,starfox::simulation::PregamePage::global,row,&boot_audio);
             drive_boot({0,starfox::input::left,0});
             require(((boot_game.scene_enhancements()>>((row-61)*2))&3)==3,"scene enhancement selection failed");
         }
-        require(boot_game.restored_state(boot_game.save_state())->scene_enhancements()==255,"scene enhancements lost in save state");
+        require(boot_game.restored_state(boot_game.save_state())->scene_enhancements()==63,"scene enhancements lost in save state");
         boot_game.set_scene_enhancements(0);
         for(unsigned row=65;row<=66;++row) {
             select_menu_action(boot_game,starfox::simulation::PregamePage::global,row,&boot_audio);
@@ -7422,7 +7427,7 @@ int main(int argc, char** argv) {
         require(boot_game.shadow_softness()==3,"shadow softness reverse wrap failed");
         boot_game.set_shadow_softness(2);
         require(boot_game.camera_response()==0,"camera response must default Off");
-        for(unsigned channel=0;channel<3;++channel) {
+        for(unsigned channel=0;channel<2;++channel) {
             select_menu_action(boot_game,starfox::simulation::PregamePage::global,73+channel,&boot_audio);
             const auto before=boot_game.camera_response();
             drive_boot({0,starfox::input::left,0});
@@ -7433,7 +7438,11 @@ int main(int argc, char** argv) {
             require(boot_game.camera_response()==before,"camera response did not wrap Off");
             drive_boot({0,starfox::input::right,0});
         }
-        require(boot_game.camera_response()==21,"camera strengths not independent");
+        require(boot_game.camera_response()==5,"camera strengths not independent");
+        boot_game.set_camera_response(48);
+        boot_game.set_scene_enhancements(192);
+        require(boot_game.camera_response()==0 && boot_game.scene_enhancements()==0,"retired camera/weather settings survived migration");
+        for(unsigned retired_row:{64U,75U}) require(std::find(starfox::simulation::global_menu_order.begin(),starfox::simulation::global_menu_order.end(),retired_row)==starfox::simulation::global_menu_order.end(),"retired camera/weather row remains selectable");
         boot_game.set_camera_response(0);
         require(boot_game.volumetric_fog()==0,"fog must default Off");
         select_menu_action(boot_game,starfox::simulation::PregamePage::global,76,&boot_audio);

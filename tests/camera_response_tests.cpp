@@ -131,7 +131,7 @@ int main() {
         CameraResponsePose p;
         for(unsigned i=1;i<=fps;++i) p=camera.update(double(i)/fps,1,63,i>=fps/2?68:100,i>=fps/2?1:0,1);
         if(fps==60) reference=p;else require(equal(reference,p),"response depends on presentation rate");
-        require(p.roll>0 && p.roll<=.024,"bank escaped limits");
+        require(p.roll==0,"retired banking still rotates the camera");
         require(equal(camera.update(1,1,63,68,1,1),p),"repeated presentation retriggered event");
         require(equal(camera.update(1.5,1,63,68,1,1,true),p),"pause changed response");
         require(equal(camera.update(1.5,1,63,68,1,1),p),"resume advanced response ages");
@@ -140,18 +140,36 @@ int main() {
         require(equal(camera.update(1.6,2,63,1,8,1),{}),"scene cut retained response");
         require(equal(camera.update(1.7,2,0,0,9,1),{}),"disabled response moved camera");
     }
+    CameraResponse retired;
+    retired.update(0,1,48,40,0,1);
+    require(equal(retired.update(.1,1,48,0,1,1),{}),"bank-only legacy setting still responds to events");
     CameraResponse camera;
     camera.update(0,1,3,100,0,0);
     camera.update(.1,1,3,68,0,0);
     auto impact=camera.update(.15,1,3,68,0,0);
     require(impact.pitch!=0 && impact.yaw!=0 && impact.roll==0,"impact did not shake presentation axes");
-    require(std::abs(impact.pitch)<=.009 && std::abs(impact.yaw)<=.009,"impact exceeded angular bound");
+    require(std::abs(impact.pitch)<=.024 && std::abs(impact.yaw)<=.024,"impact exceeded angular bound");
     CameraResponse healed=camera;
     require(equal(camera.update(.2,1,3,68,0,0),healed.update(.2,1,3,100,0,0)),"healing retriggered damage shake");
     camera={};
     camera.update(0,1,12,100,0,0);
     auto recoil=camera.update(.1,1,12,100,1,0);
     require(recoil.pitch<0 && recoil.yaw==0 && recoil.roll==0,"recoil affected wrong axes");
+    require(std::abs(recoil.pitch)>=.019,"HIGH recoil is too small to show at native resolution");
+    require(std::abs(camera.update(.2,1,12,100,1,0).pitch)>.005,"recoil vanished before a visible recovery");
+    CameraResponse small_hit;
+    small_hit.update(0,1,3,40,0,0);
+    small_hit.update(.1,1,3,39,0,0);
+    const auto hit_pose=small_hit.update(.13,1,3,39,0,0);
+    require(std::abs(hit_pose.pitch)>.005,"one cartridge shield step still produces sub-pixel shake");
+    for(unsigned mode:{1U,2U,3U}) {
+        CameraResponse bounded;
+        bounded.update(0,1,mode*21,40,0,1);
+        for(unsigned i=1;i<=60;++i) {
+            const auto pose=bounded.update(double(i)/60,1,mode*21,0,i,1);
+            require(bool(camera_response_world_transform(pose)),"combined HIGH camera effects escaped native safety bounds");
+        }
+    }
     require(equal(camera.update(0,1,12,100,1,0),{}),"rewind did not clear response");
     require(equal(camera.update(std::numeric_limits<double>::quiet_NaN(),1,63,1,1,0),{}),"invalid time retained pose");
     std::cout<<"Camera response tests passed\n";

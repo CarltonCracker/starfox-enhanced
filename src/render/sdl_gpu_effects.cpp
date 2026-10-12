@@ -1,4 +1,5 @@
 #include "starfox/render/sdl_gpu_effects.hpp"
+#include "starfox/render/global_enhancement_options.hpp"
 #include "starfox/compat/bit_cast.hpp"
 #include "starfox/render/gpu_scalefx.hpp"
 #include "starfox/render/gpu_smaa.hpp"
@@ -835,7 +836,7 @@ struct SdlGpuEffects::Impl {
         if(s.depth_fx.active()) run(35);
         if(s.scene_fx.active()) run(34);
         if(s.global_enhancements) {
-            auto global=p;global.pad0=int(s.global_enhancements&0x03ffffffU);
+            auto global=p;global.pad0=int(s.global_enhancements&global_enhancement_mask);
             global.pad1=starfox::bit_cast<std::int32_t>(float(s.presentation_seconds));
             dispatch(global,33,work[current],work[1-current]);advance();
         }

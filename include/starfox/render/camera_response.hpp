@@ -1,4 +1,5 @@
 #pragma once
+#include "starfox/render/global_enhancement_options.hpp"
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -138,20 +139,21 @@ inline bool composite_camera_response(std::span<const std::uint8_t> world,
     output=std::move(result);return true;
 }
 
-// Independent two-bit strengths for impact, recoil and banking. Events come
+// Independent two-bit strengths for impact and recoil. Banking's old field
+// is retired and ignored. Events come
 // from simulation observations, never controller polling or presentation FPS.
 // No simulation state or random generator is modified.
 class CameraResponse {
     double time_{-1},impact_time_{-1},recoil_time_{-1};
-    double impact_{},recoil_{},bank_{},bank_velocity_{};
+    double impact_{},recoil_{};
     std::uint64_t epoch_{},shot_{};
     unsigned modes_{},health_{};
     CameraResponsePose pose_{};
 public:
     CameraResponsePose update(double time,std::uint64_t epoch,unsigned modes,
-        unsigned health,std::uint64_t shot,double bank_input,bool paused=false) {
-        modes&=63;
-        if(!std::isfinite(time) || !std::isfinite(bank_input)) { *this={};return {}; }
+        unsigned health,std::uint64_t shot,double /*retired_bank_input*/,bool paused=false) {
+        modes&=camera_response_mask;
+        if(!std::isfinite(time)) { *this={};return {}; }
         if(!modes || time_<0 || epoch!=epoch_ || modes!=modes_ || time<time_ || (!paused && time-time_>1)) {
             *this={};time_=time;epoch_=epoch;modes_=modes;health_=health;shot_=shot;
             return {};
@@ -163,30 +165,27 @@ public:
             if(recoil_time_>=0) recoil_time_+=elapsed;
             time_=time;health_=health;shot_=shot;return pose_;
         }
-        const double dt=time-time_;
         if((modes&3) && health<health_) {
-            impact_=std::min(1.,double(health_-health)/32.);
+            // The cartridge shield meter drops in small steps (often one),
+            // not 32-HP hits. Preserve damage scaling without sub-pixel kicks.
+            impact_=std::sqrt(std::min(1.,double(health_-health)/8.));
             impact_time_=time;
         }
         if(((modes>>2)&3) && shot!=shot_) {
             recoil_=1;recoil_time_=time;
         }
         health_=health;shot_=shot;time_=time;
-        const double target=std::clamp(bank_input,-1.,1.)*((modes>>4)&3)*.008;
-        // Exact critically damped spring for a constant target over dt.
-        const double omega=9,offset=bank_-target,c=bank_velocity_+omega*offset;
-        const double decay=std::exp(-omega*dt);
-        bank_=target+(offset+c*dt)*decay;
-        bank_velocity_=(bank_velocity_-omega*c*dt)*decay;
-        pose_={0,0,bank_};
+        pose_={};
         if(impact_time_>=0) {
-            const double age=time-impact_time_,a=impact_*(modes&3)*.003*std::exp(-age*9);
-            pose_.pitch+=a*std::sin(age*57);
-            pose_.yaw+=a*std::sin(age*43);
+            constexpr double impact_angles[]{0,.006,.012,.024};
+            const double age=time-impact_time_,a=impact_*impact_angles[modes&3]*std::exp(-age*6);
+            pose_.pitch+=a*std::sin(age*42);
+            pose_.yaw+=a*std::sin(age*31);
         }
         if(recoil_time_>=0) {
             const double age=time-recoil_time_;
-            pose_.pitch-=recoil_*((modes>>2)&3)*.003*std::exp(-age*18);
+            constexpr double recoil_angles[]{0,.004,.010,.020};
+            pose_.pitch-=recoil_*recoil_angles[(modes>>2)&3]*std::exp(-age*9);
         }
         return pose_;
     }

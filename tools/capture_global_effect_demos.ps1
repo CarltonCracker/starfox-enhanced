@@ -6,6 +6,7 @@ param(
     [ValidateSet('direct3d12','vulkan')][string]$GpuDriver='direct3d12',
     [switch]$All,
     [switch]$Additional,
+    [switch]$TracePoints,
     [switch]$List
 )
 $ErrorActionPreference='Stop'
@@ -16,14 +17,16 @@ $taskValidation=[IO.Path]::GetFullPath((Join-Path $taskRoot 'build/validation'))
 if(!$taskOutput.StartsWith($taskValidation+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)) {
     throw 'Demo scratch must remain under build/validation on C:'
 }
-$taskImageEffects=@(
-    'Light Shafts','Anamorphic Flare','Halation','Soft Focus','Radial Blur',
+$taskImageSlots=@(
+    'Light Shafts','Anamorphic Flare','Halation','','Radial Blur',
     'Heat Haze','Sharpen','Vignette','Film Grain','CRT Scanlines',
-    'Phosphor Mask','CRT Curvature','Lens Ghosts'
+    '','CRT Curvature','Lens Ghosts'
 )
+$taskImageEffects=@($taskImageSlots|Where-Object {$_})
 $taskSpecs=@{}
-for($i=0;$i -lt $taskImageEffects.Count;$i++){
-    $taskSpecs[$taskImageEffects[$i]]=@{key='STARFOX_TEST_GLOBAL_ENHANCEMENTS';value=[uint32](3 -shl ($i*2));context=@{};stage='LEVEL1_1';left='OFF'}
+for($i=0;$i -lt $taskImageSlots.Count;$i++){
+    if(!$taskImageSlots[$i]){continue}
+    $taskSpecs[$taskImageSlots[$i]]=@{key='STARFOX_TEST_GLOBAL_ENHANCEMENTS';value=[uint32](3 -shl ($i*2));context=@{};stage='LEVEL1_1';left='OFF'}
 }
 function Add-DemoSpec([string]$Name,[string]$Key,[int]$Value,[hashtable]$Context=@{},[string]$Stage='LEVEL1_1',[string]$Left='OFF'){
     $taskSpecs[$Name]=@{key=$Key;value=$Value;context=$Context;stage=$Stage;left=$Left}
@@ -34,22 +37,29 @@ Add-DemoSpec 'Enhanced Lighting' 'STARFOX_TEST_RTX_LIGHTING' 3
 Add-DemoSpec 'Ambient Occlusion' 'STARFOX_TEST_DEPTH_ENHANCEMENTS' 3
 Add-DemoSpec 'Depth of Field' 'STARFOX_TEST_DEPTH_ENHANCEMENTS' 12
 Add-DemoSpec 'Contrast' 'STARFOX_TEST_HDR_EFFECT' 3
-Add-DemoSpec 'Adaptive Exposure' 'STARFOX_TEST_ADAPTIVE_EXPOSURE' 3
+Add-DemoSpec 'Adaptive Exposure' 'STARFOX_TEST_ADAPTIVE_EXPOSURE' 3 @{STARFOX_TEST_EXPERIENCE='EX'} 'LEVEL6_4'
 Add-DemoSpec 'Chromatic Aberration' 'STARFOX_TEST_CHROMATIC_ABERRATION' 3
-Add-DemoSpec 'Impact Shake' 'STARFOX_TEST_CAMERA_RESPONSE' 3 @{STARFOX_TEST_GOD_MODE='0'}
+Add-DemoSpec 'Impact Shake' 'STARFOX_TEST_CAMERA_RESPONSE' 3 @{STARFOX_TEST_GOD_MODE='0';STARFOX_TEST_PREROLL_TICKS='60';STARFOX_TEST_PRESSES=''} 'LEVEL1_2'
 Add-DemoSpec 'Weapon Recoil' 'STARFOX_TEST_CAMERA_RESPONSE' 12 @{STARFOX_TEST_PRESSES='30:0x4000,60:0x4000,90:0x4000,120:0x4000,150:0x4000,180:0x4000,210:0x4000,240:0x4000,270:0x4000,300:0x4000'}
-Add-DemoSpec 'Camera Banking' 'STARFOX_TEST_CAMERA_RESPONSE' 48 @{STARFOX_TEST_PRESSES='30:0x8000,60:0x0100,90:0x0100,120:0x0080,150:0x0200,180:0x0200,210:0x0100,240:0x0100,270:0x0200,300:0x8000';STARFOX_TEST_PRESS_FRAMES='20'}
 Add-DemoSpec 'Explosion Shockwaves' 'STARFOX_TEST_SCENE_ENHANCEMENTS' 3
-Add-DemoSpec 'Weapon Lighting' 'STARFOX_TEST_SCENE_ENHANCEMENTS' 12
+Add-DemoSpec 'Weapon Lighting' 'STARFOX_TEST_SCENE_ENHANCEMENTS' 12 @{STARFOX_TEST_EXPERIENCE='EX';STARFOX_TEST_PRESSES='20:0x4000,90:0x4000,160:0x4000,230:0x4000,300:0x4000';STARFOX_TEST_PRESS_FRAMES='30'} 'LEVEL6_4'
 Add-DemoSpec 'Impact Sparks and Debris' 'STARFOX_TEST_PARTICLE_ENHANCEMENTS' 3
 Add-DemoSpec 'Exhaust Trails' 'STARFOX_TEST_SCENE_ENHANCEMENTS' 48
-Add-DemoSpec 'Exhaust Heat Distortion' 'STARFOX_TEST_PARTICLE_ENHANCEMENTS' 12
+Add-DemoSpec 'Exhaust Heat Distortion' 'STARFOX_TEST_PARTICLE_ENHANCEMENTS' 12 @{STARFOX_TEST_PRESSES='20:0x0800,140:0x0400,260:0x0800';STARFOX_TEST_PRESS_FRAMES='80'}
 Add-DemoSpec 'CRT Phosphor Persistence' 'STARFOX_TEST_PHOSPHOR_PERSISTENCE' 3
-Add-DemoSpec 'Stage Weather' 'STARFOX_TEST_SCENE_ENHANCEMENTS' 192 @{STARFOX_TEST_EXPERIENCE='EX'} 'LEVEL6_6'
 Add-DemoSpec 'Water Caustics' 'STARFOX_TEST_WATER_CAUSTICS' 3 @{STARFOX_TEST_ENVIRONMENT_0='1';STARFOX_TEST_ENVIRONMENT_1='5';STARFOX_TEST_RAY_TRACING='1';STARFOX_TEST_RT_QUALITY='3'}
 Add-DemoSpec 'Ray Tracing' 'STARFOX_TEST_RT_QUALITY' 3 @{STARFOX_TEST_ENVIRONMENT_0='1';STARFOX_TEST_ENVIRONMENT_1='1'}
 Add-DemoSpec 'Shadow Softness' 'STARFOX_TEST_SHADOW_SOFTNESS' 3 @{STARFOX_TEST_RAY_TRACING='1';STARFOX_TEST_RT_QUALITY='3'} 'LEVEL1_1' 'HARD'
 Add-DemoSpec 'Reflective Surfaces' 'STARFOX_TEST_REFLECTIVE_SURFACES' 3 @{STARFOX_TEST_RAY_TRACING='1';STARFOX_TEST_RT_QUALITY='3';STARFOX_TEST_ENVIRONMENT_0='1';STARFOX_TEST_ENVIRONMENT_1='6'}
+$taskNotes=@{
+    'Halation'='Warm glow around bright cloud and model edges'
+    'Heat Haze'='Watch the clouds and mountain contours bend'
+    'Adaptive Exposure'='Night-stage scene adapts; HUD remains unchanged'
+    'Weapon Recoil'='Actual laser firing triggers a camera kick and recovery'
+    'Impact Shake'='Actual shield damage jolts the world; HUD stays still'
+    'Weapon Lighting'='Laser light affects nearby polygon surfaces'
+    'Exhaust Heat Distortion'='Watch textured scenery behind the moving ship'
+}
 $taskAdditionalEffects=@($taskSpecs.Keys|Where-Object {$_ -notin $taskImageEffects}|Sort-Object)
 $taskCatalogue=@($taskImageEffects)+@($taskAdditionalEffects)
 if($List){$taskCatalogue;exit 0}
@@ -58,7 +68,7 @@ foreach($effect in $Effects){if($effect -notin $taskCatalogue){throw "Unknown ef
 $taskBinary=[IO.Path]::GetFullPath((Join-Path $taskRoot $Binary))
 $taskFfmpeg=(Get-Command ffmpeg -ErrorAction Stop).Source
 $taskRom=Join-Path $taskRoot 'upstream-ultrastarfox/SF.SFC'
-$taskSymbols=Join-Path $taskRoot 'upstream-ultrastarfox/SYMBOLS.TXT'
+$taskSymbols=Join-Path $taskRoot 'assets/symbols/ultrastarfox.txt'
 foreach($path in @($taskBinary,$taskRom,$taskSymbols)){if(!(Test-Path -LiteralPath $path -PathType Leaf)){throw "Missing input: $path"}}
 if(Test-Path -LiteralPath $taskOutput){throw 'Preserve existing demos; choose a new output directory'}
 # Each side uses a native 4:3 capture (256x224). Keep one baseline and only
@@ -143,10 +153,13 @@ try {
         STARFOX_TEST_WATER_CAUSTICS='0';STARFOX_TEST_SHADOW_SOFTNESS='0';STARFOX_TEST_CAMERA_RESPONSE='0'
         STARFOX_TEST_VOLUMETRIC_FOG_QUALITY='0';STARFOX_TEST_MOTION_BLUR_QUALITY='0'
         STARFOX_TEST_ENVIRONMENT_0='0';STARFOX_TEST_ENVIRONMENT_3='0'
+        STARFOX_TRACE_SCENE_FX='1';STARFOX_TRACE_GPU='1'
+        STARFOX_TEST_REQUIRE_CLEAN_RUNTIME='1'
         STARFOX_CAPTURE_PRESENTATION_SEQUENCE='1';STARFOX_CAPTURE_PRESENTATION_INTERVAL='2'
         STARFOX_CAPTURE_PRESENTATION_FIRST='1';STARFOX_CAPTURE_PRESENTATION_LAST="$taskFrames"
         STARFOX_TEST_PRESSES='30:0x8000,60:0x8000,90:0x8000,120:0x0080,150:0x8000,180:0x8000,210:0x8000,240:0x8000,270:0x8000,300:0x8000'
     }
+    if($TracePoints){$settings.STARFOX_TRACE_SCENE_FX_POINTS='1'}
     foreach($key in $settings.Keys){Set-Item -LiteralPath ('Env:'+$key) -Value $settings[$key]}
     Save-DemoReceipt
     $baseline=$null;$baselineKey='';$baselineIndex=0
@@ -177,13 +190,15 @@ try {
             continue
         }
         $video=Join-Path $taskOutput ($slug+'.mp4')
-        $filter="[0:v]scale=640:480:flags=neighbor,pad=640:530:0:50:color=0x14202c,drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='$($spec.left)':fontsize=22:fontcolor=white:x=20:y=14[left];"+
-            "[1:v]scale=640:480:flags=neighbor,pad=640:530:0:50:color=0x14202c,drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='$effect - HIGH':fontsize=22:fontcolor=white:x=20:y=14[right];[left][right]hstack=inputs=2,setsar=1[out]"
+        $note=if($taskNotes.ContainsKey($effect)){$taskNotes[$effect]}else{'One enhancement enabled; identical gameplay inputs on both sides'}
+        $filter="[0:v]scale=640:480:flags=neighbor,pad=640:564:0:50:color=0x14202c,drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='$($spec.left)':fontsize=22:fontcolor=white:x=20:y=14[left];"+
+            "[1:v]scale=640:480:flags=neighbor,pad=640:564:0:50:color=0x14202c,drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='$effect - HIGH':fontsize=22:fontcolor=white:x=20:y=14[right];"+
+            "[left][right]hstack=inputs=2,setsar=1,drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='$note':fontsize=20:fontcolor=white:x=(w-tw)/2:y=539[out]"
         & $taskFfmpeg -hide_banner -loglevel error -nostdin -f concat -safe 0 -i $baseline.concat `
             -f concat -safe 0 -i $enabled.concat -filter_complex $filter -map '[out]' `
             -frames:v $taskVideoFrames -r 30 -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -movflags +faststart $video
         if($LASTEXITCODE -ne 0 -or !(Test-Path -LiteralPath $video)){throw 'Video encoding failed'}
-        $taskReceipt.effects+=@{name=$effect;key=$spec.key;value=$spec.value;context=$spec.context;stage=$spec.stage;
+        $taskReceipt.effects+=@{name=$effect;key=$spec.key;value=$spec.value;context=$spec.context;stage=$spec.stage;left=$spec.left;status='requires_visual_review';
             changed_frames=$changed;video=[IO.Path]::GetFileName($video);sha256=(Get-FileHash -LiteralPath $video).Hash}
         Save-DemoReceipt
         Remove-OwnedFrames $enabled

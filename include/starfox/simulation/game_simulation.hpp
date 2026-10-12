@@ -3,6 +3,7 @@
 #include "starfox/assets/rom.hpp"
 #include "starfox/render/asteroid_models.hpp"
 #include "starfox/render/effect_types.hpp"
+#include "starfox/render/global_enhancement_options.hpp"
 #include "starfox/input/input_latch.hpp"
 #include "starfox/simulation/map_vm.hpp"
 #include "starfox/simulation/irq_palette.hpp"
@@ -126,8 +127,8 @@ inline constexpr std::array<std::uint8_t, 14> main_menu_order{
     0,1,2,3,43,4,5,6,20,21,47,14,15,16};
 inline constexpr std::array<std::uint8_t, 13> two_d_menu_order{8,18,36,37,38,39,40,41,13,24,44,46,23};
 inline constexpr std::array<std::uint8_t, 15> three_d_menu_order{42,7,11,9,30,78,17,79,12,22,35,33,34,45,23};
-inline constexpr std::array<std::uint8_t, 36> global_menu_order{
-    29,72,32,71,76,77,10,65,66,28,70,27,73,74,75,61,62,67,63,68,64,48,49,50,51,52,53,54,55,56,57,58,69,59,60,23};
+inline constexpr std::array<std::uint8_t, 32> global_menu_order{
+    29,72,32,71,76,77,10,65,66,28,70,27,73,74,61,62,67,63,68,48,49,50,52,53,54,55,56,57,69,59,60,23};
 #if defined(__ANDROID__) || defined(STARFOX_IOS_RUNTIME)
 inline constexpr std::array<std::uint8_t, 15> options_menu_order{16,15,9,0,1,2,3,4,13,5,6,7,8,12,11};
 #else
@@ -549,13 +550,13 @@ public:
     [[nodiscard]] std::uint8_t shadow_softness() const noexcept {return shadow_softness_;}
     void set_shadow_softness(std::uint8_t value) noexcept {shadow_softness_=value&3;}
     [[nodiscard]] std::uint8_t camera_response() const noexcept {return camera_response_;}
-    void set_camera_response(std::uint8_t value) noexcept {camera_response_=value&63;}
+    void set_camera_response(std::uint8_t value) noexcept {camera_response_=value&render::camera_response_mask;}
     [[nodiscard]] std::uint8_t volumetric_fog() const noexcept {return volumetric_fog_;}
     void set_volumetric_fog(std::uint8_t value) noexcept {volumetric_fog_=std::min<std::uint8_t>(value,3);}
     [[nodiscard]] std::uint8_t motion_blur() const noexcept {return motion_blur_;}
     void set_motion_blur(std::uint8_t value) noexcept {motion_blur_=std::min<std::uint8_t>(value,3);}
-    void set_scene_enhancements(std::uint8_t value) noexcept {scene_enhancements_=value;}
-    void set_global_enhancements(std::uint32_t value) noexcept {global_enhancements_=value&0x03ffffffU;}
+    void set_scene_enhancements(std::uint8_t value) noexcept {scene_enhancements_=value&render::scene_enhancement_mask;}
+    void set_global_enhancements(std::uint32_t value) noexcept {global_enhancements_=value&render::global_enhancement_mask;}
     void set_extra_effects(std::array<std::uint8_t,3> values) noexcept {
         for(unsigned i=0;i<3;++i) extra_effects_[i]=(i==0?render::valid_manipulation(values[i]) && !render::persistence_mode(static_cast<render::Effect>(values[i])):render::valid_special_fx(values[i]))?values[i]:0;
     }

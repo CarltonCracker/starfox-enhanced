@@ -133,9 +133,9 @@ struct CalibratedGameScene::State {
     SceneFxTracker scene_fx;
     std::shared_ptr<const vr::GameSceneSnapshot> fx_source;
     std::uint64_t fx_host_epoch{},fx_epoch{};
-    void capture_fx(CalibratedGameFrame& frame,const simulation::GameSimulation& game) {
+    void capture_fx(CalibratedGameFrame& frame,const simulation::GameSimulation& /*game*/) {
         const auto& scene=*frame.current;const auto& settings=frame.settings;
-        // No emitter scan, camera interpolation, weather lookup or tracker copy
+        // No emitter scan, camera interpolation or tracker copy
         // on the unenhanced path. Clear once on OFF/menu entry, preserving the
         // tracker's monotonic birth sequence for a later re-enable.
         if(!(settings.scene_enhancements|settings.particle_enhancements) || !calibrated_scene_fx_flow(scene.flow)) {
@@ -151,29 +151,13 @@ struct CalibratedGameScene::State {
         const bool reset=!fx_source || fx_host_epoch!=settings.history_epoch || fx_source->scene_epoch!=scene.scene_epoch
             || fx_source->flow!=scene.flow || timing::camera_transform_is_discontinuous(fx_source->camera,scene.camera);
         const auto epoch=fx_epoch+unsigned(reset);
-        unsigned weather=0;
         const bool active=calibrated_scene_fx_flow(scene.flow);
         const bool space=scene.dots_mode<0 || scene.background_star_sphere || scene.background_space_horizon || scene.background_unique_space;
-        const auto named=ground_names.find(scene.background_id);const auto name=named==ground_names.end()?std::string_view{}:named->second;
-        if(active && !space && !scene.ppu->tunnel_scene && scene.flow!=simulation::GameFlowState::intro && (settings.scene_enhancements>>6)) {
-            if(name=="BG_2_3A") {
-                const auto regions=environment_palette_regions(*scene.ppu,scene.landscape_atlas_origin);
-                unsigned snow=0,dirt=0;
-                for(unsigned ink=1;ink<256;++ink) if(regions[ink]==1 && (scene.cgram[ink]&0x7fff)) {
-                    if(titania_ground_material(scene.cgram[ink])==4) ++snow;else ++dirt;
-                }
-                if(snow>dirt) weather=1;
-            }
-            if(game.experience()==simulation::Experience::starfox_ex) {
-                if(name=="BG_6_4") weather=2;
-                if(name=="BG_6_5" || name=="BG_6_6") weather=3;
-            }
-        }
         // Capture publication is transactional. A failed model/background/
         // packet or malformed effect frame cannot consume a source event.
         auto next=scene_fx;
         frame.scene_fx=next.update_world(active?settings.scene_enhancements:0,settings.effect_seconds,epoch,
-            inputs.emitters,inputs.origin,weather,active?settings.particle_enhancements:0,space?0.F:400.F);
+            inputs.emitters,inputs.origin,0,active?settings.particle_enhancements:0,space?0.F:400.F);
         if(!valid_scene_fx_world_frame(frame.scene_fx)) throw std::invalid_argument("Invalid captured native scene effects");
         frame.scene_fx_origin=inputs.origin;frame.scene_fx_source_to_rig=inputs.source_to_rig;
         scene_fx=std::move(next);fx_source=frame.current;fx_host_epoch=settings.history_epoch;fx_epoch=epoch;

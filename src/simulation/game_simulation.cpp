@@ -1232,7 +1232,7 @@ GameTickResult GameSimulation::tick_pregame_menu(
         adaptive_exposure_=std::uint8_t((adaptive_exposure_+((menu_input.pressed&starfox::input::left)?3U:1U))&3U);
         queue_sound_effect(0x11U);
     }
-    if(pregame_page_==PregamePage::global && pregame_selection_>=73 && pregame_selection_<=75
+    if(pregame_page_==PregamePage::global && pregame_selection_>=73 && pregame_selection_<=74
         && (menu_input.pressed & (starfox::input::a | starfox::input::select | starfox::input::left | starfox::input::right))) {
         const auto shift=(pregame_selection_-73)*2;
         const auto value=((camera_response_>>shift)+((menu_input.pressed&starfox::input::left)?3U:1U))&3U;
@@ -1268,7 +1268,7 @@ GameTickResult GameSimulation::tick_pregame_menu(
         depth_enhancements_=std::uint8_t((depth_enhancements_&~(3U<<shift))|(level<<shift));
         queue_sound_effect(0x11U);
     }
-    if(pregame_page_==PregamePage::global && pregame_selection_>=61 && pregame_selection_<=64
+    if(pregame_page_==PregamePage::global && pregame_selection_>=61 && pregame_selection_<=63
         && (menu_input.pressed & (starfox::input::a | starfox::input::select | starfox::input::left | starfox::input::right))) {
         const unsigned shift=(pregame_selection_-61)*2;
         const auto level=((scene_enhancements_>>shift)+((menu_input.pressed&starfox::input::left)?3U:1U))&3U;
@@ -1276,6 +1276,7 @@ GameTickResult GameSimulation::tick_pregame_menu(
         queue_sound_effect(0x11U);
     }
     if(pregame_page_==PregamePage::global && pregame_selection_>=48 && pregame_selection_<=60
+        && pregame_selection_!=51 && pregame_selection_!=58
         && (menu_input.pressed & (starfox::input::a | starfox::input::select | starfox::input::left | starfox::input::right))) {
         const unsigned shift=(pregame_selection_-48)*2;
         const auto level=((global_enhancements_>>shift)+((menu_input.pressed&starfox::input::left)?3U:1U))&3U;

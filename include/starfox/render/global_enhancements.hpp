@@ -6,15 +6,9 @@
 #include <cmath>
 #include <vector>
 #include "starfox/render/framebuffer.hpp"
+#include "starfox/render/global_enhancement_options.hpp"
 
 namespace starfox::render {
-inline constexpr unsigned global_enhancement_count=13;
-inline constexpr std::uint32_t global_enhancement_mask=(1U<<(global_enhancement_count*2))-1;
-inline constexpr std::array<std::string_view,global_enhancement_count> global_enhancement_names{
-    "LIGHT SHAFTS", "ANAMORPHIC FLARE", "HALATION", "SOFT FOCUS", "RADIAL BLUR",
-    "HEAT HAZE", "SHARPEN", "VIGNETTE", "FILM GRAIN", "CRT SCANLINES",
-    "PHOSPHOR MASK", "CRT CURVATURE", "LENS GHOSTS"};
-
 // Shared scalar kernel: GPU and software use identical bounded sampling.
 template<class Sampler> inline float global_channel(Sampler sample,float x,float y,
     float w,float h,float step,float seconds,std::uint32_t packed,unsigned channel) {

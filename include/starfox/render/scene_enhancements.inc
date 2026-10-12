@@ -14,7 +14,7 @@ for(int n=0;n<int(S_CAMERA(3));++n) {
         float fall=S_MAX(0.f,1.f-d/range);
         float diffuse=S_MAX(0.f,(normal_x*lx+normal_y*ly+normal_z*lz)/S_MAX(1.f,d));
         float tint=S_DATA(at+1,2)>0?(channel==0?1.f:channel==1?.45f:.12f):(channel==0?.25f:channel==1?.6f:1.f);
-        value+=strength*fall*fall*(.12f+.88f*diffuse)*tint*.8f;
+        value+=strength*fall*fall*(.2f+.8f*diffuse)*tint*1.2f;
     } else {
         if(depth>0 && depth+8<z) continue;
         if(type==0) {
@@ -26,10 +26,10 @@ for(int n=0;n<int(S_CAMERA(3));++n) {
             float focus=S_DATA(at+2,0),range=S_DATA(at+2,1);
             if(depth>0 && abs(depth-focus)<range) continue;
             float fall=S_MAX(0.f,1.f-distance/S_MAX(r,.5f));
-            float age=S_DATA(at+1,2),a=fall*fall*strength;
+            float age=S_DATA(at+1,2),a=fall*strength;
             float u=dx/S_MAX(r,1.f),v=dy/S_MAX(r,1.f);
-            float sx=sin(u*5.f+v*3.f-age*19.f),sy=cos(v*5.f-u*2.f-age*13.f);
-            value=value*(1-a)+S_HEAT_SAMPLE(x+sx*3.f*scale,y+sy*2.f*scale,focus,range,z)*a;
+            float sx=sin(u*4.f+v*3.f-age*8.f),sy=cos(v*4.f-u*2.f-age*6.f);
+            value=value*(1-a)+S_HEAT_SAMPLE(x+sx*6.f*scale,y+sy*4.f*scale,focus,range,z)*a;
         } else if(type==7) {
             // Opaque, spinning debris flecks, not additive glowing dots.
             float angle=S_DATA(at+1,2)*11.f;

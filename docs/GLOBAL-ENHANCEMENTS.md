@@ -22,21 +22,19 @@ ground does not collect geometry for water. GPU mode currently requires hardware
 `NEEDS HW RT` or `RT OFF` when that GPU path cannot run. Compute-only GPU support
 and native Apple/device validation remain unfinished.
 
-Thirteen additional independent controls offer Off / Low / Medium / High:
+Eleven additional independent controls offer Off / Low / Medium / High:
 
 | Control | Implementation |
 | --- | --- |
 | Light Shafts | Bright-pixel radial integration toward an upper-screen light source; screen-space, not volumetric geometry. |
 | Anamorphic Flare | Wide horizontal streaks sourced from bright scene pixels. |
-| Halation | Warm highlight diffusion. |
-| Soft Focus | Spatial diffusion, not depth-of-field. |
+| Halation | Warm, two-radius glow around individual bright highlights; does not blur the underlying scene. |
 | Radial Blur | Center-out zoom blur, not velocity-based motion blur. |
-| Heat Haze | Animated bright-area refraction. |
+| Heat Haze | Smooth, coherent animated scene refraction, including dark scenery; identical displacement for all RGB channels. |
 | Sharpen | Local unsharp masking. |
 | Vignette | Graduated corner shading. |
 | Film Grain | Deterministic, time-stepped monochrome grain. |
 | CRT Scanlines | Native-raster horizontal modulation. |
-| Phosphor Mask | RGB column mask. |
 | CRT Curvature | Barrel-shaped scene sampling; interface remains flat/readable. |
 | Lens Ghosts | Reflected bright-pixel ghosts around the image center. |
 
@@ -49,7 +47,24 @@ that enabling every effect is free, especially on mobile hardware.
 The shared CPU/GPU kernel preserves alpha and protects HUD/menu/portrait pixels,
 including source taps, and has no frame-history feedback. Settings persist in
 the normal config and save states; old settings default the new controls Off.
-Actual volumetrics and velocity-based motion blur remain separate pending work.
+Volumetric fog and velocity-based motion blur are separate controls.
+
+Soft Focus and the RGB Phosphor Mask were removed after visual review. Their
+saved two-bit slots are retired, not reassigned; loading old settings clears
+only those two controls and preserves every other selection.
+
+For comparison captures, use real conditions: bright edges for Halation,
+textured scenery for Heat Haze and Exhaust Heat Distortion, a dark stage for
+Adaptive Exposure, actual firing near geometry for Weapon Lighting/Recoil,
+actual shield damage for Impact Shake. A changed frame
+hash or a nonempty event list is not sufficient visual acceptance.
+
+The October 12 follow-up strengthens halation, smooth heat haze, localized
+exhaust refraction, weapon lights and impact/recoil camera response.
+Adaptive Exposure itself did not need retuning: the revised comparison uses
+EX's dark night stage, where its compensation is plainly visible. Comparisons
+show one control at High against Off with matching gameplay inputs; paused
+details are labeled, and never add or simulate an effect in the video editor.
 
 ## Surface-depth controls
 
@@ -70,7 +85,7 @@ ring, avoiding repeated silhouettes on low-resolution polygon edges.
 
 ## Gameplay-driven additions
 
-Six further Off / Low / Medium / High controls sit above the lens controls:
+Five further Off / Low / Medium / High controls sit above the lens controls:
 
 - Explosion Shockwaves: expanding refractive rings triggered by destruction
   flags and object-generation identities, not a repeating screen animation.
@@ -81,10 +96,6 @@ Six further Off / Low / Medium / High controls sit above the lens controls:
 - Exhaust Trails: short, fading blue exhaust puffs retain previous player world
   positions and are projected through the current camera, with surface-depth
   occlusion. These are lightweight particles, not newly modelled engine meshes.
-- Stage Weather: world-space snow on Titania while its live ground palette is
-  snowy; rain on EX's night-storm background; ash on EX's ember/volcanic
-  backgrounds. Unlisted stages, menus, space and tunnels do not get generic
-  weather. Density increases with quality.
 - Impact Sparks / Debris: health decreases and newly destroyed object identities
   emit a short burst at the object's world position. Low/Medium/High emit 4/8/12
   particles per event, with at most 24 retained. Sparks glow; debris is opaque,
@@ -109,7 +120,7 @@ control. It is tone adjustment, not HDR monitor output.
 ## CRT phosphor persistence
 
 CRT Phosphor Persistence is an independent Off / Low / Medium / High control,
-separate from Phosphor Mask and model Trails/Long Exposure. It retains a short
+separate from model Trails/Long Exposure. It retains a short
 afterglow across both world and model pixels, with green decaying more slowly
 than red and blue. The green half-life is 30/60/90 milliseconds; red is half
 that and blue one third. Decay uses elapsed presentation time, not frame count.
@@ -134,22 +145,28 @@ on-device without a CPU readback. Software/legacy rendering has a matching
 reference with lookup tables. The option defaults off and allocates no exposure
 textures when disabled. Config key: `ADAPTIVE_EXPOSURE`, values 0–3.
 
-## Camera response (development build)
+## Camera response
 
-Impact Shake, Weapon Recoil and Camera Banking are independent Off / Low /
+Impact Shake and Weapon Recoil are independent Off / Low /
 Medium / High controls in Global Enhancements. All default Off. They rotate
 the composed world rather than moving HUD elements, with a small bounded crop
 to avoid exposed edges. Impact follows shield damage; recoil follows newly
-observed player-owned laser volleys; banking follows the player's roll.
+observed player-owned laser volleys.
 Pause freezes response, and scene or strength changes reset it.
 
-Config key `CAMERA_RESPONSE` packs impact, recoil and banking into successive
-two-bit fields (bits 0–1, 2–3 and 4–5). Config and save-state support are wired.
-Desktop software and resident GPU gameplay have been tested. Temporal
-upscaling, portrait/setup/wipe combinations, stereo and device coverage remain
-unfinished; this is not yet deployed to `build/current`.
+Config key `CAMERA_RESPONSE` packs impact and recoil into two-bit fields
+(bits 0–1 and 2–3). The former banking field (bits 4–5) is cleared on load.
+The former Stage Weather field of `SCENE_ENHANCEMENTS` (bits 6–7) is also
+cleared. Both controls are removed, with other saved selections unchanged.
+The October 12 follow-up strengthens the High settings and preserves subtle
+Low settings. Shield damage is measured in the cartridge's small meter steps;
+laser recoil has a short kick and recovery.
+Desktop software/reference tests and actual GPU gameplay have been checked.
+Version 0.0.8.6 includes these changes; 0.0.8.5 binaries are unchanged.
+Other-device validation remains
+separate from desktop checks.
 
-## Volumetric fog (development build)
+## Volumetric fog
 
 Global Enhancements now includes Volumetric Fog: Off / Low / Medium / High,
 default Off. Density and integration sample count rise together. Fog uses model
@@ -161,4 +178,3 @@ Older settings/states default to Off. Disabling fog releases its GPU resources.
 Vulkan and Direct3D 12 reference/compositing tests pass, and actual menu-driven
 activation has been captured on Direct3D 12. Upscaler/stereo compatibility,
 broader scene coverage, performance and mobile validation remain unfinished.
-This has not been deployed to `build/current`.

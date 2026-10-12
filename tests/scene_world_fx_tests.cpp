@@ -72,12 +72,17 @@ int main() try {
         std::array<SceneFxEmitter,6> explosions;
         for(unsigned n=0;n<explosions.size();++n) explosions[n]={n+1,{0,0,500},true,false,false,255};
         const auto all=tracker.update_world(255,0,1,explosions,{0,0,5000},1,3,400);
-        require(all.count==61 && all.count>scene_fx_capacity,"World frame culled before independent-eye projection");
-        require(project_scene_fx_frame(all,project,200,112,256,1).camera[3]==48,"Visible flat point limit changed");
+        require(all.count==34,"Retired weather still populates world effects");
+        // Explicit far exhaust fixtures preserve the per-eye compaction check,
+        // without relying on the removed gameplay weather generator.
+        auto layered=all;
+        for(unsigned n=0;n<27;++n) layered.add({0,0,5000},6,.5f,2,0,{.15f,.55f,1,0},{2,100+int(n),0,0});
+        require(layered.count>scene_fx_capacity,"World frame culled before independent-eye projection");
+        require(project_scene_fx_frame(layered,project,200,112,256,1).camera[3]==48,"Visible flat point limit changed");
         const auto alternative_eye=[](const auto& p) {auto q=p;if(p[2]<1000) q[2]=-32;return q;};
-        const auto visible=project_scene_fx_frame(all,alternative_eye,200,112,256,1);
-        require(visible.camera[3]==27,"Other eye lost weather hidden by centre-eye compaction");
-        for(unsigned n=0;n<27;++n) require(visible.data[n*3+1][0]==3,"Other eye retained a clipped particle");
+        const auto visible=project_scene_fx_frame(layered,alternative_eye,200,112,256,1);
+        require(visible.camera[3]==27,"Other eye lost far effects hidden by centre-eye compaction");
+        for(unsigned n=0;n<27;++n) require(visible.data[n*3+1][0]==2,"Other eye retained a clipped particle");
         require(tracker.update_world(255,0,1,explosions,{0,0,5000},1,3,400)==all,"Held world events spawned twice");
         const auto later=tracker.update_world(255,.1,1,explosions,{0,0,5000},1,3,400);
         const auto reset=tracker.update_world(255,.1,2,explosions,{0,0,5000},1,3,400);

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(starfox_enhanced VERSION 0.0.8.5 LANGUAGES CXX)
+project(starfox_enhanced VERSION 0.0.8.6 LANGUAGES CXX)
 
 # The PS5 payload SDK toolchain (cmake/toolchains/ps5-radv.cmake) sets PROSPERO.
 if(PROSPERO)
@@ -1269,7 +1269,7 @@ if(STARFOX_BUILD_RUNTIME)
             # Apple bundle versions accept three components, not our four-part
             # release tag. Keep the marketing series and increment the build.
             MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
-            MACOSX_BUNDLE_BUNDLE_VERSION "0.0.805"
+            MACOSX_BUNDLE_BUNDLE_VERSION "0.0.806"
             MACOSX_BUNDLE_INFO_PLIST
                 "${CMAKE_CURRENT_SOURCE_DIR}/platform/apple/Info.plist.in")
     endif()

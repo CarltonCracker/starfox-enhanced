@@ -432,10 +432,10 @@ void global_tests(Gpu& gpu,SDL_GPUTextureFormat format) {
             color[at+3]=static_cast<unsigned char>((x*13+y*19)%256);
         }
         gpu.begin();source.upload(color);receiver.upload(coverage);gpu.submit();
-        for(unsigned choice=0;choice<=render::global_enhancement_count+1;++choice) for(unsigned quality:{1U,2U,3U})
+        for(unsigned choice=0;choice<=render::global_enhancement_indices.size()+1;++choice) for(unsigned quality:{1U,2U,3U})
             for(float seconds:{0.F,.317F,1.73F}) {
-            const unsigned packed=choice<render::global_enhancement_count?quality<<(choice*2)
-                :choice==render::global_enhancement_count?quality*0x01555555U:render::global_enhancement_mask;
+            const unsigned packed=choice<render::global_enhancement_indices.size()?quality<<(render::global_enhancement_indices[choice]*2)
+                :choice==render::global_enhancement_indices.size()?(quality*0x01555555U)&render::global_enhancement_mask:render::global_enhancement_mask;
             auto expected=color;Bytes scratch;render::apply_global_enhancements(packed,ownership,expected,scratch,seconds);
             gpu.begin();check(native.enqueue(gpu.command,source.texture,receiver.texture,target.texture,w,h,step,packed,seconds),native.status().c_str());gpu.submit();
             const auto actual=target.read();
@@ -456,7 +456,7 @@ void global_tests(Gpu& gpu,SDL_GPUTextureFormat format) {
         gpu.begin();check(native.enqueue(gpu.command,source.texture,receiver.texture,target.texture,w,h,step,0,0),native.status().c_str());gpu.submit();
         compare(target.read(),color,"Cancelled global pass contaminated a later frame",0);
     }
-    std::cout<<"  All 13 global enhancements: shared flat oracle, LOW/MED/HIGH and combined selections, 45x33 grid, 1x/3x, three times, protected samples/ink/alpha, malformed/cancelled inputs and exact OFF passed"<<std::endl;
+    std::cout<<"  All "<<starfox::render::global_enhancement_indices.size()<<" active global enhancements: shared flat oracle, LOW/MED/HIGH and combined selections, 45x33 grid, 1x/3x, three times, protected samples/ink/alpha, malformed/cancelled inputs and exact OFF passed"<<std::endl;
 }
 void appearance_tests(Gpu& gpu,SDL_GPUTextureFormat format) {
     render::GpuCalibratedGlobal native;check(native.initialize(gpu.device,format),native.status().c_str());
@@ -816,6 +816,7 @@ int main(int argc,char** argv) try {
     std::cout<<"Calibrated component adapter: "<<SDL_GetStringProperty(SDL_GetGPUDeviceProperties(gpu.device),
         SDL_PROP_GPU_DEVICE_NAME_STRING,"unknown")<<" driver="<<SDL_GetGPUDeviceDriver(gpu.device)<<std::endl;
     const bool aa_only=argc>2 && std::string_view(argv[2])=="--aa-only";
+    const bool global_only=argc>2 && std::string_view(argv[2])=="--global-only";
     const bool ssaa_only=argc>2 && std::string_view(argv[2])=="--ssaa-only";
     const bool temporal_only=argc>2 && std::string_view(argv[2])=="--temporal-only";
     const bool patterns_only=argc>2 && std::string_view(argv[2])=="--temporal-pattern-only";
@@ -842,6 +843,7 @@ int main(int argc,char** argv) try {
         if(panel_water_only) {water_panel_guide_tests(gpu,format);continue;}
         if(ray_history_only) {temporal_liquid_tests(gpu,format);continue;}
         if(history_images_only) {persistence_tests(gpu,format);exposure_tests(gpu,format);continue;}
+        if(global_only) {global_tests(gpu,format);continue;}
         if(aa_only) {aa_tests(gpu,format);continue;}
         if(fsr_only) {native_fsr_tests(gpu,format);continue;}
         if(ssaa_only) {ssaa_tests(gpu,format);continue;}
@@ -883,6 +885,7 @@ int main(int argc,char** argv) try {
     if(ray_history_only) {std::cout<<"Native ray history "<<backend<<": four formats and independent consumed-ray/previous-eligibility pixel oracles passed.\n";return 0;}
     if(panel_water_only) {std::cout<<"Native panel liquid guides "<<backend<<": four formats passed; no physical Leia claim.\n";return 0;}
     if(ground_only || native_rays_only || water_guides_only) {std::cout<<"Native ground/ray compositor "<<backend<<": four formats passed; no physical Leia claim.\n";return 0;}
+    if(global_only) {std::cout<<"Native global enhancements "<<backend<<": all 11 controls/qualities, combined, HUD/alpha and frozen phases across four formats passed; GPU component fixture, not physical Leia validation.\n";return 0;}
     if(aa_only || ssaa_only || temporal_only || patterns_only || edges_only || fsr_only) {std::cout<<"Native AA/upscale "<<backend<<": four formats passed; no physical Leia claim.\n";return 0;}
     std::cout<<"Calibrated ray composite "<<backend<<": four runtime formats, packed/uint masks, strided/partial rows, alpha/colour oracle, binary cutouts, emissive exclusion, independent calibrated eyes, original depth/source-order and stale/cancelled continuation passed. "
         <<(std::string_view(backend)=="direct3d12"?"Resident native DXR shadows/reflections composited and checked.":"Raster/composite checks only; no native Vulkan DXR claim.")<<" Fixture, not physical Leia validation.\n";return 0;

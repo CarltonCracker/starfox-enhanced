@@ -547,9 +547,9 @@ int main() {
         }
     }
     std::cout<<"Independent animated FX: CPU/GPU coverage and time samples passed\n";
-    for(unsigned fx=0;fx<=global_enhancement_count;++fx) for(unsigned level=1;level<=3;++level) {
+    for(unsigned fx=0;fx<=global_enhancement_indices.size();++fx) for(unsigned level=1;level<=3;++level) {
         auto cpu=source,hardware=source;GpuEffectSettings settings;
-        settings.global_enhancements=fx==global_enhancement_count?global_enhancement_mask:level<<(fx*2);
+        settings.global_enhancements=fx==global_enhancement_indices.size()?global_enhancement_mask:level<<(global_enhancement_indices[fx]*2);
         settings.presentation_seconds=.35;
         apply_global_enhancements(settings.global_enhancements,frame,cpu,scratch,.35f);
         if(!gpu.apply(device.Get(),frame,hardware,settings)) return 55;
@@ -560,7 +560,7 @@ int main() {
             if((i%4==3 || frame.layer_tags()[i/4]==1) && hardware[i]!=source[i]) return 57;
         }
     }
-    std::cout<<"Global enhancements: all 13, combined, three levels, CPU/GPU and protected layers passed\n";
+    std::cout<<"Global enhancements: all 11, combined, three levels, CPU/GPU and protected layers passed\n";
     for(unsigned kind=0;kind<9;++kind) {
         auto cpu=source,hardware=source;GpuEffectSettings settings;
         SurfaceBuffer receiver(frame.stored_width(),frame.stored_height());

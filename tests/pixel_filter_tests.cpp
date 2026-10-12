@@ -1200,6 +1200,16 @@ int main(int argc, char** argv) {
         auto eye=advanced_ring;eye.eye(4,1000);
         require(eye.data[0][0]!=advanced_ring.data[0][0],"shockwave did not receive stereo parallax");
         require(!tracker.update(192,1.,1,{}, {0,0,0},0,projection,48,32,256,1).active(),"weather emitted in non-weather stage");
+        SceneFxTracker rain_tracker;
+        const auto rain=rain_tracker.update_world(192,1.,1,{}, {0,0,0},2);
+        require(rain.count==0 && valid_scene_fx_world_frame(rain),"retired weather still emits particles");
+        require(rain==rain_tracker.update_world(192,1.,1,{}, {0,0,0},2),"paused weather changed positions");
+        unsigned weather_count=0;
+        for(unsigned quality=1;quality<=3;++quality) {
+            const auto weather=rain_tracker.update_world(quality<<6,1.,1,{}, {0,0,0},2);
+            require(weather.count==0 && weather_count==0,"legacy weather quality still emits particles");
+            weather_count=weather.count;
+        }
         SceneFxTracker impact;
         emitter[0]={2,{0,0,500},false,false,false,20};
         require(!impact.update(0,0,1,emitter,{0,0,0},0,projection,48,32,256,1,3).active(),"undamaged object emitted particles");
@@ -1324,7 +1334,21 @@ int main(int argc, char** argv) {
         auto disabled=original;
         scratch.clear();apply_global_enhancements(0,fx_frame,disabled,scratch,.35f);
         require(disabled==original && scratch.empty(),"disabled global FX did work");
-        for(unsigned fx=0;fx<global_enhancement_count;++fx) {
+        auto retired=original;
+        apply_global_enhancements(global_enhancement_retired_mask,fx_frame,retired,scratch,.35f);
+        require(retired==original,"retired global FX still alter the image");
+        const auto dark_pattern=[](float x,float) {return (unsigned(x/3)&1)? .3f:.1f;};
+        require(global_channel(dark_pattern,20.5f,16.f,96.f,64.f,1.f,.35f,3U<<10,0)!=dark_pattern(20.5f,16.f),
+            "heat haze still ignores dark scenery");
+        for(unsigned channel=1;channel<3;++channel)
+            require(global_channel(dark_pattern,19.f,16.f,96.f,64.f,1.f,.35f,3U<<10,channel)
+                ==global_channel(dark_pattern,19.f,16.f,96.f,64.f,1.f,.35f,3U<<10,0),"heat haze refracts RGB differently");
+        const auto narrow_highlight=[](float x,float y) {return x>20.f && x<22.f && y>12.f && y<20.f?1.f:.1f;};
+        require(global_channel(narrow_highlight,18.f,16.f,96.f,64.f,1.f,.35f,3U<<4,0)>.12f,
+            "halation failed to bleed a narrow highlight onto its dark neighbour");
+        const auto unlit=[](float,float) {return .3f;};
+        require(global_channel(unlit,18.f,16.f,96.f,64.f,1.f,.35f,3U<<4,0)==.3f,"halation fogged an unlit surface");
+        for(unsigned fx:global_enhancement_indices) {
             auto first=original,second=original;
             apply_global_enhancements(3U<<(2*fx),fx_frame,first,scratch,.35f);
             apply_global_enhancements(3U<<(2*fx),fx_frame,second,scratch,.35f);

@@ -493,6 +493,19 @@ bool is_landscape_texture(const DrawPacket& packet,LandscapeTexture kind) noexce
     const auto texels=packet.geometry.texel_view();
     return texels.size()>16 && texels[7]==(4096U|32768U) && texels[2]==(kind==LandscapeTexture::ground?1U:0U);
 }
+void set_headset_mapping(DrawPacket& packet) noexcept {
+    // Header words the flat mappings leave unused: 3 (world/ground; zeroed
+    // by landscape_world_packet), 6 (replacement art), 12 (corridor).
+    auto& data=packet.geometry.texels;
+    if(is_landscape_world(packet) || is_landscape_ground(packet)) data[3]=1;
+    else if(is_landscape_texture(packet,LandscapeTexture::sky) || is_landscape_texture(packet,LandscapeTexture::ground)) data[6]=1;
+    else if(is_tunnel_corridor(packet)) {
+        // Rows by distance along the corridor (either way), and the planes
+        // continue behind the seat instead of ending one band back.
+        data[12]=1;
+        for(auto& vertex:packet.geometry.vertices) if(vertex.position[2]>0) vertex.position[2]=corridor_far;
+    }
+}
 Matrix4 landscape_world_model(double roll,double pitch,double height) noexcept {
     return landscape_orientation(roll,pitch,float(std::max(height,1.))/256.F,{0,0,0});
 }

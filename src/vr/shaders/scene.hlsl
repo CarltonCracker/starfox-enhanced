@@ -597,6 +597,15 @@ float4 tunnel_corridor_sample(Fragment input) {
     float3 p=input.surface_position;
     float3 eye=mul(view_matrix(),float4(p,1)).xyz*256.;
     float distance=max(-eye.z,1.);
+    if(texels[s+12]!=0) {
+        // Headsets (vr::set_headset_mapping): distance along the corridor
+        // from the eye, either way, whatever the head's direction. The model
+        // is a uniform scale and translation: offset = p + A^-1 t.
+        float3x3 a=float3x3(camera.view_rows[0].xyz,camera.view_rows[1].xyz,camera.view_rows[2].xyz);
+        float3 t=float3(camera.view_rows[0].w,camera.view_rows[1].w,camera.view_rows[2].w);
+        float3 column=float3(a[0][0],a[1][0],a[2][0]);
+        distance=max(abs(p.z+mul(t,a).z/dot(column,column)),1.);
+    }
     uint face=uint(input.uv.x+.5);
     bool ceiling=face==0;
     float height=asfloat(texels[s+(ceiling?1:2)]);
@@ -666,10 +675,17 @@ float square_wave_box(float x,float period,float footprint) {
 // Screen derivatives of the ground plane's source X/Z, set by the fragment
 // entry (derivatives do not exist in the vertex stage, which also samples).
 static float2 plane_dx=0,plane_dy=0;
+// Headset views (vr::set_headset_mapping) map the art by direction:
+// art columns per radian near the native focal length of 256, rounded so a
+// full turn wraps the art a whole number of times (no seam behind).
+float cylinder_columns(float art_width) {
+    return art_width*max(1.,round(6.28318530718*256./art_width))/6.28318530718;
+}
 float4 landscape_world_sample(Fragment input) {
     uint s=input.texture.x;
     uint tail=s+272+16384;
     float3 d=input.surface_position;
+    bool cylindrical=texels[s+3]!=0;
     // Source X/Z on the world-fixed ground plane.
     float2 source_plane=float2(d.x,-d.z);
     float alternate=0;
@@ -679,9 +695,16 @@ float4 landscape_world_sample(Fragment input) {
         d=unrolled_camera_offset(world);
         // The plane may carry the camera's yaw (world-fixed ground): express
         // the offset in the camera's heading frame (forward = -Z) so the haze
-        // rows and art columns stay screen-aligned as before.
-        float3 view_z=camera.view_rows[2].xyz;
-        float2 heading=normalize(-float2(view_z.x,view_z.z)+float2(0,-1e-6));
+        // rows and art columns stay screen-aligned as before. A headset's
+        // view turns with the head, so it passes the source camera heading.
+        float2 heading;
+        if(cylindrical && (camera.effects.z&65536U)!=0) {
+            float angle=float(camera.effects.z&65535U)/65536.*6.28318530718;
+            heading=float2(cos(angle),sin(angle));
+        } else {
+            float3 view_z=camera.view_rows[2].xyz;
+            heading=normalize(-float2(view_z.x,view_z.z)+float2(0,-1e-6));
+        }
         d=float3(dot(d.xz,float2(-heading.y,heading.x)),d.y,-dot(d.xz,heading));
         if(texels[tail+4]!=0) {
             // Classic scroll: the native gradient stays fixed on screen and
@@ -691,8 +714,15 @@ float4 landscape_world_sample(Fragment input) {
             alternate=square_wave_box(source_plane.y,period,abs(plane_dx.y)+abs(plane_dy.y));
         }
     }
-    float depth=max(-d.z,length(d)*.02);
-    float2 art=float2(asfloat(texels[tail+1])+d.x/depth*256.,
+    // Planar: distance along the view axis. Cylindrical: horizontal distance,
+    // so rows follow the elevation's tangent in every direction.
+    float depth=cylindrical?max(length(d.xz),length(d)*.02):max(-d.z,length(d)*.02);
+    float column=d.x/depth*256.;
+    if(cylindrical) {
+        uint edge=texels[s+8]!=0?16:8;
+        column=atan2(d.x,-d.z)*cylinder_columns(float(((texels[s+2]&1)!=0?64:32)*edge));
+    }
+    float2 art=float2(asfloat(texels[tail+1])+column,
         clamp(asfloat(texels[tail])-d.y/depth*256.,asfloat(texels[tail+2]),asfloat(texels[tail+3])));
     float4 colour;
     if(filter_2d()) {
@@ -765,10 +795,12 @@ float4 landscape_texture_sample(Fragment input) {
         // Sky: the native art mapping (horizon row and centre column per draw,
         // camera.effects.z = 16.16 x 32 fixed point), above the horizon only.
         float3 d=input.surface_position;
-        float depth=max(-d.z,length(d)*.02);
+        bool cylindrical=texels[s+6]!=0;
+        float depth=cylindrical?max(length(d.xz),length(d)*.02):max(-d.z,length(d)*.02);
         float horizon=float(camera.effects.z&65535U)/32.,centre=float(camera.effects.z>>16)/32.;
         float rows=asfloat(texels[s+4]);
-        float2 art=float2(centre+d.x/depth*256.,horizon-d.y/depth*256.);
+        float column=cylindrical?atan2(d.x,-d.z)*cylinder_columns(asfloat(texels[s+3])):d.x/depth*256.;
+        float2 art=float2(centre+column,horizon-d.y/depth*256.);
         if(art.y>=horizon) return 0;
         image=float2(art.x/asfloat(texels[s+3])*float(texels[s]),
             clamp((art.y-(horizon-rows))/rows,0.,1.)*float(texels[s+1]));

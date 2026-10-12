@@ -1,4 +1,5 @@
 #include "starfox/modern/sdl_source_scene.hpp"
+#include "starfox/vr/modern_frame.hpp"
 #include "starfox/vr/source_span_model.hpp"
 #include "render/shaders/generated/spans_portable.hpp"
 #include "render/shaders/generated/clip_continuous_portable.hpp"
@@ -335,35 +336,8 @@ bool SdlSourceScene::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* comm
             }
         }
         next->draws.push_back({first,legacy-first,{}});
-        // Painter objects: bounding radius (model space x placement scale).
-        next->enclosing.assign(source.packets.size(),false);
-        for(std::size_t index=0;index<source.packets.size();++index) {
-            const auto& model=source.packets[index].model;
-            const double scale=std::sqrt(double(model[0])*model[0]+double(model[1])*model[1]+double(model[2])*model[2]);
-            const double distance=std::sqrt(double(model[12])*model[12]+double(model[13])*model[13]+double(model[14])*model[14]);
-            double radius=0;
-            if(const auto* request=requests[index]) {
-                for(const auto& v:request->model.projection.continuous_vertices)
-                    radius=std::max(radius,std::sqrt(double(v.x)*v.x+double(v.y)*v.y+double(v.z)*v.z)/double(request->units));
-            } else for(const auto& v:source.packets[index].geometry.vertex_view())
-                radius=std::max(radius,std::sqrt(double(v.position[0])*v.position[0]+double(v.position[1])*v.position[1]
-                    +double(v.position[2])*v.position[2]));
-            // Large static scenery (tunnel sections, hangars, buildings: over
-            // 2 m, i.e. 512 source units) or anything around the camera. A
-            // camera-only test flips between frames as sections pass and swaps
-            // winners. Moving objects (ships) never paint over scenery.
-            const auto handle=uint16_t(source.handles[index]&0xffffU);
-            // Line-only objects (cables, wires) have no faces to order and
-            // must stay behind the walls they pass (Corneria's launch base).
-            bool lines_only;
-            if(const auto* request=requests[index])
-                lines_only=std::all_of(request->model.faces.primitives.begin(),request->model.faces.primitives.end(),
-                    [](auto primitive){return primitive==render::PackedPrimitive::line;});
-            else lines_only=source.packets[index].geometry.vertex_view().empty();
-            next->enclosing[index]=!lines_only && (radius*scale>2. || radius*scale>distance)
-                && handle!=0 && source.handles[index]<0x20000U
-                && std::find(moving.begin(),moving.end(),handle)==moving.end();
-        }
+        // Painter objects (vr::painter_scenery, shared with the PCVR app).
+        next->enclosing=vr::painter_scenery(source,moving);
         if(!next->packets->initialize(device,uploads_,source.packets,source.handles)) {
             const auto reason=next->packets->status();
             if(state_) state_->packets=std::move(next->packets); // Keep retained geometry for the next attempt.

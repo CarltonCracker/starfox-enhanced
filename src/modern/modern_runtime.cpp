@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
 namespace starfox::modern {
@@ -22,6 +24,36 @@ vr::EyeCamera flat_scene_camera(const vr::GameSceneSnapshot& scene,float aspect)
     camera.projection[0]=256.F/half_width;
     camera.projection[8]=(128.F-(float(scene.source_vanishing_point[0])+16.F))/half_width;
     return camera;
+}
+namespace {
+// Headset preview (testing without a headset): STARFOX_MODERN_HEADSET_PREVIEW=
+// "yaw,pitch[,fov]" in degrees (yaw left, pitch up, horizontal field of view,
+// default 100) plans the frame exactly as the PCVR app does and draws it
+// from the seat with that head orientation, through the same shader.
+struct HeadsetPreview {float yaw{},pitch{},fov{100};};
+std::optional<HeadsetPreview> headset_preview() {
+    const char* value=std::getenv("STARFOX_MODERN_HEADSET_PREVIEW");
+    if(!value || !*value) return {};
+    HeadsetPreview preview;
+    if(std::sscanf(value,"%f,%f,%f",&preview.yaw,&preview.pitch,&preview.fov)<2 || !(preview.fov>10 && preview.fov<170)) return {};
+    return preview;
+}
+// vr::eye_camera's conventions (Vulkan Y down, infinite far, near 0.05 m)
+// for an eye at the seat turned by yaw then pitch.
+vr::EyeCamera headset_preview_camera(const HeadsetPreview& preview,float aspect) noexcept {
+    constexpr float degrees=3.14159265358979F/180.F;
+    const float cy=std::cos(preview.yaw*degrees),sy=std::sin(preview.yaw*degrees);
+    const float cp=std::cos(preview.pitch*degrees),sp=std::sin(preview.pitch*degrees);
+    // Eye-to-world R = Ry(yaw) Rx(pitch); the view is its transpose.
+    const float r[3][3]{{cy,sy*sp,sy*cp},{0,cp,-sp},{-sy,cy*sp,cy*cp}}; // r[row][column]
+    vr::EyeCamera camera{};
+    for(unsigned row=0;row<3;++row) for(unsigned column=0;column<3;++column) camera.view[column*4+row]=r[column][row];
+    camera.view[15]=1;
+    const float x=std::tan(preview.fov*.5F*degrees),y=x/std::max(aspect,.01F);
+    auto& m=camera.projection;
+    m[0]=1/x;m[5]=-1/y;m[10]=-1;m[11]=-1;m[14]=-.05F;
+    return camera;
+}
 }
 int hud_edge_shift(float aspect) noexcept {
     if(!(aspect>0)) return 0;
@@ -57,6 +89,12 @@ struct ModernRuntime::State {
         // drawing over their backing face instead of z-fighting with it.
         vr::set_inset_decals(true);
         vr::set_solid_decals(true);
+        if(preview) {
+            // The PCVR app's inputs (application.cpp): VR's own cockpit, no
+            // flat-screen layer substitutes, no widescreen HUD shift.
+            inputs.trigonometry=nullptr;inputs.flat_landscape=inputs.space_roll_geometry=false;
+            inputs.flat_space_horizon=inputs.flat_tunnel_extension=false;
+        }
         // Replacement model textures (<exe>/textures/tex_*.png) and, with
         // STARFOX_MODERN_DUMP_TEXTURES=1, a dump of the source artwork in the
         // same layout (<exe>/texture_dump/).
@@ -77,6 +115,7 @@ struct ModernRuntime::State {
     render::ScaledTextRenderer dialogue_layout;
     simulation::TrigTables trigonometry;
     vr::FrameLayerInputs inputs;
+    std::optional<HeadsetPreview> preview{headset_preview()};
     render::TextureOverrides overrides;
     std::unique_ptr<TextureDump> dump;
     SdlFrameRenderer frame;
@@ -126,6 +165,7 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
             if(const auto* filter=std::getenv("STARFOX_MODERN_FILTER"); filter && std::string_view(filter)=="0") s.frame.set_filter_2d(false);
             if(const char* base=SDL_GetBasePath()) s.frame.set_texture_directory(std::string(base)+"textures/");
             s.frame.set_texture_dump(s.dump.get());
+            if(s.preview) s.frame.set_frame_settings({true,.25F});
         }
         int width=requested_width,height=requested_height;
         // Default: the window's output, not whatever intermediate target is bound.
@@ -163,7 +203,7 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
         SDL_FlushRenderer(renderer);
         auto* command=SDL_AcquireGPUCommandBuffer(device);
         require(command!=nullptr,"Acquire MODERN command buffer");
-        s.inputs.hud_edge_shift=hud_edge_shift(float(width)/float(height));
+        s.inputs.hud_edge_shift=s.preview?0:hud_edge_shift(float(width)/float(height));
         if(!s.frame.prepare(command,*previous,*current,alpha,std::move(world),s.inputs)) {
             SDL_CancelGPUCommandBuffer(command);throw std::runtime_error(s.frame.status());
         }
@@ -177,7 +217,8 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
         if(!pass) {SDL_CancelGPUCommandBuffer(command);throw std::runtime_error("Begin MODERN render pass");}
         // flat_scene_camera fills the height with the 224 source rows.
         s.frame.set_target(unsigned(width),unsigned(height),unsigned(std::max(1L,std::lround(height/224.))));
-        const bool recorded=s.frame.record(command,pass,flat_scene_camera(*current,float(width)/float(height)));
+        const bool recorded=s.frame.record(command,pass,s.preview?headset_preview_camera(*s.preview,float(width)/float(height))
+            :flat_scene_camera(*current,float(width)/float(height)));
         SDL_EndGPURenderPass(pass);
         require(SDL_SubmitGPUCommandBuffer(command),"Submit MODERN frame");
         require(recorded,s.frame.status());

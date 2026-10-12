@@ -118,6 +118,15 @@ enum class LandscapeTexture {sky,ground};
 [[nodiscard]] DrawPacket landscape_texture_packet(LandscapeTexture,std::span<const uint32_t> rgba,
     unsigned width,unsigned height,float art_width,float rows_above,float tile,bool srgb=false);
 [[nodiscard]] bool is_landscape_texture(const DrawPacket&,LandscapeTexture) noexcept;
+// Headset views: map a landscape world, ground, replacement-art or corridor packet by
+// direction (cylindrical: art column from the heading angle, row from the
+// tangent of the elevation; seamless all round) instead of the flat screen's
+// planar projection, which only holds within 90 degrees of the view axis.
+// The ground's art columns then follow the source camera heading passed in
+// camera.effects.z (ModernFrame::landscape_heading), not the eye's. A 3D
+// tunnel corridor colours its rows by distance along the corridor instead of
+// the eye's view depth, and extends behind the seat.
+void set_headset_mapping(DrawPacket&) noexcept;
 // Placement for a camera at world X/Z (source units, fractional for
 // display-rate motion): the corridor stays fixed in world X and Z (bands)
 // and follows the camera vertically, as the cartridge's tables do.

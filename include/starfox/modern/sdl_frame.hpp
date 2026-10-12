@@ -2,25 +2,15 @@
 #include "starfox/modern/sdl_source_scene.hpp"
 #include "starfox/modern/texture_dump.hpp"
 #include "starfox/vr/frame_layers.hpp"
-#include <map>
+#include "starfox/vr/modern_frame.hpp"
 #include <optional>
 namespace starfox::modern {
-// Background state between two ticks for display-rate rebuilds: the PPU
-// with integer scroll registers/scanline tables (null when static or
-// discontinuous), the fractional scroll remainders, and the Mode 2 horizon
-// line fitted to each tick's VRAM offset table and interpolated.
-struct BackgroundPresentation {
-    std::shared_ptr<const simulation::SnesPpuState> ppu;
-    std::optional<std::array<float,2>> bg2_fraction,bg3_fraction,mode2_horizon;
-};
-BackgroundPresentation interpolated_background(const vr::GameSceneSnapshot& previous,
-    const vr::GameSceneSnapshot& current,double alpha);
-// Least-squares line through the valid entries of the BG2 Mode 2 vertical
-// offset table (VRAM 0x2fa0): {intercept, slope per column}, column 1 = x 0..7.
-std::optional<std::array<double,2>> mode2_horizon_fit(const simulation::SnesPpuState&);
-// A standard infinite perspective (VR's: clip z = -z - near) rewritten for
-// reversed depth (clip z = near); other projections are returned unchanged.
-vr::EyeCamera reversed_depth_camera(vr::EyeCamera) noexcept;
+// The frame planning moved to starfox_scene (vr::ModernFrame), shared with
+// the PCVR application.
+using vr::BackgroundPresentation;
+using vr::interpolated_background;
+using vr::mode2_horizon_fit;
+using vr::reversed_depth_camera;
 // MODERN's whole frame, drawn from the shared VR scene code in VR's layer
 // order: surrounding stars, backgrounds, tunnel surround, world (compute
 // route), first-person MHUD lines, circle wipe, sprites/HUD/dialogue, shutter. Only the camera and
@@ -45,13 +35,15 @@ public:
     void set_filter_2d(bool enabled) noexcept {filter_2d_=enabled;}
     // Replacement landscape artwork: <directory>/bg_XXXX_sky.png and
     // bg_XXXX_ground.png (XXXX = background id, hex), loaded once per level.
-    void set_texture_directory(std::string directory) {texture_directory_=std::move(directory);}
+    void set_texture_directory(std::string directory);
     // Writes each planet background's art once (owned by the caller; null = off).
-    void set_texture_dump(TextureDump* dump) noexcept {texture_dump_=dump;}
+    void set_texture_dump(TextureDump* dump);
+    // Headset preview (harness): plan the frame as the PCVR app does.
+    void set_frame_settings(vr::ModernFrame::Settings settings) noexcept {frame_.set_settings(settings);}
     // Target size and pixels per source pixel for source line thickness.
     void set_target(unsigned width,unsigned height,unsigned source_pixel) noexcept {
         pipelines_.set_line_brush(source_pixel,width,height);
-        source_pixel_=float(height)/224.F;
+        source_pixel_=float(height)/224.F;target_height_=float(height);
     }
     const SdlSourceScene& world() const noexcept {return world_;}
     void release() noexcept;
@@ -61,22 +53,12 @@ private:
     SdlScenePipelines pipelines_;
     SdlUploadBatch uploads_;
     SdlDrawPackets stars_,backgrounds_,tunnel_,cockpit_,sprites_,reticle_,circle_,shutter_,textures_,colour_math_;
-    std::vector<vr::DrawPacket> texture_packets_;
-    std::optional<uint16_t> texture_background_;
+    vr::ModernFrame frame_;
     std::string texture_directory_;
     TextureDump* texture_dump_{};
-    uint32_t texture_mapping_{};
-    float source_pixel_{1};
-    std::optional<float> level_horizon_;
-    std::map<int,unsigned> horizon_votes_;
-    uint16_t level_background_{};
+    float source_pixel_{1},target_height_{224};
     SdlSourceScene world_;
-    std::vector<vr::DrawPacket> background_packets_;
-    std::optional<uint64_t> layer_revision_;
-    std::optional<SceneBlend> circle_blend_;
-    bool colour_math_active_{},colour_math_over_hud_{};
-    std::optional<SceneBlend> colour_math_blend_;
-    bool circle_active_{},circle_over_hud_{},shutter_active_{},background_interpolated_{},cockpit_active_{},reticle_active_{},filter_2d_{true};
+    bool filter_2d_{true};
     std::string status_{"MODERN frame not initialized"};
 };
 }

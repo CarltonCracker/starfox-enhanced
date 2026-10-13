@@ -173,18 +173,17 @@ int main() {
         require(next.camera[3]==3,"exhaust/heat fixture did not emit both types");
         for(unsigned i=0;i<3;++i) for(unsigned j=0;j<i;++j)
             require(next.motion_points[i].identity!=next.motion_points[j].identity,"exhaust/heat reused one render identity");
-        SceneFxTracker weather;
-        const auto weather_project=[](const auto& p){return std::array<double,3>{p[0],p[1],p[2]+1000};};
-        first=weather.update(192,0,1,{}, {0,0,0},1,weather_project,200,112,256,1);
-        next=weather.update(192,.01,1,{}, {480,0,0},1,weather_project,200,112,256,1);
-        require(first.active() && next.active(),"weather identity fixture is empty");
+        // The live exhaust frames above contain an existing birth plus newly
+        // spawned exhaust/heat points. Keep mixed-generation motion coverage
+        // without depending on the removed weather generator.
+        require(first.active() && next.active(),"exhaust identity fixture is empty");
         history.commit(points(first),{1,1,400,224},true);
         matched=history.prepare(points(next),{2,1,400,224});unsigned retained=0,spawned=0;
         for(unsigned i=0;i<matched.size();++i) {
             if(matched[i].valid) ++retained;else ++spawned;
-            for(unsigned j=0;j<i;++j) require(next.motion_points[i].identity!=next.motion_points[j].identity,"weather cells share identity");
+            for(unsigned j=0;j<i;++j) require(next.motion_points[i].identity!=next.motion_points[j].identity,"exhaust points share identity");
         }
-        require(retained && spawned,"weather grid movement did not retain and introduce cells");
+        require(retained && spawned,"exhaust motion did not retain and introduce births");
         const auto old=next.motion_points[0];next.eye(8,1024);
         require(next.motion_points[0].identity==old.identity && next.motion_points[0].projected[0]==next.data[0][0],"eye transform detached particle metadata");
         require(next.motion_points[0].projected[0]!=old.projected[0],"eye transform left particle at central camera");
@@ -204,7 +203,7 @@ int main() {
     {
         SceneMotionHistory history;
         const SceneMotionPoint a{{6,42,0,0},{20,30,100},true};
-        const SceneMotionPoint b{{3,-4,5,6},{40,50,200},true};
+        const SceneMotionPoint b{{2,-4,5,6},{40,50,200},true};
         std::array<SceneMotionPoint,2> first{a,b},next{b,a};
         next[0].projected={43,55,180};next[1].projected={25,27,120};
         require(!history.prepare(next,{2,1,400,224})[0].valid,"uncommitted particle history used");
@@ -217,8 +216,8 @@ int main() {
         require(!history.prepare(duplicate,{2,1,400,224})[1].valid,"duplicate current particle identity accepted");
         for(auto frame:{SceneMotionHistory::Frame{3,1,400,224},{2,2,400,224},{2,1,800,448},{2,1,400,224,true}})
             require(!history.prepare(next,frame)[0].valid,"particle cut/resize/pause retained motion");
-        auto spawned=next;spawned[0].identity[2]++;
-        require(!history.prepare(spawned,{2,1,400,224})[0].valid,"new weather cell borrowed old motion");
+        auto spawned=next;spawned[0].identity[1]++;
+        require(!history.prepare(spawned,{2,1,400,224})[0].valid,"new particle birth borrowed old motion");
         for(double eye:{-8.,8.}) {
             auto point=next[1];auto prior=motion[1];
             require(scene_motion_eye(point,prior,eye,256,1024),"particle eye projection rejected");

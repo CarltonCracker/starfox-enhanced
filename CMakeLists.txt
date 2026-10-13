@@ -618,6 +618,14 @@ if(STARFOX_BUILD_TOOLS)
     add_executable(starfox_shape_coverage src/app/shape_coverage.cpp)
     target_link_libraries(starfox_shape_coverage PRIVATE starfox_core)
 
+    add_executable(starfox_texture_dump src/app/texture_dump.cpp)
+    target_link_libraries(starfox_texture_dump PRIVATE starfox_core)
+    if(MINGW)
+        # Modders run this from Explorer, without the toolchain on PATH.
+        target_link_options(starfox_texture_dump PRIVATE
+            -static -static-libgcc -static-libstdc++)
+    endif()
+
     add_executable(starfox_map_trace src/app/map_trace.cpp)
     target_link_libraries(starfox_map_trace PRIVATE starfox_core)
 

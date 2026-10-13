@@ -585,14 +585,20 @@ void ShapeDecoder::decode_colours(Shape& shape) const {
 }
 
 void ShapeDecoder::decode_texture(Shape& shape, std::uint16_t descriptor) const {
-    if ((descriptor & 0xc000U) != 0x4000U || texture_address_table_ == 0U
-        || texture_coordinate_table_ == 0U) {
-        return;
-    }
     if (std::any_of(shape.textures.begin(), shape.textures.end(), [descriptor](const auto& texture) {
             return texture.descriptor == descriptor;
         })) {
         return;
+    }
+    if (auto decoded = texture(descriptor)) {
+        shape.textures.push_back(std::move(*decoded));
+    }
+}
+
+std::optional<TextureImage> ShapeDecoder::texture(std::uint16_t descriptor) const {
+    if ((descriptor & 0xc000U) != 0x4000U || texture_address_table_ == 0U
+        || texture_coordinate_table_ == 0U) {
+        return std::nullopt;
     }
 
     const auto texture_index = static_cast<std::uint8_t>(descriptor);
@@ -604,7 +610,7 @@ void ShapeDecoder::decode_texture(Shape& shape, std::uint16_t descriptor) const 
     // table can coincidentally have bit 14 set; only descriptors valid against
     // both canonical lookup tables are textures.
     if (coordinate_index >= 9U || texture_index >= texture_count) {
-        return;
+        return std::nullopt;
     }
     const auto address_entry = texture_address_table_
         + static_cast<std::uint32_t>(texture_index) * 3U;
@@ -646,7 +652,7 @@ void ShapeDecoder::decode_texture(Shape& shape, std::uint16_t descriptor) const 
                 : static_cast<std::uint8_t>(packed & 0x0fU));
         }
     }
-    shape.textures.push_back(std::move(texture));
+    return texture;
 }
 
 } // namespace starfox::assets

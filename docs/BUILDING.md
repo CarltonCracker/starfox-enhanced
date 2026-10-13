@@ -200,6 +200,26 @@ and licenses are recorded in `THIRD_PARTY_NOTICES.md`. The original Nintendo/
 Argonaut staff, Star Fox EX team, UltraStarFox contributors, native-port
 credit, and MSU-set attribution are recorded separately in `CREDITS.md`.
 
+`starfox_texture_dump` writes every Super FX texture straight from the ROM,
+without playing the game:
+
+```sh
+starfox_texture_dump Starfox-Assets.BIN textures [--map LEVEL3_7]
+starfox_texture_dump SF.SFC SYMBOLS.TXT textures [--map LEVEL3_7]
+```
+
+The bundle form writes `original/` and `ex/`. Each holds `atlas/` (every
+texture bank as a 256x128 page per 4-bit plane), `textures/` (each texture
+that a shape or colour table references) and `textures.csv`, which lists every
+size each texture is sampled at, its descriptors and the shapes that use it.
+`textures/` uses the names MODERN's replacement loader reads,
+`tex_AAAAAA_l.png` / `tex_AAAAAA_h.png` (SNES ROM address, low/high nibble
+plane), so an edited copy at any resolution goes into `textures/` next to
+`starfox_pc.exe`. The PNGs are RGBA with texel 0 transparent, coloured with
+CGRAM palette 7 after the `--map` stage has loaded (default `LEVEL1_1`). When
+the game samples one texture at several sizes, the largest is written. Never
+commit the output, since it is ROM data.
+
 The EX regression runs every one of the 40 stage labels shipped through
 `PLANETS` and `PLANETS2` for 2,000 deterministic logic ticks. The source-only
 `PLANETS3` test campaign is intentionally outside the shipped experience.

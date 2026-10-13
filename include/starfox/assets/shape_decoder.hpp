@@ -4,6 +4,7 @@
 #include "starfox/assets/shape.hpp"
 
 #include <cstdint>
+#include <optional>
 #include <string>
 
 namespace starfox::assets {
@@ -25,6 +26,9 @@ public:
         const ShapeHeader& header, double camera_z) noexcept;
     [[nodiscard]] Shape decode_by_name(const SymbolMap& symbols, const std::string& name) const;
     [[nodiscard]] bool looks_like_shape_header(std::uint32_t address) const noexcept;
+    // Resolves one colour word to its texture, or nothing for flat colours
+    // and words that are not valid against both texture tables.
+    [[nodiscard]] std::optional<TextureImage> texture(std::uint16_t descriptor) const;
 
 private:
     [[nodiscard]] ShapeHeader decode_header(std::uint32_t address) const;

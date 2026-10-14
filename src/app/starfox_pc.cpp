@@ -607,7 +607,7 @@ std::uint32_t effective_render_scale_factor(
 // The RENDERER row's value.
 std::string_view renderer_label(const starfox::simulation::GameSimulation& game) noexcept {
     if(game.renderer_mode()==starfox::simulation::RendererMode::software) return "SOFTWARE";
-    if(game.modern_renderer()) return "MODERN (EXPERIMENTAL, VERY FAST)";
+    if(game.modern_renderer()) return "MODERN - EXPERIMENTAL, VERY FAST";
     return game.gpu_fast()?"GPU FAST":"GPU";
 }
 
@@ -11039,7 +11039,10 @@ int main(int argc, char** argv) {
                     7U * 16U + 4U);
                 // Translated labels need breathing room at the same readable
                 // font size, not narrower letters to fit the English column.
-                const auto menu_extra = game.language() != 0U
+                // MODERN's full RENDERER name needs the same room in English.
+                const auto menu_extra = (game.language() != 0U
+                        || (game.modern_renderer()
+                            && game.pregame_page() == starfox::simulation::PregamePage::main))
                     && !hud_editor.active && !remap_menu.active
                     && game.pregame_page() != starfox::simulation::PregamePage::options
                     ? std::min<std::int32_t>(64, (display_width - snes_width) / 2) : 0;
@@ -11048,6 +11051,15 @@ int main(int argc, char** argv) {
                 const std::int32_t menu_label_x = 32 - menu_extra;
                 const std::int32_t menu_value_right = 236 + menu_extra;
                 const std::int32_t menu_cursor_x = 20 - menu_extra;
+                // A 4:3 menu has no room for it, so it shows the short name
+                // rather than printing over the label.
+                const auto renderer_value = [&]() -> std::string_view {
+                    const auto full = renderer_label(game);
+                    return !game.modern_renderer()
+                        || text_renderer.measure_ascii("RENDERER") + 8
+                            + text_renderer.measure_ascii(full) <= menu_value_right - menu_label_x
+                        ? full : std::string_view{"MODERN"};
+                }();
                 setup_overlay_left = menu_left;
                 setup_overlay_right = menu_right;
                 for (std::int32_t x = menu_left + viewport_origin;
@@ -11275,7 +11287,7 @@ int main(int argc, char** argv) {
                         for(std::size_t row=0;row<order.size();++row) {
                             std::string_view label;std::string value;
                             switch(order[row]) {
-                            case 16:label="RENDERER";value=renderer_label(game);break;
+                            case 16:label="RENDERER";value=renderer_value;break;
                             case 15:label="GPU BACKEND";value=starfox::render::renderer_backend_names[unsigned(window.renderer_backend())];break;
                             case 9:label="STEREOSCOPIC 3D";value="A  OPEN";break;
                             case 0:label="CHEATS";value="A  OPEN";break;
@@ -11399,7 +11411,7 @@ int main(int argc, char** argv) {
                                 ? std::string_view{"SOFTWARE ONLY"}
                                 :
 #endif
-                            renderer_label(game),
+                            renderer_value,
                             row_y[4], game.pregame_selection() == 4U);
                         const auto msu1_value = game.msu1_available()
                             ? on_off(game.msu1_music())

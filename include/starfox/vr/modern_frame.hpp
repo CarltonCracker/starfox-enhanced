@@ -97,6 +97,11 @@ public:
     // camera.effects.z for the backgrounds draw on a headset: the source
     // camera heading in the landscape ground's frame (16-bit turn | 1<<16).
     uint32_t landscape_heading{};
+    // camera.effects.z for the backgrounds draw on a flat view: the planet
+    // art's column offset for the camera's world yaw, so the mountains turn
+    // with the ground (16ths of a source column, mod 4096 | 1<<17); zero
+    // with STARFOX_MODERN_FIXED_SKY=0 (the cartridge's own screen art).
+    uint32_t sky_turn{};
     // Flat first person: MHUD wing lines. Reticle as geometry.
     std::optional<DrawPacket> cockpit,reticle;
     std::optional<Overlay> circle,colour_math;
@@ -108,6 +113,10 @@ private:
     std::function<void(uint16_t,const simulation::SnesPpuState&,float,std::span<const uint32_t>)> observe_landscape_;
     std::optional<uint64_t> layer_revision_;
     std::optional<uint16_t> texture_background_;
+    // Unwrapped camera yaw behind sky_turn: last heading and accumulated
+    // art columns (continuous across the +-pi wrap).
+    std::optional<double> sky_yaw_;
+    double sky_columns_{};
     std::optional<float> level_horizon_;
     std::map<int,unsigned> horizon_votes_;
     uint16_t level_background_{};

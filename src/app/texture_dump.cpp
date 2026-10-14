@@ -2,6 +2,8 @@
 #include "starfox/assets/rom.hpp"
 #include "starfox/assets/runtime_bundle.hpp"
 #include "starfox/assets/shape_decoder.hpp"
+#include "starfox/render/sprite_renderer.hpp"
+#include "starfox/render/texture_overrides.hpp"
 #include "starfox/simulation/game_simulation.hpp"
 
 #include <algorithm>
@@ -52,25 +54,27 @@ void put_chunk(std::vector<std::uint8_t>& out, const char* type,
         std::span{out}.subspan(start, data.size() + 4U)));
 }
 
-// RGBA to match MODERN's own dump; index 0 becomes alpha 0. Uncompressed
+// RGBA to match MODERN's own dump; index 0 becomes alpha 0 unless it is
+// opaque art (portraits paint colour 0 as their backing). Uncompressed
 // deflate keeps the encoder tiny, since textures are at most 256x128.
 void write_png(const std::filesystem::path& path, std::size_t width,
     std::size_t height, const std::vector<std::uint8_t>& indices,
-    const Palette& palette) {
+    const Palette& palette, bool opaque = false) {
     std::vector<std::uint8_t> raw;
     raw.reserve((width * 4U + 1U) * height);
     for (std::size_t y = 0; y < height; ++y) {
         raw.push_back(0U);
         for (std::size_t x = 0; x < width; ++x) {
             const auto index = indices[y * width + x] & 0x0fU;
+            const auto clear = index == 0U && !opaque;
             const auto word = palette[index];
             // BGR555 to RGB888, replicating the top bits into the low bits.
             for (const auto shift : {0U, 5U, 10U}) {
                 const auto channel = static_cast<std::uint8_t>((word >> shift) & 0x1fU);
-                raw.push_back(index == 0U ? 0U
+                raw.push_back(clear ? 0U
                     : static_cast<std::uint8_t>((channel << 3U) | (channel >> 2U)));
             }
-            raw.push_back(index == 0U ? 0U : 255U);
+            raw.push_back(clear ? 0U : 255U);
         }
     }
     std::vector<std::uint8_t> zlib{0x78U, 0x01U};
@@ -135,6 +139,117 @@ Palette stage_palette(const Edition& edition, const std::string& map) {
         palette = game.palette_words();
     }
     return palette;
+}
+
+// Communications portraits: FACEDATA (and EX's FACEDATA2) holds 32x40 frames
+// of 20 SNES 4bpp tiles, column-major (vr::source_portrait_packet), drawn
+// through palette 7 with colour 0 as an opaque backing. Each frame runs to
+// the next symbol, which ends the table.
+std::size_t dump_portraits(const Edition& edition, const std::filesystem::path& directory,
+    const Palette& palette) {
+    const auto& rom = edition.rom;
+    std::vector<std::uint32_t> starts;
+    for (const auto& [name, addresses] : edition.symbols.entries()) {
+        for (const auto address : addresses) starts.push_back(address);
+    }
+    std::sort(starts.begin(), starts.end());
+    std::ofstream index{directory / "portraits.csv"};
+    index << "file,table,frame\n";
+    std::size_t written = 0;
+    for (const auto* table : {"FACEDATA", "FACEDATA2"}) {
+        for (const auto base : edition.symbols.find(table)) {
+            if ((base & 0xffffU) < 0x8000U || ((base >> 16U) & 0xffU) >= 0x70U) continue;
+            const auto next = std::upper_bound(starts.begin(), starts.end(), base);
+            const auto end = std::min<std::uint32_t>((base | 0xffffU) + 1U,
+                next == starts.end() ? 0xffffffffU : *next);
+            for (std::uint32_t frame = 0; base + (frame + 1U) * 640U <= end && frame < 256U; ++frame) {
+                const auto address = base + frame * 640U;
+                std::vector<std::uint8_t> pixels(32U * 40U);
+                for (std::uint32_t tile = 0; tile < 20U; ++tile) {
+                    const auto tile_x = tile / 5U, tile_y = tile % 5U;
+                    const auto bytes = address + tile * 32U;
+                    for (std::uint32_t row = 0; row < 8U; ++row) {
+                        const std::array planes{rom.read8(bytes + row * 2U), rom.read8(bytes + row * 2U + 1U),
+                            rom.read8(bytes + 16U + row * 2U), rom.read8(bytes + 17U + row * 2U)};
+                        for (std::uint32_t column = 0; column < 8U; ++column) {
+                            std::uint8_t ink = 0U;
+                            for (std::uint32_t plane = 0; plane < 4U; ++plane) {
+                                ink |= static_cast<std::uint8_t>(((planes[plane] >> (7U - column)) & 1U) << plane);
+                            }
+                            pixels[(tile_y * 8U + row) * 32U + tile_x * 8U + column] = ink;
+                        }
+                    }
+                }
+                const auto file = "face_" + hex(address & 0xffffffU, 6) + ".png";
+                write_png(directory / "textures" / file, 32U, 40U, pixels, palette, true);
+                index << file << ',' << table << ',' << frame << '\n';
+                ++written;
+            }
+            break;
+        }
+    }
+    return written;
+}
+
+// 2D OBJ sprites (HUD labels, icons, digits) live in VRAM, so play the stage
+// headlessly and keep every sprite it shows, named by MODERN's content key
+// (render::sprite_override_key). LIVES is then stepped so the HUD draws
+// every digit.
+std::size_t dump_sprites(const Edition& edition, const std::filesystem::path& directory,
+    const std::string& map) {
+    starfox::simulation::GameSimulation game{edition.rom, edition.symbols, map};
+    constexpr unsigned sizes[6][2]{{8, 16}, {8, 32}, {8, 64}, {16, 32}, {16, 64}, {32, 64}};
+    std::set<std::uint64_t> seen;
+    std::ofstream index{directory / "sprites.csv"};
+    index << "file,size,palette,tile,x,y,tick\n";
+    const auto capture = [&](unsigned tick) {
+        const auto& ppu = game.map().ppu_state();
+        if ((ppu.main_screen & 16U) == 0U) return;
+        const auto selection = std::min(unsigned(ppu.object_select >> 5U), 5U);
+        for (unsigned object = 0; object < 128U; ++object) {
+            const auto low = object * 4U;
+            const auto attr = ppu.oam[low + 3U];
+            if ((ppu.oam[low] | ppu.oam[low + 1U] | ppu.oam[low + 2U] | attr) == 0U) continue;
+            if (ppu.oam[low] == 248U && ppu.oam[low + 1U] == 248U) continue;
+            const auto high = ppu.oam[512U + object / 4U] >> ((object % 4U) * 2U);
+            const auto size = sizes[selection][(high >> 1U) & 1U];
+            const auto tile = static_cast<std::uint16_t>(ppu.oam[low + 2U] | ((attr & 1U) << 8U));
+            const unsigned palette = (attr >> 1U) & 7U;
+            const auto inks = starfox::render::object_inks(ppu, tile, size);
+            if (std::all_of(inks.begin(), inks.end(), [](auto ink) { return ink == 0U; })) continue;
+            const auto key = starfox::render::sprite_override_key(inks, size, palette);
+            if (!seen.insert(key).second) continue;
+            Palette colours{};
+            std::copy_n(ppu.cgram.begin() + 128 + palette * 16U, 16, colours.begin());
+            const auto file = starfox::render::sprite_override_name(key) + ".png";
+            write_png(directory / "textures" / file, size, size, inks, colours);
+            int x = ppu.oam[low] + ((high & 1U) << 8U);
+            if (x >= 256) x -= 512;
+            index << file << ',' << size << ',' << palette << ",$" << hex(tile, 3) << ','
+                  << x << ',' << unsigned(ppu.oam[low + 1U]) << ',' << tick << '\n';
+        }
+    };
+    const auto advance = [&game] {
+        game.present_frame();
+        game.present_frame();
+        game.present_frame();
+        static_cast<void>(game.tick({}));
+    };
+    unsigned tick = 0;
+    for (; tick < 400U; ++tick) {
+        advance();
+        if (tick % 10U == 0U) capture(tick);
+    }
+    if (const auto& lives = edition.symbols.find("LIVES"); !lives.empty()) {
+        // The HUD shows LIVES minus one, so 10 draws the 9.
+        for (std::uint8_t count = 0; count <= 10U; ++count, ++tick) {
+            game.map().write_native_byte(lives.front(), count);
+            advance();
+            advance();
+            capture(tick);
+        }
+    }
+    return seen.size();
 }
 
 void dump_edition(const Edition& edition, const std::filesystem::path& root,
@@ -239,8 +354,8 @@ void dump_edition(const Edition& edition, const std::filesystem::path& root,
     };
     std::map<std::string, Entry> files;
     for (const auto& [descriptor, texture] : textures) {
-        const auto name = std::string{"tex_"} + hex(texture.address & 0xffffffU, 6)
-            + ((descriptor & 0x2000U) != 0U ? "_h" : "_l") + ".png";
+        const auto name = starfox::render::texture_override_name(
+            starfox::render::texture_override_key(texture)) + ".png";
         auto& entry = files[name];
         const auto area = [](const auto* image) {
             return (image->u_mask + 1U) * (image->v_mask + 1U);
@@ -267,7 +382,10 @@ void dump_edition(const Edition& edition, const std::filesystem::path& root,
               << joined(entry.descriptors, [](auto value) { return "$" + hex(value, 4); }) << "\",\""
               << joined(entry.shapes, [](const auto& shape) { return shape; }) << "\"\n";
     }
-    std::cout << edition.label << ": " << files.size() << " textures, " << atlases
+    const auto portraits = dump_portraits(edition, directory, palette);
+    const auto sprites = dump_sprites(edition, directory, map);
+    std::cout << edition.label << ": " << files.size() << " textures, " << portraits
+              << " portrait frames, " << sprites << " sprites, " << atlases
               << " atlas pages, palette from " << map << " -> " << directory.string() << '\n';
 }
 

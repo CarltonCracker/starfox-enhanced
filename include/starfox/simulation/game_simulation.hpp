@@ -81,8 +81,10 @@ enum class RendererMode : std::uint8_t {
 enum class GpuRenderer : std::uint8_t {
     accurate, // the original per-model GPU path, the parity reference
     fast,     // the GPU FAST paths; output must match accurate exactly
+    modern,   // MODERN: whole frames from the shared VR scene code (desktop
+              // builds with MODERN only; others load it as accurate)
 };
-inline constexpr std::size_t gpu_renderer_count = 2U;
+inline constexpr std::size_t gpu_renderer_count = 3U;
 
 // Internal supersampling of the host-rendered 3D layer. Cartridge 2D art is
 // unaffected and keeps its source raster.
@@ -597,23 +599,40 @@ public:
         renderer_mode_ = constrain_renderer_mode(mode, hardware_renderer_only);
     }
     [[nodiscard]] static constexpr std::pair<RendererMode,GpuRenderer> next_renderer_selection(
-        RendererMode mode,GpuRenderer gpu,bool backward,bool hardware_only) noexcept {
+        RendererMode mode,GpuRenderer gpu,bool backward,bool hardware_only,bool modern=false) noexcept {
         if(hardware_only) return {RendererMode::gpu,
             gpu==GpuRenderer::fast?GpuRenderer::accurate:GpuRenderer::fast};
-        const unsigned position=mode==RendererMode::software?0U:gpu==GpuRenderer::fast?2U:1U;
-        const unsigned next=(position+(backward?2U:1U))%3U;
+        // SOFTWARE -> GPU -> GPU FAST [-> MODERN], wrapping.
+        const unsigned count=modern?4U:3U;
+        const unsigned position=mode==RendererMode::software?0U
+            :gpu==GpuRenderer::fast?2U:gpu==GpuRenderer::modern && modern?3U:1U;
+        const unsigned next=(position+(backward?count-1U:1U))%count;
         return {next==0U?RendererMode::software:RendererMode::gpu,
-            next==0U?gpu:next==2U?GpuRenderer::fast:GpuRenderer::accurate};
+            next==0U?gpu:next==3U?GpuRenderer::modern:next==2U?GpuRenderer::fast:GpuRenderer::accurate};
     }
     [[nodiscard]] GpuRenderer gpu_renderer() const noexcept {
         return gpu_renderer_;
     }
     void set_gpu_renderer(GpuRenderer renderer) noexcept {
-        gpu_renderer_ = renderer;
+        gpu_renderer_ = renderer==GpuRenderer::modern && !modern_available_
+            ? GpuRenderer::accurate : renderer;
     }
+    // GPU FAST paths (and their 5x-10x scales). MODERN includes them: any
+    // frame MODERN does not draw falls back to GPU FAST.
     [[nodiscard]] bool gpu_fast() const noexcept {
         return renderer_mode_ == RendererMode::gpu
-            && gpu_renderer_ == GpuRenderer::fast;
+            && gpu_renderer_ != GpuRenderer::accurate;
+    }
+    // The host offers MODERN (desktop builds with STARFOX_MODERN). Set before
+    // the saved renderer is applied.
+    void set_modern_available(bool available) noexcept {
+        modern_available_ = available;
+        if(!available && gpu_renderer_ == GpuRenderer::modern) gpu_renderer_ = GpuRenderer::accurate;
+    }
+    [[nodiscard]] bool modern_available() const noexcept { return modern_available_; }
+    [[nodiscard]] bool modern_renderer() const noexcept {
+        return renderer_mode_ == RendererMode::gpu
+            && gpu_renderer_ == GpuRenderer::modern;
     }
     [[nodiscard]] bool msu1_music() const noexcept { return msu1_music_; }
     void set_msu1_music(bool enabled) noexcept {
@@ -1341,6 +1360,7 @@ private:
     bool vsync_{};
     RendererMode renderer_mode_{RendererMode::gpu};
     GpuRenderer gpu_renderer_{GpuRenderer::accurate};
+    bool modern_available_{};
     bool msu1_music_{};
     bool msu1_available_{true};
     bool rumble_{true};

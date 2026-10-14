@@ -31,5 +31,19 @@ int main() try {
         if(software!=1 || accurate!=1 || fast!=1 || mode!=RendererMode::software)
             throw std::runtime_error("Desktop renderer menu failed its three-way cycle");
     }
+    for(bool backward:{false,true}) {
+        auto mode=RendererMode::software;auto gpu=GpuRenderer::accurate;
+        unsigned software=0,accurate=0,fast=0,modern=0;
+        for(unsigned step=0;step<4;++step) {
+            const auto selected=GameSimulation::next_renderer_selection(mode,gpu,backward,false,true);
+            mode=selected.first;gpu=selected.second;
+            software+=mode==RendererMode::software;
+            accurate+=mode==RendererMode::gpu && gpu==GpuRenderer::accurate;
+            fast+=mode==RendererMode::gpu && gpu==GpuRenderer::fast;
+            modern+=mode==RendererMode::gpu && gpu==GpuRenderer::modern;
+        }
+        if(software!=1 || accurate!=1 || fast!=1 || modern!=1 || mode!=RendererMode::software)
+            throw std::runtime_error("MODERN renderer menu failed its four-way cycle");
+    }
     std::cout<<"Platform "<<platform_render_scale_limit<<"x scale bound and two/three-way renderer cycles passed\n";
 } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}

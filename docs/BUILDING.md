@@ -217,8 +217,24 @@ size each texture is sampled at, its descriptors and the shapes that use it.
 plane), so an edited copy at any resolution goes into `textures/` next to
 `starfox_pc.exe`. The PNGs are RGBA with texel 0 transparent, coloured with
 CGRAM palette 7 after the `--map` stage has loaded (default `LEVEL1_1`). When
-the game samples one texture at several sizes, the largest is written. Never
-commit the output, since it is ROM data.
+the game samples one texture at several sizes, the largest is written.
+
+`textures/` also holds every communications portrait frame as
+`face_AAAAAA.png` (the frame's ROM address in `FACEDATA`, or EX's
+`FACEDATA2`), 32x40 and opaque, listed in `portraits.csv`. MODERN draws a
+`face_*.png` in `textures/` next to `starfox_pc.exe` over the whole portrait
+box at any resolution (keep 4:5) and applies the screen fade to it. Each
+mouth/eye position is its own frame. Original's table ends with a few frames
+of unrelated data that the game never shows.
+
+2D sprites (HUD labels, icons and digits, stage title lettering) live in
+VRAM, so the tool plays `--map` headlessly, steps `LIVES` to show every digit,
+and writes each sprite it sees as `obj_HHHHHHHHHHHHHHHH.png`, a hash of the
+sprite's pixels, size and palette (`render::sprite_override_key`), listed in
+`sprites.csv` with its tile and screen position. MODERN draws an `obj_*.png`
+in `textures/` over that sprite at any square size. With
+`STARFOX_MODERN_DUMP_TEXTURES=1` MODERN also writes every sprite it draws.
+Never commit the output, since it is ROM data.
 
 The EX regression runs every one of the 40 stage labels shipped through
 `PLANETS` and `PLANETS2` for 2,000 deterministic logic ticks. The source-only

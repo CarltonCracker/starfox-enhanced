@@ -102,6 +102,7 @@ bool SdlFrameRenderer::record(SDL_GPUCommandBuffer* command,SDL_GPURenderPass* p
         // A headset preview passes the source camera heading to the ground.
         auto background_camera=camera;
         if(f.settings().headset) background_camera.effects[2]=f.landscape_heading;
+        else background_camera.effects[2]=f.sky_turn;
         if(!backgrounds_.record(command,pass,pipelines_,background_camera)) return fail("background");
     }
     if(!f.textures.empty()) {

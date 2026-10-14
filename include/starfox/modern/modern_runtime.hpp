@@ -1,10 +1,20 @@
 #pragma once
 #include "starfox/modern/sdl_frame.hpp"
+#include "starfox/render/framebuffer.hpp"
 #include "starfox/render/scaled_text_renderer.hpp"
 #include <SDL3/SDL_render.h>
 #include <memory>
 #include <string>
 namespace starfox::modern {
+// A host text layer (the ON-SCREEN FPS counter) drawn over MODERN's frame like
+// the existing presentation draws it: non-zero ink is white with a black
+// shadow one source pixel down-right. x, y are in the canvas (canvas_width x
+// canvas_height source pixels) that the frame fills.
+struct HostOverlay {
+    const render::Framebuffer* ink{};
+    int x{},y{};
+    int canvas_width{},canvas_height{};
+};
 // MODERN in the desktop runtime: keeps the shared VR scene history, assembles
 // and draws a whole frame through SDL_GPU into an SDL renderer target, and
 // presents it. The desktop loop owns simulation, pacing and fallback.
@@ -18,15 +28,17 @@ public:
     void capture_tick();
     // Pause, stage replacement or camera cut: do not interpolate across it.
     void reset_interpolation() noexcept;
-    // Flows MODERN draws; others fall back to the existing renderer.
+    // Frames MODERN draws; others (host menus) fall back to the existing
+    // renderer.
     static bool draws(const simulation::GameSimulation&) noexcept;
     // Draws and presents one frame on `renderer` (SDL's GPU render driver
     // only). `alpha` is the desktop's display interpolation fraction. The
     // frame is drawn at width x height (the desktop's internal raster: canvas
     // x render scale; zero means the window's output size) and scaled to the
     // window like the existing renderer's frame. With `capture_path`, the
-    // drawn frame is also written as BMP.
-    bool present(SDL_Renderer*,double alpha,int width=0,int height=0,const char* capture_path=nullptr);
+    // drawn frame is also written as BMP (without `overlay`).
+    bool present(SDL_Renderer*,double alpha,int width=0,int height=0,const char* capture_path=nullptr,
+        const HostOverlay& overlay={});
     const std::string& status() const noexcept {return status_;}
     // Compute-route models skipped this frame (warp/axis not yet ported).
     std::size_t unsupported_models() const noexcept;

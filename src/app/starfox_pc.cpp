@@ -604,6 +604,13 @@ std::uint32_t effective_render_scale_factor(
         static_cast<std::uint32_t>(starfox::simulation::standard_render_scale_count));
 }
 
+// The RENDERER row's value.
+std::string_view renderer_label(const starfox::simulation::GameSimulation& game) noexcept {
+    if(game.renderer_mode()==starfox::simulation::RendererMode::software) return "SOFTWARE";
+    if(game.modern_renderer()) return "MODERN (EXPERIMENTAL, VERY FAST)";
+    return game.gpu_fast()?"GPU FAST":"GPU";
+}
+
 // Above 4x, GPU FAST traces ray-traced shadows and reflections at 4x: their
 // detail matches 4x play while models and everything else keep the full
 // render scale. Rays dominate the 5x-10x frame (11 ms of 25 ms at 10x 32:9).
@@ -8272,7 +8279,13 @@ int main(int argc, char** argv) {
             game.set_renderer_mode(
                 static_cast<starfox::simulation::RendererMode>(
                     saved_pregame.renderer_mode));
-            game.set_gpu_renderer(saved_pregame.gpu_renderer == 1U
+#if defined(STARFOX_MODERN)
+            game.set_modern_available(true);
+#endif
+            // Saved 2 (MODERN) loads as GPU ACCURATE in builds without it.
+            game.set_gpu_renderer(saved_pregame.gpu_renderer == 2U
+                ? starfox::simulation::GpuRenderer::modern
+                : saved_pregame.gpu_renderer == 1U
                 ? starfox::simulation::GpuRenderer::fast
                 : starfox::simulation::GpuRenderer::accurate);
             game.set_msu1_available(msu1_pack.available());
@@ -8295,10 +8308,22 @@ int main(int argc, char** argv) {
                     ? starfox::simulation::RendererMode::software
                     : starfox::simulation::RendererMode::gpu);
                 // GPU and GPU_ACCURATE select the original path.
-                game.set_gpu_renderer(value == "GPU_FAST"
+                game.set_gpu_renderer(value == "MODERN"
+                    ? starfox::simulation::GpuRenderer::modern
+                    : value == "GPU_FAST"
                     ? starfox::simulation::GpuRenderer::fast
                     : starfox::simulation::GpuRenderer::accurate);
             }
+#if defined(STARFOX_MODERN)
+            // The A/B launchers' switch: start in MODERN whatever the saved
+            // renderer. Only once, so the RENDERER row can still change it.
+            static bool modern_forced{};
+            if(const auto* flag=std::getenv("STARFOX_MODERN"); !modern_forced && flag && std::string_view(flag)=="1") {
+                modern_forced=true;
+                game.set_renderer_mode(starfox::simulation::RendererMode::gpu);
+                game.set_gpu_renderer(starfox::simulation::GpuRenderer::modern);
+            }
+#endif
             if (const auto* forced_enhanced = std::getenv(
                     "STARFOX_TEST_ENHANCED")) {
                 game.set_two_d_filter(std::string_view{forced_enhanced} != "0"
@@ -9654,12 +9679,18 @@ int main(int argc, char** argv) {
         live_fps.reset(raster_timestamp, game.presentation_fps());
         starfox::app::MenuSettingsResetHold settings_reset_hold;
 #if defined(STARFOX_MODERN)
-        // MODERN (A/B switch STARFOX_MODERN=1): gameplay frames come from the
-        // shared VR scene code on SDL_GPU; every other frame, or any MODERN
-        // failure, falls back to the existing renderer for that frame.
+        // MODERN (RENDERER row, or STARFOX_MODERN=1): frames come from the
+        // shared VR scene code on SDL_GPU. Host-drawn screens (the pre-game
+        // menu, host overlays) or any MODERN failure fall back to the
+        // existing renderer (GPU FAST) for that frame. The runtime exists
+        // only while MODERN is selected, so its tick history never goes stale.
         std::unique_ptr<starfox::modern::ModernRuntime> modern;
-        if(const auto* flag=std::getenv("STARFOX_MODERN"); flag && std::string_view(flag)=="1")
-            modern=std::make_unique<starfox::modern::ModernRuntime>(game,rom,symbols);
+        const auto sync_modern=[&] {
+            if(game.modern_renderer() && !modern)
+                modern=std::make_unique<starfox::modern::ModernRuntime>(game,rom,symbols);
+            else if(!game.modern_renderer() && modern) modern.reset();
+        };
+        sync_modern();
         bool modern_failure_reported=false;
 #endif
         while (running) {
@@ -10831,6 +10862,7 @@ int main(int argc, char** argv) {
                     const bool runtime_options_were_open=game.runtime_options_open();
                     const auto tick_result = game.tick(controls);
 #if defined(STARFOX_MODERN)
+                    sync_modern();
                     if(modern) modern->capture_tick();
 #endif
 #if defined(__ANDROID__)
@@ -11243,7 +11275,7 @@ int main(int argc, char** argv) {
                         for(std::size_t row=0;row<order.size();++row) {
                             std::string_view label;std::string value;
                             switch(order[row]) {
-                            case 16:label="RENDERER";value=game.renderer_mode()==starfox::simulation::RendererMode::gpu?"GPU":"SOFTWARE";break;
+                            case 16:label="RENDERER";value=renderer_label(game);break;
                             case 15:label="GPU BACKEND";value=starfox::render::renderer_backend_names[unsigned(window.renderer_backend())];break;
                             case 9:label="STEREOSCOPIC 3D";value="A  OPEN";break;
                             case 0:label="CHEATS";value="A  OPEN";break;
@@ -11367,10 +11399,7 @@ int main(int argc, char** argv) {
                                 ? std::string_view{"SOFTWARE ONLY"}
                                 :
 #endif
-                            game.renderer_mode()
-                                    == starfox::simulation::RendererMode::gpu
-                                ? std::string_view{"GPU"}
-                                : std::string_view{"SOFTWARE"},
+                            renderer_label(game),
                             row_y[4], game.pregame_selection() == 4U);
                         const auto msu1_value = game.msu1_available()
                             ? on_off(game.msu1_music())
@@ -11872,10 +11901,18 @@ int main(int argc, char** argv) {
                     if(name.size()<6U) name.insert(0U,6U-name.size(),'0');
                     modern_capture=(capture_directory/(name+".bmp")).string();
                 }
+                // ON-SCREEN FPS, placed as the existing presentation places it.
+                starfox::modern::HostOverlay fps_overlay;
+                if(game.show_fps()) {
+                    live_fps_overlay.clear();
+                    text_renderer.draw_ascii("FPS "+std::to_string(live_fps.fps()),0,0,live_fps_overlay,1U,0U);
+                    fps_overlay={&live_fps_overlay,int(display_width-live_fps_overlay.width()-4U),4,
+                        int(display_width),int(snes_height)};
+                }
                 // Same internal raster as the existing renderer: canvas x scale.
                 if(modern->present(window.renderer(),interpolation_alpha,
                     int(display_width*render_scale),int(snes_height*render_scale),
-                    modern_capture.empty()?nullptr:modern_capture.c_str())) {
+                    modern_capture.empty()?nullptr:modern_capture.c_str(),fps_overlay)) {
                     if(!advance_frozen_frame) live_fps.record_frame(std::chrono::steady_clock::now());
                     if(presented_frames==0) startup_trace->mark("first game/menu frame presented");
                     ++presented_frames;

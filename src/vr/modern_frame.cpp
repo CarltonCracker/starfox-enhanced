@@ -38,6 +38,20 @@ void erase_world_packet(SourceModelPackets& world,std::size_t index,const char* 
         if(compute.packet_index>index) --compute.packet_index;
     }
 }
+// Flat views: turn the planet art with the camera's world yaw (see
+// ModernFrame::sky_turn). STARFOX_MODERN_FIXED_SKY=0 keeps the cartridge's
+// own pan, which follows its offset tables at a different rate and slides
+// against the 3D ground.
+bool world_fixed_sky() noexcept {
+    static const bool fixed=[] {
+        const char* value=std::getenv("STARFOX_MODERN_FIXED_SKY");
+        return !(value && std::string_view(value)=="0");
+    }();
+    return fixed;
+}
+// Art columns per radian of yaw: the SNES focal length, the rate world
+// objects at the screen centre move, where the planar art mapping matches it.
+constexpr double sky_columns_per_radian=256;
 bool gameplay_flow(const GameSceneSnapshot& scene) noexcept {
     return scene.flow==simulation::GameFlowState::gameplay || scene.flow==simulation::GameFlowState::training;
 }
@@ -160,7 +174,8 @@ std::vector<bool> painter_scenery(const SourceModelPackets& source,std::span<con
 void ModernFrame::reset() noexcept {
     stars.clear();star_keys.clear();world={};moving.clear();
     tunnel_surround.clear();sprites.clear();backgrounds.clear();background_models.clear();
-    textures.clear();texture_models.clear();texture_mapping=landscape_heading=0;
+    textures.clear();texture_models.clear();texture_mapping=landscape_heading=sky_turn=0;
+    sky_yaw_.reset();sky_columns_=0;
     cockpit.reset();reticle.reset();circle.reset();colour_math.reset();shutter.reset();
     layers_rebuilt=backgrounds_rebuilt=textures_rebuilt=false;
     layer_revision_.reset();texture_background_.reset();level_horizon_.reset();horizon_votes_.clear();
@@ -352,6 +367,16 @@ void ModernFrame::prepare(const GameSceneSnapshot& previous,const GameSceneSnaps
         const double x=-landscape.rotation[2],z=-landscape.rotation[10];
         const double turn=std::hypot(x,z)>1e-6?std::atan2(z,x)/(2*pi):0.;
         landscape_heading=(uint32_t(std::lround((turn-std::floor(turn))*65536.))&0xffffU)|0x10000U;
+        sky_turn=0;
+        if(!settings_.headset && world_fixed_sky() && landscape_world && std::hypot(x,z)>1e-6) {
+            const double yaw=std::atan2(z,x);
+            if(sky_yaw_) sky_columns_+=std::remainder(yaw-*sky_yaw_,2*pi)*sky_columns_per_radian;
+            sky_yaw_=yaw;
+            // 4096 is a whole number of every BG2 art width (256-1024).
+            sky_columns_=std::fmod(sky_columns_,4096.);
+            const double offset=sky_columns_<0?sky_columns_+4096.:sky_columns_;
+            sky_turn=(uint32_t(std::lround(offset*16.))&0xffffU)|0x20000U;
+        } else sky_yaw_.reset();
     }
     // Space backgrounds: the real camera roll as geometry around the view
     // axis (the vanishing point), like the planet landscape, instead of
@@ -371,7 +396,8 @@ void ModernFrame::prepare(const GameSceneSnapshot& previous,const GameSceneSnaps
             // Sky replacement mapping for this frame: horizon row and
             // centre column, 32x fixed point (camera.effects.z).
             const auto texels=packet.geometry.texel_view();
-            const float horizon=std::bit_cast<float>(texels[272+16384]),centre=std::bit_cast<float>(texels[272+16384+1]);
+            const float horizon=std::bit_cast<float>(texels[272+16384]);
+            const float centre=std::bit_cast<float>(texels[272+16384+1])+(sky_turn?float(sky_turn&0xffffU)/16.F:0.F);
             texture_mapping=uint32_t(std::clamp(horizon*32.F,0.F,65535.F))
                 |(uint32_t(std::clamp(std::fmod(centre,1024.F)+1024.F,0.F,2047.F)*32.F)<<16);
             if(observe_landscape_ && texels.size()>=272+16384+6+112)

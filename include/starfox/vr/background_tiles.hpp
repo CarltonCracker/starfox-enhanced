@@ -106,6 +106,7 @@ struct PhotographicBody {
 // BG2 scroll) and shares the ground's up vector, so both horizons agree.
 [[nodiscard]] Matrix4 landscape_ground_view_model(const Matrix4& rotation,double height,double camera_x,double camera_z) noexcept;
 [[nodiscard]] Matrix4 landscape_dome_view_model(const Matrix4& rotation,double height) noexcept;
+
 // Replacement artwork (RGBA words, r in the low byte) for a landscape.
 // Sky: replaces the art above the horizon, mapped like the BG2 strip: the
 // image's width spans `art_width` art columns (wrapping) and its height the

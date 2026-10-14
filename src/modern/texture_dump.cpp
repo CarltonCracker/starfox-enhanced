@@ -1,6 +1,7 @@
 #include "starfox/modern/texture_dump.hpp"
 #include "starfox/vr/background_tiles.hpp"
 #include "starfox/render/palette.hpp"
+#include "starfox/render/sprite_renderer.hpp"
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <cmath>
@@ -8,6 +9,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 
 namespace starfox::modern {
 namespace {
@@ -19,6 +21,22 @@ constexpr const char* readme=
 "it (any resolution) and copy it with the SAME name into the textures folder\n"
 "next to starfox_pc.exe, then restart with STARFOX_MODERN=1.\n"
 "index.txt lists every file with its native size and where it was first seen.\n"
+"To get every model texture and portrait without playing, run\n"
+"  starfox_texture_dump Starfox-Assets.BIN <folder>\n"
+"which writes the same tex_*.png and face_*.png names for Original and EX.\n"
+"\n"
+"obj_HHHHHHHHHHHHHHHH.png - a 2D sprite (HUD labels, icons, digits)\n"
+"  Named by a hash of the sprite's own pixels, size and palette, so the same\n"
+"  picture always gets the same name. Big words like SHIELD are several\n"
+"  sprites side by side: replace each piece. Written the first time a sprite\n"
+"  is drawn, so play until a digit or icon appears to get it. Keep the\n"
+"  square shape (8x8 -> 32x32 or 64x64); alpha below 50% is transparent.\n"
+"\n"
+"face_AAAAAA.png - a communications portrait frame (32x40)\n"
+"  AAAAAA is the frame's SNES ROM address. Each mouth and eye position is its\n"
+"  own frame, so replace every frame of a character for smooth animation.\n"
+"  The image covers the whole portrait box; keep the 4:5 aspect (128x160,\n"
+"  256x320...). Pixels with alpha below 50% show the scene behind.\n"
 "\n"
 "tex_AAAAAA_l.png / tex_AAAAAA_h.png - Super FX model textures\n"
 "  AAAAAA is the texture's SNES ROM address; l/h is the low/high nibble plane\n"
@@ -88,6 +106,33 @@ void TextureDump::model_texture(const assets::TextureImage& texture,const std::a
     write(render::texture_override_name(key)+".png",width,height,image,
         "model texture, descriptor 0x"+hex(texture.descriptor,4));
 }
+void TextureDump::sprites(const simulation::SnesPpuState& ppu) {
+    if(!(ppu.main_screen&16)) return;
+    constexpr unsigned sizes[6][2]{{8,16},{8,32},{8,64},{16,32},{16,64},{32,64}};
+    const auto selection=std::min(unsigned(ppu.object_select>>5),5U);
+    std::optional<render::Palette256> colours;
+    for(unsigned object=0;object<128;++object) {
+        const auto low=object*4;const auto attr=ppu.oam[low+3];
+        if(!(ppu.oam[low]|ppu.oam[low+1]|ppu.oam[low+2]|attr)) continue;
+        if(ppu.oam[low]==248 && ppu.oam[low+1]==248) continue;
+        const auto high=ppu.oam[512+object/4]>>((object%4)*2);
+        const unsigned size=sizes[selection][(high>>1)&1];
+        const auto tile=uint16_t(ppu.oam[low+2]|((attr&1U)<<8));
+        const unsigned palette=(attr>>1)&7U;
+        const auto inks=render::object_inks(ppu,tile,size);
+        if(std::all_of(inks.begin(),inks.end(),[](auto ink){return ink==0;})) continue;
+        const auto key=render::sprite_override_key(inks,size,palette);
+        if(!sprites_.insert(key).second) continue;
+        if(!colours) colours=render::decode_bgr555_palette(ppu.cgram);
+        std::vector<uint32_t> image(inks.size());
+        for(std::size_t i=0;i<inks.size();++i)
+            image[i]=inks[i]?rgba((*colours)[128+palette*16+inks[i]]):0U;
+        int x=ppu.oam[low]+((high&1)<<8);if(x>=256) x-=512;
+        write(render::sprite_override_name(key)+".png",size,size,image,
+            "sprite, tile 0x"+hex(tile,3)+" palette "+std::to_string(palette)
+            +" at "+std::to_string(x)+","+std::to_string(ppu.oam[low+1]));
+    }
+}
 void TextureDump::landscape(uint16_t background,const simulation::SnesPpuState& ppu,float horizon,std::span<const uint32_t> haze) {
     if(!backgrounds_.insert(background).second) return;
     const auto stem="bg_"+hex(background,4);
@@ -121,13 +166,14 @@ void TextureDump::landscape(uint16_t background,const simulation::SnesPpuState& 
     write(stem+"_ground.png",size,size,ground,"planet ground template, tiles every 2048 world units");
     write(stem+"_atlas.png",width,height,vr::bg2_art_image(ppu,0,0,width,height),"BG2 art reference (not loaded)");
 }
-render::TextureOverrides load_texture_overrides(const std::string& directory) {
-    render::TextureOverrides overrides;
+namespace {
+// Every file in `directory` whose name `key` accepts, as RGBA (any size).
+template<class Map,class Key> Map load_overrides(const std::string& directory,Key key) {
+    Map overrides;
     std::error_code error;
     for(const auto& entry:std::filesystem::directory_iterator(directory,error)) {
-        const auto name=entry.path().filename().string();
-        unsigned address=0;char plane=0;
-        if(name.size()!=16 || std::sscanf(name.c_str(),"tex_%6x_%c.png",&address,&plane)!=2 || (plane!='l' && plane!='h')) continue;
+        const auto id=key(entry.path().filename().string());
+        if(!id) continue;
         SDL_Surface* loaded=SDL_LoadSurface(entry.path().string().c_str());
         if(!loaded) continue;
         SDL_Surface* converted=SDL_ConvertSurface(loaded,SDL_PIXELFORMAT_ABGR8888);
@@ -139,11 +185,33 @@ render::TextureOverrides load_texture_overrides(const std::string& directory) {
             for(unsigned y=0;y<image.height;++y)
                 std::memcpy(image.rgba.data()+std::size_t(y)*image.width,
                     static_cast<const uint8_t*>(converted->pixels)+std::size_t(y)*converted->pitch,image.width*4U);
-            overrides[address|(plane=='h'?0x1000000U:0U)]=std::move(image);
+            overrides[*id]=std::move(image);
             std::fprintf(stderr,"MODERN textures: %s loaded\n",entry.path().string().c_str());
         }
         SDL_DestroySurface(converted);
     }
     return overrides;
+}
+}
+render::TextureOverrides load_texture_overrides(const std::string& directory) {
+    return load_overrides<render::TextureOverrides>(directory,[](const std::string& name)->std::optional<uint32_t> {
+        unsigned address=0;char plane=0;
+        if(name.size()!=16 || std::sscanf(name.c_str(),"tex_%6x_%c.png",&address,&plane)!=2 || (plane!='l' && plane!='h')) return std::nullopt;
+        return address|(plane=='h'?0x1000000U:0U);
+    });
+}
+render::TextureOverrides load_portrait_overrides(const std::string& directory) {
+    return load_overrides<render::TextureOverrides>(directory,[](const std::string& name)->std::optional<uint32_t> {
+        unsigned address=0;
+        if(name.size()!=15 || std::sscanf(name.c_str(),"face_%6x.png",&address)!=1) return std::nullopt;
+        return address;
+    });
+}
+render::SpriteOverrides load_sprite_overrides(const std::string& directory) {
+    return load_overrides<render::SpriteOverrides>(directory,[](const std::string& name)->std::optional<uint64_t> {
+        unsigned long long key=0;
+        if(name.size()!=24 || std::sscanf(name.c_str(),"obj_%16llx.png",&key)!=1) return std::nullopt;
+        return uint64_t(key);
+    });
 }
 }

@@ -24,14 +24,24 @@ public:
     // `horizon` is the level horizon art row; `haze` the 112 ground colours
     // below it (RGBA, red low byte).
     void landscape(uint16_t background,const simulation::SnesPpuState&,float horizon,std::span<const uint32_t> haze);
+    // Every visible OBJ sprite (HUD labels, icons, digits) as
+    // obj_HHHHHHHHHHHHHHHH.png in its live OBJ palette.
+    void sprites(const simulation::SnesPpuState&);
     std::size_t written() const noexcept {return written_;}
 private:
     bool write(const std::string& name,unsigned width,unsigned height,std::span<const uint32_t> rgba,const std::string& note);
     std::string directory_;
     std::unordered_set<uint32_t> models_;
     std::unordered_set<uint16_t> backgrounds_;
+    std::unordered_set<uint64_t> sprites_;
     std::size_t written_{};
 };
 // Every tex_AAAAAA_l.png / tex_AAAAAA_h.png in `directory` (any size).
 render::TextureOverrides load_texture_overrides(const std::string& directory);
+// Every face_AAAAAA.png in `directory` (any size), keyed by the portrait
+// frame's ROM address (vr::source_portrait_address).
+render::TextureOverrides load_portrait_overrides(const std::string& directory);
+// Every obj_HHHHHHHHHHHHHHHH.png in `directory` (any size), keyed by
+// render::sprite_override_key.
+render::SpriteOverrides load_sprite_overrides(const std::string& directory);
 }

@@ -42,7 +42,8 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
         const bool vector_reticle=in.vector_reticle && !source_vector_reticle_packet(*snapshot->ppu,*snapshot->ppu,1.,
             snapshot->display_brightness,srgb).geometry.vertex_view().empty();
         packet=source_sprite_packet(*snapshot->ppu,snapshot->display_brightness,{},srgb,&snapshot->meters,
-            edge_layout?&*edge_layout:nullptr,vector_reticle?SourceSpritePass::all_but_reticle:SourceSpritePass::all);
+            edge_layout?&*edge_layout:nullptr,vector_reticle?SourceSpritePass::all_but_reticle:SourceSpritePass::all,
+            in.sprite_overrides);
         meters=source_meter_packet(snapshot->meters,snapshot->ppu->cgram,snapshot->display_brightness,srgb);
         if(edge_layout) {
             // Meter rectangles (six vertices each, inner 224-wide coordinates)
@@ -224,13 +225,32 @@ FrameLayers assemble_frame_layers(const GameSceneSnapshot& scene,const FrameLaye
             snapshot->display_brightness,srgb,snapshot->background_scroll_override);
         for(auto& layer:next_sprites) layer.model=ppu_transform;
     }
+    // ppu_transform moved by whole source pixels (column-major model).
+    const auto ui_transform=[&](std::array<int,2> offset) {
+        auto model=ppu_transform;
+        for(unsigned row=0;row<4;++row) model[12+row]+=model[row]*float(offset[0])+model[4+row]*float(offset[1]);
+        return model;
+    };
     if(replace_dialogue) {
         if(!in.dialogue_layout || !in.rom || !in.symbols) throw std::runtime_error("Dialogue layers need ROM, symbols and layout");
         in.dialogue_layout->set_language(in.language);
         auto dialogue_packets=source_dialogue_packets(*in.rom,*in.symbols,
-            snapshot->dialogue,*in.dialogue_layout,snapshot->ppu->cgram,snapshot->display_brightness,srgb);
+            snapshot->dialogue,*in.dialogue_layout,snapshot->ppu->cgram,snapshot->display_brightness,srgb,
+            in.portrait_overrides);
+        const auto comms_transform=ui_transform(in.comms_offset);
         for(auto& layer:dialogue_packets) {
-            layer.model=ppu_transform;next_sprites.push_back(std::move(layer));
+            layer.model=comms_transform;next_sprites.push_back(std::move(layer));
+        }
+    }
+    if(in.pause_text && snapshot->paused && in.rom && in.symbols) {
+        // Desktop: draw_game_text(PAUSETXT, 90, 90) on the Super FX UI layer
+        // (224 wide, right clip 224), ink 7*16 + the record's colour byte.
+        for(const auto address:in.symbols->find("PAUSETXT")) {
+            if((address&0xffffU)<0x8000U || ((address>>16U)&0xffU)>=0x70U) continue;
+            auto text=source_game_text_packet(*in.rom,*in.symbols,address,90,90,224,256,
+                uint8_t(112+(in.rom->read8(address)&15U)),snapshot->ppu->cgram,snapshot->display_brightness,srgb);
+            text.model=ui_transform(in.comms_offset);next_sprites.push_back(std::move(text));
+            break;
         }
     }
     if(snapshot->briefing.active) {

@@ -931,7 +931,8 @@ bool load_pregame_settings(
         } else if (name == "GPU_RENDERER") {
             // Optional. An unknown value (for example from a newer build)
             // falls back to ACCURATE instead of rejecting the whole file.
-            loaded.gpu_renderer = value == 1 ? 1U : 0U;
+            loaded.gpu_renderer = value == 1 || value == 2
+                ? static_cast<std::uint8_t>(value) : 0U;
         } else if (name == "MODEL_SMOOTHING") {
             if (value < 0 || value > 3) return false;
             loaded.model_smoothing = static_cast<std::uint8_t>(value);
@@ -1107,7 +1108,7 @@ bool save_pregame_settings(
             || settings.selected_level > 79U || settings.selected_level % 10U == 0U))
         || settings.language > 5U || settings.experience > 1U || settings.music_volume > 100U
         || settings.sfx_volume > 100U || settings.render_scale > 9U || settings.model_smoothing > 3U
-        || settings.gpu_renderer > 1U
+        || settings.gpu_renderer > 2U
         || settings.asteroid_models >= render::asteroid_model_mode_count) {
         return false;
     }

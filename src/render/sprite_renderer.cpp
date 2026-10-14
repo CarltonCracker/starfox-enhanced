@@ -131,6 +131,17 @@ std::uint8_t object_pixel(
 
 } // namespace
 
+std::vector<std::uint8_t> object_inks(
+    const simulation::SnesPpuState& ppu, std::uint16_t tile_number, std::uint32_t size) {
+    std::vector<std::uint8_t> inks(static_cast<std::size_t>(size) * size);
+    for (std::uint32_t y = 0; y < size; ++y) {
+        for (std::uint32_t x = 0; x < size; ++x) {
+            inks[static_cast<std::size_t>(y) * size + x] = object_pixel(ppu, tile_number, x, y);
+        }
+    }
+    return inks;
+}
+
 void interpolate_crosshair_oam(
     const std::array<std::uint8_t, 544>& previous_oam,
     double interpolation_alpha,

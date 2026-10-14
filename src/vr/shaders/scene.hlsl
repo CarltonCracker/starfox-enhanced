@@ -718,6 +718,10 @@ float4 landscape_world_sample(Fragment input) {
     // so rows follow the elevation's tangent in every direction.
     float depth=cylindrical?max(length(d.xz),length(d)*.02):max(-d.z,length(d)*.02);
     float column=d.x/depth*256.;
+    // Flat views (ModernFrame::sky_turn): the sky dome turns its art with
+    // the camera's world yaw, 16ths of a column.
+    if((texels[s+7]&16384U)==0 && !cylindrical && (camera.effects.z&0x20000U)!=0)
+        column+=float(camera.effects.z&65535U)/16.;
     if(cylindrical) {
         uint edge=texels[s+8]!=0?16:8;
         column=atan2(d.x,-d.z)*cylinder_columns(float(((texels[s+2]&1)!=0?64:32)*edge));
@@ -761,12 +765,13 @@ float4 landscape_world_sample(Fragment input) {
         // fifth of the row spacing) and fade below a pixel instead of sparkling.
         float pixel=max(1.,float((camera.effects.w>>8)&4095U)/16.);
         const float2 phase=float2(127.5,127.5);
-        float2 nearest=floor((source_plane-phase)/256.+.5)*256.+phase;
+        float spacing=asfloat(texels[tail+6+113]);
+        float2 nearest=floor((source_plane-phase)/spacing+.5)*spacing+phase;
         float2 offset=nearest-source_plane;
         float det=plane_dx.x*plane_dy.y-plane_dx.y*plane_dy.x;
         if(abs(det)>1e-12) {
             float2 screen=float2(offset.x*plane_dy.y-offset.y*plane_dy.x,plane_dx.x*offset.y-plane_dx.y*offset.x)/det;
-            float cell=256./max(max(length(plane_dx),length(plane_dy)),1e-6);
+            float cell=spacing/max(max(length(plane_dx),length(plane_dy)),1e-6);
             float radius=min(.6*pixel,.2*cell);
             float fade=saturate(radius/.75);
             float half_side=max(radius,.75);

@@ -1564,10 +1564,10 @@ GameTickResult GameSimulation::tick_pregame_menu(
             | starfox::input::right | starfox::input::select
             | starfox::input::a | starfox::input::b)) != 0U;
     if (change_renderer) {
-        // SOFTWARE <-> GPU ACCURATE <-> GPU FAST, wrapping. Left/B step back.
+        // SOFTWARE <-> GPU ACCURATE <-> GPU FAST [<-> MODERN], wrapping. Left/B step back.
         const bool backward = (menu_input.pressed
             & (starfox::input::left | starfox::input::b)) != 0U;
-        const auto next=next_renderer_selection(renderer_mode_,gpu_renderer_,backward,hardware_renderer_only);
+        const auto next=next_renderer_selection(renderer_mode_,gpu_renderer_,backward,hardware_renderer_only,modern_available_);
         set_renderer_mode(next.first);set_gpu_renderer(next.second);
         if (!gpu_fast() && static_cast<std::size_t>(render_scale_)
                 >= standard_render_scale_count) {

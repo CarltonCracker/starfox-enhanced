@@ -76,6 +76,9 @@ struct ModernRuntime::State {
         inputs.flat_space_horizon=true;
         inputs.flat_tunnel_extension=true;
         inputs.bg3_behind_bg2=true;
+        // The desktop's Super FX UI layer: 224 wide, centred, 16 rows down.
+        inputs.comms_offset={16,16};
+        inputs.pause_text=true;
         inputs.landscape_ground_dots=!(std::getenv("STARFOX_MODERN_GROUND_DOTS") && std::string_view(std::getenv("STARFOX_MODERN_GROUND_DOTS"))=="0");
         // STARFOX_MODERN_LANDSCAPE=0 keeps the native BG2 planet layer.
         const auto* landscape=std::getenv("STARFOX_MODERN_LANDSCAPE");
@@ -94,13 +97,19 @@ struct ModernRuntime::State {
             // flat-screen layer substitutes, no widescreen HUD shift.
             inputs.trigonometry=nullptr;inputs.flat_landscape=inputs.space_roll_geometry=false;
             inputs.flat_space_horizon=inputs.flat_tunnel_extension=false;
+            inputs.comms_offset={};inputs.pause_text=false;
         }
-        // Replacement model textures (<exe>/textures/tex_*.png) and, with
+        // Replacement model textures, portraits and sprites
+        // (<exe>/textures/tex_*.png, face_*.png, obj_*.png) and, with
         // STARFOX_MODERN_DUMP_TEXTURES=1, a dump of the source artwork in the
         // same layout (<exe>/texture_dump/).
         if(const char* base=SDL_GetBasePath()) {
             overrides=load_texture_overrides(std::string(base)+"textures/");
             if(!overrides.empty()) models.set_texture_overrides(&overrides);
+            portraits=load_portrait_overrides(std::string(base)+"textures/");
+            if(!portraits.empty()) inputs.portrait_overrides=&portraits;
+            sprites=load_sprite_overrides(std::string(base)+"textures/");
+            if(!sprites.empty()) inputs.sprite_overrides=&sprites;
             if(const auto* dump_flag=std::getenv("STARFOX_MODERN_DUMP_TEXTURES"); dump_flag && std::string_view(dump_flag)=="1") {
                 dump=std::make_unique<TextureDump>(std::string(base)+"texture_dump/");
                 std::fprintf(stderr,"MODERN texture dump: %s\n",dump->directory().c_str());
@@ -116,20 +125,24 @@ struct ModernRuntime::State {
     simulation::TrigTables trigonometry;
     vr::FrameLayerInputs inputs;
     std::optional<HeadsetPreview> preview{headset_preview()};
-    render::TextureOverrides overrides;
+    render::TextureOverrides overrides,portraits;
+    render::SpriteOverrides sprites;
     std::unique_ptr<TextureDump> dump;
     SdlFrameRenderer frame;
     SDL_GPUDevice* device{};
     SDL_Renderer* renderer{};
     SDL_Texture* target{};
+    SDL_Texture* overlay{};
+    std::vector<uint8_t> overlay_pixels;
     SDL_GPUTexture* depth{};
     SDL_GPUTextureFormat depth_format{};
     int width{},height{};
     bool captured{};
     void release_targets() noexcept {
         if(target) SDL_DestroyTexture(target);
+        if(overlay) SDL_DestroyTexture(overlay);
         if(depth && device) SDL_ReleaseGPUTexture(device,depth);
-        target=nullptr;depth=nullptr;width=height=0;
+        target=overlay=nullptr;depth=nullptr;width=height=0;
     }
     ~State() {release_targets();frame.release();}
 };
@@ -140,11 +153,13 @@ void ModernRuntime::capture_tick() {state_->history.capture();state_->captured=t
 void ModernRuntime::reset_interpolation() noexcept {state_->history.reset_interpolation();}
 std::size_t ModernRuntime::unsupported_models() const noexcept {return state_->frame.world().unsupported_models();}
 bool ModernRuntime::draws(const simulation::GameSimulation& game) noexcept {
-    const auto flow=game.flow_state();
-    return (flow==simulation::GameFlowState::gameplay || flow==simulation::GameFlowState::training)
-        && !game.paused() && !game.runtime_options_open();
+    // Every cartridge screen the shared VR scene code draws (title, intro,
+    // planet select, results, game over, credits...). The host's pre-game
+    // and runtime option menus are drawn by the existing presentation path.
+    return !game.in_setup_menu() && !game.runtime_options_open();
 }
-bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_width,int requested_height,const char* capture_path) {
+bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_width,int requested_height,const char* capture_path,
+    const HostOverlay& overlay) {
     auto& s=*state_;
     try {
         require(renderer!=nullptr,"MODERN needs a renderer");
@@ -195,6 +210,7 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
         require(colour!=nullptr,"MODERN target has no GPU texture");
         const auto previous=s.history.previous(),current=s.history.current();
         require(previous && current && current->ppu,"MODERN scene history incomplete");
+        if(s.dump) s.dump->sprites(*current->ppu);
         // The desktop's 3D ASTEROIDS setting (VR passes its own preference).
         s.models.set_asteroid_models(s.history.game().asteroid_models());
         auto world=s.models.assemble_world_interpolated(*previous,*current,alpha,s.inputs.srgb,true);
@@ -265,6 +281,36 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
                 } else if(copy_command) SDL_CancelGPUCommandBuffer(copy_command);
                 SDL_ReleaseGPUTransferBuffer(device,download);
             }
+        }
+        if(overlay.ink && overlay.canvas_width>0 && overlay.canvas_height>0) {
+            // One source pixel wider and taller for the shadow.
+            const int ow=int(overlay.ink->width())+1,oh=int(overlay.ink->height())+1;
+            if(s.overlay && (s.overlay->w!=ow || s.overlay->h!=oh)) {SDL_DestroyTexture(s.overlay);s.overlay=nullptr;}
+            if(!s.overlay) {
+                s.overlay=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ABGR8888,SDL_TEXTUREACCESS_STREAMING,ow,oh);
+                require(s.overlay!=nullptr,"Create MODERN overlay");
+                SDL_SetTextureBlendMode(s.overlay,SDL_BLENDMODE_BLEND);
+                SDL_SetTextureScaleMode(s.overlay,SDL_SCALEMODE_NEAREST);
+            }
+            s.overlay_pixels.assign(std::size_t(ow)*std::size_t(oh)*4U,0);
+            const auto ink=[&](int x,int y) {
+                return x>=0 && y>=0 && x<ow-1 && y<oh-1 && overlay.ink->get(uint32_t(x),uint32_t(y))!=0;
+            };
+            for(int y=0;y<oh;++y) for(int x=0;x<ow;++x) {
+                const bool white=ink(x,y),shadow=!white && ink(x-1,y-1);
+                if(!white && !shadow) continue;
+                auto* p=&s.overlay_pixels[(std::size_t(y)*std::size_t(ow)+std::size_t(x))*4U];
+                p[0]=p[1]=p[2]=white?255:0;p[3]=255;
+            }
+            require(SDL_UpdateTexture(s.overlay,nullptr,s.overlay_pixels.data(),ow*4),"Update MODERN overlay");
+            SDL_FRect frame=destination;
+            if(!letterbox) {
+                int full_w=0,full_h=0;SDL_GetCurrentRenderOutputSize(renderer,&full_w,&full_h);
+                frame={0,0,float(full_w),float(full_h)};
+            }
+            const float sx=frame.w/float(overlay.canvas_width),sy=frame.h/float(overlay.canvas_height);
+            const SDL_FRect at{frame.x+float(overlay.x)*sx,frame.y+float(overlay.y)*sy,float(ow)*sx,float(oh)*sy};
+            require(SDL_RenderTexture(renderer,s.overlay,nullptr,&at),"Draw MODERN overlay");
         }
         const bool presented=SDL_RenderPresent(renderer);
         SDL_SetRenderLogicalPresentation(renderer,logical_w,logical_h,mode);

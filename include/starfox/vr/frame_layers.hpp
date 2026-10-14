@@ -1,6 +1,7 @@
 #pragma once
 #include "starfox/vr/draw_packet.hpp"
 #include "starfox/vr/game_scene.hpp"
+#include "starfox/render/texture_overrides.hpp"
 #include <array>
 #include <functional>
 #include <optional>
@@ -84,6 +85,19 @@ struct FrameLayerInputs {
     // The level's unpitched horizon art row (the renderer applies camera
     // pitch as geometry); empty = this tick's pitched art horizon.
     std::optional<float> landscape_horizon;
+    // Flat views: place the replaced communications (portrait, text, meter)
+    // where the desktop composites its 224-wide Super FX UI layer, this many
+    // source pixels right and down of the 256x224 origin.
+    std::array<int,2> comms_offset{};
+    // Replacement portrait art keyed by frame ROM address
+    // (source_portrait_address), drawn instead of the native 32x40 tiles.
+    const render::TextureOverrides* portrait_overrides{};
+    // Replacement OBJ sprite art (HUD labels, icons, digits) keyed by
+    // render::sprite_override_key.
+    const render::SpriteOverrides* sprite_overrides{};
+    // Flat views: draw the cartridge's PAUSE text (PAUSETXT) while paused,
+    // as the desktop does on its Super FX UI layer.
+    bool pause_text{};
 };
 struct FrameLayers {
     std::vector<DrawPacket> backgrounds,tunnel_surround,sprites;

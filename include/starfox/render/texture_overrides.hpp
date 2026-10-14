@@ -2,6 +2,7 @@
 #include "starfox/assets/shape.hpp"
 #include <cstdint>
 #include <cstdio>
+#include <span>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -26,4 +27,21 @@ inline std::string texture_override_name(std::uint32_t key) {
     return name;
 }
 using TextureOverrides=std::unordered_map<std::uint32_t,TextureOverrideImage>;
+// SNES OBJ sprites live in VRAM, not at a fixed ROM address, so a sprite is
+// identified by what it shows: FNV-1a over its size, OAM palette and the
+// unflipped 4-bit inks (row-major, size x size).
+inline std::uint64_t sprite_override_key(std::span<const std::uint8_t> inks,unsigned size,unsigned palette) noexcept {
+    std::uint64_t hash=14695981039346656037ULL;
+    const auto mix=[&hash](std::uint8_t byte) {hash=(hash^byte)*1099511628211ULL;};
+    mix(std::uint8_t(size));mix(std::uint8_t(palette));
+    for(const auto ink:inks) mix(ink&15U);
+    return hash;
+}
+// obj_HHHHHHHHHHHHHHHH (the 64-bit key, hex).
+inline std::string sprite_override_name(std::uint64_t key) {
+    char name[24];
+    std::snprintf(name,sizeof name,"obj_%016llx",static_cast<unsigned long long>(key));
+    return name;
+}
+using SpriteOverrides=std::unordered_map<std::uint64_t,TextureOverrideImage>;
 }

@@ -1167,11 +1167,15 @@ int main(int argc, char** argv) {
         require(starfox::app::load_pregame_settings(pregame_test_path, loaded_pregame)
             && loaded_pregame.gpu_renderer == 0U && loaded_pregame.timing_mode == fast.timing_mode,
             "settings without GPU_RENDERER did not load as GPU ACCURATE");
-        std::ofstream{pregame_test_path, std::ios::app} << "GPU_RENDERER 2\n";
+        std::ofstream{pregame_test_path, std::ios::app} << "GPU_RENDERER 3\n";
         require(starfox::app::load_pregame_settings(pregame_test_path, loaded_pregame)
             && loaded_pregame.gpu_renderer == 0U,
             "unknown GPU_RENDERER value did not fall back to GPU ACCURATE");
-        auto invalid = saved_pregame;invalid.gpu_renderer = 2;
+        auto modern = saved_pregame;modern.gpu_renderer = 2;
+        require(starfox::app::save_pregame_settings(pregame_test_path, modern)
+            && starfox::app::load_pregame_settings(pregame_test_path, loaded_pregame)
+            && loaded_pregame == modern, "MODERN setting round trip failed");
+        auto invalid = saved_pregame;invalid.gpu_renderer = 3;
         require(!starfox::app::save_pregame_settings(pregame_test_path, invalid),
             "invalid GPU renderer setting was saved");
         // 5x-10x render scales belong to GPU FAST.

@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <unordered_map>
 namespace starfox::vr {
 std::vector<DrawPacket> layout_a_instrument_packets(const assets::RomImage& rom,const assets::SymbolMap& symbols,
     const GameSceneSnapshot& scene,render::ScaledTextRenderer& text,bool srgb) {
@@ -73,11 +74,11 @@ DrawPacket layout_a_surface(bool menu,unsigned selection,bool srgb,unsigned menu
 std::vector<DrawPacket> source_dialogue_packets(const assets::RomImage& rom,
     const assets::SymbolMap& symbols,const simulation::DialogueState& dialogue,
     render::ScaledTextRenderer& layout,const std::array<uint16_t,256>& cgram,
-    unsigned brightness,bool srgb) {
+    unsigned brightness,bool srgb,const render::TextureOverrides* portraits) {
     std::vector<DrawPacket> packets;
     if(!dialogue.active) return packets;
     packets.push_back(source_portrait_packet(rom,symbols,dialogue.portrait_frame,
-        dialogue.alternate_portraits,cgram,brightness,srgb));
+        dialogue.alternate_portraits,cgram,brightness,srgb,portraits));
     if(dialogue.text_visible && (dialogue.text_address&0xffffU)>=0x8000U) {
         const auto translated=layout.translated_game_text_lines(dialogue.text_address,92);
         int y=dialogue.three_lines?153:169;
@@ -120,8 +121,7 @@ DrawPacket source_dialogue_meter_packet(const simulation::DialogueState& dialogu
     rectangle(84,179,84+std::min<unsigned>(dialogue.meter_health,41),187,114);
     return packet;
 }
-DrawPacket source_portrait_packet(const assets::RomImage& rom,const assets::SymbolMap& symbols,
-    uint8_t frame,bool alternate,const std::array<uint16_t,256>& cgram,unsigned brightness,bool srgb) {
+uint32_t source_portrait_address(const assets::SymbolMap& symbols,uint8_t frame,bool alternate) {
     const auto address=[&](const char* name) {
         for(auto value:symbols.find(name))
             if((value&0xffffU)>=0x8000U && ((value>>16)&255U)<0x70U) return value;
@@ -130,12 +130,56 @@ DrawPacket source_portrait_packet(const assets::RomImage& rom,const assets::Symb
     auto base=alternate?address("FACEDATA2"):0U;
     if(!base) base=address("FACEDATA");
     if(!base) throw std::runtime_error("Missing portrait data");
+    return base+uint32_t(frame)*640;
+}
+DrawPacket source_portrait_packet(const assets::RomImage& rom,const assets::SymbolMap& symbols,
+    uint8_t frame,bool alternate,const std::array<uint16_t,256>& cgram,unsigned brightness,bool srgb,
+    const render::TextureOverrides* portraits) {
+    const auto address=source_portrait_address(symbols,frame,alternate);
+    // The same 32x40 placement as the native portrait below, corrected for
+    // SNES pixel aspect.
+    const auto corner_vertex=[](unsigned corner) {
+        const float u=(corner==1 || corner==2)?32.F:0.F,v=corner>=2?40.F:0.F;
+        SceneVertex vertex{};
+        vertex.position[0]=80.F-(32.F-u)*7.F/6.F;vertex.position[1]=152.F+v;
+        vertex.uv[0]=u;vertex.uv[1]=v;
+        return vertex;
+    };
+    if(portraits) {
+        const auto found=portraits->find(address);
+        if(found!=portraits->end() && found->second.width && found->second.height
+            && found->second.rgba.size()==std::size_t(found->second.width)*found->second.height) {
+            // Replacement art through the shader's resident-texture
+            // replacement path: a material header (masks at 9/10, image
+            // offset+1 at 12, packed size at 13) followed by RGBA words.
+            // The screen fade is baked in, as the native palette is.
+            const auto& image=found->second;
+            constexpr uint32_t header=14;
+            DrawPacket packet;
+            auto& texels=packet.geometry.texels;
+            texels.assign(header,0U);
+            texels[9]=31;texels[10]=39;texels[12]=header+1;texels[13]=image.width|(image.height<<16);
+            texels.reserve(header+image.rgba.size());
+            const auto level=std::min(brightness,15U);
+            for(const auto pixel:image.rgba) {
+                uint32_t faded=pixel&0xff000000U;
+                for(unsigned shift:{0U,8U,16U}) faded|=((((pixel>>shift)&255U)*level)/15U)<<shift;
+                texels.push_back(faded);
+            }
+            for(unsigned corner:{0U,1U,2U,0U,2U,3U}) {
+                auto vertex=corner_vertex(corner);
+                vertex.texture[3]=8388608U|4U|(srgb?2U:0U);
+                packet.geometry.vertices.push_back(vertex);
+            }
+            return packet;
+        }
+    }
     // Keep the authored planar tiles packed: the existing background shader
     // decodes their four bitplanes and palette, with no CPU pixel rasterization.
     simulation::SnesPpuState ppu{};
     ppu.main_screen=1;ppu.background_mode=1;ppu.bg1_screen_base=512;
     ppu.cgram=cgram;
-    for(unsigned i=0;i<640;++i) ppu.vram[i]=rom.read8(base+uint32_t(frame)*640+i);
+    for(unsigned i=0;i<640;++i) ppu.vram[i]=rom.read8(address+i);
     for(unsigned x=0;x<4;++x) for(unsigned y=0;y<5;++y) {
         const unsigned offset=1024+(y*32+x)*2;
         const unsigned tile=x*5+y;
@@ -145,11 +189,8 @@ DrawPacket source_portrait_packet(const assets::RomImage& rom,const assets::Symb
     auto packet=background_tile_packet(ppu,BackgroundLayer::bg1,options,srgb);
     packet.geometry.vertices.clear();
     for(bool ink:{false,true}) for(unsigned corner:{0U,1U,2U,0U,2U,3U}) {
-        const float u=(corner==1 || corner==2)?32.F:0.F,v=corner>=2?40.F:0.F;
-        SceneVertex vertex{};
         // Correct SNES pixel aspect without moving the right edge into text.
-        vertex.position[0]=80.F-(32.F-u)*7.F/6.F;vertex.position[1]=152.F+v;
-        vertex.uv[0]=u;vertex.uv[1]=v;
+        auto vertex=corner_vertex(corner);
         // Tile index zero is transparent in the shared shader. Its native
         // portrait meaning is palette 112, supplied by this backing quad.
         vertex.texture[1]=ink?0U:112U;vertex.texture[3]=(ink?8U:32U)|(srgb?2U:0U);
@@ -535,9 +576,13 @@ DrawPacket source_meter_packet(const simulation::MeterState& meters,
 }
 DrawPacket source_sprite_packet(const simulation::SnesPpuState& ppu,unsigned brightness,
     std::optional<unsigned> priority,bool srgb,const simulation::MeterState* meters,
-    const render::HudLayout* layout,SourceSpritePass pass) {
+    const render::HudLayout* layout,SourceSpritePass pass,const render::SpriteOverrides* overrides) {
     if(brightness>15 || (priority && *priority>3)) throw std::invalid_argument("Invalid source sprite options");
     DrawPacket packet;packet.model={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+    // Vertices drawn from replacement art; their material headers follow the
+    // packed VRAM once its size is fixed.
+    struct Replaced {std::size_t vertex;const render::TextureOverrideImage* image;uint32_t size;};
+    std::vector<Replaced> replaced;
     if(!(ppu.main_screen&16)) return packet;
     constexpr unsigned sizes[6][2]{{8,16},{8,32},{8,64},{16,32},{16,64},{32,64}};
     const auto selection=std::min(unsigned(ppu.object_select>>5),5U);
@@ -575,6 +620,14 @@ DrawPacket source_sprite_packet(const simulation::SnesPpuState& ppu,unsigned bri
         const int size=int(sizes[selection][(high>>1)&1]);
         const int left=std::max(x,0),right=std::min(x+size,256);
         if(right<=left) continue;
+        const render::TextureOverrideImage* image=nullptr;
+        if(overrides && !overrides->empty()) {
+            const auto found=overrides->find(render::sprite_override_key(
+                render::object_inks(ppu,tile,unsigned(size)),unsigned(size),(attr>>1)&7U));
+            if(found!=overrides->end() && found->second.width && found->second.height
+                && found->second.rgba.size()==std::size_t(found->second.width)*found->second.height)
+                image=&found->second;
+        }
         for(int wrap=0;wrap<2;++wrap) {
             const int y=int(ppu.oam[low+1])+(boss_label?1:0)-wrap*256;
             const int top=std::max(y,0),bottom=std::min(y+size,224);
@@ -585,6 +638,12 @@ DrawPacket source_sprite_packet(const simulation::SnesPpuState& ppu,unsigned bri
                 v.uv[0]=float(corners[corner][0]-x);v.uv[1]=float(corners[corner][1]-y);
                 v.texture[1]=ppu.object_select|((uint32_t(ppu.oam[low+2])|((attr&1U)<<8))<<8);
                 v.texture[2]=attr|(uint32_t(size)<<8);v.texture[3]=16|(srgb?2:0);
+                if(image) {
+                    if(attr&0x40) v.uv[0]=float(size)-v.uv[0];
+                    if(attr&0x80) v.uv[1]=float(size)-v.uv[1];
+                    v.texture[1]=v.texture[2]=0;v.texture[3]=8388608U|4U|(srgb?2U:0U);
+                    replaced.push_back({packet.geometry.vertices.size(),image,uint32_t(size)});
+                }
                 packet.geometry.vertices.push_back(v);
             }
         }
@@ -594,6 +653,27 @@ DrawPacket source_sprite_packet(const simulation::SnesPpuState& ppu,unsigned bri
     const auto palette=render::decode_bgr555_palette(ppu.cgram);
     for(unsigned i=0;i<256;++i) data[16+i]=palette[i].r|(uint32_t(palette[i].g)<<8)|(uint32_t(palette[i].b)<<16)|0xff000000U;
     pack_vram(ppu.vram,std::span<uint32_t,16384>(data.data()+272,16384));
+    // Replacement art through the shader's resident-texture replacement path
+    // (as portraits): a material header (masks at 9/10, image offset+1 at 12,
+    // packed size at 13) then RGBA words with the screen fade baked in. The
+    // key includes the OBJ size, so each image has one size.
+    std::unordered_map<const render::TextureOverrideImage*,uint32_t> headers;
+    for(const auto& item:replaced) {
+        auto [entry,added]=headers.try_emplace(item.image,uint32_t(data.size()));
+        if(added) {
+            const auto header=entry->second;
+            const auto& image=*item.image;
+            data.resize(header+14,0U);
+            data[header+9]=data[header+10]=item.size-1;
+            data[header+12]=header+15;data[header+13]=image.width|(image.height<<16);
+            for(const auto pixel:image.rgba) {
+                uint32_t faded=pixel&0xff000000U;
+                for(unsigned shift:{0U,8U,16U}) faded|=((((pixel>>shift)&255U)*brightness)/15U)<<shift;
+                data.push_back(faded);
+            }
+        }
+        packet.geometry.vertices[item.vertex].texture[0]=entry->second;
+    }
     return packet;
 }
 }

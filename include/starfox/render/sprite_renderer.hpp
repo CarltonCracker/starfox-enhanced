@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <optional>
 #include <array>
+#include <vector>
 
 namespace starfox::simulation {
 struct MeterState;
@@ -37,6 +38,12 @@ void suppress_crosshair_oam(simulation::SnesPpuState& ppu) noexcept;
 // packed X-high/size bits and wrapped sprite coordinates, not unrelated HUD.
 [[nodiscard]] std::optional<std::array<std::uint8_t,544>> isolated_crosshair_oam(
     const simulation::SnesPpuState& ppu,std::int32_t horizontal_offset=0) noexcept;
+
+// One OBJ's 4-bit inks from VRAM (OBSEL name base and gap), unflipped and
+// row-major, size x size. Replacement art is keyed by these
+// (sprite_override_key).
+[[nodiscard]] std::vector<std::uint8_t> object_inks(
+    const simulation::SnesPpuState& ppu,std::uint16_t tile_number,std::uint32_t size);
 
 class SpriteRenderer {
 public:

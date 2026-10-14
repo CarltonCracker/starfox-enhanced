@@ -344,6 +344,9 @@ DrawPacket landscape_world_packet(const simulation::SnesPpuState& ppu,
     // Ground dots drawn on the 3D ground plane itself (RGBA, alpha 0 = none):
     // the cartridge's 256-unit lattice, anchored to the world.
     data.push_back(ground_dot_colour.value_or(0U));
+    // Ground dot spacing (source units): every other dot of the cartridge's
+    // 256-unit lattice, which crowded wide views.
+    data.push_back(starfox::bit_cast<uint32_t>(512.F));
     // Geometry: a dome (64 x 32) then the ground plane at Y = -1; drawn in
     // that order without depth so the ground covers the dome's lower half.
     auto& vertices=packet.geometry.vertices;vertices.clear();
@@ -385,8 +388,9 @@ float landscape_art_horizon(const simulation::SnesPpuState& ppu,float vanishing_
     }
     return float(double(vanishing_y)+offset);
 }
-// Tile payload, horizon/centre/rows/classic/cell, 112 haze rows, dot colour.
-constexpr std::size_t landscape_world_texels=272+16384+6+112+1;
+// Tile payload, horizon/centre/rows/classic/cell, 112 haze rows, dot colour,
+// dot spacing.
+constexpr std::size_t landscape_world_texels=272+16384+6+112+2;
 bool is_landscape_world(const DrawPacket& packet) noexcept {
     const auto texels=packet.geometry.texel_view();
     return texels.size()==landscape_world_texels && texels[7]==4096U && !packet.geometry.vertex_view().empty();

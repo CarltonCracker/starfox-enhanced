@@ -205,9 +205,7 @@ endif()
 if(MINGW AND EXISTS "${sdl3_SOURCE_DIR}/src/video/directx/d3d12.h")
     target_include_directories(starfox_displayxr BEFORE PRIVATE "${sdl3_SOURCE_DIR}/src/video/directx")
 endif()
-# These standalone reflection-index/optical diagnostics compile both DXIL and
-# SPIR-V. The SDK's DXIL-only DXC is sufficient for the player, not these tools.
-if(STARFOX_BUILD_TOOLS AND STARFOX_DXR_ENABLED AND STARFOX_ENABLE_EXPERIMENTAL_REFLECTION_INDEX)
+if(STARFOX_BUILD_TOOLS AND STARFOX_DXR_ENABLED)
     add_executable(starfox_reflection_source_owner_check tools/check_reflection_source_owner.cpp)
     target_link_libraries(starfox_reflection_source_owner_check PRIVATE starfox_displayxr SDL3::SDL3)
     target_include_directories(starfox_reflection_source_owner_check PRIVATE "${sdl3_SOURCE_DIR}/src/video/khronos")
@@ -225,6 +223,9 @@ if(STARFOX_BUILD_TOOLS AND STARFOX_DXR_ENABLED AND STARFOX_ENABLE_EXPERIMENTAL_R
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(starfox_reflection_source_owner_check PRIVATE -Wall -Wextra -Wconversion -Werror)
     endif()
+    # The SDK's DXIL-only DXC is sufficient for the player and ordinary
+    # diagnostics, but these experimental tools also compile SPIR-V.
+    if(STARFOX_ENABLE_EXPERIMENTAL_REFLECTION_INDEX)
     # Resident conservative old-feature index, diagnostic staging only. These
     # pipelines are not linked to a player or permission to reuse curved colour.
     set(visibility_index_headers)
@@ -565,6 +566,7 @@ if(STARFOX_BUILD_TOOLS AND STARFOX_DXR_ENABLED AND STARFOX_ENABLE_EXPERIMENTAL_R
     if(MINGW)
         target_link_options(starfox_reflected_liquid_motion_check PRIVATE -static -static-libgcc -static-libstdc++)
     endif()
+    endif() # STARFOX_ENABLE_EXPERIMENTAL_REFLECTION_INDEX
     add_executable(starfox_displayxr_vulkan_creation_check tools/check_displayxr_vulkan_creation.cpp)
     target_link_libraries(starfox_displayxr_vulkan_creation_check PRIVATE starfox_displayxr SDL3::SDL3)
     target_include_directories(starfox_displayxr_vulkan_creation_check PRIVATE "${sdl3_SOURCE_DIR}/src/video/khronos")

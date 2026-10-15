@@ -35,6 +35,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        if: runner.os == 'Windows'
       - name: Install Linux build dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev libxtst-dev libasound2-dev libudev-dev libgl1-mesa-dev
@@ -43,8 +45,7 @@ jobs:
         run: |
           compiler=()
           if [[ "$RUNNER_OS" == Windows ]]; then
-            compiler=(-DCMAKE_C_COMPILER=C:/Strawberry/c/bin/gcc.exe -DCMAKE_CXX_COMPILER=C:/Strawberry/c/bin/g++.exe)
-            echo 'C:/Strawberry/c/bin' >> "$GITHUB_PATH"
+            compiler=(-DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl)
           fi
           cmake -S . -B build/source-checks -G Ninja "${compiler[@]}" \
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON -DSTARFOX_BUILD_TESTS=ON \

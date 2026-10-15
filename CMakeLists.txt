@@ -2131,6 +2131,8 @@ if(STARFOX_BUILD_TESTS)
 
     add_executable(starfox_direct_audio_tests tests/direct_audio_tests.cpp)
     target_link_libraries(starfox_direct_audio_tests PRIVATE starfox_core)
+    add_executable(starfox_credits_restart_tests tests/credits_restart_tests.cpp)
+    target_link_libraries(starfox_credits_restart_tests PRIVATE starfox_core)
 
     add_executable(starfox_transition_parity_tests
         tests/transition_parity_tests.cpp)
@@ -2254,6 +2256,10 @@ if(STARFOX_BUILD_TESTS)
                     "${CMAKE_CURRENT_SOURCE_DIR}/upstream-ultrastarfox/SF.SFC"
                     "${CMAKE_CURRENT_SOURCE_DIR}/upstream-ultrastarfox/SYMBOLS.TXT"
         )
+        add_test(NAME starfox_upstream_credits_restart COMMAND starfox_credits_restart_tests
+            "${CMAKE_CURRENT_SOURCE_DIR}/upstream-ultrastarfox/SF.SFC"
+            "${CMAKE_CURRENT_SOURCE_DIR}/upstream-ultrastarfox/SYMBOLS.TXT")
+        set_tests_properties(starfox_upstream_credits_restart PROPERTIES TIMEOUT 600)
         add_test(
             NAME starfox_upstream_transition_parity
             COMMAND starfox_transition_parity_tests
@@ -2403,6 +2409,9 @@ if(STARFOX_BUILD_TESTS)
                     "${STARFOX_EX_ROM_FILE}"
                     "${STARFOX_EX_SYMBOLS_FILE}"
         )
+        add_test(NAME starfox_ex_credits_restart COMMAND starfox_credits_restart_tests
+            "${STARFOX_EX_ROM_FILE}" "${STARFOX_EX_SYMBOLS_FILE}")
+        set_tests_properties(starfox_ex_credits_restart PROPERTIES TIMEOUT 600)
         add_test(
             NAME starfox_ex_transition_parity
             COMMAND starfox_transition_parity_tests

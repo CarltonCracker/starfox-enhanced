@@ -3604,7 +3604,16 @@ void GameSimulation::begin_end_game_sequence() {
 GameTickResult GameSimulation::tick_end_game_sequence(
     const input::TickInput& input) {
     constexpr std::uint32_t spc_clocks_per_tick = 1'024'000U / 20U;
-    write_input(input);
+    auto native_input=input;
+    if(ending_final_score_) {
+        // TRANSFER_L still runs the completed credits map while the total
+        // score task is suspended. Its START tail jump must not reset that
+        // live host call stack; accept the original input at the host handoff.
+        native_input.held&=~starfox::input::start;
+        native_input.pressed&=~starfox::input::start;
+        native_input.released&=~starfox::input::start;
+    }
+    write_input(native_input);
     GameTickResult result;
     for (std::size_t phase = 0; phase < current_tick_video_phases_; ++phase) {
         map_.set_apu_clock_offset(static_cast<std::uint32_t>(
@@ -5837,8 +5846,14 @@ GameTickResult GameSimulation::tick(const input::TickInput& input) {
                 | starfox::input::select))
             == (starfox::input::left_shoulder | starfox::input::select);
     auto native_input = input;
-    if (flow_state_ == GameFlowState::title && !ex_title_logo_active) {
-        // The PC front end owns the title-screen START transition. The EX
+    if ((flow_state_ == GameFlowState::title && !ex_title_logo_active)
+        || flow_state_ == GameFlowState::credits
+        || (flow_state_ == GameFlowState::finished && credits_complete_)) {
+        // The host owns title and completed-credits START transitions. Never
+        // let CREDITS' RESTART tail jump enter the persistent outer loop from
+        // a bounded UPDATE_OBJECTS_L call, including the transfer in which
+        // its final wait completes before credits_complete_ has been observed.
+        // The EX
         // title map handles the same edge by entering TRANSFER_L and then
         // tail-jumping into its persistent special-menu loop. Following that
         // second main loop from this bounded UPDATE_OBJECTS_L call can never

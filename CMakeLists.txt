@@ -2216,6 +2216,9 @@ if(STARFOX_BUILD_TESTS)
             ENVIRONMENT "SDL_AUDIODRIVER=dummy")
         set_tests_properties(starfox_runtime_input_tests PROPERTIES
             ENVIRONMENT "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS=1"
+            # Both host variants intentionally exercise the same temporary
+            # config filenames; do not let parallel CTest writers collide.
+            RESOURCE_LOCK starfox_runtime_input_fixture_files
             TIMEOUT 10)
         if(WIN32 AND NOT WINDOWS_STORE)
             # Exercise UWP's pre-initialization configuration on the host as
@@ -2226,7 +2229,8 @@ if(STARFOX_BUILD_TESTS)
             target_link_libraries(starfox_uwp_input_tests PRIVATE starfox_core SDL3::SDL3)
             add_test(NAME starfox_uwp_input_tests COMMAND starfox_uwp_input_tests)
             set_tests_properties(starfox_uwp_input_tests PROPERTIES
-                ENVIRONMENT "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS=1" TIMEOUT 10)
+                ENVIRONMENT "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS=1"
+                RESOURCE_LOCK starfox_runtime_input_fixture_files TIMEOUT 10)
         endif()
     endif()
 

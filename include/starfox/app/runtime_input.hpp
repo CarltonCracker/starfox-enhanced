@@ -216,6 +216,8 @@ struct PregameSettings {
     std::uint8_t asteroid_models{}; // render::AsteroidModels: 0=SPRITE, 1-3=SUPER FX LOW/MEDIUM/HIGH.
     // 0=GPU ACCURATE (default), 1=GPU FAST, 2=MODERN. Optional key GPU_RENDERER.
     std::uint8_t gpu_renderer{};
+    // Optional desktop window size. Both zero retain automatic aspect sizing.
+    std::uint16_t window_width{},window_height{};
 
     [[nodiscard]] bool operator==(const PregameSettings&) const = default;
 };

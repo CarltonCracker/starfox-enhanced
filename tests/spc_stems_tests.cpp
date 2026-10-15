@@ -59,6 +59,36 @@ std::vector<Write> upload(bool restart) {
     return writes;
 }
 
+void check_batched_bank_initialization() {
+    // Two original synthetic drivers. The first initializes shared workspace;
+    // the second overlay depends on it, like cumulative level-select banks.
+    const auto bank=[](std::uint16_t address,std::span<const std::uint8_t> program,bool restart) {
+        std::vector<Write> writes;
+        if(restart) writes.push_back({0,0xff,0});
+        writes.insert(writes.end(),{{2,std::uint8_t(address),0},{3,std::uint8_t(address>>8),0},{1,1,0},{0,0xcc,0}});
+        for(auto byte:program) writes.push_back({1,byte,0});
+        writes.insert(writes.end(),{{2,std::uint8_t(address),0},{3,std::uint8_t(address>>8),0},{0,0xcc,0},{1,0,0}});
+        return writes;
+    };
+    constexpr std::array<std::uint8_t,5> init{0x8f,0x42,0x20,0x2f,0xfe}; // MOV $20,#$42; BRA $
+    constexpr std::array<std::uint8_t,6> overlay{0xe4,0x20,0xc4,0xf4,0x2f,0xfe}; // MOV A,$20; MOV $f4,A; BRA $
+    for(bool warm:{false,true}) {
+        Audio batched,separate;
+        if(warm) {
+            const auto old=upload(false);
+            (void)batched.render_logic_tick(old);(void)separate.render_logic_tick(old);
+        }
+        const auto first=bank(0x0400,init,warm),second=bank(0x0500,overlay,true);
+        auto combined=first;combined.insert(combined.end(),second.begin(),second.end());
+        (void)separate.render_logic_tick(first);(void)separate.render_logic_tick(second);
+        const auto pcm=batched.render_logic_tick(combined);
+        require(separate.output_ports()[0]==0x42,"Synthetic separate bank initialization did not run");
+        require(batched.output_ports()==separate.output_ports(),"Batched level-select uploads skipped intermediate driver initialization");
+        require(pcm.size()==Audio::stereo_frames_per_logic_tick*2,"Upload repair queued extra audible frames");
+        require(batched.save_state()==separate.save_state(),"Batched upload machine differs from separate complete uploads");
+    }
+}
+
 void advance(Audio& audio, std::span<const Write> writes) {
 #if defined(STARFOX_AUDIO_LEGACY_ORACLE)
     // Compile this fixture against the unchanged pre-optimization source and
@@ -121,6 +151,7 @@ void operator delete[](void* memory, std::size_t) noexcept { std::free(memory); 
 int main(int argc, char** argv) {
     try {
         require(argc == 1 || argc == 2, "Usage: spc_stems_tests [private trace file]");
+        check_batched_bank_initialization();
         std::ofstream file;
         if (argc == 2) {
             file.open(argv[1], std::ios::binary);

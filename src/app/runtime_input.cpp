@@ -873,6 +873,9 @@ bool load_pregame_settings(
         } else if (name == "FULLSCREEN") {
             if(value<0 || value>1) return false;
             loaded.fullscreen=value!=0;
+        } else if (name == "WINDOW_WIDTH" || name == "WINDOW_HEIGHT") {
+            if(value<0 || value>16384) return false;
+            (name=="WINDOW_WIDTH"?loaded.window_width:loaded.window_height)=static_cast<std::uint16_t>(value);
         } else if (name == "PLANET_SELECT_CHEAT") {
             if(value<0 || value>1) return false;
             loaded.planet_select_cheat=value!=0;
@@ -1073,6 +1076,8 @@ bool load_pregame_settings(
     // These select alternate temporal models for one DLSS viewport, not two
     // simultaneous passes. Reject an ambiguous file without replacing settings.
     if(loaded.dlss_mode && loaded.dlss45_mode) return false;
+    if((loaded.window_width || loaded.window_height)
+        && (loaded.window_width<256 || loaded.window_height<224)) return false;
     settings = loaded;
     return true;
 }
@@ -1080,7 +1085,10 @@ bool load_pregame_settings(
 bool save_pregame_settings(
     const std::filesystem::path& path,
     const PregameSettings& settings) noexcept try {
-    if (path.empty() || settings.timing_mode > 1U
+    if (path.empty() || settings.window_width>16384 || settings.window_height>16384
+        || ((settings.window_width || settings.window_height)
+            && (settings.window_width<256 || settings.window_height<224))
+        || settings.timing_mode > 1U
         || settings.display_mode > 5U || settings.crosshair_colour > 7U || settings.aa_type > 6U
         || settings.anti_aliasing > 3U || settings.rtx_lighting > 3U
         || settings.two_d_filter > 5U || settings.effect >= render::effect_count
@@ -1178,6 +1186,8 @@ bool save_pregame_settings(
            << "INFINITE_LIVES " << static_cast<unsigned>(settings.infinite_lives) << '\n'
            << "PLANET_SELECT_CHEAT " << unsigned(settings.planet_select_cheat) << '\n'
            << "FULLSCREEN " << unsigned(settings.fullscreen) << '\n'
+           << "WINDOW_WIDTH " << settings.window_width << '\n'
+           << "WINDOW_HEIGHT " << settings.window_height << '\n'
            << "AA_TYPE " << unsigned(settings.aa_type) << '\n'
            << "INTEGER_SCALING " << settings.integer_scaling << '\n'
            << "INFINITE_BOOST " << static_cast<unsigned>(settings.infinite_boost) << '\n'

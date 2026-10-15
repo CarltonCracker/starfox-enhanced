@@ -1731,7 +1731,9 @@ public:
     explicit Window(starfox::simulation::RendererMode renderer_mode,
         DlssHost* dlss=nullptr, bool start_fullscreen=false,
         starfox::render::RendererBackend backend=starfox::render::RendererBackend::automatic,
-        starfox::app::GpuLaunchGuard* gpu_guard=nullptr,bool startup_sr_platform=false):dlss_(dlss),gpu_launch_guard_(gpu_guard),renderer_backend_(backend) {
+        starfox::app::GpuLaunchGuard* gpu_guard=nullptr,bool startup_sr_platform=false,
+        std::uint16_t fixed_width=0,std::uint16_t fixed_height=0):dlss_(dlss),gpu_launch_guard_(gpu_guard),renderer_backend_(backend) {
+        fixed_window_width_=fixed_width;fixed_window_height_=fixed_height;
         sr_backend_request_.update(startup_sr_platform,false,false);
         if(!starfox::render::renderer_backend_supported(renderer_backend_))
             renderer_backend_=starfox::render::RendererBackend::automatic;
@@ -1749,6 +1751,9 @@ public:
 #endif
         // Benchmarks can present at a real output size (e.g. 3840x2160).
         int window_width=1024,window_height=896;
+        if(fixed_window_width_ && fixed_window_height_) {
+            window_width=fixed_window_width_;window_height=fixed_window_height_;
+        }
         if (const auto* size=std::getenv("STARFOX_TEST_WINDOW_SIZE");
             size && std::getenv("STARFOX_TEST_FRAMES")) {
             char* end=nullptr;
@@ -1896,6 +1901,9 @@ public:
     Window& operator=(const Window&) = delete;
 
     [[nodiscard]] SDL_Renderer* renderer() const noexcept { return renderer_; }
+    [[nodiscard]] std::array<std::uint16_t,2> fixed_window_size() const noexcept {
+        return {fixed_window_width_,fixed_window_height_};
+    }
     void set_renderer_release_callback(std::function<void()> callback) {
         renderer_release_callback_=std::move(callback);
     }
@@ -5259,6 +5267,7 @@ public:
     // Alt+1..4: windowed at that multiple of the native 224-line canvas;
     // Alt+0 returns to the automatic size.
     void set_window_multiple(std::uint32_t multiple) noexcept {
+        fixed_window_width_=fixed_window_height_=0;
         window_multiple_=std::min(multiple,8U);
         if ((SDL_GetWindowFlags(window_) & SDL_WINDOW_FULLSCREEN) == 0U && texture_width_ && texture_height_)
             set_windowed_size(texture_width_, texture_height_);
@@ -6344,6 +6353,10 @@ private:
     void set_windowed_size(std::uint32_t width, std::uint32_t height) noexcept {
         // Fit follows the user's window, never resize the window to its canvas.
         if (fit_screen_) {SDL_SetWindowAspectRatio(window_,0.F,0.F);return;}
+        if(fixed_window_width_ && fixed_window_height_) {
+            SDL_SetWindowAspectRatio(window_,0.F,0.F);
+            SDL_SetWindowSize(window_,fixed_window_width_,fixed_window_height_);return;
+        }
         const auto raster_width = width / window_scale_;
         const auto raster_height = height / window_scale_;
         const auto integer_scale = window_multiple_ ? window_multiple_ : raster_width <= snes_width
@@ -6585,6 +6598,7 @@ private:
 
     std::uint32_t window_scale_{1U};
     std::uint32_t window_multiple_{};
+    std::uint16_t fixed_window_width_{},fixed_window_height_{};
     SDL_Window* window_{};
     const starfox::app::TouchLayoutConfig* touch_layout_config_{};
     bool touch_editor_active_{};
@@ -7927,7 +7941,8 @@ int main(int argc, char** argv) {
 #endif
         Window window{initial_window_renderer,&dlss,
             !std::getenv("STARFOX_TEST_HIDDEN") && (startup_fullscreen || saved_pregame.fullscreen),
-            static_cast<starfox::render::RendererBackend>(saved_pregame.renderer_backend),gpu_guard,startup_sr_platform};
+            static_cast<starfox::render::RendererBackend>(saved_pregame.renderer_backend),gpu_guard,startup_sr_platform,
+            saved_pregame.window_width,saved_pregame.window_height};
         window.set_startup_trace(&*startup_trace);
         const auto touch_layout_path=starfox::app::touch_layout_settings_path();
         starfox::app::TouchLayoutConfig touch_layout_config{};
@@ -8218,6 +8233,7 @@ int main(int argc, char** argv) {
                 window.leia_requested(),
                 static_cast<std::uint8_t>(game.asteroid_models()),
                 static_cast<std::uint8_t>(game.gpu_renderer()),
+                window.fixed_window_size()[0],window.fixed_window_size()[1],
             };
         };
         {

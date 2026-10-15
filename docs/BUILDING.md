@@ -3,6 +3,16 @@
 Prebuilt packages do not require these steps. See [the README](../README.md)
 for installation and supported ROM revisions.
 
+## Fixed desktop window size
+
+Set `FULLSCREEN 0`, `WINDOW_WIDTH 1280` and `WINDOW_HEIGHT 720` in `pregame.cfg`
+to start at that window size. Both dimensions must be present (width 256–16384,
+height 224–16384). `WINDOW_WIDTH 0` and `WINDOW_HEIGHT 0` restore automatic sizing.
+Non-matching aspect ratios are letterboxed; only FIT SCREEN stretches the image.
+Fullscreen keeps the dimensions for the next switch back to windowed mode.
+The desktop Alt+1 through Alt+4 shortcuts temporarily select native-size multiples;
+Alt+0 restores automatic sizing for the current session.
+
 ## Development launcher
 
 Release builds use the checked-in source-built BPS deltas and pinned symbol

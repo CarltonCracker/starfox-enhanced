@@ -271,6 +271,7 @@ struct Spc700Audio::Impl {
             spc_set_output(spc, output.data(), static_cast<int>(output.size()));
         }
         int last_clock = 0;
+        bool driver_loaded_in_batch = false;
         auto finish_frame = [&] {
             if (!loaded) return;
             {
@@ -289,7 +290,13 @@ struct Spc700Audio::Impl {
         // restart command. The subsequent writes are another IPL upload.
         for (const auto& write : writes) {
             if (!uploading && write.port == 0U && write.value == 0xffU) {
-                if (split_upload_restarts) finish_frame();
+                // Level select can emit several complete cumulative banks in
+                // one source tick. Each uploaded driver's prologue must run
+                // before the next restart snapshots its initialized ARAM.
+                // Do not advance an already-running driver an extra frame for
+                // an ordinary single-bank tick, or queue the hidden preroll.
+                if (split_upload_restarts || driver_loaded_in_batch) finish_frame();
+                driver_loaded_in_batch = false;
                 begin_upload();
             }
             const auto was_loaded = loaded;
@@ -325,6 +332,7 @@ struct Spc700Audio::Impl {
                 last_clock = clock;
             }
             if (!was_loaded && loaded) {
+                driver_loaded_in_batch = true;
                 // Loading an SPC state resets the library's output buffer.
                 // Attach this tick's buffer immediately so initialization and
                 // later timestamped port traffic are rendered, not discarded.

@@ -923,6 +923,19 @@ int main(int argc, char** argv) {
             && loaded_pregame == saved_pregame && loaded_pregame.stereo_output == 0,
             "pre-stereo settings did not default to OFF");
     }
+    for(const auto size:{std::pair{0U,0U},std::pair{256U,224U},std::pair{1280U,720U},std::pair{16384U,16384U}}) {
+        auto settings=saved_pregame;settings.window_width=std::uint16_t(size.first);settings.window_height=std::uint16_t(size.second);
+        require(starfox::app::save_pregame_settings(pregame_test_path,settings)
+            && starfox::app::load_pregame_settings(pregame_test_path,loaded_pregame)
+            && loaded_pregame==settings,"fixed window size did not round-trip");
+    }
+    for(const auto entry:{"WINDOW_WIDTH -1", "WINDOW_WIDTH 16385", "WINDOW_WIDTH 640", "WINDOW_HEIGHT 480"}) {
+        require(starfox::app::save_pregame_settings(pregame_test_path,saved_pregame),"window size fixture");
+        {std::ofstream bad{pregame_test_path,std::ios::app};bad<<entry<<'\n';}
+        auto unchanged=saved_pregame;
+        require(!starfox::app::load_pregame_settings(pregame_test_path,unchanged)
+            && unchanged==saved_pregame,"invalid/partial window size replaced settings");
+    }
     for(const auto separation:{1U,16U,128U,512U}) for(const auto convergence:{16U,1024U,65535U}) {
         auto settings=saved_pregame;
         settings.stereo_separation=static_cast<std::uint16_t>(separation);

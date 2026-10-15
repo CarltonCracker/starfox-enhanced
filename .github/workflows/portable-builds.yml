@@ -12,6 +12,11 @@ on:
         type: boolean
         required: false
         default: false
+      source_checks_only:
+        description: Run desktop and shared VR source tests only; no platform packages or release
+        type: boolean
+        required: false
+        default: false
   push:
     tags:
       - 'v*'
@@ -20,8 +25,53 @@ permissions:
   contents: write
 
 jobs:
+  source-checks:
+    if: ${{ inputs.source_checks_only }}
+    name: Source checks (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev libasound2-dev libudev-dev libgl1-mesa-dev
+      - name: Configure source-only desktop and shared VR graph
+        shell: bash
+        run: |
+          compiler=()
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            compiler=(-DCMAKE_C_COMPILER=C:/Strawberry/c/bin/gcc.exe -DCMAKE_CXX_COMPILER=C:/Strawberry/c/bin/g++.exe)
+            echo 'C:/Strawberry/c/bin' >> "$GITHUB_PATH"
+          fi
+          cmake -S . -B build/source-checks -G Ninja "${compiler[@]}" \
+            -DCMAKE_BUILD_TYPE=Release -DSTARFOX_BUILD_TESTS=ON \
+            -DSTARFOX_BUILD_RUNTIME=ON -DSTARFOX_BUILD_VR=ON \
+            -DSTARFOX_ENABLE_LEIASR=OFF -DSTARFOX_EMBED_RUNTIME_ASSETS=OFF \
+            -DSTARFOX_PACKAGE_MSU1_MUSIC=OFF -DSTARFOX_EMBED_MSU1_MUSIC=OFF \
+            -DSTARFOX_ROM_FILE=source-only-no-rom.sfc \
+            -DSTARFOX_EX_ROM_FILE=source-only-no-ex-rom.sfc \
+            -DSTARFOX_RETAIL_V12_FILE=source-only-no-retail.sfc
+      - name: Build desktop and VR targets
+        run: cmake --build build/source-checks --parallel 2
+      - name: Run source regression tests
+        env:
+          SDL_VIDEODRIVER: dummy
+          SDL_AUDIODRIVER: dummy
+        run: ctest --test-dir build/source-checks --output-on-failure --parallel 2 --exclude-regex starfox_3ds
+      - name: Preserve compact test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-check-results-${{ matrix.os }}
+          path: build/source-checks/Testing/Temporary/LastTest.log
+          if-no-files-found: ignore
+          retention-days: 7
+
   windows-x64:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: Windows x64 runtime and standalone asset builder
     runs-on: windows-2022
     steps:
@@ -157,7 +207,7 @@ jobs:
             StarFoxAssetBuilder-0.0.8.6-windows-x64.zip --clobber
 
   windows-x86:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: Windows x86 runtime
     runs-on: windows-latest
     steps:
@@ -213,7 +263,7 @@ jobs:
             StarFoxEnhanced-0.0.8.6-windows-x86.zip --clobber
 
   xbox-uwp-x64:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: Xbox UWP x64 (Developer Mode)
     # Keep the legacy UWP/C++ packaging workload and its redistributable
     # Microsoft.VCLibs framework package available. windows-latest moved to
@@ -278,7 +328,7 @@ jobs:
             StarFoxEnhanced-0.0.8.6-xbox-uwp-x64.zip --clobber
 
   linux-x64:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: Linux x64 native runtime
     runs-on: ubuntu-24.04
     steps:
@@ -335,7 +385,7 @@ jobs:
             StarFoxEnhanced-0.0.8.6-linux-x64.zip --clobber
 
   macos-universal:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: macOS universal (unsigned)
     runs-on: macos-15
     steps:
@@ -380,7 +430,7 @@ jobs:
             StarFoxEnhanced-0.0.8.6-macos-universal.zip --clobber
 
   ios-device:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: iOS arm64 device (unsigned)
     runs-on: macos-15
     steps:
@@ -424,7 +474,7 @@ jobs:
             StarFoxEnhanced-0.0.8.6-ios-arm64-unsigned.ipa --clobber
 
   android-arm64:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: Android arm64 signed APK
     runs-on: ubuntu-latest
     steps:
@@ -485,6 +535,7 @@ jobs:
           tag="${REQUESTED_TAG:-${GITHUB_REF_NAME}}"
           gh release upload "${tag}" StarFoxEnhanced-0.0.8.6-android-arm64.apk --clobber
   quest-arm64:
+    if: ${{ !inputs.source_checks_only }}
     name: Quest 3 arm64 signed VR development APK
     runs-on: ubuntu-latest
     steps:
@@ -565,7 +616,7 @@ jobs:
           tag="${REQUESTED_TAG:-${GITHUB_REF_NAME}}"
           gh release upload "${tag}" StarFoxEnhanced-0.0.8.6-quest-arm64.zip --clobber
   windows-pcvr:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: Windows x64 OpenXR PCVR development build
     runs-on: windows-latest
     steps:
@@ -618,7 +669,7 @@ jobs:
           draft: true
 
   switch-homebrew:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: Nintendo Switch homebrew NRO
     runs-on: ubuntu-latest
     container:
@@ -653,7 +704,7 @@ jobs:
           draft: true
 
   vita-homebrew:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: PS Vita native VPK
     runs-on: ubuntu-latest
     container:
@@ -692,7 +743,7 @@ jobs:
           draft: true
 
   linux-vr-host-tests:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: Linux host VR regression tests
     runs-on: ubuntu-24.04
     steps:
@@ -749,7 +800,7 @@ jobs:
             -R '^starfox_(pixel_filter_tests|camera_response_tests|scene_world_fx_tests|runtime_input_tests|simulation_tests)$'
 
   steam-frame-arm64:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: Sniper sysroot ARM64 baseline, OpenXR player, and package
     runs-on: ubuntu-24.04
     steps:
@@ -817,7 +868,7 @@ jobs:
           draft: true
 
   ps5-homebrew:
-    if: ${{ !inputs.quest_only }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only }}
     name: PS5 native RADV homebrew title
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -872,7 +923,7 @@ jobs:
     name: Release package checksums
     needs: [windows-x64, windows-x86, xbox-uwp-x64, linux-x64, macos-universal, ios-device, android-arm64, quest-arm64, windows-pcvr, switch-homebrew, vita-homebrew, linux-vr-host-tests, steam-frame-arm64, ps5-homebrew]
     # Implicit success() keeps incomplete/failed platform runs in draft.
-    if: ${{ !inputs.quest_only && (github.event_name == 'push' || inputs.release_tag != '') }}
+    if: ${{ !inputs.quest_only && !inputs.source_checks_only && (github.event_name == 'push' || inputs.release_tag != '') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

@@ -28,6 +28,9 @@ public:
     void capture_tick();
     // Pause, stage replacement or camera cut: do not interpolate across it.
     void reset_interpolation() noexcept;
+    // The host must call this before destroying/replacing SDL's renderer.
+    // Keep scene history, but retire every resource using the live old device.
+    void release_renderer() noexcept;
     // Frames MODERN draws; others (host menus) fall back to the existing
     // renderer.
     static bool draws(const simulation::GameSimulation&) noexcept;

@@ -1,4 +1,5 @@
 #include "starfox/modern/sdl_source_scene.hpp"
+#include "starfox/modern/frame_policy.hpp"
 #include "starfox/vr/modern_frame.hpp"
 #include "starfox/vr/source_span_model.hpp"
 #include "render/shaders/generated/spans_portable.hpp"
@@ -302,6 +303,7 @@ bool SdlSourceScene::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* comm
         require(device && command,"Missing MODERN scene device/command");
         require(source.pending.empty() && source.handles.size()==source.packets.size() && source.packets.size()<=4096,
             "Incomplete ordered source scene");
+        require(source_models_supported(source.compute_models),"Unsupported MODERN warp/axis model: use the complete fallback frame");
         std::vector<const vr::SourceComputeModel*> requests(source.packets.size());
         for(const auto& request:source.compute_models) {
             require(request.packet_index<source.packets.size() && !requests[request.packet_index]
@@ -320,7 +322,6 @@ bool SdlSourceScene::initialize(SDL_GPUDevice* device,SDL_GPUCommandBuffer* comm
         for(std::size_t index=0;index<source.packets.size();++index) {
             const auto* request=requests[index];
             if(request) {
-                if(request->warp || request->axis) {++unsupported;continue;} // Warp/axis stages not ported yet.
                 std::shared_ptr<SdlSourceModel> model;
                 if(const auto found=previous.find(request->key);found!=previous.end()
                     && found->second->units()==request->units && found->second->unclipped()==request->model.graphics_unclipped

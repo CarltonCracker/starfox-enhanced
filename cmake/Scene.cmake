@@ -12,7 +12,8 @@ add_library(starfox_scene STATIC
 target_include_directories(starfox_scene PUBLIC include)
 target_compile_features(starfox_scene PUBLIC cxx_std_20)
 target_link_libraries(starfox_scene PUBLIC starfox_core)
-if(BUILD_TESTING AND Python3_EXECUTABLE)
+if(STARFOX_BUILD_TESTS)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
     add_test(NAME starfox_scene_api_free
         COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_LIST_DIR}/../tools/check_scene_api_free.py")
     set_tests_properties(starfox_scene_api_free PROPERTIES LABELS "vr;scene" TIMEOUT 30)

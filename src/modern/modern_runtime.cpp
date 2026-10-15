@@ -1,4 +1,6 @@
 #include "starfox/modern/modern_runtime.hpp"
+#include "starfox/modern/frame_policy.hpp"
+#include "starfox/modern/sdl_render_state.hpp"
 #include "starfox/vr/decal_surface.hpp"
 #include "starfox/vr/source_models.hpp"
 #include <SDL3/SDL.h>
@@ -151,12 +153,16 @@ ModernRuntime::ModernRuntime(const simulation::GameSimulation& game,const assets
 ModernRuntime::~ModernRuntime()=default;
 void ModernRuntime::capture_tick() {state_->history.capture();state_->captured=true;}
 void ModernRuntime::reset_interpolation() noexcept {state_->history.reset_interpolation();}
+void ModernRuntime::release_renderer() noexcept {
+    auto& s=*state_;
+    s.release_targets();s.frame.release();s.device=nullptr;s.renderer=nullptr;
+}
 std::size_t ModernRuntime::unsupported_models() const noexcept {return state_->frame.world().unsupported_models();}
 bool ModernRuntime::draws(const simulation::GameSimulation& game) noexcept {
     // Every cartridge screen the shared VR scene code draws (title, intro,
     // planet select, results, game over, credits...). The host's pre-game
     // and runtime option menus are drawn by the existing presentation path.
-    return !game.in_setup_menu() && !game.runtime_options_open();
+    return flat_frame_supported(game.in_setup_menu(),game.runtime_options_open(),game.stereo_output());
 }
 bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_width,int requested_height,const char* capture_path,
     const HostOverlay& overlay) {
@@ -215,6 +221,7 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
         s.models.set_asteroid_models(s.history.game().asteroid_models());
         auto world=s.models.assemble_world_interpolated(*previous,*current,alpha,s.inputs.srgb,true);
         require(world.pending.empty(),"MODERN world assembly pending");
+        require(source_models_supported(world.compute_models),"MODERN warp/axis models require the complete fallback renderer");
         // The renderer's own queued work must reach the GPU before ours.
         SDL_FlushRenderer(renderer);
         auto* command=SDL_AcquireGPUCommandBuffer(device);
@@ -239,8 +246,8 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
         require(SDL_SubmitGPUCommandBuffer(command),"Submit MODERN frame");
         require(recorded,s.frame.status());
         // Blit to the window without the desktop's logical presentation.
-        int logical_w=0,logical_h=0;SDL_RendererLogicalPresentation mode{};
-        SDL_GetRenderLogicalPresentation(renderer,&logical_w,&logical_h,&mode);
+        const SdlRenderStateGuard restore_state{renderer};
+        const auto mode=restore_state.logical_mode();
         SDL_SetRenderLogicalPresentation(renderer,0,0,SDL_LOGICAL_PRESENTATION_DISABLED);
         SDL_SetRenderTarget(renderer,nullptr);SDL_SetRenderViewport(renderer,nullptr);
         // Same presentation as the existing renderer: letterboxed (or integer
@@ -313,7 +320,6 @@ bool ModernRuntime::present(SDL_Renderer* renderer,double alpha,int requested_wi
             require(SDL_RenderTexture(renderer,s.overlay,nullptr,&at),"Draw MODERN overlay");
         }
         const bool presented=SDL_RenderPresent(renderer);
-        SDL_SetRenderLogicalPresentation(renderer,logical_w,logical_h,mode);
         require(presented,"Present MODERN frame");
         status_.clear();return true;
     } catch(const std::exception& error) {status_=error.what();return false;}

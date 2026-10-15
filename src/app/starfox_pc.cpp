@@ -1809,6 +1809,7 @@ public:
         }
     }
     void release_renderer_resources() {
+        if(renderer_release_callback_) renderer_release_callback_();
         release_sr_platform();
         sr_platform_attempted_=false;sr_failure_reported_=false;
         SDL_DestroyTexture(plain_ui_texture_);plain_ui_texture_=nullptr;
@@ -1895,6 +1896,9 @@ public:
     Window& operator=(const Window&) = delete;
 
     [[nodiscard]] SDL_Renderer* renderer() const noexcept { return renderer_; }
+    void set_renderer_release_callback(std::function<void()> callback) {
+        renderer_release_callback_=std::move(callback);
+    }
     [[nodiscard]] starfox::simulation::RendererMode renderer_mode() const noexcept {return renderer_mode_;}
     [[nodiscard]] starfox::app::GpuFallbackReason take_gpu_fallback() noexcept {
         return std::exchange(gpu_fallback_reason_,starfox::app::GpuFallbackReason::none);
@@ -6710,6 +6714,7 @@ private:
     bool temporal_enabled_{},temporal_pending_{};
     bool last_present_succeeded_{};
     std::function<void()> present_pacer_;
+    std::function<void()> renderer_release_callback_;
     std::uint64_t present_pacing_ns_{};
     starfox::render::GpuScene late_scene_;
     starfox::render::GpuScene background_scene_;
@@ -9684,11 +9689,18 @@ int main(int argc, char** argv) {
         // menu, host overlays) or any MODERN failure fall back to the
         // existing renderer (GPU FAST) for that frame. The runtime exists
         // only while MODERN is selected, so its tick history never goes stale.
-        std::unique_ptr<starfox::modern::ModernRuntime> modern;
+        std::shared_ptr<starfox::modern::ModernRuntime> modern;
         const auto sync_modern=[&] {
-            if(game.modern_renderer() && !modern)
-                modern=std::make_unique<starfox::modern::ModernRuntime>(game,rom,symbols);
-            else if(!game.modern_renderer() && modern) modern.reset();
+            if(game.modern_renderer() && !modern) {
+                modern=std::make_shared<starfox::modern::ModernRuntime>(game,rom,symbols);
+                // Window outlives this scene. A weak owner also makes teardown
+                // safe during exceptions and after a cartridge replacement.
+                window.set_renderer_release_callback([owner=std::weak_ptr(modern)] {
+                    if(auto active=owner.lock()) active->release_renderer();
+                });
+            } else if(!game.modern_renderer() && modern) {
+                window.set_renderer_release_callback({});modern.reset();
+            }
         };
         sync_modern();
         bool modern_failure_reported=false;

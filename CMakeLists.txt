@@ -2467,6 +2467,8 @@ if(STARFOX_BUILD_TESTS)
 
     find_package(Python3 COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
+        add_test(NAME starfox_ps5_splash_routes
+            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_ps5_splash_routes.py")
         add_test(NAME starfox_shader_payload_partition_tests
             COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_shader_payload_partition.py")
         if(WIN32 AND NOT WINDOWS_STORE AND NOT CMAKE_CROSSCOMPILING)

@@ -9554,6 +9554,14 @@ int main(int argc, char** argv) {
         game.set_shape_face_counts(&shape_face_counts);
         std::unordered_set<std::uint32_t> invalid_shapes;
         std::uint64_t presented_frames = 0;
+        const auto complete_presentation=[&] {
+#if defined(STARFOX_PS5)
+            // Every successful presenter, including preview-OFF and loading
+            // UI, must uncover VideoOut. The platform retries failed hides.
+            StarfoxPS5_HideSplashScreen();
+#endif
+            ++presented_frames;
+        };
         std::uint64_t source_logic_frames = 0;
         std::uint64_t profile_scene_cuts{};
         std::uint64_t profile_camera_cuts{};
@@ -11621,7 +11629,7 @@ int main(int argc, char** argv) {
                         std::chrono::steady_clock::now()-profile_frame_start).count();
                     std::cerr<<"plain-menu: frame="<<presented_frames<<" scale=1 effects=0 scene=0 work-us="<<elapsed<<'\n';
                 }
-                live_fps.record_frame(std::chrono::steady_clock::now());++presented_frames;
+                live_fps.record_frame(std::chrono::steady_clock::now());complete_presentation();
 #if defined(__ANDROID__)
                 if(android_deferred_gpu_start) {
                     android_deferred_gpu_start=false;SDL_PumpEvents();
@@ -11645,7 +11653,7 @@ int main(int argc, char** argv) {
                     const auto record_native_submission=[&] {
                         if(window.leia_presented_frames()==previous_native_frames) return;
                         if(!presented_frames) startup_trace->mark("first calibrated Leia game/menu frame presented");
-                        live_fps.record_frame(std::chrono::steady_clock::now());++presented_frames;
+                        live_fps.record_frame(std::chrono::steady_clock::now());complete_presentation();
                         if(test_frames && presented_frames>=test_frames) running=false;
                     };
                     if(leia_history_generation!=window.leia_generation()) {
@@ -11955,7 +11963,7 @@ int main(int argc, char** argv) {
                     modern_capture.empty()?nullptr:modern_capture.c_str(),fps_overlay)) {
                     if(!advance_frozen_frame) live_fps.record_frame(std::chrono::steady_clock::now());
                     if(presented_frames==0) startup_trace->mark("first game/menu frame presented");
-                    ++presented_frames;
+                    complete_presentation();
                     if(test_frames!=0 && presented_frames>=test_frames) {
                         if(modern->unsupported_models()) std::cerr<<"modern: unsupported warp/axis models in final frame="<<modern->unsupported_models()<<'\n';
                         running=false;
@@ -15754,11 +15762,6 @@ int main(int argc, char** argv) {
                     <<preparation_events.jobs<<" event-pumps="<<preparation_events.pumps<<'\n';
 #endif
             }
-#if defined(STARFOX_PS5)
-            // The system's launch splash covers the title until the title
-            // hides it (ProsperoEden hides it on its first presented frame).
-            if(presented_frames==0) StarfoxPS5_HideSplashScreen();
-#endif
             const auto profile_present_done = std::chrono::steady_clock::now();
             const auto work_without_pacing=[&](std::chrono::steady_clock::time_point start) {
                 const auto elapsed=static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -15931,7 +15934,7 @@ int main(int argc, char** argv) {
                 }
             }
 #endif
-            ++presented_frames;
+            complete_presentation();
 #if defined(__ANDROID__)
             if(android_deferred_gpu_start) {
                 android_deferred_gpu_start=false;

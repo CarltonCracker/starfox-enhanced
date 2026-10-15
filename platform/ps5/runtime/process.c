@@ -83,12 +83,15 @@ void StarfoxPS5_ProcessSetup(void)
 void StarfoxPS5_HideSplashScreen(void)
 {
     static bool hidden;
-    if (hidden) {
+    static Uint64 next_attempt;
+    const Uint64 now = SDL_GetTicks();
+    if (hidden || now < next_attempt) {
         return;
     }
     const int result = sceSystemServiceHideSplashScreen();
     fprintf(stderr, "hide splash screen: 0x%08x\n", (unsigned)result);
     hidden = result == 0;
+    next_attempt = now + 1000; // Retry failed service calls without logging at 60 Hz.
 }
 
 static FILE *sdl_log;

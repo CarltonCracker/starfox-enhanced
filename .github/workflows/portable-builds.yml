@@ -41,6 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: msys2/setup-msys2@v2
+        id: msys2
         if: runner.os == 'Windows'
         with:
           msystem: UCRT64
@@ -51,12 +52,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev libxtst-dev libasound2-dev libudev-dev libgl1-mesa-dev
       - name: Configure source-only desktop and shared VR graph
         shell: bash
+        env:
+          MSYS2_ROOT: ${{ steps.msys2.outputs.msys2-location }}
         run: |
           compiler=()
           if [[ "$RUNNER_OS" == Windows ]]; then
-            compiler=(-DCMAKE_C_COMPILER=C:/msys64/ucrt64/bin/gcc.exe -DCMAKE_CXX_COMPILER=C:/msys64/ucrt64/bin/g++.exe -DCMAKE_MAKE_PROGRAM=C:/msys64/ucrt64/bin/ninja.exe)
-            export PATH="/c/msys64/ucrt64/bin:$PATH"
-            echo 'C:/msys64/ucrt64/bin' >> "$GITHUB_PATH"
+            toolchain_dir="${MSYS2_ROOT//\\//}/ucrt64/bin"
+            compiler=("-DCMAKE_C_COMPILER=$toolchain_dir/gcc.exe" "-DCMAKE_CXX_COMPILER=$toolchain_dir/g++.exe" "-DCMAKE_MAKE_PROGRAM=$toolchain_dir/ninja.exe")
+            export PATH="$(cygpath -u "$toolchain_dir"):$PATH"
+            echo "$toolchain_dir" >> "$GITHUB_PATH"
           fi
           cmake -S . -B build/source-checks -G Ninja "${compiler[@]}" \
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON -DSTARFOX_BUILD_TESTS=ON \
@@ -69,9 +73,8 @@ jobs:
       - name: Build desktop and VR targets
         run: cmake --build build/source-checks --parallel 2
       - name: Run source regression tests
-        env:
-          SDL_VIDEODRIVER: dummy
-          SDL_AUDIODRIVER: dummy
+        # SDL fixtures select their own dummy drivers. Global driver environment
+        # variables override their SDL_SetHint calls and make setup fail.
         run: ctest --test-dir build/source-checks --output-on-failure --parallel 2 --exclude-regex starfox_3ds
       - name: Preserve compact test results
         if: always()

@@ -75,7 +75,9 @@ jobs:
       - name: Run source regression tests
         # SDL fixtures select their own dummy drivers. Global driver environment
         # variables override their SDL_SetHint calls and make setup fail.
-        run: ctest --test-dir build/source-checks --output-on-failure --parallel 2 --exclude-regex starfox_3ds
+        # Hardware/debug-layer tests run separately on an actual GPU, not on
+        # these headless source-only runners. Their targets are still built.
+        run: ctest --test-dir build/source-checks --output-on-failure --parallel 2 --exclude-regex starfox_3ds --label-exclude native_gpu
       - name: Preserve compact test results
         if: always()
         uses: actions/upload-artifact@v4

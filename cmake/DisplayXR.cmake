@@ -205,7 +205,9 @@ endif()
 if(MINGW AND EXISTS "${sdl3_SOURCE_DIR}/src/video/directx/d3d12.h")
     target_include_directories(starfox_displayxr BEFORE PRIVATE "${sdl3_SOURCE_DIR}/src/video/directx")
 endif()
-if(STARFOX_BUILD_TOOLS AND STARFOX_DXR_ENABLED)
+# These standalone reflection-index/optical diagnostics compile both DXIL and
+# SPIR-V. The SDK's DXIL-only DXC is sufficient for the player, not these tools.
+if(STARFOX_BUILD_TOOLS AND STARFOX_DXR_ENABLED AND STARFOX_ENABLE_EXPERIMENTAL_REFLECTION_INDEX)
     add_executable(starfox_reflection_source_owner_check tools/check_reflection_source_owner.cpp)
     target_link_libraries(starfox_reflection_source_owner_check PRIVATE starfox_displayxr SDL3::SDL3)
     target_include_directories(starfox_reflection_source_owner_check PRIVATE "${sdl3_SOURCE_DIR}/src/video/khronos")
